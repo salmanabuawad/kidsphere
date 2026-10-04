@@ -16,16 +16,25 @@ DB_USER=${DB_USER:-kidsphere}
 PORT=${PORT:-3070}
 STORAGE_DIR=${STORAGE_DIR:-/var/lib/kidsphere/storage}
 SEED_DEMO=${SEED_DEMO:-true}
+NODE_DIR=${NODE_DIR:-/opt/kidsphere-node}
 
 echo "==> System packages (postgresql, nginx, certbot) ..."
+# --no-upgrade: never upgrade/restart packages other apps on this host depend on.
 apt-get update -y
-apt-get install -y postgresql postgresql-contrib nginx certbot python3-certbot-nginx curl ca-certificates openssl
+apt-get install -y --no-upgrade postgresql postgresql-contrib nginx certbot python3-certbot-nginx curl ca-certificates openssl xz-utils
 
-echo "==> Node.js 22 ..."
-if ! command -v node >/dev/null 2>&1 || [ "$(node -p 'process.versions.node.split(".")[0]')" -lt 22 ]; then
-  curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
-  apt-get install -y nodejs
+if ss -ltn "( sport = :$PORT )" | grep -q LISTEN && ! systemctl is-active --quiet kidsphere; then
+  echo "!! Port $PORT is already in use by another service. Re-run with PORT=<free port>."; exit 1
 fi
+
+echo "==> Private Node.js 22 in $NODE_DIR (system Node is left untouched) ..."
+NODE_VERSION=${NODE_VERSION:-v22.23.3}
+if [ ! -x "$NODE_DIR/bin/node" ]; then
+  ARCH=$(uname -m); case "$ARCH" in x86_64) NARCH=x64;; aarch64) NARCH=arm64;; *) echo "unsupported arch $ARCH"; exit 1;; esac
+  curl -fsSL "https://nodejs.org/dist/$NODE_VERSION/node-$NODE_VERSION-linux-$NARCH.tar.xz" -o /tmp/kidsphere-node.tar.xz
+  mkdir -p "$NODE_DIR" && tar -xJf /tmp/kidsphere-node.tar.xz -C "$NODE_DIR" --strip-components=1 && rm /tmp/kidsphere-node.tar.xz
+fi
+export PATH="$NODE_DIR/bin:$PATH"
 node -v
 
 echo "==> Service user '$APP_USER' ..."
@@ -73,7 +82,7 @@ EOF
 fi
 
 echo "==> systemd unit ..."
-sed -e "s#__APP_DIR__#$APP_DIR#g" -e "s#__APP_USER__#$APP_USER#g" "$APP_DIR/deploy/systemd/kidsphere.service" > /etc/systemd/system/kidsphere.service
+sed -e "s#__APP_DIR__#$APP_DIR#g" -e "s#__APP_USER__#$APP_USER#g" -e "s#__NODE_DIR__#$NODE_DIR#g" "$APP_DIR/deploy/systemd/kidsphere.service" > /etc/systemd/system/kidsphere.service
 systemctl daemon-reload
 systemctl enable kidsphere
 
@@ -83,12 +92,12 @@ ln -sf "/etc/nginx/sites-available/$DOMAIN.conf" "/etc/nginx/sites-enabled/$DOMA
 nginx -t && systemctl reload nginx
 
 echo "==> Build, migrate, start ..."
-bash "$APP_DIR/deploy/deploy.sh"
+NODE_DIR="$NODE_DIR" bash "$APP_DIR/deploy/deploy.sh"
 
 if [ "$SEED_DEMO" = "true" ] && [ ! -f /root/kidsphere-demo-credentials.txt ]; then
   echo "==> Seeding demo tenant with a random password ..."
   SEED_PW="Ks-$(openssl rand -base64 12 | tr -dc 'A-Za-z0-9' | head -c 14)!"
-  (cd "$APP_DIR" && set -a && . ./.env && set +a && SEED_ALLOW_PRODUCTION=true SEED_PASSWORD="$SEED_PW" sudo -E -u "$APP_USER" npx tsx prisma/seed.ts)
+  (cd "$APP_DIR" && set -a && . ./.env && set +a && sudo -u "$APP_USER" env PATH="$NODE_DIR/bin:$PATH" DATABASE_URL="$DATABASE_URL" NODE_ENV=production SEED_ALLOW_PRODUCTION=true SEED_PASSWORD="$SEED_PW" STORAGE_LOCAL_DIR="$STORAGE_LOCAL_DIR" npx tsx prisma/seed.ts)
   printf 'Kidsphere demo accounts (%s)\npassword: %s\nadmin@kidsphere.local teacher@kidsphere.local parent@kidsphere.local\n' "$DOMAIN" "$SEED_PW" > /root/kidsphere-demo-credentials.txt
   chmod 600 /root/kidsphere-demo-credentials.txt
   echo "    Demo credentials saved to /root/kidsphere-demo-credentials.txt (root only)."

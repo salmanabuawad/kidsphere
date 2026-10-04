@@ -7,10 +7,11 @@ set -euo pipefail
 
 APP_DIR=${APP_DIR:-/opt/kidsphere}
 APP_USER=${APP_USER:-kidsphere}
+NODE_DIR=${NODE_DIR:-/opt/kidsphere-node}
 cd "$APP_DIR"
 chown -R "$APP_USER:$APP_USER" "$APP_DIR"
 
-run() { sudo -u "$APP_USER" -H bash -c "cd '$APP_DIR' && set -a && . ./.env && set +a && $*"; }
+run() { sudo -u "$APP_USER" -H bash -c "export PATH='$NODE_DIR/bin':$PATH && cd '$APP_DIR' && set -a && . ./.env && set +a && $*"; }
 
 echo "==> Dependencies ..."
 LOCK_HASH=$(md5sum package-lock.json | cut -d' ' -f1)

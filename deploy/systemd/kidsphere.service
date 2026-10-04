@@ -10,7 +10,7 @@ Group=__APP_USER__
 WorkingDirectory=__APP_DIR__
 EnvironmentFile=__APP_DIR__/.env
 Environment=HOSTNAME=127.0.0.1
-ExecStart=/usr/bin/node __APP_DIR__/.next/standalone/server.js
+ExecStart=__NODE_DIR__/bin/node __APP_DIR__/.next/standalone/server.js
 Restart=always
 RestartSec=5
 # Hardening
