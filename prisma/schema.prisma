@@ -1,0 +1,905 @@
+// Kidsphere relational model.
+//
+// Tenant isolation: every table that holds child or family data carries an
+// `organizationId`. All reads/writes go through src/server/permissions, which
+// resolves the actor's scope before any query touches these tables.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ───────────────────────────── Enums ─────────────────────────────
+
+enum Role {
+  SUPER_ADMIN
+  ORGANIZATION_ADMIN
+  KINDERGARTEN_ADMIN
+  TEACHER
+  PARENT
+}
+
+enum Locale {
+  ar
+  he
+  en
+}
+
+enum ConfidenceLevel {
+  REPORTED
+  OBSERVED
+  CORROBORATED
+  EMERGING
+  RETIRED
+}
+
+enum AttributeStatus {
+  ACTIVE
+  PENDING_CONFIRMATION
+  RETIRED
+  REJECTED
+}
+
+enum AttributeCategory {
+  INTEREST
+  STRENGTH
+  EMOTIONAL_REGULATION
+  SOCIAL_INTERACTION
+  COMMUNICATION
+  LANGUAGE
+  EXECUTIVE_FUNCTION
+  PLAY
+  MOTOR
+  INDEPENDENCE
+  SENSORY
+  LEARNING_PREFERENCE
+  TRIGGER
+  SUPPORT
+  FAMILY_PRIORITY
+}
+
+enum EvidenceSource {
+  PARENT_QUESTIONNAIRE
+  TEACHER_OBSERVATION
+  TEACHER_ENTRY
+  OUTCOME
+  AI_SUGGESTION
+}
+
+enum ObservationKind {
+  QUICK
+  FULL
+}
+
+enum ObservationContext {
+  arrival
+  free_play
+  group_time
+  structured_activity
+  yard
+  meal
+  art
+  transition
+  end_of_day
+  other
+}
+
+enum DevelopmentDomain {
+  EMOTIONAL
+  SOCIAL
+  LANGUAGE
+  ATTENTION_EF
+  PLAY
+  GROSS_MOTOR
+  FINE_MOTOR
+  INDEPENDENCE
+  SENSORY
+  COGNITIVE
+  PARTICIPATION
+}
+
+enum SupportOutcome {
+  helped
+  partly_helped
+  did_not_help
+  not_assessed
+}
+
+enum ObservationRating {
+  NOT_OBSERVED
+  BEGINNING
+  WITH_SUPPORT
+  CONSISTENT
+}
+
+enum OutcomeResult {
+  HELPED
+  PARTLY_HELPED
+  DID_NOT_HELP
+  NOT_OBSERVED
+}
+
+enum GoalStatus {
+  ACTIVE
+  PAUSED
+  ACHIEVED
+  CLOSED
+}
+
+enum ContentStatus {
+  DRAFT
+  TEACHER_REVIEW
+  APPROVED
+  PUBLISHED
+  ARCHIVED
+}
+
+enum ContentType {
+  INTERACTIVE_STORY
+  STORY
+  SOCIAL_STORY
+  SIMPLE_GAME
+  VISUAL_ROUTINE
+  MATCHING_ACTIVITY
+  CHOICE_ACTIVITY
+  MOVEMENT_ACTIVITY
+  ROLE_PLAY_ACTIVITY
+  PARENT_HOME_ACTIVITY
+  TEACHER_DISCUSSION_ACTIVITY
+  WEEKLY_PLAN
+}
+
+enum VersionSource {
+  AI_GENERATED
+  AI_REGENERATED
+  TEACHER_EDIT
+  TEMPLATE
+  MANUAL
+}
+
+enum ApprovalAction {
+  SUBMITTED_FOR_REVIEW
+  APPROVED
+  PUBLISHED
+  RETURNED_TO_DRAFT
+  ARCHIVED
+}
+
+enum QuestionnaireStatus {
+  IN_PROGRESS
+  SUBMITTED
+}
+
+enum ConsentStatus {
+  GRANTED
+  REVOKED
+}
+
+enum MediaKind {
+  CHARACTER_PHOTO
+}
+
+enum PersonRelation {
+  CHILD
+  MOTHER
+  FATHER
+  SIBLING
+  GRANDPARENT
+  FAMILY_MEMBER
+  FRIEND
+}
+
+enum ConsentPurpose {
+  CHARACTER_INSPIRATION
+  STORY_ILLUSTRATION
+}
+
+enum PlanItemStatus {
+  PLANNED
+  READY
+  DONE
+  SKIPPED
+}
+
+// ─────────────────────── Tenancy & identity ───────────────────────
+
+model Organization {
+  id             String   @id @default(cuid())
+  name           String
+  slug           String   @unique
+  /// Reserved for future `<subdomain>.kidsphere.app` routing.
+  subdomain      String?  @unique
+  brandColor     String   @default("#0f766e")
+  defaultLocale  Locale   @default(ar)
+  enabledLocales Locale[] @default([ar, he, en])
+  /// Optional per-tenant override of AI_DEFAULT_PROVIDER ("anthropic" | "openai" | "demo").
+  aiProvider     String?
+  aiEnabled      Boolean  @default(true)
+  /// Consent configuration: whether family photo characters may be used at all.
+  mediaEnabled   Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  kindergartens Kindergarten[]
+  classes       Class[]
+  users         User[]
+  children      Child[]
+  templates     ContentTemplate[]
+}
+
+model Kindergarten {
+  id             String   @id @default(cuid())
+  organizationId String
+  name           String
+  slug           String
+  address        String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  classes      Class[]
+  children     Child[]
+  admins       User[]
+
+  @@unique([organizationId, slug])
+  @@index([organizationId])
+}
+
+model Class {
+  id             String   @id @default(cuid())
+  organizationId String
+  kindergartenId String
+  name           String
+  ageBand        String   @default("3-5")
+  contentLocale  Locale   @default(ar)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  kindergarten Kindergarten   @relation(fields: [kindergartenId], references: [id], onDelete: Cascade)
+  teachers     ClassTeacher[]
+  children     Child[]
+  weeklyPlans  WeeklyPlan[]
+
+  @@index([organizationId])
+  @@index([kindergartenId])
+}
+
+model User {
+  id             String    @id @default(cuid())
+  email          String    @unique
+  passwordHash   String
+  name           String
+  role           Role
+  organizationId String?
+  /// Set for KINDERGARTEN_ADMIN (scope) and optionally for teachers.
+  kindergartenId String?
+  uiLocale       Locale    @default(ar)
+  /// Hashed adult PIN used to exit child mode on shared devices.
+  childModePinHash String?
+  isActive       Boolean   @default(true)
+  lastLoginAt    DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  organization  Organization?  @relation(fields: [organizationId], references: [id])
+  kindergarten  Kindergarten?  @relation(fields: [kindergartenId], references: [id])
+  sessions      Session[]
+  resetTokens   PasswordResetToken[]
+  classes       ClassTeacher[]
+  children      ParentChild[]
+  notifications Notification[]
+
+  @@index([organizationId])
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  userAgent String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model ClassTeacher {
+  classId        String
+  userId         String
+  organizationId String
+  isLead         Boolean  @default(false)
+  createdAt      DateTime @default(now())
+
+  class Class @relation(fields: [classId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([classId, userId])
+  @@index([userId])
+}
+
+// ───────────────────────────── Children ─────────────────────────────
+
+model Child {
+  id              String    @id @default(cuid())
+  organizationId  String
+  kindergartenId  String
+  classId         String?
+  firstName       String
+  lastName        String?
+  /// Name used in generated content (often the first name only).
+  displayName     String
+  dateOfBirth     DateTime
+  primaryLanguage Locale    @default(ar)
+  otherLanguages  Locale[]  @default([])
+  avatarColor     String    @default("#f59e0b")
+  archivedAt      DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  organization   Organization          @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  kindergarten   Kindergarten          @relation(fields: [kindergartenId], references: [id])
+  class          Class?                @relation(fields: [classId], references: [id])
+  parents        ParentChild[]
+  questionnaires ParentQuestionnaire[]
+  observations   Observation[]
+  attributes     ProfileAttribute[]
+  goals          Goal[]
+  interventions  Intervention[]
+  outcomes       Outcome[]
+  content        ContentAsset[]
+  media          MediaAsset[]
+  consents       MediaConsent[]
+  childSessions  ChildSession[]
+  parentMessages ParentMessage[]
+  planItems      WeeklyPlanItem[]
+
+  @@index([organizationId])
+  @@index([classId])
+}
+
+model ParentChild {
+  parentId       String
+  childId        String
+  organizationId String
+  relation       PersonRelation @default(MOTHER)
+  createdAt      DateTime       @default(now())
+
+  parent User  @relation(fields: [parentId], references: [id], onDelete: Cascade)
+  child  Child @relation(fields: [childId], references: [id], onDelete: Cascade)
+
+  @@id([parentId, childId])
+  @@index([childId])
+}
+
+model ParentQuestionnaire {
+  id             String              @id @default(cuid())
+  organizationId String
+  childId        String
+  parentId       String
+  status         QuestionnaireStatus @default(IN_PROGRESS)
+  version        Int                 @default(1)
+  currentSection String?
+  submittedAt    DateTime?
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+
+  child     Child            @relation(fields: [childId], references: [id], onDelete: Cascade)
+  responses ParentResponse[]
+
+  @@index([organizationId, childId])
+}
+
+model ParentResponse {
+  id              String   @id @default(cuid())
+  questionnaireId String
+  section         String
+  questionKey     String
+  value           Json
+  /// Health / medical answers. Never passed to AI generation; restricted view.
+  isSensitive     Boolean  @default(false)
+  updatedAt       DateTime @updatedAt
+
+  questionnaire ParentQuestionnaire @relation(fields: [questionnaireId], references: [id], onDelete: Cascade)
+
+  @@unique([questionnaireId, questionKey])
+}
+
+model ParentMessage {
+  id             String    @id @default(cuid())
+  organizationId String
+  childId        String
+  authorId       String
+  body           String
+  readAt         DateTime?
+  createdAt      DateTime  @default(now())
+
+  child Child @relation(fields: [childId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, childId])
+}
+
+// ──────────────────────────── Observations ────────────────────────────
+
+model Observation {
+  id                  String              @id @default(cuid())
+  organizationId      String
+  childId             String
+  authorId            String
+  kind                ObservationKind
+  context             ObservationContext
+  observedAt          DateTime            @default(now())
+  /// Observable facts only.
+  observedBehavior    String
+  frequencyOrDuration String?
+  whatHappenedBefore  String?
+  supportsTried       String[]            @default([])
+  supportOutcome      SupportOutcome      @default(not_assessed)
+  strengthNoticed     String?
+  /// Teacher interpretation, stored apart from the facts above.
+  teacherNote         String?
+  /// Teacher flagged a possible pattern → creates EMERGING attribute candidates.
+  possiblePattern     String?
+  /// Full-form free text (overwhelm/regulation, participation contexts).
+  details             Json?
+  createdAt           DateTime            @default(now())
+
+  child   Child               @relation(fields: [childId], references: [id], onDelete: Cascade)
+  domains ObservationDomain[]
+  items   ObservationItem[]
+
+  @@index([organizationId, childId, observedAt])
+}
+
+model ObservationDomain {
+  observationId String
+  domain        DevelopmentDomain
+
+  observation Observation @relation(fields: [observationId], references: [id], onDelete: Cascade)
+
+  @@id([observationId, domain])
+}
+
+model ObservationItem {
+  id            String            @id @default(cuid())
+  observationId String
+  domain        DevelopmentDomain
+  itemKey       String
+  rating        ObservationRating
+  note          String?
+
+  observation Observation @relation(fields: [observationId], references: [id], onDelete: Cascade)
+
+  @@unique([observationId, itemKey])
+}
+
+// ─────────────────────── Child Understanding Profile ───────────────────────
+
+model ProfileAttribute {
+  id             String            @id @default(cuid())
+  organizationId String
+  childId        String
+  category       AttributeCategory
+  /// Normalized snake_case key, e.g. `visual_countdown`.
+  value          String
+  confidence     ConfidenceLevel
+  status         AttributeStatus
+  confirmedById  String?
+  confirmedAt    DateTime?
+  retiredAt      DateTime?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  child    Child                      @relation(fields: [childId], references: [id], onDelete: Cascade)
+  evidence ProfileAttributeEvidence[]
+
+  @@unique([childId, category, value])
+  @@index([organizationId, childId])
+}
+
+model ProfileAttributeEvidence {
+  id          String         @id @default(cuid())
+  attributeId String
+  sourceType  EvidenceSource
+  sourceId    String
+  authorId    String?
+  note        String?
+  createdAt   DateTime       @default(now())
+
+  attribute ProfileAttribute @relation(fields: [attributeId], references: [id], onDelete: Cascade)
+
+  @@unique([attributeId, sourceType, sourceId])
+}
+
+// ─────────────────────────── Goals & outcomes ───────────────────────────
+
+model Goal {
+  id                   String            @id @default(cuid())
+  organizationId       String
+  childId              String
+  teacherId            String
+  domain               DevelopmentDomain
+  statement            String
+  successIndicator     String
+  startDate            DateTime
+  reviewDate           DateTime
+  status               GoalStatus        @default(ACTIVE)
+  parentReinforcement  String?
+  shareWithParent      Boolean           @default(false)
+  /// Positive, parent-facing wording ("We are practicing smooth transitions").
+  parentFocus          String?
+  closedAt             DateTime?
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
+
+  child         Child          @relation(fields: [childId], references: [id], onDelete: Cascade)
+  evidence      GoalEvidence[]
+  interventions Intervention[]
+  outcomes      Outcome[]
+  content       ContentAsset[]
+  planItems     WeeklyPlanItem[]
+
+  @@index([organizationId, childId, status])
+}
+
+model GoalEvidence {
+  id         String         @id @default(cuid())
+  goalId     String
+  sourceType EvidenceSource
+  sourceId   String
+  note       String?
+  createdAt  DateTime       @default(now())
+
+  goal Goal @relation(fields: [goalId], references: [id], onDelete: Cascade)
+
+  @@unique([goalId, sourceType, sourceId])
+}
+
+model Intervention {
+  id             String   @id @default(cuid())
+  organizationId String
+  childId        String
+  goalId         String?
+  contentId      String?
+  support        String?
+  description    String
+  usedAt         DateTime @default(now())
+  createdById    String
+  createdAt      DateTime @default(now())
+
+  child    Child         @relation(fields: [childId], references: [id], onDelete: Cascade)
+  goal     Goal?         @relation(fields: [goalId], references: [id], onDelete: SetNull)
+  content  ContentAsset? @relation(fields: [contentId], references: [id], onDelete: SetNull)
+  outcomes Outcome[]
+
+  @@index([organizationId, childId])
+}
+
+model Outcome {
+  id              String              @id @default(cuid())
+  organizationId  String
+  childId         String
+  goalId          String
+  interventionId  String?
+  result          OutcomeResult
+  note            String?
+  context         ObservationContext?
+  durationMinutes Int?
+  observationId   String?
+  recordedById    String
+  recordedAt      DateTime            @default(now())
+
+  child        Child         @relation(fields: [childId], references: [id], onDelete: Cascade)
+  goal         Goal          @relation(fields: [goalId], references: [id], onDelete: Cascade)
+  intervention Intervention? @relation(fields: [interventionId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, goalId])
+}
+
+// ─────────────────────────── Weekly plans ───────────────────────────
+
+model WeeklyPlan {
+  id             String   @id @default(cuid())
+  organizationId String
+  classId        String?
+  weekStart      DateTime
+  notes          String?
+  createdById    String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  class Class?           @relation(fields: [classId], references: [id], onDelete: Cascade)
+  items WeeklyPlanItem[]
+
+  @@index([organizationId, weekStart])
+}
+
+model WeeklyPlanItem {
+  id           String         @id @default(cuid())
+  weeklyPlanId String
+  childId      String
+  goalId       String?
+  dayOfWeek    Int
+  contentType  ContentType
+  title        String
+  contentId    String?
+  status       PlanItemStatus @default(PLANNED)
+  createdAt    DateTime       @default(now())
+
+  plan    WeeklyPlan    @relation(fields: [weeklyPlanId], references: [id], onDelete: Cascade)
+  child   Child         @relation(fields: [childId], references: [id], onDelete: Cascade)
+  goal    Goal?         @relation(fields: [goalId], references: [id], onDelete: SetNull)
+  content ContentAsset? @relation(fields: [contentId], references: [id], onDelete: SetNull)
+
+  @@index([weeklyPlanId])
+}
+
+// ─────────────────────────────── Content ───────────────────────────────
+
+model ContentAsset {
+  id               String             @id @default(cuid())
+  organizationId   String
+  childId          String?
+  goalId           String?
+  classId          String?
+  type             ContentType
+  language         Locale
+  title            String
+  status           ContentStatus      @default(DRAFT)
+  ageBand          String             @default("4-5")
+  durationMinutes  Int                @default(5)
+  domain           DevelopmentDomain?
+  theme            String?
+  difficulty       Int                @default(2)
+  createdById      String
+  currentVersionId String?            @unique
+  /// Optimistic-concurrency counter; incremented on every edit.
+  revision         Int                @default(1)
+  /// Teacher-only explanation of the personalization that was used.
+  rationale        Json?
+  /// The minimized generation context (what was sent to the AI provider).
+  generationContext Json?
+  isDemoGenerated  Boolean            @default(false)
+  publishedAt      DateTime?
+  archivedAt       DateTime?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  child          Child?             @relation(fields: [childId], references: [id], onDelete: Cascade)
+  goal           Goal?              @relation(fields: [goalId], references: [id], onDelete: SetNull)
+  versions       ContentVersion[]   @relation("ContentVersions")
+  currentVersion ContentVersion?    @relation("CurrentVersion", fields: [currentVersionId], references: [id])
+  approvals      ContentApproval[]
+  characters     ContentCharacter[]
+  narrations     TeacherNarration[]
+  interventions  Intervention[]
+  planItems      WeeklyPlanItem[]
+
+  @@index([organizationId, status])
+  @@index([childId, status])
+}
+
+model ContentVersion {
+  id            String        @id @default(cuid())
+  contentId     String
+  versionNumber Int
+  body          Json
+  source        VersionSource
+  aiRequestId   String?
+  createdById   String
+  createdAt     DateTime      @default(now())
+
+  content        ContentAsset  @relation("ContentVersions", fields: [contentId], references: [id], onDelete: Cascade)
+  currentOf      ContentAsset? @relation("CurrentVersion")
+
+  @@unique([contentId, versionNumber])
+}
+
+model ContentApproval {
+  id        String         @id @default(cuid())
+  contentId String
+  versionId String?
+  action    ApprovalAction
+  actorId   String
+  note      String?
+  createdAt DateTime       @default(now())
+
+  content ContentAsset @relation(fields: [contentId], references: [id], onDelete: Cascade)
+
+  @@index([contentId])
+}
+
+/// Approved character assets attached to a content item (snapshot of consent at selection time).
+model ContentCharacter {
+  contentId    String
+  mediaAssetId String
+  consentId    String
+
+  content ContentAsset @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  media   MediaAsset   @relation(fields: [mediaAssetId], references: [id], onDelete: Cascade)
+
+  @@id([contentId, mediaAssetId])
+}
+
+model ContentTemplate {
+  id             String             @id @default(cuid())
+  organizationId String?
+  type           ContentType
+  language       Locale
+  title          String
+  description    String?
+  domain         DevelopmentDomain?
+  ageBand        String             @default("3-5")
+  /// Content body with `{{child}}` placeholders — never contains a real child's data.
+  body           Json
+  isActive       Boolean            @default(true)
+  createdById    String?
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+}
+
+// ─────────────────────────── Media & consent ───────────────────────────
+
+model MediaAsset {
+  id             String         @id @default(cuid())
+  organizationId String
+  childId        String
+  uploadedById   String
+  kind           MediaKind      @default(CHARACTER_PHOTO)
+  /// Opaque storage key. Never returned to clients.
+  storageKey     String         @unique
+  mimeType       String
+  sizeBytes      Int
+  personRelation PersonRelation
+  personLabel    String
+  deletedAt      DateTime?
+  createdAt      DateTime       @default(now())
+
+  child      Child              @relation(fields: [childId], references: [id], onDelete: Cascade)
+  consents   MediaConsent[]
+  usedIn     ContentCharacter[]
+
+  @@index([organizationId, childId])
+}
+
+model MediaConsent {
+  id                  String           @id @default(cuid())
+  organizationId      String
+  childId             String
+  mediaAssetId        String
+  grantedById         String
+  personRelation      PersonRelation
+  personLabel         String
+  allowedPurposes     ConsentPurpose[]
+  allowedContentTypes ContentType[]
+  status              ConsentStatus    @default(GRANTED)
+  grantedAt           DateTime         @default(now())
+  revokedAt           DateTime?
+  revokedById         String?
+
+  child Child      @relation(fields: [childId], references: [id], onDelete: Cascade)
+  media MediaAsset @relation(fields: [mediaAssetId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, childId])
+  @@index([mediaAssetId])
+}
+
+model TeacherNarration {
+  id             String       @id @default(cuid())
+  organizationId String
+  contentId      String
+  teacherId      String
+  /// null = whole-content narration; otherwise a scene id.
+  sceneId        String?
+  storageKey     String       @unique
+  mimeType       String
+  sizeBytes      Int
+  /// Set when the content is approved/published; the child player only plays approved narration.
+  approved       Boolean      @default(false)
+  createdAt      DateTime     @default(now())
+
+  content ContentAsset @relation(fields: [contentId], references: [id], onDelete: Cascade)
+
+  @@index([contentId])
+}
+
+// ─────────────────────────── Child device mode ───────────────────────────
+
+model ChildSession {
+  id             String    @id @default(cuid())
+  tokenHash      String    @unique
+  organizationId String
+  childId        String
+  launchedById   String
+  pinHash        String
+  expiresAt      DateTime
+  endedAt        DateTime?
+  failedPinCount Int       @default(0)
+  createdAt      DateTime  @default(now())
+
+  child Child @relation(fields: [childId], references: [id], onDelete: Cascade)
+}
+
+// ─────────────────────────── Platform ───────────────────────────
+
+model Notification {
+  id             String    @id @default(cuid())
+  organizationId String
+  userId         String
+  type           String
+  title          String
+  body           String?
+  link           String?
+  readAt         DateTime?
+  createdAt      DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, readAt])
+}
+
+model AuditLog {
+  id             String   @id @default(cuid())
+  organizationId String?
+  actorId        String?
+  actorRole      String?
+  action         String
+  objectType     String
+  objectId       String?
+  /// Safe metadata only — never full child records.
+  metadata       Json?
+  createdAt      DateTime @default(now())
+
+  @@index([organizationId, createdAt])
+  @@index([objectType, objectId])
+}
+
+model AIRequestLog {
+  id             String   @id @default(cuid())
+  organizationId String?
+  actorId        String?
+  provider       String
+  model          String
+  operation      String
+  inputTokens    Int?
+  outputTokens   Int?
+  durationMs     Int
+  success        Boolean
+  repaired       Boolean  @default(false)
+  errorCode      String?
+  contentId      String?
+  createdAt      DateTime @default(now())
+
+  @@index([organizationId, createdAt])
+}
+
+model AnalyticsEvent {
+  id             String   @id @default(cuid())
+  organizationId String?
+  name           String
+  properties     Json?
+  createdAt      DateTime @default(now())
+
+  @@index([name, createdAt])
+}

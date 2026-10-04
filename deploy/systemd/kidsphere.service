@@ -1,0 +1,23 @@
+[Unit]
+Description=Kidsphere (Next.js standalone server)
+After=network.target postgresql.service
+Wants=postgresql.service
+
+[Service]
+Type=simple
+User=__APP_USER__
+Group=__APP_USER__
+WorkingDirectory=__APP_DIR__
+EnvironmentFile=__APP_DIR__/.env
+Environment=HOSTNAME=127.0.0.1
+ExecStart=/usr/bin/node __APP_DIR__/.next/standalone/server.js
+Restart=always
+RestartSec=5
+# Hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=true
+
+[Install]
+WantedBy=multi-user.target
