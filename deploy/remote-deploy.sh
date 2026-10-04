@@ -13,6 +13,9 @@ SSH_USER=${SSH_USER:-root}
 APP_DIR=${APP_DIR:-/opt/kidsphere}
 DOMAIN=${DOMAIN:-kids.kortexd.com}
 TARGET="$SSH_USER@$SSH_HOST"
+SSH_KEY=${SSH_KEY:-$HOME/.ssh/kidsphere_deploy}
+SSH_OPTS=(-o StrictHostKeyChecking=accept-new)
+[ -f "$SSH_KEY" ] && SSH_OPTS+=(-i "$SSH_KEY")
 
 cd "$(git rev-parse --show-toplevel)"
 SHA=$(git rev-parse --short HEAD)
@@ -21,11 +24,11 @@ if [ -n "$(git status --porcelain)" ]; then
 fi
 
 echo "==> Uploading $SHA to $TARGET:$APP_DIR ..."
-git archive --format=tar.gz HEAD | ssh "$TARGET" "mkdir -p '$APP_DIR' && tar -xzf - -C '$APP_DIR' && echo '$SHA' > '$APP_DIR/REVISION'"
+git archive --format=tar.gz HEAD | ssh "${SSH_OPTS[@]}" "$TARGET" "mkdir -p '$APP_DIR' && tar -xzf - -C '$APP_DIR' && echo '$SHA' > '$APP_DIR/REVISION'"
 
 if [ "${FIRST_INSTALL:-0}" = "1" ]; then
-  ssh "$TARGET" "cd '$APP_DIR' && DOMAIN='$DOMAIN' APP_DIR='$APP_DIR' bash deploy/install.sh"
+  ssh "${SSH_OPTS[@]}" "$TARGET" "cd '$APP_DIR' && DOMAIN='$DOMAIN' APP_DIR='$APP_DIR' bash deploy/install.sh"
 else
-  ssh "$TARGET" "cd '$APP_DIR' && APP_DIR='$APP_DIR' bash deploy/deploy.sh"
+  ssh "${SSH_OPTS[@]}" "$TARGET" "cd '$APP_DIR' && APP_DIR='$APP_DIR' bash deploy/deploy.sh"
 fi
 echo "==> Deployed $SHA → https://$DOMAIN"
