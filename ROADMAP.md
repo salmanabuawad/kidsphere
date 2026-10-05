@@ -1,35 +1,60 @@
 # Roadmap
 
-## Implemented MVP
+This file tracks progress against the phases in spec §42 ([docs/mvp-refocus/SPEC.md](docs/mvp-refocus/SPEC.md)).
 
-- Auth (sessions, roles, password reset, rate limiting), multi-tenant hierarchy, server-side permission matrix, audit log
-- Arabic / Hebrew (RTL) and English (LTR) UI with independent content language; locale switching
-- Parent portal: onboarding, "Get to Know My Child" (14 sections, save & resume, sensitive answers protected), child overview (strengths first), shared focus and home activities, stories, messages to teacher, family characters with granular consent and revocation, account
-- Teacher workspace: dashboard (review queue, review dates, drafts, not-observed, this week, recent progress), classes, child cards, child overview, parent insight, Quick & Full observations (with dictation), Child Understanding Profile with provenance and confirmation, goals (max 3), Generation Studio, content review/edit/regenerate/approve/publish, narration recording, child preview, weekly planner, content library with templates, progress, outcomes
-- Child experience: locked child mode with PIN exit, picture home, story player with choices, visual routines, choice/matching activities, approved narration with TTS fallback
-- Administration: metrics, organizations, kindergartens, classes, children, users, assignments, languages, settings (branding, consent configuration, AI), templates, permissions matrix, AI status and request log, audit log
-- AI: provider abstraction (Claude, OpenAI, DEMO), minimal context builder, structured validation with repair, child-safety checks, metadata-only logging
-- Storage abstraction (local / S3), private authorized media
-- Tests: 51 unit, 30 integration (PostgreSQL), 3 Playwright E2E; seed with the full Adam scenario
-- Deployment scripts for Ubuntu (nginx, systemd, certbot)
+## Done
 
-## Next stage
+**Phase 1: Know**
+- The assessment of the legacy app ([docs/mvp-refocus/ASSESSMENT.md](docs/mvp-refocus/ASSESSMENT.md)).
+- A fresh schema of 14 tables in one hand-written Alembic revision. The legacy Next.js app was removed from the tree (tag `legacy-nextjs`).
+- Auth with sessions, e-mail or username login, and account settings. Admin pages for users, classes, teacher assignment and parent links.
+- The child list (the teacher's home) with search and a class filter.
+- The 7-step Add Child wizard. It can be saved and continued later, has a Parent/Teacher perspective toggle, and parents get their own onboarding.
+- An immutable baseline with "Create new baseline".
+- The child profile screen (spec §13) and an optional photo upload.
 
-- Scheduled retention/deletion job and per-organization retention settings; data export for families
-- SMTP/API mail transport and notification e-mails (password reset, questionnaire reminders)
-- Image-generation provider behind the existing `visualPrompt` field, using consented character assets
-- Server-side text-to-speech provider (narration cache per scene/language)
-- Nonce-based CSP (remove `'unsafe-inline'` for scripts)
-- Redis-backed rate limiting and sessions cache for multi-instance deployments
-- Subdomain routing per organization (`<slug>.kidsphere.app`) using `Organization.subdomain`
-- Goal review workflow (review meeting notes, extend/close with summary)
-- Offline-capable child player (PWA) for unreliable kindergarten Wi-Fi
-- Bulk import of classes/children/parents (CSV)
-- Parent ↔ teacher two-way messaging threads
+**Phase 2: Focus and observe**
+- Current Focus areas: at most 3 active (enforced with a row lock), each with a 5-step plan (Strength → Need → Adaptation → What we will do → Follow-up).
+- Quick observations that take under 30 seconds and can be repeated safely (`client_request_id`).
+- A development timeline with "load older".
 
-## Optional integrations
+**Phase 3: Create and experience**
+- Generation in Strength Builder and Growth Support modes: story, real-world activity and digital game, with 7 tap-only templates including `story_builder`.
+- Claude when a key is set, otherwise deterministic templates in ar, he and en. Every result is validated and safety-checked.
+- Teacher review: preview, edit, approve, regenerate (with an instruction), duplicate, archive, delete drafts and share with the parent.
+- A full-screen Present view, a story player with read-aloud, an activity card and a video plan view.
+- One-tap feedback, mirrored into the observations.
 
-- SSO (Google Workspace / Microsoft Entra) for staff
-- MDM/kiosk profiles for school tablets (see `docs/kiosk.md`)
-- External analytics sink (receives only sanitized events)
-- Additional UI languages (e.g. Russian, Amharic) — add to `LOCALES` and translate
+**Phase 4: Learn and adapt**
+- A development review with an AI or template suggestion, the no-certainty rule and five descriptive statuses per focus area.
+- Baseline validation.
+- Focus decisions (keep, pause, close, edit, create).
+- A teacher-approved current understanding that new content builds on.
+- The weekly "small pack": story, activity, game and 3 discussion prompts, plus a video plan only on request.
+
+**Phase 5: Video (partly done)**
+- The AI writes a video plan (script, scenes, narration, visual prompts, 30–90 s).
+- `services/video_service.py` exists, with a placeholder provider.
+
+**Platform**
+- The ar/he/en UI with true RTL. The parent area shows shared content and onboarding.
+- An audit log with a CLI reader.
+- Server-side CI (`deploy/ci/remote-test.sh`).
+- The deploy scripts (`remote-deploy.sh`, `deploy-kids.ps1`).
+
+## Remaining
+
+**Product**
+- **A real video provider.** Add a branch to `services/video_service.py` once credentials exist, and poll or show `generating/ready/failed` status. Nothing may block on it.
+- **Native-speaker review of the Arabic and Hebrew wording.** This covers the new option labels and the template phrase tables. Also decide on one Hebrew convention for UI strings (slash forms or not). See [docs/terminology.md](docs/terminology.md) §6.
+- **Personalised characters.** Generic characters, animals and interest-based heroes are used today. Characters made from the child or family would need consent (spec §32).
+- **An idempotency key for feedback.** `POST /content/{id}/feedback` has no `client_request_id`, so a double submit can record two feedback rows. Observations already have one.
+
+**Server**
+- **Remove the legacy apps.** The owner removes the legacy apps from the server after checking the backups (see [deploy/README.md](deploy/README.md#legacy-installs-still-on-the-server)). After that, the side-by-side names (`kidsphere-mvp`, `kidsphere_mvp`) may stay as they are.
+- **Scheduled backups.** Today the database is dumped only before each deploy, and the uploads directory is not backed up by the scripts.
+
+**Privacy**
+- **Data lifecycle.** There is no export, retention or hard-delete for a child (children are only archived). Add these when a real retention policy exists.
+- **Masking in review suggestions.** The development-review suggestion masks only the child's first or preferred name in observation text, and sends the focus title and description without masking classmate names. Content generation masks both. Align the two.
+- **`backend/.env.example`.** It still shows the DB user and name `kidsphere`, while `install.sh` writes `kidsphere_mvp`. `APP_URL` is unused.
