@@ -11,19 +11,23 @@ export function WizardProgress({ current, total, onPick, labels }: { current: nu
   const { t } = useI18n();
   return (
     <div className="space-y-2">
-      <p className="text-sm font-medium text-muted">{current > total ? t("wizard.reviewStep") : t("wizard.stepOf", { current, total })}</p>
+      <p className="tabular text-sm font-medium text-ink-muted">{current > total ? t("wizard.reviewStep") : t("wizard.stepOf", { current, total })}</p>
       <ol className="flex gap-1.5" aria-label={t("wizard.progress")}>
         {Array.from({ length: total }, (_, i) => {
           const n = i + 1;
           const done = n < current;
           const here = n === current;
-          const cls = cn("h-2.5 w-full rounded-full transition-colors", done ? "bg-brand" : here ? "bg-brand/60" : "bg-stone-200");
+          // Block dots, no numbers dressed as scores: done = brand-soft with a brand edge, here = brand, upcoming = an outline.
+          const cls = cn(
+            "h-3 w-full rounded-[4px] transition-colors",
+            done ? "border-2 border-brand bg-brand-soft" : here ? "bg-brand" : "border-2 border-line-strong",
+          );
           return (
             <li key={n} className="flex-1">
               {onPick ? (
                 <button
                   type="button"
-                  className="flex min-h-6 w-full items-center"
+                  className="flex min-h-11 w-full items-center"
                   aria-current={here ? "step" : undefined}
                   aria-label={labels?.[i] ?? t("wizard.stepOf", { current: n, total })}
                   onClick={() => onPick(n)}
@@ -44,7 +48,7 @@ export function WizardProgress({ current, total, onPick, labels }: { current: nu
 /** Sticky action bar for Back / Save & finish later / Next (above the phone bottom bar). */
 export function WizardActions({ children }: { children: ReactNode }) {
   return (
-    <div className="sticky bottom-20 z-10 flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-line bg-white/95 p-3 shadow-lg backdrop-blur md:bottom-4">
+    <div className="sticky bottom-20 z-10 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-line bg-surface p-3 shadow-sheet md:bottom-4">
       {children}
     </div>
   );
@@ -54,8 +58,8 @@ export function DoneMark({ on, label }: { on: boolean; label: string }) {
   return (
     <span
       className={cn(
-        "inline-flex size-7 items-center justify-center rounded-full text-xs",
-        on ? "bg-emerald-600 text-white" : "border border-dashed border-stone-300 text-stone-400",
+        "inline-flex size-7 items-center justify-center rounded-sm text-sm",
+        on ? "bg-success text-on-brand" : "border-[1.5px] border-dashed border-line-strong text-ink-muted",
       )}
       title={label}
       aria-label={label}

@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
-import { KeyRound, Pencil, Plus, Search, UserCheck, UserX, UsersRound } from "lucide-react";
+import { KeyRound, Pencil, Plus, Search, UserCheck, UserX } from "lucide-react";
+import { UsersIcon } from "@/icons";
 import { useAuth, useUser } from "@/auth/AuthProvider";
 import { Alert } from "@/components/ui/Alert";
 import { Avatar } from "@/components/ui/Avatar";
@@ -21,7 +22,8 @@ import { PasswordDialog } from "./PasswordDialog";
 import { UserDialog } from "./UserDialog";
 import { ROLES, type AdminUser } from "./types";
 
-const roleTone = { admin: "brand", teacher: "interest", parent: "helps" } as const;
+// Roles are not profile meanings, so they never borrow the meaning tints.
+const roleTone = { admin: "brand", teacher: "neutral", parent: "outline" } as const;
 
 function UserRow({
   user,
@@ -48,7 +50,7 @@ function UserRow({
             </span>
             {isSelf && <Badge tone="outline">{t("admin.users.you")}</Badge>}
           </p>
-          <p className="truncate text-sm text-muted" dir="ltr">
+          <p className="truncate text-sm text-ink-muted" dir="ltr">
             <bdi>{user.email}</bdi>
           </p>
         </div>
@@ -114,7 +116,7 @@ export function UsersPage() {
   return (
     <div className="mx-auto max-w-5xl">
       <PageHeader
-        icon={<UsersRound />}
+        icon={<UsersIcon />}
         title={t("admin.users.title")}
         description={t("admin.users.subtitle")}
         actions={
@@ -137,14 +139,14 @@ export function UsersPage() {
       />
 
       <div className="relative mb-4 max-w-sm">
-        <Search className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted" aria-hidden />
+        <Search className="pointer-events-none absolute start-3.5 top-1/2 size-5 -translate-y-1/2 text-ink-muted" aria-hidden />
         <Input
           type="search"
           aria-label={t("admin.users.search")}
           placeholder={t("admin.users.search")}
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          className="ps-9"
+          className="bg-tray ps-11"
         />
       </div>
 
@@ -156,7 +158,8 @@ export function UsersPage() {
         <PageSkeleton />
       ) : shown.length === 0 ? (
         <EmptyState
-          icon={<UsersRound />}
+          scene={users.length > 0 ? "search" : undefined}
+          icon={<UsersIcon />}
           title={users.length === 0 ? t("admin.users.empty") : t("admin.users.noMatch")}
           action={
             users.length === 0 ? (

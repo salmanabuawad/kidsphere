@@ -19,9 +19,7 @@
     "archived": "Archived",
     "profileInProgress": "Profile in progress",
     "drafts": "Drafts waiting",
-    "notObserved": "Not observed recently",
-    "observe": "Observe",
-    "open": "Open profile"
+    "notObserved": "Not observed recently"
   },
   "child": {
     "backToList": "All children",
@@ -47,6 +45,7 @@
     "focus": "Current focus",
     "focusEmpty": "No current focus yet. Choose up to 3 areas to support.",
     "manageFocus": "Manage focus",
+    "focusFull": "Focus slots full",
     "focusCreate": "Create content",
     "showPlan": "Show plan",
     "hidePlan": "Hide plan",

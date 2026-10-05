@@ -1,6 +1,7 @@
 import { useRef, useState, type RefObject } from "react";
 import { useNavigate, useParams } from "react-router";
-import { ClipboardCheck, Lightbulb, Plus, Sparkles, Target, Wand2, X } from "lucide-react";
+import { ClipboardCheck, Lightbulb, Plus, Sparkles, Wand2, X } from "lucide-react";
+import { CurrentFocusIcon } from "@/icons";
 import {
   Alert,
   Badge,
@@ -334,13 +335,13 @@ function ReviewFlow({ childId, context, current }: { childId: string; context: D
         <CardBody className="space-y-4">
           {!ctx.baseline && <Alert tone="info">{t("development.review.noBaseline")}</Alert>}
           <div className="grid gap-3 sm:grid-cols-2">
-            <div className="space-y-2 rounded-2xl border border-line p-4">
+            <div className="space-y-2 rounded-lg border border-line p-4">
               <Button size="lg" className="w-full" loading={suggesting.pending} icon={<Sparkles className="size-5" aria-hidden />} onClick={suggest}>
                 {draft?.source === "suggestion" ? t("development.review.start.again") : t("development.review.start.suggest")}
               </Button>
-              <p className="text-sm text-muted">{t("development.review.start.suggestHint")}</p>
+              <p className="text-sm text-ink-muted">{t("development.review.start.suggestHint")}</p>
             </div>
-            <div className="space-y-2 rounded-2xl border border-line p-4">
+            <div className="space-y-2 rounded-lg border border-line p-4">
               <Button
                 size="lg"
                 variant="outline"
@@ -353,7 +354,7 @@ function ReviewFlow({ childId, context, current }: { childId: string; context: D
               >
                 {t("development.review.start.blank")}
               </Button>
-              <p className="text-sm text-muted">{t("development.review.start.blankHint")}</p>
+              <p className="text-sm text-ink-muted">{t("development.review.start.blankHint")}</p>
             </div>
           </div>
           {draft?.source === "suggestion" && (
@@ -387,7 +388,7 @@ function ReviewFlow({ childId, context, current }: { childId: string; context: D
           <Card>
             <CardBody className="space-y-3">
               {unsafe && <Alert tone="warning">{t("development.review.unsafe")}</Alert>}
-              <p className="text-sm text-muted">{t("development.review.approveHint")}</p>
+              <p className="text-sm text-ink-muted">{t("development.review.approveHint")}</p>
               <div className="flex flex-wrap justify-end gap-2">
                 <ButtonLink to={paths.childDevelopment(childId)} variant="ghost" size="lg">
                   {t("development.review.cancel")}
@@ -443,16 +444,16 @@ function FocusStep({ draft, update }: { draft: Draft; update: (fn: (d: Draft) =>
 
   return (
     <Card>
-      <CardHeader title={t("development.review.steps.focus")} icon={<Target className="size-4" aria-hidden />} description={t("development.review.focus.hint")} />
+      <CardHeader title={t("development.review.steps.focus")} icon={<CurrentFocusIcon />} description={t("development.review.focus.hint")} />
       <CardBody className="space-y-4">
-        {draft.focus.length === 0 && <p className="text-sm text-muted">{t("development.review.focus.none")}</p>}
+        {draft.focus.length === 0 && <p className="text-sm text-ink-muted">{t("development.review.focus.none")}</p>}
         {draft.focus.map((f) => (
           <FocusReviewCard key={f.id} focus={f} onChange={(patch) => setFocus(f.id, patch)} />
         ))}
         {draft.added.length > 0 && (
           <ul className="space-y-2">
             {draft.added.map((n) => (
-              <li key={n.uid} data-testid="new-focus" className="flex items-center justify-between gap-2 rounded-2xl border border-line px-4 py-2">
+              <li key={n.uid} data-testid="new-focus" className="flex items-center justify-between gap-2 rounded-lg border border-line px-4 py-2">
                 <span className="flex items-center gap-2 text-sm text-ink">
                   <Badge tone="attention">{t("development.review.focus.new")}</Badge>
                   <span dir="auto">{n.title}</span>
@@ -481,7 +482,7 @@ function FocusStep({ draft, update }: { draft: Draft; update: (fn: (d: Draft) =>
             <Button variant="outline" icon={<Plus className="size-4" aria-hidden />} disabled={full} onClick={() => setAdding(true)}>
               {t("development.review.focus.add")}
             </Button>
-            {full && <p className="text-xs text-muted">{t("development.review.focus.full", { max })}</p>}
+            {full && <p className="text-caption text-ink-muted">{t("development.review.focus.full", { max })}</p>}
           </div>
         )}
       </CardBody>
@@ -493,14 +494,14 @@ function FocusReviewCard({ focus, onChange }: { focus: FocusDraft; onChange: (pa
   const { t } = useI18n();
   const limited = isLimited(focus.status, focus.observation_count);
   return (
-    <section data-testid="focus-review" aria-label={focus.title} className="space-y-4 rounded-2xl border border-line p-4">
+    <section data-testid="focus-review" aria-label={focus.title} className="space-y-4 rounded-lg border border-line p-4">
       <div className="space-y-1">
         <h3 className="text-base font-semibold text-ink" dir="auto">
           {focus.title}
         </h3>
-        <EvidenceText count={focus.observation_count} className="text-sm text-muted" />
+        <EvidenceText count={focus.observation_count} className="text-sm text-ink-muted" />
         {focus.note && (
-          <p className="text-sm text-muted" dir="auto">
+          <p className="text-sm text-ink-muted" dir="auto">
             {focus.note}
           </p>
         )}
@@ -511,7 +512,7 @@ function FocusReviewCard({ focus, onChange }: { focus: FocusDraft; onChange: (pa
         options={REVIEW_STATUSES.map((s) => ({ value: s, label: t(`development.status.${s}`), icon: REVIEW_ICON[s] }))}
         onChange={(status) => onChange(status === "no_longer_needed" && focus.decision === "keep" ? { status, decision: "close" } : { status })}
       />
-      {limited && <p className="text-xs text-muted">{t("development.review.limited")}</p>}
+      {limited && <p className="text-caption text-ink-muted">{t("development.review.limited")}</p>}
       <ChoiceRow<KeptDecision>
         label={t("development.review.focus.decisionLabel")}
         value={focus.decision}
@@ -551,16 +552,16 @@ function AddFocus({ takenKeys, onAdd, onCancel }: { takenKeys: string[]; onAdd: 
   const uid = () => `n-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
 
   return (
-    <div className="space-y-4 rounded-2xl border border-line p-4" data-testid="add-focus">
+    <div className="space-y-4 rounded-lg border border-line p-4" data-testid="add-focus">
       <p className="text-sm font-semibold text-ink">{t("development.review.focus.addTitle")}</p>
       <div className="space-y-3">
-        <p className="text-sm text-muted">{t("development.review.focus.suggestions")}</p>
+        <p className="text-sm text-ink-muted">{t("development.review.focus.suggestions")}</p>
         {categories.map((cat) => {
           const items = suggestions.filter((s) => s.category === cat.key);
           if (!items.length) return null;
           return (
             <div key={cat.key} className="space-y-2">
-              <p className="flex items-center gap-2 text-sm font-medium text-muted">
+              <p className="flex items-center gap-2 text-sm font-medium text-ink-muted">
                 {cat.icon && <span aria-hidden>{cat.icon}</span>}
                 {labelOf(cat)}
               </p>
@@ -582,7 +583,7 @@ function AddFocus({ takenKeys, onAdd, onCancel }: { takenKeys: string[]; onAdd: 
         })}
       </div>
       <div className="space-y-3">
-        <p className="text-sm text-muted">{t("development.review.focus.orCustom")}</p>
+        <p className="text-sm text-ink-muted">{t("development.review.focus.orCustom")}</p>
         <div className="grid gap-3 sm:grid-cols-2">
           <Field label={t("development.review.focus.category")}>
             {(p) => (
@@ -639,12 +640,12 @@ function ValidationStep({ draft, update }: { draft: Draft; update: (fn: (d: Draf
               <li key={baselineItemId(v)} data-testid="validation-item" className="space-y-2 py-4 first:pt-0 last:pb-0">
                 <div>
                   <p className="text-sm font-semibold text-ink">
-                    <span className="font-normal text-muted">{t(`development.validation.lists.${v.list}`)} · </span>
+                    <span className="font-normal text-ink-muted">{t(`development.validation.lists.${v.list}`)} · </span>
                     <span dir="auto">{v.label}</span>
                   </p>
                   <EvidenceText count={v.observation_ids.length} />
                   {v.note && (
-                    <p className="text-sm text-muted" dir="auto">
+                    <p className="text-sm text-ink-muted" dir="auto">
                       {v.note}
                     </p>
                   )}
@@ -655,7 +656,7 @@ function ValidationStep({ draft, update }: { draft: Draft; update: (fn: (d: Draf
                   options={VALIDATION_STATUSES.map((s) => ({ value: s, label: t(`development.validation.status.${s}`), icon: VALIDATION_ICON[s] }))}
                   onChange={(s) => setStatus(i, s)}
                 />
-                {isLimited(v.status, v.observation_ids.length) && <p className="text-xs text-muted">{t("development.review.limited")}</p>}
+                {isLimited(v.status, v.observation_ids.length) && <p className="text-caption text-ink-muted">{t("development.review.limited")}</p>}
               </li>
             ))}
           </ul>
@@ -772,7 +773,7 @@ function ItemsEditor({
                   type="button"
                   aria-label={t("development.review.understanding.removeItem", { label: r.label })}
                   onClick={() => onChange(items.filter((x) => itemId(x) !== itemId(it)))}
-                  className={cn("inline-flex min-h-11 items-center gap-1.5 rounded-full px-3.5 text-sm ring-1 ring-inset", toneClasses[tone])}
+                  className={cn("inline-flex min-h-11 items-center gap-2 rounded-sm px-3.5 text-sm font-medium", toneClasses[tone])}
                 >
                   {(r.icon ?? fallbackIcon) && <span aria-hidden>{r.icon ?? fallbackIcon}</span>}
                   <span dir="auto">{r.label}</span>

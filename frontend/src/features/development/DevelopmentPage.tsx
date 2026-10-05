@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router";
-import { ClipboardCheck, Flag, History, Lightbulb, LineChart, Plus, Sparkles, Star, Target } from "lucide-react";
+import { ClipboardCheck, Flag, History, Lightbulb, ListChecks, Plus, Sparkles } from "lucide-react";
+import { CurrentFocusIcon, DevelopmentIcon } from "@/icons";
 import { Alert, Badge, Button, ButtonLink, Card, CardBody, CardHeader, Chip, Dialog, EmptyState, Skeleton } from "@/components/ui";
 import { pick } from "@/i18n/config";
 import { useI18n } from "@/i18n/I18nProvider";
@@ -84,11 +85,13 @@ function Development({ childId }: { childId: string }) {
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
-          <h2 className="flex items-center gap-2 text-xl font-semibold text-ink">
-            <LineChart className="size-5 text-brand" aria-hidden />
+          <h2 className="font-display text-title flex items-center gap-3 font-semibold text-ink">
+            <span aria-hidden className="flex size-8 shrink-0 items-center justify-center rounded-sm bg-tray">
+              <DevelopmentIcon className="size-5" />
+            </span>
             {t("development.title")}
           </h2>
-          <p className="mt-1 max-w-2xl text-sm text-muted">{t("development.intro")}</p>
+          <p className="mt-1 max-w-2xl text-sm text-ink-muted">{t("development.intro")}</p>
         </div>
         <div className="flex flex-wrap gap-2">
           <ButtonLink to={paths.newReview(childId)} icon={<ClipboardCheck className="size-4" aria-hidden />}>
@@ -221,7 +224,7 @@ function BaselineCard({
         <BaselineSupport summary={s} />
         {earlier.length > 0 && (
           <Section title={t("development.baseline.history")} icon={<History className="size-4" aria-hidden />}>
-            <p className="text-xs text-muted">{t("development.baseline.historyHint")}</p>
+            <p className="text-caption text-ink-muted">{t("development.baseline.historyHint")}</p>
             <ul className="space-y-1 text-sm text-ink">
               {earlier.map((b) => (
                 <li key={b.id}>
@@ -254,7 +257,7 @@ function BaselineSupport({ summary }: { summary: BaselineSummary }) {
       <ul className="flex flex-wrap gap-2">
         {focus.map((f) => (
           <li key={`f-${f.id}`}>
-            <Chip tone="attention" icon={<Target className="size-3.5" aria-hidden />}>
+            <Chip tone="focus" icon={<CurrentFocusIcon size={16} aria-hidden />}>
               {f.title}
             </Chip>
           </li>
@@ -332,7 +335,7 @@ function UnderstandingCard({ understanding }: { understanding: CurrentUnderstand
           </Section>
         )}
         {u.next_steps && (
-          <Section title={t("development.current.nextSteps")} icon={<Star className="size-4" aria-hidden />}>
+          <Section title={t("development.current.nextSteps")} icon={<ListChecks className="size-4" aria-hidden />}>
             <p className="text-sm text-ink" dir="auto">
               {u.next_steps}
             </p>
@@ -354,21 +357,21 @@ function ValidationCard({ review }: { review: Review }) {
         description={t("development.validation.fromReview", { date: formatDate(review.review_date) })}
       />
       <CardBody>
-        <p className="mb-3 text-sm text-muted">{t("development.validation.hint")}</p>
+        <p className="mb-3 text-sm text-ink-muted">{t("development.validation.hint")}</p>
         <ul className="divide-y divide-line">
           {review.baseline_validation.map((v, i) => (
             <li key={`${v.list}-${v.key ?? v.custom ?? i}`} className="flex flex-wrap items-start justify-between gap-2 py-3">
               <div className="min-w-0">
                 <p className="text-sm font-medium text-ink">
-                  <span className="text-muted">{t(`development.validation.lists.${v.list}`)} · </span>
+                  <span className="text-ink-muted">{t(`development.validation.lists.${v.list}`)} · </span>
                   <span dir="auto">{v.label}</span>
                 </p>
                 {v.note && (
-                  <p className="mt-0.5 text-sm text-muted" dir="auto">
+                  <p className="mt-0.5 text-sm text-ink-muted" dir="auto">
                     {v.note}
                   </p>
                 )}
-                <EvidenceText count={v.observation_ids.length} className="mt-0.5 text-xs text-muted" />
+                <EvidenceText count={v.observation_ids.length} className="mt-0.5 text-caption text-ink-muted" />
               </div>
               <ValidationBadge status={v.status} />
             </li>
@@ -384,7 +387,7 @@ function ReviewsList({ reviews, childId }: { reviews: Review[] | undefined; chil
   return (
     <section aria-labelledby="past-reviews" className="space-y-3">
       <h2 id="past-reviews" className="flex items-center gap-2 text-lg font-semibold text-ink">
-        <History className="size-5 text-muted" aria-hidden />
+        <History className="size-5 text-ink-muted" aria-hidden />
         {t("development.reviews.title")}
       </h2>
       {!reviews ? (
@@ -422,7 +425,7 @@ function ReviewItemCard({ review }: { review: Review }) {
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-sm font-semibold text-ink">
           {formatDate(review.review_date)}
-          {review.created_by?.name && <span className="font-normal text-muted"> · {t("development.reviews.by", { name: review.created_by.name })}</span>}
+          {review.created_by?.name && <span className="font-normal text-ink-muted"> · {t("development.reviews.by", { name: review.created_by.name })}</span>}
         </p>
         {review.ai_suggested && <Badge tone="neutral">{t("development.reviews.aiSuggested")}</Badge>}
       </div>
@@ -437,7 +440,7 @@ function ReviewItemCard({ review }: { review: Review }) {
           {open && (
             <div className="mt-3 space-y-4">
               {review.focus_review.length > 0 && (
-                <Section title={t("development.reviews.focusTitle")} icon={<Target className="size-4" aria-hidden />}>
+                <Section title={t("development.reviews.focusTitle")} icon={<CurrentFocusIcon className="size-5" aria-hidden />}>
                   <ul className="space-y-2">
                     {review.focus_review.map((f) => (
                       <li key={f.focus_area_id} className="flex flex-wrap items-center gap-2 text-sm">
@@ -447,12 +450,12 @@ function ReviewItemCard({ review }: { review: Review }) {
                         {f.status && <ReviewStatusBadge status={f.status} />}
                         <Badge tone="outline">{t(`development.decision.${f.decision}`)}</Badge>
                         {f.what_worked && (
-                          <span className="basis-full text-muted" dir="auto">
+                          <span className="basis-full text-ink-muted" dir="auto">
                             {t("development.review.focus.whatWorked")}: {f.what_worked}
                           </span>
                         )}
                         {f.what_to_change && (
-                          <span className="basis-full text-muted" dir="auto">
+                          <span className="basis-full text-ink-muted" dir="auto">
                             {t("development.review.focus.whatToChange")}: {f.what_to_change}
                           </span>
                         )}

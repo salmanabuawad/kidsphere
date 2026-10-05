@@ -43,7 +43,7 @@ export function PhotoDialog({ child, open, onClose, onChanged }: { child: ChildB
           {child.has_photo && (
             <Button
               variant="ghost"
-              className="me-auto text-rose-700"
+              className="me-auto text-danger hover:text-danger"
               icon={<Trash2 className="size-4" aria-hidden />}
               loading={remove.pending}
               disabled={upload.pending}
@@ -73,7 +73,7 @@ export function PhotoDialog({ child, open, onClose, onChanged }: { child: ChildB
     >
       <div className="flex flex-col items-center gap-3 py-2">
         <ChildAvatar child={child} size="xl" />
-        <p className="font-medium" dir="auto">
+        <p className="text-name font-semibold" dir="auto">
           {displayName(child)}
         </p>
         <input
@@ -101,7 +101,7 @@ export function PhotoButton({ hasPhoto, onClick }: { hasPhoto: boolean; onClick:
       onClick={onClick}
       aria-label={label}
       title={label}
-      className="absolute -end-1 -bottom-1 inline-flex size-11 items-center justify-center rounded-full border border-line bg-white text-ink shadow-md hover:bg-stone-50"
+      className="absolute -end-2 -bottom-2 inline-flex size-11 items-center justify-center rounded-md border-[1.5px] border-line-strong bg-surface text-ink shadow-lip transition-colors hover:bg-tray"
     >
       <Camera className="size-5" aria-hidden />
     </button>

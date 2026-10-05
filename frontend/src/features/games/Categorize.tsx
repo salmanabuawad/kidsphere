@@ -1,12 +1,13 @@
 import { useMemo, useState } from "react";
 import type { CategorizeGame } from "@/features/player/types";
 import { usePlayerText } from "@/features/player/content-locale";
-import { ChoiceCard, Feedback, KidHeading, Pic } from "@/features/player/kid-ui";
+import { ChoiceCard, Feedback, KidHeading, Pic, playPaint } from "@/features/player/kid-ui";
 import { cn } from "@/lib/utils";
 import { seedOf, shuffledIndices } from "./shuffle";
 import type { TemplateProps } from "./template-props";
 
-const BASKETS = ["bg-sky-50 ring-sky-200", "bg-violet-50 ring-violet-200", "bg-amber-50 ring-amber-200"];
+/** Baskets take the paints after the item cards' first ones, so a basket never looks like a card. */
+const BASKET_PAINT = [1, 5, 4];
 
 /**
  * Tap-to-place (PLAN-ADJUSTMENTS B16): tap a picture, then tap the basket it
@@ -45,7 +46,7 @@ export function Categorize({ game, lang, replay, onDone }: TemplateProps<Categor
   return (
     <div className="flex flex-1 flex-col gap-6" data-testid="game-categorize">
       <KidHeading title={game.title} intro={game.intro} />
-      <p className="text-center text-lg text-stone-600">{t("player.game.categorize.hint")}</p>
+      <p className="text-center text-lg text-ink-muted">{t("player.game.categorize.hint")}</p>
 
       <div className={cn("mx-auto grid w-full max-w-4xl gap-4", game.categories.length === 3 ? "grid-cols-3" : "grid-cols-2")}>
         {game.categories.map((c, ci) => (
@@ -55,21 +56,25 @@ export function Categorize({ game, lang, replay, onDone }: TemplateProps<Categor
             onClick={() => pickBasket(c.key)}
             aria-label={c.label}
             className={cn(
-              "flex min-h-40 flex-col items-center gap-2 rounded-3xl p-4 ring-4 transition select-none active:scale-[0.98]",
-              BASKETS[ci % BASKETS.length],
-              selected !== null && "ring-brand/50",
+              "ks-press relative flex min-h-40 flex-col items-center gap-2 rounded-xl bg-surface p-4 shadow-lip-lg select-none active:translate-y-1 active:shadow-none focus-visible:outline-offset-[3px]",
+              selected !== null && "bg-brand-soft",
             )}
             data-testid={`basket-${c.key}`}
           >
-            <Pic emoji={c.emoji ?? "🧺"} className="text-6xl" />
-            <span dir="auto" className="text-xl font-bold text-ink md:text-2xl">
+            <span aria-hidden className={cn("pointer-events-none absolute inset-0 rounded-xl", selected !== null ? "border-4 border-dashed border-brand" : "border-[3px] border-ink")} />
+            <span aria-hidden className={cn("relative flex size-20 items-center justify-center rounded-lg", playPaint(BASKET_PAINT[ci % BASKET_PAINT.length]!))}>
+              <span className="flex size-14 items-center justify-center rounded-full bg-surface">
+                <Pic emoji={c.emoji ?? "🧺"} className="text-[2.25rem]" />
+              </span>
+            </span>
+            <span dir="auto" className="font-display text-kid-label relative font-semibold text-ink">
               {c.label}
             </span>
             <span className="flex flex-wrap justify-center gap-1" data-testid={`basket-${c.key}-items`}>
               {placed
                 .filter((i) => game.items[i]!.category === c.key)
                 .map((i) => (
-                  <span key={i} className="animate-pop rounded-full bg-white px-2 py-1 text-base shadow-sm" title={game.items[i]!.label}>
+                  <span key={i} className="animate-bounce-place relative rounded-full bg-surface px-2 py-1 text-base ring-2 ring-ink" title={game.items[i]!.label}>
                     {game.items[i]!.emoji ? <Pic emoji={game.items[i]!.emoji} className="text-2xl" /> : null}
                     <span className={game.items[i]!.emoji ? "sr-only" : ""}>{game.items[i]!.label}</span>
                   </span>
@@ -87,6 +92,7 @@ export function Categorize({ game, lang, replay, onDone }: TemplateProps<Categor
               label={game.items[i]!.label}
               emoji={game.items[i]!.emoji}
               state={selected === i ? "selected" : "idle"}
+              paint={i}
               onClick={() => pickItem(i)}
               data-testid={`categorize-item-${i}`}
             />

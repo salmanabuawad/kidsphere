@@ -8,7 +8,8 @@
  */
 import { useState } from "react";
 import { Link, useParams } from "react-router";
-import { ChevronLeft, ChevronRight, Heart, Maximize2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Maximize2 } from "lucide-react";
+import { ContentIcon } from "@/icons";
 import { Alert, Button, Card, CardBody, EmptyState, PageHeader, PageSkeleton } from "@/components/ui";
 import { parseActivity, parseGame, parseStory, parseVideoPlan, PresentFrame, toContentLocale } from "@/features/player";
 import { useI18n } from "@/i18n/I18nProvider";
@@ -72,7 +73,7 @@ export function ParentChildContentPage() {
     <div className="mx-auto max-w-3xl">
       <PageHeader
         back={{ to: paths.parentHome(), label: t("content.parent.back") }}
-        icon={<Heart />}
+        icon={<ContentIcon />}
         title={name ? t("content.parent.titleFor", { name }) : t("content.parent.title")}
         description={t("content.parent.subtitle")}
       />
@@ -83,7 +84,7 @@ export function ParentChildContentPage() {
       ) : loading && data === undefined && !error ? (
         <PageSkeleton />
       ) : items.length === 0 ? (
-        <EmptyState icon={<Heart />} title={t("content.parent.empty")} description={t("content.parent.emptyHint")} />
+        <EmptyState scene="content" title={t("content.parent.empty")} description={t("content.parent.emptyHint")} />
       ) : (
         <ul className="space-y-3" data-testid="parent-content-list">
           {items.map((c) => {
@@ -92,16 +93,16 @@ export function ParentChildContentPage() {
               <li key={c.id}>
                 <Link
                   to={paths.parentContent(c.id)}
-                  className="flex min-h-20 items-center gap-4 rounded-[var(--radius-card)] border border-line bg-card px-5 py-4 shadow-[var(--shadow-card)] transition-colors hover:border-brand/40"
+                  className="ks-press flex min-h-20 items-center gap-4 rounded-lg border border-line bg-surface px-5 py-4 shadow-lip hover:-translate-y-px hover:shadow-lip-lg active:translate-y-0.5 active:shadow-none"
                 >
                   <TypeIcon type={type} size="lg" />
                   <span className="min-w-0 flex-1">
                     <span className="block truncate text-lg font-semibold text-ink" dir="auto">
                       {c.title}
                     </span>
-                    <span className="block text-sm text-muted">{t(`content.types.${type}`)}</span>
+                    <span className="block text-sm text-ink-muted">{t(`content.types.${type}`)}</span>
                   </span>
-                  <ChevronRight className="size-5 shrink-0 text-muted rtl:rotate-180" aria-hidden />
+                  <ChevronRight className="size-5 shrink-0 text-ink-muted rtl:-scale-x-100" aria-hidden />
                 </Link>
               </li>
             );
@@ -129,7 +130,7 @@ export function ParentContentPage() {
   if (error && !isApiError(error, "NOT_FOUND")) {
     return (
       <div className="mx-auto max-w-3xl">
-        <PageHeader back={{ to: backTo, label: backLabel }} icon={<Heart />} title={t("content.parent.title")} />
+        <PageHeader back={{ to: backTo, label: backLabel }} icon={<ContentIcon />} title={t("content.parent.title")} />
         <Alert tone="error" action={<Button size="sm" variant="outline" onClick={reload}>{t("common.retry")}</Button>}>
           {toMessage(error)}
         </Alert>
@@ -140,8 +141,8 @@ export function ParentContentPage() {
   if (!item) {
     return (
       <div className="mx-auto max-w-3xl">
-        <PageHeader back={{ to: backTo, label: backLabel }} icon={<Heart />} title={t("content.parent.title")} />
-        <EmptyState icon={<Heart />} title={t("content.parent.notAvailable")} description={t("content.parent.notAvailableHint")} />
+        <PageHeader back={{ to: backTo, label: backLabel }} icon={<ContentIcon />} title={t("content.parent.title")} />
+        <EmptyState scene="search" title={t("content.parent.notAvailable")} description={t("content.parent.notAvailableHint")} />
       </div>
     );
   }
@@ -153,7 +154,7 @@ export function ParentContentPage() {
         <PageHeader back={{ to: backTo, label: backLabel }} icon={<TypeIcon type={type} size="sm" />} eyebrow={t(`content.types.${type}`)} title={item.title} />
         <Card>
           <CardBody>
-            <p className="text-sm text-muted">{t("content.parent.cantShow")}</p>
+            <p className="text-sm text-ink-muted">{t("content.parent.cantShow")}</p>
           </CardBody>
         </Card>
       </div>
@@ -164,12 +165,12 @@ export function ParentContentPage() {
   return (
     <div className="mx-auto max-w-4xl" data-testid="parent-content">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-        <Link to={backTo} className="-ms-1 inline-flex min-h-11 items-center gap-1 rounded-lg px-1 text-sm text-muted hover:text-ink">
-          <ChevronLeft className="size-4 rtl:rotate-180" aria-hidden />
+        <Link to={backTo} className="-ms-1 inline-flex min-h-11 items-center gap-1 rounded-md px-1 text-sm text-ink-muted hover:text-ink">
+          <ChevronLeft className="size-4 rtl:-scale-x-100" aria-hidden />
           {backLabel}
         </Link>
         <div className="flex items-center gap-2">
-          <span className="inline-flex items-center gap-2 text-sm text-muted">
+          <span className="inline-flex items-center gap-2 text-sm text-ink-muted">
             <TypeIcon type={type} size="sm" />
             {t(`content.types.${type}`)}
           </span>
@@ -180,7 +181,7 @@ export function ParentContentPage() {
           )}
         </div>
       </div>
-      <div className="rounded-[var(--radius-card)] border border-line bg-card p-4 shadow-[var(--shadow-card)] sm:p-6">
+      <div className="rounded-lg border border-line bg-surface p-4 sm:p-6">
         <ContentPreview item={item} audience="child" />
       </div>
       {full && (

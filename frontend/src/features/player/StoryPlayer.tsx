@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { MessageCircleQuestion, RotateCcw, Square, Volume2 } from "lucide-react";
+import { RotateCcw, Square, Volume2 } from "lucide-react";
+import { NoteQuoteIcon } from "@/icons";
 import type { AppLocale } from "@/i18n/config";
 import { cn } from "@/lib/utils";
 import { contentDir, usePlayerText, type Dir } from "./content-locale";
-import { BackArrow, Dots, KidButton, NextArrow, RoundButton } from "./kid-ui";
+import { BackArrow, Dots, KidButton, NextArrow, playPaint, RoundButton } from "./kid-ui";
 import { parseStory } from "./parse";
 import { PlayerFallback } from "./PlayerFallback";
 import type { Story } from "./types";
@@ -62,41 +63,45 @@ export function StoryPlayer({ story: raw, lang, dir: dirProp, showTeacherNote = 
 
   return (
     <div dir={dir} lang={lang} className="flex min-h-[70vh] flex-col gap-6" data-testid="story-player">
-      <h1 dir="auto" className="text-center text-2xl font-semibold text-stone-700 md:text-3xl">
+      <h1 dir="auto" className="font-display text-display-lg text-center font-semibold text-ink">
         {story.title}
       </h1>
 
       {!onQuestions ? (
         <section key={page} className="animate-rise flex flex-1 flex-col items-center gap-6" data-testid="story-page">
-          <div className="flex aspect-[4/3] w-full max-w-xl items-center justify-center rounded-[2rem] bg-gradient-to-br from-amber-50 via-orange-50 to-sky-100 shadow-inner">
-            <span className="text-[8rem] leading-none md:text-[10rem]" aria-hidden data-testid="story-illustration">
-              {picture}
+          {/* The picture: a colouring-book frame around a painted block, the emoji in a surface pod. */}
+          <div className="relative flex aspect-[4/3] w-full max-w-xl items-center justify-center rounded-xl bg-surface shadow-lip-lg">
+            <span aria-hidden className="pointer-events-none absolute inset-0 rounded-xl border-[3px] border-ink" />
+            <span aria-hidden className={cn("flex aspect-square h-[66%] items-center justify-center rounded-lg", playPaint(page))}>
+              <span className="flex size-[78%] items-center justify-center rounded-full bg-surface">
+                <span className="text-[6rem] leading-none md:text-[8rem]" data-testid="story-illustration">
+                  {picture}
+                </span>
+              </span>
             </span>
           </div>
-          <p dir="auto" className="mx-auto max-w-3xl text-center text-2xl leading-relaxed text-ink md:text-3xl md:leading-relaxed">
+          <p dir="auto" className="font-display text-kid-story mx-auto max-w-[30ch] text-center font-medium text-ink">
             {story.story[page]}
           </p>
         </section>
       ) : (
         <section className="animate-rise mx-auto flex w-full max-w-3xl flex-1 flex-col gap-5" data-testid="story-questions">
-          <h2 className="flex items-center justify-center gap-3 text-center text-2xl font-bold text-brand md:text-3xl">
-            <MessageCircleQuestion className="size-8" aria-hidden />
+          <h2 className="font-display text-display-lg flex items-center justify-center gap-3 text-center font-semibold text-ink">
+            <NoteQuoteIcon className="size-10 shrink-0" aria-hidden />
             {t("player.story.questionsTitle")}
           </h2>
           <ul className="space-y-4">
             {story.questions.map((q, i) => (
-              <li key={i} className="flex items-start gap-4 rounded-3xl bg-white p-5 shadow-sm ring-2 ring-sky-100">
-                <span className="text-4xl leading-none" aria-hidden>
-                  💭
-                </span>
-                <p dir="auto" className="text-xl leading-relaxed md:text-2xl">
+              <li key={i} className="animate-bounce-place flex items-start gap-4 rounded-xl bg-brand-soft px-6 py-5 text-ink">
+                <span aria-hidden className={cn("mt-1 size-6 shrink-0 rounded-sm border-2 border-ink", playPaint(i + 1))} />
+                <p dir="auto" className="font-display text-kid-label font-medium">
                   {q}
                 </p>
               </li>
             ))}
           </ul>
           {showTeacherNote && (
-            <aside className="rounded-2xl bg-stone-100 p-4 text-stone-700" data-testid="story-teacher-note">
+            <aside className="rounded-md bg-tray p-4 text-ink" data-testid="story-teacher-note">
               <p className="text-sm font-semibold">{t("player.story.teacherNote")}</p>
               <p dir="auto" className="mt-1">
                 {story.teacher_note}
@@ -105,7 +110,7 @@ export function StoryPlayer({ story: raw, lang, dir: dirProp, showTeacherNote = 
           )}
           <div className="flex justify-center">
             <KidButton tone="plain" onClick={() => go(0)} data-testid="story-again">
-              <RotateCcw className="size-6" aria-hidden />
+              <RotateCcw aria-hidden />
               {t("player.story.readAgain")}
             </KidButton>
           </div>
@@ -115,6 +120,7 @@ export function StoryPlayer({ story: raw, lang, dir: dirProp, showTeacherNote = 
       <nav className="mt-auto flex items-center justify-between gap-4" aria-label={story.title}>
         <RoundButton
           label={t("player.back")}
+          tone="plain"
           onClick={() => go(page - 1)}
           disabled={page === 0}
           className={cn(page === 0 && "invisible")}
@@ -125,17 +131,17 @@ export function StoryPlayer({ story: raw, lang, dir: dirProp, showTeacherNote = 
         {supported ? (
           <RoundButton
             label={speaking ? t("player.stopReading") : t("player.listen")}
+            tone="plain"
             onClick={() => (speaking ? stop() : speak(pageText))}
             data-testid="story-listen"
           >
             {speaking ? <Square className="size-7" aria-hidden /> : <Volume2 className="size-8" aria-hidden />}
           </RoundButton>
         ) : (
-          <span className="size-16 md:size-20" aria-hidden />
+          <span className="size-[72px] md:size-20" aria-hidden />
         )}
         <RoundButton
           label={t("player.next")}
-          tone="brand"
           onClick={() => go(page + 1)}
           disabled={onQuestions}
           className={cn(onQuestions && "invisible")}

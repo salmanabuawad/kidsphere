@@ -2,17 +2,25 @@ import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 /**
- * Meaning-coded tones: strength = emerald, interest = sky, helps = violet,
- * attention = amber (never red for educational needs), danger = rose (errors only).
+ * Meaning tones (spec 2.2). A tone is always paired with its icon and its word;
+ * labels on tints stay `ink` (brand-on-brand-soft is the one coloured-text pair).
+ *   strength = sunflower, interest = berry, helps = leaf, focus = grape,
+ *   attention = tangerine ("worth a look", never red), brand = act / "you are here",
+ *   neutral = tray, muted = tray with a muted label (Draft, Archived),
+ *   success = a bordered "Approved" (never on a helps tint), danger = system errors only,
+ *   outline = a plain surface chip.
  * green/sky/violet/amber/rose/stone are aliases kept for ported code.
  */
 export type Tone =
   | "neutral"
+  | "muted"
   | "brand"
   | "strength"
   | "interest"
   | "helps"
+  | "focus"
   | "attention"
+  | "success"
   | "danger"
   | "outline"
   | "green"
@@ -22,28 +30,37 @@ export type Tone =
   | "rose"
   | "stone";
 
+const TONES = {
+  neutral: "bg-tray text-ink",
+  muted: "bg-tray text-ink-muted",
+  brand: "bg-brand-soft text-brand",
+  strength: "bg-strength-soft text-ink",
+  interest: "bg-interest-soft text-ink",
+  helps: "bg-helps-soft text-ink",
+  focus: "bg-focus-soft text-ink",
+  attention: "bg-attention-soft text-ink",
+  success: "border-[1.5px] border-success bg-surface text-success",
+  danger: "border-[1.5px] border-danger bg-surface text-danger",
+  outline: "border border-line bg-surface text-ink",
+} as const;
+
+/** Fill + label colour per tone (no size): for custom chip-like controls. */
 export const toneClasses: Record<Tone, string> = {
-  neutral: "bg-stone-100 text-stone-700 ring-stone-200",
-  brand: "bg-brand-soft text-brand ring-brand/20",
-  strength: "bg-emerald-50 text-emerald-800 ring-emerald-200",
-  interest: "bg-sky-50 text-sky-800 ring-sky-200",
-  helps: "bg-violet-50 text-violet-800 ring-violet-200",
-  attention: "bg-amber-50 text-amber-800 ring-amber-200",
-  danger: "bg-rose-50 text-rose-800 ring-rose-200",
-  outline: "bg-white text-stone-600 ring-stone-200",
-  green: "bg-emerald-50 text-emerald-800 ring-emerald-200",
-  sky: "bg-sky-50 text-sky-800 ring-sky-200",
-  violet: "bg-violet-50 text-violet-800 ring-violet-200",
-  amber: "bg-amber-50 text-amber-800 ring-amber-200",
-  rose: "bg-rose-50 text-rose-800 ring-rose-200",
-  stone: "bg-white text-stone-600 ring-stone-200",
+  ...TONES,
+  green: TONES.helps,
+  sky: TONES.brand,
+  violet: TONES.focus,
+  amber: TONES.attention,
+  rose: TONES.danger,
+  stone: TONES.outline,
 };
 
+/** Status badge (spec 6.4): 24px block, caption 500, optional 12–14px leading glyph, no wrapping. */
 export function Badge({ tone = "neutral", icon, children, className }: { tone?: Tone; icon?: ReactNode; children: ReactNode; className?: string }) {
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium whitespace-nowrap ring-1 ring-inset",
+        "text-caption inline-flex min-h-6 items-center gap-1 rounded-sm px-2 font-medium whitespace-nowrap [&_svg]:size-3.5 [&_svg]:shrink-0",
         toneClasses[tone],
         className,
       )}

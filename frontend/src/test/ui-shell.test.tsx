@@ -22,7 +22,7 @@ const navRoutes: AppRoute[] = [
   { path: "/parent", element: <Page />, roles: ["parent"], nav: { labelKey: "nav.parentHome", icon: BookOpen, order: 10 } },
 ];
 
-describe("touch targets (≥44px = h-11 / min-h-11)", () => {
+describe("touch targets (≥44px = h-11 / min-h-11; form controls 48px = h-12)", () => {
   const wrap = (ui: ReactNode) =>
     render(
       <AuthProvider initialUser={null}>
@@ -52,7 +52,7 @@ describe("touch targets (≥44px = h-11 / min-h-11)", () => {
     expect(chip.getAttribute("aria-pressed")).toBe("true");
   });
 
-  it("inputs, selects and the segmented language switch are 44px", () => {
+  it("inputs and selects are 48px (h-12) and the segmented language switch is 44px", () => {
     wrap(
       <>
         <Input aria-label="name" />
@@ -62,8 +62,8 @@ describe("touch targets (≥44px = h-11 / min-h-11)", () => {
         <LocaleSwitcher variant="segmented" />
       </>,
     );
-    expect(screen.getByLabelText("name").className).toMatch(/\bh-11\b/);
-    expect(screen.getByLabelText("pick").className).toMatch(/\bh-11\b/);
+    expect(screen.getByLabelText("name").className).toMatch(/\bh-12\b/);
+    expect(screen.getByLabelText("pick").className).toMatch(/\bh-12\b/);
     for (const r of screen.getAllByRole("radio")) expect(r.className).toMatch(/\bmin-h-11\b/);
   });
 });

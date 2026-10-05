@@ -5,6 +5,7 @@
  *   GET  /api/children/{id}/content?status&pack_id → {content: ContentSummary[]}
  *   GET  /api/packs/{packId} → {pack_id, child_id, items: ContentDetail[]}
  *   GET/PUT /api/content/{id}; POST …/approve | regenerate | duplicate | share | archive | feedback; DELETE (drafts)
+ *   POST …/feedback → 201 {feedback, content}; 200 with the first save for a repeated client_request_id
  *
  * Parents get only shared, approved/completed rows and none of the staff fields.
  */
@@ -106,7 +107,14 @@ export type GenerateResponse = { content?: ContentDetail; items?: ContentDetail[
 export type ContentResponse = { content: ContentDetail };
 export type ContentListResponse = { content: ContentSummary[] };
 export type PackResponse = { pack_id: string; child_id: string; items: ContentDetail[] };
-export type FeedbackBody = { result: FeedbackResult; support_level?: FeedbackSupport; observation?: string; what_helped?: (string | { custom: string })[] };
+/** `client_request_id`: one id per feedback, resent on every retry until a save succeeds (the backend answers a repeat with the first save, 200). */
+export type FeedbackBody = {
+  result: FeedbackResult;
+  support_level?: FeedbackSupport;
+  observation?: string;
+  what_helped?: (string | { custom: string })[];
+  client_request_id?: string;
+};
 
 const enc = encodeURIComponent;
 export const contentListUrl = (childId: string) => `/api/children/${enc(childId)}/content`;

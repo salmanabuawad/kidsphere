@@ -1,15 +1,18 @@
 import { useMemo, useState, type ReactNode } from "react";
 import { Link } from "react-router";
-import { ArchiveRestore, Eye, FileText, PencilLine, Plus, Search, Users, Zap } from "lucide-react";
+import { ArchiveRestore, Calendar, PencilLine, Plus, Search } from "lucide-react";
 import { useAuth } from "@/auth/AuthProvider";
-import { Alert, Badge, Button, ButtonLink, Card, Checkbox, EmptyState, Input, PageHeader, PageSkeleton, Select } from "@/components/ui";
+import { Alert, Badge, Button, ButtonLink, cardTappable, Checkbox, Chip, EmptyState, Input, PageHeader, PageSkeleton, Select } from "@/components/ui";
+import { AttentionIcon, ChildrenIcon, ContentIcon, StrengthsIcon } from "@/icons";
 import { useI18n } from "@/i18n/I18nProvider";
 import { useFormat } from "@/lib/format";
 import { paths } from "@/lib/paths";
 import { useFetch } from "@/lib/useFetch";
 import { useErrorMessage } from "@/lib/useAction";
+import { cn } from "@/lib/utils";
 import { displayName, notObservedRecently } from "./api";
 import { ChildAvatar } from "./ChildAvatar";
+import { useProfileItem } from "./ProfileItems";
 import type { ChildCard, ChildListResponse } from "./types";
 
 /** Locale-aware, case-insensitive "contains" on name and preferred name. */
@@ -44,7 +47,7 @@ export function ChildListPage() {
   return (
     <div>
       <PageHeader
-        icon={<Users />}
+        icon={<ChildrenIcon />}
         title={t("children.list.title")}
         description={t("children.list.description")}
         actions={
@@ -71,7 +74,7 @@ export function ChildListPage() {
       {children.length > 0 && (
         <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center">
           <div className="relative flex-1">
-            <Search className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted" aria-hidden />
+            <Search className="pointer-events-none absolute start-3.5 top-1/2 size-5 -translate-y-1/2 text-ink-muted" aria-hidden />
             <Input
               type="search"
               dir="auto"
@@ -79,7 +82,7 @@ export function ChildListPage() {
               onChange={(e) => setQ(e.target.value)}
               placeholder={t("children.list.searchPlaceholder")}
               aria-label={t("children.list.searchLabel")}
-              className="ps-9"
+              className="bg-tray ps-11"
             />
           </div>
           {classes.length > 1 && (
@@ -105,7 +108,7 @@ export function ChildListPage() {
           {drafts.length > 0 && (
             <Strip
               tone="brand"
-              icon={<FileText className="size-4" aria-hidden />}
+              icon={<ContentIcon />}
               title={t("children.list.draftsStrip")}
               hint={t("children.list.draftsStripHint")}
               items={drafts}
@@ -115,7 +118,7 @@ export function ChildListPage() {
           {notObserved.length > 0 && (
             <Strip
               tone="attention"
-              icon={<Eye className="size-4" aria-hidden />}
+              icon={<AttentionIcon />}
               title={t("children.list.notObservedStrip")}
               hint={t("children.list.notObservedStripHint")}
               items={notObserved}
@@ -129,7 +132,7 @@ export function ChildListPage() {
         <PageSkeleton />
       ) : children.length === 0 && !error ? (
         <EmptyState
-          icon={<Users />}
+          scene="children"
           title={t("children.list.empty")}
           description={t("children.list.emptyHint")}
           action={
@@ -140,7 +143,7 @@ export function ChildListPage() {
         />
       ) : visible.length === 0 && filtering ? (
         <EmptyState
-          icon={<Search />}
+          scene="search"
           title={t("children.list.noMatch")}
           action={
             <Button
@@ -155,7 +158,7 @@ export function ChildListPage() {
           }
         />
       ) : (
-        <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3" data-testid="child-cards">
+        <ul className="grid gap-3 md:grid-cols-2 xl:grid-cols-3" data-testid="child-cards">
           {visible.map((c) => (
             <li key={c.id}>
               <ChildListCard child={c} />
@@ -167,67 +170,112 @@ export function ChildListPage() {
   );
 }
 
+/** Strength chips on a list card: at most this many, then a neutral "+N" (design-system ChildCard). */
+const CARD_STRENGTHS = 2;
+
+/**
+ * Teacher list card (spec 6.6, design-system ChildCard): the whole card is one tappable
+ * link to the profile, with no buttons inside (Observe lives in the bottom bar and on the
+ * profile). Avatar | name, age, class and the first strengths (strengths first) | last
+ * observed; status badges; a worth-a-look strip when the child has not been observed
+ * lately (tangerine, never red).
+ */
 function ChildListCard({ child }: { child: ChildCard }) {
   const { t } = useI18n();
-  const { formatAge } = useFormat();
+  const { formatAge, formatRelativeDays } = useFormat();
+  const resolve = useProfileItem();
   const name = displayName(child);
   const drafts = (child.draft_content_count ?? 0) > 0;
   const quiet = !child.archived && notObservedRecently(child.last_observation_at);
+  const strengths = child.strengths ?? [];
+  const shownStrengths = strengths.slice(0, CARD_STRENGTHS);
+  const moreStrengths = strengths.length - shownStrengths.length;
   return (
-    <Card className="flex h-full flex-col p-4 transition-shadow hover:shadow-md">
-      <Link to={paths.child(child.id)} className="-m-1 flex items-center gap-3 rounded-xl p-1" data-testid={`child-card-${child.id}`}>
+    <Link
+      to={paths.child(child.id)}
+      className={cn("flex h-full flex-col rounded-lg border border-line bg-surface p-3 text-ink sm:px-4", cardTappable)}
+      data-testid={`child-card-${child.id}`}
+    >
+      <div className="grid min-h-[72px] grid-cols-[auto_minmax(0,1fr)_auto] items-start gap-x-3">
         <ChildAvatar child={child} size="lg" />
-        <div className="min-w-0 flex-1">
-          <p className="truncate text-lg font-semibold text-ink" dir="auto">
+        <div className="min-w-0">
+          <p className="text-name truncate font-semibold text-ink" dir="auto">
             {name}
           </p>
           {child.preferred_name && child.preferred_name !== child.name && (
-            <p className="truncate text-xs text-muted" dir="auto">
+            <p className="text-caption truncate text-ink-muted" dir="auto">
               {child.name}
             </p>
           )}
-          <p className="text-sm text-muted">{formatAge(child.birth_date)}</p>
+          <p className="text-caption tabular text-ink-muted">{formatAge(child.birth_date)}</p>
           {child.class && (
-            <p className="truncate text-xs text-muted" dir="auto">
+            <p className="text-caption truncate text-ink-muted" dir="auto">
               {child.class.name}
             </p>
           )}
         </div>
-      </Link>
-      <div className="mt-3 flex min-h-6 flex-wrap gap-1.5">
-        {child.archived && (
-          <Badge tone="neutral" icon={<ArchiveRestore className="size-3" aria-hidden />}>
-            {t("children.list.archived")}
-          </Badge>
+        {child.last_observation_at && (
+          <span className="text-caption tabular inline-flex items-center gap-1 text-ink-muted">
+            <Calendar className="size-3.5 shrink-0" aria-hidden />
+            {formatRelativeDays(child.last_observation_at)}
+          </span>
         )}
-        {child.wizard_completed === false && (
-          <Badge tone="helps" icon={<PencilLine className="size-3" aria-hidden />}>
-            {t("children.list.profileInProgress")}
-          </Badge>
+        {shownStrengths.length > 0 && (
+          <ul className="col-span-2 col-start-2 mt-2 flex min-w-0 flex-nowrap gap-2" aria-label={t("children.profile.strengths")}>
+            {shownStrengths.map((it, i) => (
+              <li key={it.key ?? it.custom ?? i} className="min-w-0">
+                <Chip
+                  tone="strength"
+                  icon={<StrengthsIcon size={16} />}
+                  className="max-w-full [&>span:last-child]:min-w-0 [&>span:last-child]:truncate"
+                >
+                  {resolve("strengths", it).label}
+                </Chip>
+              </li>
+            ))}
+            {moreStrengths > 0 && (
+              <li className="shrink-0">
+                <Chip tone="neutral" className="tabular">
+                  +{moreStrengths}
+                </Chip>
+              </li>
+            )}
+          </ul>
         )}
-        {drafts && (
-          <Badge tone="brand" icon={<FileText className="size-3" aria-hidden />}>
-            {t("children.list.drafts")}
-          </Badge>
-        )}
-        {quiet && (
-          <Badge tone="attention" icon={<Eye className="size-3" aria-hidden />}>
+      </div>
+      {(child.archived || child.wizard_completed === false || drafts) && (
+        <div className="mt-3 flex flex-wrap gap-1.5">
+          {child.archived && (
+            <Badge tone="muted" icon={<ArchiveRestore aria-hidden />}>
+              {t("children.list.archived")}
+            </Badge>
+          )}
+          {child.wizard_completed === false && (
+            <Badge tone="neutral" icon={<PencilLine aria-hidden />}>
+              {t("children.list.profileInProgress")}
+            </Badge>
+          )}
+          {drafts && (
+            <Badge tone="brand" icon={<ContentIcon paint={false} aria-hidden />}>
+              {t("children.list.drafts")}
+            </Badge>
+          )}
+        </div>
+      )}
+      {quiet && (
+        // mt-auto keeps the strip on the card's bottom edge across a grid row; pt-3 is the minimum gap.
+        <div className="mt-auto pt-3">
+          <p className="text-caption flex items-center gap-2 rounded-md bg-attention-soft px-3 py-2 font-medium text-ink">
+            <AttentionIcon size={16} className="shrink-0" aria-hidden />
             {t("children.list.notObserved")}
-          </Badge>
-        )}
-      </div>
-      <div className="mt-auto flex gap-2 pt-4">
-        <ButtonLink to={paths.childObserve(child.id)} variant="soft" className="flex-1" icon={<Zap className="size-4" aria-hidden />}>
-          {t("children.list.observe")}
-        </ButtonLink>
-        <ButtonLink to={paths.child(child.id)} variant="outline" className="flex-1">
-          {t("children.list.open")}
-        </ButtonLink>
-      </div>
-    </Card>
+          </p>
+        </div>
+      )}
+    </Link>
   );
 }
 
+/** A worth-a-look strip above the cards: drafts to review (brand) or not observed lately (attention). */
 function Strip({
   tone,
   icon,
@@ -243,23 +291,21 @@ function Strip({
   items: ChildCard[];
   to: (c: ChildCard) => string;
 }) {
-  const box = tone === "brand" ? "border-teal-200 bg-teal-50/60" : "border-amber-200 bg-amber-50/70";
-  const head = tone === "brand" ? "text-brand" : "text-amber-900";
   return (
-    <section className={`rounded-2xl border px-4 py-3 ${box}`} aria-label={title}>
-      <div className="mb-2 flex flex-wrap items-baseline gap-x-2">
-        <h2 className={`flex items-center gap-1.5 text-sm font-semibold ${head}`}>
+    <section className={cn("rounded-lg px-4 py-3", tone === "brand" ? "bg-brand-soft" : "bg-attention-soft")} aria-label={title}>
+      <div className="mb-2 flex flex-wrap items-center gap-x-2 gap-y-1">
+        <h2 className="flex items-center gap-2 text-base font-semibold text-ink [&_svg]:size-5">
           {icon}
           {title}
         </h2>
-        <p className="text-xs text-muted">{hint}</p>
+        <p className="text-caption text-ink-muted">{hint}</p>
       </div>
-      <ul className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
+      <ul className="-mx-1 flex gap-2 overflow-x-auto px-1 pt-0.5 pb-1.5">
         {items.map((c) => (
           <li key={c.id} className="shrink-0">
             <Link
               to={to(c)}
-              className="flex min-h-11 items-center gap-2 rounded-full border border-line bg-white py-1 ps-1 pe-3 text-sm font-medium text-ink shadow-sm hover:border-stone-300"
+              className="ks-press flex min-h-11 items-center gap-2 rounded-md border border-line bg-surface py-1 ps-1 pe-3 text-sm font-semibold text-ink shadow-lip hover:bg-tray active:translate-y-0.5 active:shadow-none"
             >
               <ChildAvatar child={c} size="sm" />
               <span dir="auto">{displayName(c)}</span>

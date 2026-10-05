@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useNavigate } from "react-router";
-import { ArrowRight, Camera, Save, UserRound } from "lucide-react";
+import { ArrowRight, Camera, Save } from "lucide-react";
+import { AccountIcon } from "@/icons";
 import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 import { Card, CardBody } from "@/components/ui/Card";
@@ -183,12 +184,12 @@ function BasicsForm({ childId, initial }: { childId?: string; initial?: ChildBas
         onPick={childId ? (n) => n > 1 && navigate(paths.childEdit(childId, n)) : undefined}
       />
       <div className="flex items-start gap-3">
-        <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-brand-soft text-brand" aria-hidden>
-          <UserRound className="size-6" />
+        <span className="flex size-12 shrink-0 items-center justify-center rounded-md bg-tray" aria-hidden>
+          <AccountIcon className="size-7" />
         </span>
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-ink">{childId ? t("wizard.basics.editTitle") : t("wizard.basics.title")}</h1>
-          <p className="mt-1 text-sm text-muted">{t("wizard.basics.intro")}</p>
+          <h1 className="font-display text-display-lg font-semibold text-ink">{childId ? t("wizard.basics.editTitle") : t("wizard.basics.title")}</h1>
+          <p className="mt-1 text-base text-ink-muted">{t("wizard.basics.intro")}</p>
         </div>
       </div>
 
@@ -224,7 +225,7 @@ function BasicsForm({ childId, initial }: { childId?: string; initial?: ChildBas
           </div>
 
           {age && (
-            <p className="rounded-xl bg-brand-soft px-4 py-2.5 text-sm font-medium text-brand" aria-live="polite">
+            <p className="tabular rounded-md bg-brand-soft px-4 py-2.5 text-sm font-semibold text-brand" aria-live="polite">
               {t("wizard.basics.age", { age })}
             </p>
           )}
@@ -265,9 +266,9 @@ function BasicsForm({ childId, initial }: { childId?: string; initial?: ChildBas
           </div>
 
           <div className="flex flex-wrap items-center gap-4">
-            {preview && <img src={preview} alt="" className="size-16 rounded-2xl object-cover" />}
-            <label className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-xl border border-line bg-white px-4 text-sm font-medium text-ink hover:bg-stone-50">
-              <Camera className="size-4" aria-hidden />
+            {preview && <img src={preview} alt="" className="size-16 rounded-md border border-line object-cover" />}
+            <label className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-md border-[1.5px] border-line-strong bg-surface px-4 text-sm font-semibold text-ink shadow-lip transition-colors hover:bg-tray focus-within:outline-3 focus-within:outline-offset-2 focus-within:outline-ring">
+              <Camera className="size-5" aria-hidden />
               {photo ? t("wizard.basics.changePhoto") : initial?.has_photo ? t("wizard.basics.replacePhoto") : t("wizard.basics.addPhoto")}
               <input
                 type="file"
@@ -283,7 +284,7 @@ function BasicsForm({ childId, initial }: { childId?: string; initial?: ChildBas
                 }}
               />
             </label>
-            <span className="text-xs text-muted">{t("common.optional")}</span>
+            <span className="text-caption text-ink-muted">{t("common.optional")}</span>
           </div>
         </CardBody>
       </Card>
@@ -293,12 +294,12 @@ function BasicsForm({ childId, initial }: { childId?: string; initial?: ChildBas
           {t("common.cancel")}
         </Button>
         <div className="flex flex-wrap gap-2">
-          <Button variant="outline" icon={<Save className="size-4" aria-hidden />} disabled={pending} onClick={() => void submit(true)}>
+          <Button variant="secondary" icon={<Save aria-hidden />} disabled={pending} onClick={() => void submit(true)}>
             {t("wizard.saveLater")}
           </Button>
           <Button type="submit" loading={pending} data-testid="wizard-next">
             {t("common.next")}
-            <ArrowRight className="size-4 rtl:rotate-180" aria-hidden />
+            <ArrowRight className="rtl:-scale-x-100" aria-hidden />
           </Button>
         </div>
       </WizardActions>

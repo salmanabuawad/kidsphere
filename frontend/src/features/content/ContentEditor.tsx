@@ -107,7 +107,7 @@ export function ContentEditor({
           )}
         </Alert>
       )}
-      <div className="sticky bottom-0 -mx-1 flex flex-wrap justify-end gap-2 border-t border-line bg-surface/95 px-1 py-3 backdrop-blur">
+      <div className="sticky bottom-0 -mx-1 flex flex-wrap justify-end gap-2 border-t border-line bg-ground px-1 py-3">
         <Button variant="ghost" onClick={onCancel} disabled={pending}>
           {t("content.editor.cancel")}
         </Button>
@@ -210,9 +210,9 @@ function ListEditor({
     <fieldset className="space-y-3" data-testid={testId}>
       <legend className="mb-2 text-sm font-semibold text-ink">{label}</legend>
       {items.map((item, i) => (
-        <div key={i} className="rounded-2xl border border-line bg-card p-3">
+        <div key={i} className="rounded-2xl border border-line bg-surface p-3">
           <div className="mb-2 flex items-center justify-between gap-2">
-            <span className="text-sm font-medium text-muted">{itemLabel(i)}</span>
+            <span className="text-sm font-medium text-ink-muted">{itemLabel(i)}</span>
             <div className="flex gap-1">
               {reorder && (
                 <>

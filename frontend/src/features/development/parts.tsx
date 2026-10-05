@@ -3,19 +3,24 @@ import { Badge, type Tone } from "@/components/ui";
 import { useI18n } from "@/i18n/I18nProvider";
 import { MIN_OBSERVATIONS, NEEDS_MORE, type ReviewStatus, type ValidationStatus } from "./api";
 
+/*
+ * Statuses are words on a calm tray (spec 6.4); only "needs more observation" and
+ * "may need refinement" are worth a look (tangerine). No status borrows a meaning tint,
+ * a tower or a growth icon, so nothing reads as a level or a grade.
+ */
 const VALIDATION_TONE: Record<ValidationStatus, Tone> = {
-  supported: "strength",
-  partially_supported: "interest",
-  needs_more_observation: "neutral",
+  supported: "neutral",
+  partially_supported: "neutral",
+  needs_more_observation: "attention",
   may_need_refinement: "attention",
 };
 
 const REVIEW_TONE: Record<ReviewStatus, Tone> = {
-  improving: "strength",
-  some_improvement: "interest",
+  improving: "neutral",
+  some_improvement: "neutral",
   no_clear_change: "neutral",
-  needs_more_observation: "neutral",
-  no_longer_needed: "brand",
+  needs_more_observation: "attention",
+  no_longer_needed: "neutral",
 };
 
 export const VALIDATION_ICON: Record<ValidationStatus, string> = {
@@ -40,7 +45,7 @@ export const reviewTone = (s: ReviewStatus): Tone => REVIEW_TONE[s] ?? "neutral"
 export function ValidationBadge({ status }: { status: ValidationStatus }) {
   const { t } = useI18n();
   return (
-    <Badge tone={validationTone(status)} icon={<span aria-hidden>{VALIDATION_ICON[status]}</span>}>
+    <Badge tone={validationTone(status)}>
       {t(`development.validation.status.${status}`)}
     </Badge>
   );
@@ -49,7 +54,7 @@ export function ValidationBadge({ status }: { status: ValidationStatus }) {
 export function ReviewStatusBadge({ status }: { status: ReviewStatus }) {
   const { t } = useI18n();
   return (
-    <Badge tone={reviewTone(status)} icon={<span aria-hidden>{REVIEW_ICON[status]}</span>}>
+    <Badge tone={reviewTone(status)}>
       {t(`development.status.${status}`)}
     </Badge>
   );
@@ -71,7 +76,7 @@ export function useEvidence() {
 
 export function EvidenceText({ count, className }: { count: number; className?: string }) {
   const evidence = useEvidence();
-  return <p className={className ?? "text-xs text-muted"}>{evidence(count)}</p>;
+  return <p className={className ?? "text-caption text-ink-muted"}>{evidence(count)}</p>;
 }
 
 /** True when a chosen status claims more than the observations can carry (PLAN B6). */
@@ -84,11 +89,11 @@ export function Section({ title, icon, children, empty }: { title: string; icon?
   const { t } = useI18n();
   return (
     <section className="space-y-2">
-      <h3 className="flex items-center gap-2 text-sm font-semibold text-muted">
+      <h3 className="flex items-center gap-2 text-sm font-semibold text-ink-muted">
         {icon}
         {title}
       </h3>
-      {empty ? <p className="text-sm text-muted">{t("development.sections.empty")}</p> : children}
+      {empty ? <p className="text-sm text-ink-muted">{t("development.sections.empty")}</p> : children}
     </section>
   );
 }

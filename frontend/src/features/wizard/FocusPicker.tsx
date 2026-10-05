@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { ChevronDown, Plus, Target, X } from "lucide-react";
+import { ChevronDown, Plus, X } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
-import { Chip, ToggleChip } from "@/components/ui/Chip";
+import { Chip, NumeralBlock, ToggleChip } from "@/components/ui/Chip";
+import { CurrentFocusIcon } from "@/icons";
 import { Field, Input, Select, Textarea } from "@/components/ui/Field";
 import { Alert } from "@/components/ui/Alert";
 import { Skeleton } from "@/components/ui/Spinner";
@@ -68,18 +69,20 @@ export function FocusPicker({
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between gap-2">
-        <h3 className="flex items-center gap-2 text-base font-semibold text-ink">
-          <Target className="size-5 text-brand" aria-hidden />
+        <h3 className="font-display text-title flex items-center gap-3 font-semibold text-ink">
+          <span className="flex size-8 shrink-0 items-center justify-center rounded-sm bg-focus-soft" aria-hidden>
+            <CurrentFocusIcon className="size-5" />
+          </span>
           {t("wizard.focus.title")}
         </h3>
-        <Badge tone={full ? "attention" : "brand"}>{t("wizard.focus.count", { count: active.length, max: MAX_ACTIVE_FOCUS })}</Badge>
+        <Badge tone={full ? "attention" : "brand"} className="tabular">{t("wizard.focus.count", { count: active.length, max: MAX_ACTIVE_FOCUS })}</Badge>
       </div>
-      <p className="text-sm text-muted">{t("wizard.focus.hint")}</p>
+      <p className="text-sm text-ink-muted">{t("wizard.focus.hint")}</p>
 
       {loading && !data ? (
         <Skeleton className="h-24" />
       ) : active.length === 0 ? (
-        <p className="rounded-xl border border-dashed border-line p-4 text-sm text-muted">{t("wizard.focus.none")}</p>
+        <p className="rounded-md border-[1.5px] border-dashed border-line-strong p-4 text-sm text-ink-muted">{t("wizard.focus.none")}</p>
       ) : (
         <ol className="space-y-3">
           {active.map((f, i) => (
@@ -100,14 +103,18 @@ export function FocusPicker({
       {full && <Alert tone="info">{t("wizard.focus.full")}</Alert>}
 
       <div className="space-y-4">
-        <h4 className="text-sm font-semibold text-muted">{t("wizard.focus.suggestions")}</h4>
+        <h4 className="text-sm font-semibold text-ink-muted">{t("wizard.focus.suggestions")}</h4>
         {categories.map((cat) => {
           const items = suggestions.filter((s) => s.category === cat.key);
           if (!items.length) return null;
           return (
             <div key={cat.key} className="space-y-2">
               <p className="flex items-center gap-2 text-sm font-medium text-ink">
-                {cat.icon && <span aria-hidden>{cat.icon}</span>}
+                {cat.icon && (
+                  <span aria-hidden className="flex size-6 items-center justify-center rounded-full bg-surface text-base leading-none">
+                    {cat.icon}
+                  </span>
+                )}
                 <span dir="auto">{labelOf(cat)}</span>
                 {parentPriorities.includes(cat.key) && <Badge tone="brand">{t("wizard.focus.parentPriority")}</Badge>}
               </p>
@@ -115,7 +122,7 @@ export function FocusPicker({
                 {items.map((s) => (
                   <ToggleChip
                     key={s.key}
-                    tone="attention"
+                    tone="focus"
                     selected={chosenKeys.has(s.key)}
                     disabled={pending || (full && !chosenKeys.has(s.key)) || chosenKeys.has(s.key)}
                     onToggle={() => void add({ suggestion_key: s.key, title: labelOf(s) })}
@@ -130,7 +137,7 @@ export function FocusPicker({
       </div>
 
       <form
-        className="space-y-3 rounded-2xl border border-line p-4"
+        className="space-y-3 rounded-lg border border-line p-4"
         onSubmit={async (e) => {
           e.preventDefault();
           if (!customCategory || !customTitle.trim()) return;
@@ -158,7 +165,7 @@ export function FocusPicker({
             {(p) => <Input {...p} dir="auto" maxLength={200} value={customTitle} disabled={full} onChange={(e) => setCustomTitle(e.target.value)} />}
           </Field>
         </div>
-        <Button type="submit" variant="outline" icon={<Plus className="size-4" aria-hidden />} disabled={full || pending || !customCategory || !customTitle.trim()}>
+        <Button type="submit" variant="secondary" icon={<Plus aria-hidden />} disabled={full || pending || !customCategory || !customTitle.trim()}>
           {t("wizard.focus.addCustom")}
         </Button>
       </form>
@@ -187,17 +194,15 @@ function FocusCard({
   const [open, setOpen] = useState(false);
   const hasPlan = !!focus.plan && Object.values(focus.plan).some(Boolean);
   return (
-    <li className="rounded-2xl border border-amber-200 bg-amber-50/40">
+    <li className="rounded-lg bg-focus-soft">
       <div className="flex items-start gap-3 p-4">
-        <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-amber-500 text-sm font-bold text-white" aria-hidden>
-          {index}
-        </span>
+        <NumeralBlock n={index} className="mt-0.5" />
         <div className="min-w-0 flex-1">
           <p className="font-semibold text-ink" dir="auto">
             {focus.title}
           </p>
           <div className="mt-1 flex flex-wrap gap-1.5">
-            <Chip tone="attention">{categoryLabel}</Chip>
+            <Chip tone="outline">{categoryLabel}</Chip>
             {hasPlan && <Chip tone="brand">{t("wizard.focus.hasPlan")}</Chip>}
           </div>
         </div>
@@ -205,12 +210,12 @@ function FocusCard({
           {t("wizard.focus.notNow")}
         </Button>
       </div>
-      <div className="border-t border-amber-200 px-4 py-2">
+      <div className="border-t border-line px-4 py-2">
         <button
           type="button"
           aria-expanded={open}
           onClick={() => setOpen((o) => !o)}
-          className="flex min-h-11 w-full items-center justify-between gap-2 text-sm font-medium text-brand"
+          className="flex min-h-11 w-full items-center justify-between gap-2 text-sm font-semibold text-focus-ink"
         >
           {hasPlan ? t("wizard.plan.edit") : t("wizard.plan.add")}
           <ChevronDown className={open ? "size-4 rotate-180 transition-transform" : "size-4 transition-transform"} aria-hidden />

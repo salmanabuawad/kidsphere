@@ -1,12 +1,15 @@
 import { useState, type FormEvent } from "react";
 import { Navigate, useNavigate, useSearchParams } from "react-router";
-import { Eye, EyeOff, LogIn, Sprout } from "lucide-react";
+import { Eye, EyeOff, LogIn } from "lucide-react";
 import { useAuth } from "@/auth/AuthProvider";
 import { LocaleSwitcher } from "@/components/layout/LocaleSwitcher";
 import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 import { Field, Input } from "@/components/ui/Field";
+import { Chip } from "@/components/ui/Chip";
+import { BlockCluster } from "@/components/ui/EmptyState";
 import { FullPageSpinner } from "@/components/ui/Spinner";
+import { BrandMarkIcon, GrowthSupportIcon, InterestsIcon, StrengthsIcon } from "@/icons";
 import { useI18n } from "@/i18n/I18nProvider";
 import { homeFor, safeNext } from "@/lib/paths";
 import { useErrorMessage } from "@/lib/useAction";
@@ -46,11 +49,7 @@ export function LoginPage() {
   }
 
   return (
-    <div className="relative flex min-h-dvh flex-col overflow-hidden bg-surface">
-      <div aria-hidden className="pointer-events-none absolute -start-24 -top-24 size-80 rounded-full bg-brand/10 blur-3xl" />
-      <div aria-hidden className="pointer-events-none absolute -end-20 top-1/3 size-72 rounded-full bg-amber-200/30 blur-3xl" />
-      <div aria-hidden className="pointer-events-none absolute -bottom-24 start-1/4 size-72 rounded-full bg-violet-200/25 blur-3xl" />
-
+    <div className="relative flex min-h-dvh flex-col overflow-hidden bg-ground">
       <div className="relative flex justify-end p-3">
         <LocaleSwitcher variant="compact" />
       </div>
@@ -58,14 +57,12 @@ export function LoginPage() {
       <main className="relative flex flex-1 items-center justify-center px-4 pb-12">
         <div className="w-full max-w-md">
           <div className="mb-6 flex flex-col items-center text-center">
-            <span className="mb-4 flex size-14 items-center justify-center rounded-2xl bg-brand text-white shadow-[var(--shadow-raised)]" aria-hidden>
-              <Sprout className="size-7" />
-            </span>
-            <h1 className="text-2xl font-semibold tracking-tight text-ink">{t("auth.welcome")}</h1>
-            <p className="mt-1.5 text-sm text-muted">{t("auth.welcomeSub")}</p>
+            <BrandMarkIcon className="mb-3 size-16" aria-hidden />
+            <h1 className="font-display text-display-lg font-semibold text-ink">{t("auth.welcome")}</h1>
+            <p className="mt-1.5 text-sm text-ink-muted">{t("auth.welcomeSub")}</p>
           </div>
 
-          <div className="animate-rise rounded-3xl border border-line bg-card p-6 shadow-[var(--shadow-card)] sm:p-8">
+          <div className="animate-placed rounded-lg border border-line bg-surface p-6 shadow-lip sm:p-8">
             <form onSubmit={onSubmit} className="space-y-5" noValidate>
               {error && <Alert tone="error">{error}</Alert>}
               <Field label={t("auth.identifier")} required>
@@ -103,25 +100,38 @@ export function LoginPage() {
                       onClick={() => setShowPassword((s) => !s)}
                       aria-label={showPassword ? t("auth.hidePassword") : t("auth.showPassword")}
                       aria-pressed={showPassword}
-                      className="absolute inset-y-0 end-0 inline-flex w-11 items-center justify-center rounded-e-xl text-muted hover:text-ink"
+                      className="absolute inset-y-0 end-0 inline-flex w-12 items-center justify-center rounded-e-md text-ink-muted hover:text-ink"
                     >
-                      {showPassword ? <EyeOff className="size-4" aria-hidden /> : <Eye className="size-4" aria-hidden />}
+                      {showPassword ? <EyeOff className="size-5" aria-hidden /> : <Eye className="size-5" aria-hidden />}
                     </button>
                   </div>
                 )}
               </Field>
-              <Button type="submit" size="lg" className="w-full" loading={pending} icon={<LogIn className="size-4 rtl:rotate-180" aria-hidden />}>
+              <Button type="submit" size="lg" className="w-full" loading={pending} icon={<LogIn className="rtl:-scale-x-100" aria-hidden />}>
                 {pending ? t("auth.signingIn") : t("auth.signIn")}
               </Button>
             </form>
-            <p className="mt-5 text-center text-xs text-muted">{t("auth.forgotHint")}</p>
+            <p className="text-caption mt-5 text-center text-ink-muted">{t("auth.forgotHint")}</p>
           </div>
 
-          <ul className="mt-6 flex flex-wrap justify-center gap-2 text-xs text-stone-600" aria-label={t("common.tagline")}>
-            <li className="rounded-full bg-emerald-50 px-3 py-1 ring-1 ring-emerald-200 ring-inset">⭐ {t("auth.pillarStrengths")}</li>
-            <li className="rounded-full bg-sky-50 px-3 py-1 ring-1 ring-sky-200 ring-inset">💙 {t("auth.pillarInterests")}</li>
-            <li className="rounded-full bg-violet-50 px-3 py-1 ring-1 ring-violet-200 ring-inset">🌱 {t("auth.pillarGrowth")}</li>
+          <ul className="mt-6 flex flex-wrap justify-center gap-2" aria-label={t("common.tagline")}>
+            <li>
+              <Chip tone="strength" icon={<StrengthsIcon size={16} />}>
+                {t("auth.pillarStrengths")}
+              </Chip>
+            </li>
+            <li>
+              <Chip tone="interest" icon={<InterestsIcon size={16} />}>
+                {t("auth.pillarInterests")}
+              </Chip>
+            </li>
+            <li>
+              <Chip tone="focus" icon={<GrowthSupportIcon size={16} />}>
+                {t("auth.pillarGrowth")}
+              </Chip>
+            </li>
           </ul>
+          <BlockCluster className="mx-auto mt-6" />
         </div>
       </main>
     </div>

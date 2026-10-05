@@ -24,26 +24,26 @@ export function StoryBuilder({ game, lang, dir, onDone }: TemplateProps<StoryBui
     return (
       <div className="animate-rise flex flex-1 flex-col items-center gap-6" data-testid="story-builder-story">
         <KidHeading title={game.title} />
-        <p className="text-center text-xl font-semibold text-stone-600">{t("player.game.storyBuilder.yourStory")}</p>
+        <p className="font-display text-center text-xl font-semibold text-ink-muted">{t("player.game.storyBuilder.yourStory")}</p>
         <ol dir={dir} className="flex w-full max-w-4xl flex-row flex-wrap items-stretch justify-center gap-3" data-testid="story-builder-cards">
           {game.steps.map((s, si) => {
             const c = s.choices[chosen[si]!]!;
             return (
-              <li key={si} className="flex min-w-28 flex-col items-center gap-2 rounded-3xl bg-white p-4 text-center shadow-sm ring-2 ring-amber-200" data-testid="story-builder-card">
+              <li key={si} className="animate-bounce-place flex min-w-28 flex-col items-center gap-2 rounded-xl border-[3px] border-ink bg-surface p-4 text-center shadow-lip-lg" data-testid="story-builder-card">
                 <Pic emoji={c.emoji} className="text-6xl" />
-                <span dir="auto" className="text-xl font-semibold">
+                <span dir="auto" className="font-display text-kid-label font-semibold text-ink">
                   {c.label}
                 </span>
               </li>
             );
           })}
         </ol>
-        <div className="mx-auto max-w-2xl rounded-3xl bg-emerald-50 px-6 py-5 text-center ring-2 ring-emerald-200">
-          <p className="flex items-center justify-center gap-3 text-3xl font-bold text-emerald-900 md:text-4xl">
-            <Mic className="size-8" aria-hidden />
+        <div className="mx-auto max-w-[640px] rounded-xl bg-helps-soft px-6 py-5 text-center text-ink">
+          <p className="font-display text-display-lg flex items-center justify-center gap-3 font-semibold">
+            <Mic className="size-8 shrink-0" aria-hidden />
             {t("player.game.storyBuilder.tellYourStory")}
           </p>
-          <p dir="auto" className="mt-3 text-xl text-emerald-950 md:text-2xl" data-testid="story-builder-closing">
+          <p dir="auto" className="font-display mt-3 text-xl leading-[1.875rem] font-medium" data-testid="story-builder-closing">
             {game.closing_prompt}
           </p>
         </div>
@@ -68,7 +68,7 @@ export function StoryBuilder({ game, lang, dir, onDone }: TemplateProps<StoryBui
           {chosen.map((ci, si) => {
             const c = game.steps[si]!.choices[ci]!;
             return (
-              <li key={si} className="rounded-full bg-amber-50 px-3 py-1 text-lg ring-1 ring-amber-200">
+              <li key={si} className="rounded-md border-2 border-ink bg-surface px-3 py-1 text-lg text-ink">
                 <Pic emoji={c.emoji} className="me-1" />
                 <span dir="auto">{c.label}</span>
               </li>
@@ -77,12 +77,12 @@ export function StoryBuilder({ game, lang, dir, onDone }: TemplateProps<StoryBui
         </ol>
       )}
       <section key={step} className="animate-rise flex flex-col gap-6">
-        <p dir="auto" className="text-center text-2xl font-semibold text-ink md:text-3xl" data-testid="story-builder-prompt">
+        <p dir="auto" className="font-display text-display-lg text-center font-semibold text-ink" data-testid="story-builder-prompt">
           {s.prompt}
         </p>
         <div className="mx-auto grid w-full max-w-3xl grid-cols-2 gap-4">
           {s.choices.map((c, i) => (
-            <ChoiceCard key={i} label={c.label} emoji={c.emoji} size="lg" onClick={() => choose(i)} data-testid={`story-choice-${i}`} />
+            <ChoiceCard key={i} label={c.label} emoji={c.emoji} size="lg" paint={i + step} onClick={() => choose(i)} data-testid={`story-choice-${i}`} />
           ))}
         </div>
       </section>

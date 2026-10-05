@@ -90,7 +90,7 @@ def list_children(db: Session, user: User, class_id: uuid.UUID | None = None, q:
     )
     stmt = (
         access.visible_children(user, include_archived=include_archived)
-        .add_columns(Class, ChildProfile.wizard_completed_at, focus_count, last_obs, drafts)
+        .add_columns(Class, ChildProfile.wizard_completed_at, ChildProfile.strengths, focus_count, last_obs, drafts)
         .outerjoin(Class, Class.id == Child.class_id)
         .outerjoin(ChildProfile, ChildProfile.child_id == Child.id)
     )
@@ -104,7 +104,7 @@ def list_children(db: Session, user: User, class_id: uuid.UUID | None = None, q:
 
     on = today()
     cards = []
-    for child, cls, wizard_done, n_focus, last_at, n_drafts in db.execute(stmt).all():
+    for child, cls, wizard_done, strengths, n_focus, last_at, n_drafts in db.execute(stmt).all():
         card = {
             "id": str(child.id),
             "name": child.name,
@@ -124,6 +124,8 @@ def list_children(db: Session, user: User, class_id: uuid.UUID | None = None, q:
                 "draft_content_count": int(n_drafts or 0),
                 "archived": child.archived_at is not None,
             })
+            # Strengths first: the card leads with them ({key|custom, sources}, like the parent view).
+            card["strengths"] = _items(strengths, parent_view=True)
         cards.append(card)
     return cards
 

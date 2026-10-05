@@ -156,7 +156,7 @@ export function TeachersDialog({ klass, onClose, onSaved }: { klass: ClassRow | 
       {loading && !data ? (
         <Spinner label={t("common.loading")} />
       ) : teachers.length === 0 ? (
-        <p className="text-sm text-muted">{t("admin.classes.noTeachers")}</p>
+        <p className="text-sm text-ink-muted">{t("admin.classes.noTeachers")}</p>
       ) : (
         <fieldset>
           <legend className="sr-only">{t("admin.classes.teachers")}</legend>
@@ -171,10 +171,10 @@ export function TeachersDialog({ klass, onClose, onSaved }: { klass: ClassRow | 
                       <span dir="auto" className="font-medium">
                         {u.name}
                       </span>
-                      <span dir="ltr" className="text-xs text-muted">
+                      <span dir="ltr" className="text-caption text-ink-muted">
                         <bdi>{u.email}</bdi>
                       </span>
-                      {!u.is_active && <span className="text-xs text-muted">({t("admin.users.inactive")})</span>}
+                      {!u.is_active && <span className="text-caption text-ink-muted">({t("admin.users.inactive")})</span>}
                     </span>
                   }
                 />

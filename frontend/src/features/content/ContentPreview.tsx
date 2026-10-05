@@ -57,14 +57,14 @@ export function DiscussionPrompts({ content, lang }: { content: unknown; lang: s
   const prompts = discussionPrompts(content);
   if (prompts.length === 0) return null;
   return (
-    <section className="rounded-[var(--radius-card)] border border-line bg-surface-2 p-5" data-testid="discussion-prompts">
+    <section className="rounded-[var(--radius-card)] border border-line bg-tray p-5" data-testid="discussion-prompts">
       <h3 className="mb-3 flex items-center gap-2 text-base font-semibold text-ink">
         <MessagesSquare className="size-5 text-brand" aria-hidden />
         {t("content.review.discussion")}
       </h3>
       <ul className="space-y-2" lang={lang}>
         {prompts.map((p, i) => (
-          <li key={i} dir="auto" className="rounded-xl bg-card px-4 py-3 text-lg text-ink">
+          <li key={i} dir="auto" className="rounded-md bg-surface px-4 py-3 text-lg text-ink">
             {p}
           </li>
         ))}

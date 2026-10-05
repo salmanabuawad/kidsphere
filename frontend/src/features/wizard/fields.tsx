@@ -1,5 +1,5 @@
 import { useId, useState, type ReactNode } from "react";
-import { Plus } from "lucide-react";
+import { Check, Plus } from "lucide-react";
 import type { Tone } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { ToggleChip } from "@/components/ui/Chip";
@@ -19,7 +19,7 @@ export function Question({ label, hint, children, id }: { label: ReactNode; hint
         <legend id={labelId} className="text-base font-semibold text-ink" dir="auto">
           {label}
         </legend>
-        {hint && <p className="mt-0.5 text-sm text-muted">{hint}</p>}
+        {hint && <p className="mt-0.5 text-sm text-ink-muted">{hint}</p>}
       </div>
       {children}
     </fieldset>
@@ -102,12 +102,12 @@ export function ItemsField({
               }
             }}
           />
-          <Button variant="outline" icon={<Plus className="size-4" aria-hidden />} disabled={!draft.trim() || full} onClick={add}>
+          <Button variant="secondary" icon={<Plus aria-hidden />} disabled={!draft.trim() || full} onClick={add}>
             {t("wizard.add")}
           </Button>
         </div>
       )}
-      {max !== undefined && <p className="text-xs text-muted">{t("wizard.chosenOfMax", { count: value.length, max })}</p>}
+      {max !== undefined && <p className="text-caption tabular text-ink-muted">{t("wizard.chosenOfMax", { count: value.length, max })}</p>}
     </div>
   );
 }
@@ -140,7 +140,7 @@ export function SingleField({ list, value, onChange }: { list: string; value: st
   return (
     <div className="flex flex-wrap gap-2" role="radiogroup">
       {options(list).map((o) => (
-        <ToggleChip key={o.key} icon={o.icon} selected={value === o.key} onToggle={() => onChange(value === o.key ? undefined : o.key)}>
+        <ToggleChip key={o.key} single icon={o.icon} selected={value === o.key} onToggle={() => onChange(value === o.key ? undefined : o.key)}>
           {labelOf(o)}
         </ToggleChip>
       ))}
@@ -157,7 +157,7 @@ export function LevelsGrid({ list, value, onChange }: { list: string; value: Rec
   const { list: options, labelOf } = useOptions();
   const levels = options("support_levels");
   return (
-    <div className="divide-y divide-line rounded-2xl border border-line">
+    <div className="divide-y divide-line rounded-md border border-line">
       {options(list).map((area) => (
         <div key={area.key} className="space-y-2 p-3 sm:flex sm:items-center sm:gap-3 sm:space-y-0">
           <p className="flex min-w-36 items-center gap-2 font-medium text-ink sm:w-44 sm:shrink-0">
@@ -168,7 +168,7 @@ export function LevelsGrid({ list, value, onChange }: { list: string; value: Rec
             )}
             <span dir="auto">{labelOf(area)}</span>
           </p>
-          <div className="grid flex-1 grid-cols-2 gap-2 lg:grid-cols-4" role="radiogroup" aria-label={labelOf(area)}>
+          <div className="grid flex-1 grid-cols-2 gap-1 rounded-md bg-tray p-1 lg:grid-cols-4" role="radiogroup" aria-label={labelOf(area)}>
             {levels.map((lvl) => {
               const on = value[area.key] === lvl.key;
               return (
@@ -184,10 +184,12 @@ export function LevelsGrid({ list, value, onChange }: { list: string; value: Rec
                     onChange(next);
                   }}
                   className={cn(
-                    "min-h-11 rounded-xl border px-2 py-1.5 text-sm leading-tight transition-colors",
-                    on ? levelTone[lvl.key] ?? "border-brand bg-brand text-brand-ink" : "border-line bg-white text-ink hover:bg-stone-50",
+                    "flex min-h-11 items-center justify-center gap-1.5 rounded-md border-2 px-2 py-1.5 text-sm leading-tight transition-colors",
+                    // The SupportScale track (spec 6.8): one neutral treatment for every level, never colour-coded, never red.
+                    on ? "border-brand bg-surface font-semibold text-ink shadow-lip" : "border-transparent font-medium text-ink-muted hover:text-ink",
                   )}
                 >
+                  {on && <Check className="size-4 shrink-0 text-brand" strokeWidth={2.5} aria-hidden />}
                   <span dir="auto">{labelOf(lvl)}</span>
                 </button>
               );
@@ -198,13 +200,6 @@ export function LevelsGrid({ list, value, onChange }: { list: string; value: Rec
     </div>
   );
 }
-
-const levelTone: Record<string, string> = {
-  independent: "border-emerald-600 bg-emerald-600 text-white",
-  some_support: "border-sky-600 bg-sky-600 text-white",
-  significant_support: "border-violet-600 bg-violet-600 text-white",
-  not_observed: "border-stone-500 bg-stone-500 text-white",
-};
 
 /** Step 6: things in the environment that may affect the child; per item "what happens / what helps". */
 export function SensitivitiesField({ value, onChange }: { value: SensitivityItem[]; onChange: (v: SensitivityItem[]) => void }) {
@@ -224,7 +219,7 @@ export function SensitivitiesField({ value, onChange }: { value: SensitivityItem
         const id = itemId(v);
         const label = v.key ? optionLabel("sensitivities", v.key) : v.custom;
         return (
-          <div key={id} className="space-y-3 rounded-2xl border border-amber-200 bg-amber-50/40 p-4">
+          <div key={id} className="space-y-3 rounded-lg bg-attention-soft p-4">
             <p className="font-semibold text-ink" dir="auto">
               {label}
             </p>

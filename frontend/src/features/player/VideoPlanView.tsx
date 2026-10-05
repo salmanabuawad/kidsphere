@@ -1,5 +1,6 @@
 import { useMemo, type ReactNode } from "react";
-import { Clapperboard, Clock, Film, Info, Mic, Sparkles, Target } from "lucide-react";
+import { Clock, Film, Info, Mic, Sparkles } from "lucide-react";
+import { CurrentFocusIcon, VideoIcon } from "@/icons";
 import type { AppLocale } from "@/i18n/config";
 import { cn } from "@/lib/utils";
 import { contentDir, usePlayerText, type Dir } from "./content-locale";
@@ -21,11 +22,12 @@ export type VideoPlanViewProps = {
   notice?: ReactNode | null;
 };
 
+/** Status words on calm fills (spec 6.4): processing is brand, ready is the bordered success badge, a failure is worth a look. */
 const STATUS_TONE: Record<VideoStatus, string> = {
-  script_ready: "bg-sky-50 text-sky-800 ring-sky-200",
-  generating: "bg-violet-50 text-violet-800 ring-violet-200",
-  ready: "bg-emerald-50 text-emerald-800 ring-emerald-200",
-  failed: "bg-amber-50 text-amber-800 ring-amber-200",
+  script_ready: "bg-tray text-ink",
+  generating: "bg-brand-soft text-brand",
+  ready: "border-[1.5px] border-success bg-surface text-success",
+  failed: "bg-attention-soft text-ink",
 };
 
 /** Teacher-facing video plan: learning goal, script and the scene list. */
@@ -47,66 +49,66 @@ export function VideoPlanView({ plan: raw, lang, dir: dirProp, status = "script_
     <article
       dir={dir}
       lang={lang}
-      className="mx-auto w-full max-w-3xl space-y-6 rounded-[var(--radius-card)] border border-line bg-card p-6 shadow-[var(--shadow-card)] md:p-8"
+      className="mx-auto w-full max-w-3xl space-y-6 rounded-lg border border-line bg-surface p-6 md:p-8"
       data-testid="video-plan"
     >
       <header className="space-y-3">
         <div className="flex flex-wrap items-center gap-2">
           <span
-            className={cn("inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset", STATUS_TONE[status])}
+            className={cn("text-caption inline-flex min-h-6 items-center gap-1 rounded-sm px-2 font-medium", STATUS_TONE[status])}
             data-testid="video-status"
           >
             <Film className="size-3.5" aria-hidden />
             {t(`player.video.status.${status}`)}
           </span>
-          <span className="inline-flex items-center gap-1 text-sm text-muted">
+          <span className="tabular inline-flex items-center gap-1 text-sm text-ink-muted">
             <Clock className="size-4" aria-hidden />
             {t("player.video.duration", { count: plan.duration_seconds })}
           </span>
         </div>
-        <h2 dir="auto" className="text-2xl font-bold text-ink md:text-3xl">
+        <h2 dir="auto" className="font-display text-display-lg font-semibold text-ink">
           {plan.title}
         </h2>
         <p className="flex items-start gap-2 text-lg">
-          <Target className="mt-1 size-5 shrink-0 text-brand" aria-label={t("player.video.learningGoal")} />
+          <CurrentFocusIcon className="mt-1 size-5 shrink-0 text-ink" aria-label={t("player.video.learningGoal")} />
           <span dir="auto">{plan.learning_goal}</span>
         </p>
       </header>
 
       {note && (
-        <div className="flex items-start gap-2 rounded-xl bg-sky-50 p-3 text-sky-900 ring-1 ring-sky-200" data-testid="video-notice">
-          <Info className="mt-0.5 size-5 shrink-0" aria-hidden />
+        <div className="flex items-start gap-3 rounded-md bg-brand-soft px-4 py-3 text-ink" data-testid="video-notice">
+          <Info className="mt-0.5 size-5 shrink-0 text-brand" aria-hidden />
           <div>{note}</div>
         </div>
       )}
 
       <section className="space-y-2">
         <h3 className="flex items-center gap-2 font-semibold">
-          <Mic className="size-5 text-helps" aria-hidden />
+          <Mic className="size-5 text-ink-muted" aria-hidden />
           {t("player.video.script")}
         </h3>
-        <p dir="auto" className="rounded-xl bg-surface-2 p-4 leading-relaxed whitespace-pre-line">
+        <p dir="auto" className="rounded-md bg-tray p-4 leading-relaxed whitespace-pre-line">
           {plan.script}
         </p>
       </section>
 
       <section className="space-y-3">
         <h3 className="flex items-center gap-2 font-semibold">
-          <Clapperboard className="size-5 text-interest" aria-hidden />
+          <VideoIcon className="size-6" aria-hidden />
           {t("player.video.scenes")}
         </h3>
         <ol className="space-y-3">
           {plan.scenes.map((s, i) => (
-            <li key={i} className="space-y-2 rounded-2xl border border-line p-4" data-testid="video-scene">
-              <p className="text-sm font-semibold text-brand">{t("player.video.scene", { n: i + 1 })}</p>
+            <li key={i} className="space-y-2 rounded-lg border border-line p-4" data-testid="video-scene">
+              <p className="tabular text-sm font-semibold text-brand">{t("player.video.scene", { n: i + 1 })}</p>
               <p dir="auto" className="font-medium">
                 {s.description}
               </p>
-              <p className="flex items-start gap-2 text-stone-700">
+              <p className="flex items-start gap-2 text-ink">
                 <Mic className="mt-1 size-4 shrink-0" aria-label={t("player.video.narration")} />
                 <span dir="auto">{s.narration}</span>
               </p>
-              <p className="flex items-start gap-2 text-sm text-muted">
+              <p className="flex items-start gap-2 text-sm text-ink-muted">
                 <Sparkles className="mt-0.5 size-4 shrink-0" aria-label={t("player.video.visualPrompt")} />
                 <span dir="auto">{s.visual_prompt}</span>
               </p>

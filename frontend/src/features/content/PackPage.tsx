@@ -6,7 +6,8 @@
  */
 import { useState } from "react";
 import { Link, useParams } from "react-router";
-import { Check, ChevronDown, ChevronRight, Package } from "lucide-react";
+import { Check, ChevronDown, ChevronRight } from "lucide-react";
+import { PackIcon } from "@/icons";
 import { Alert, Button, ButtonLink, Card, EmptyState, PageHeader, PageSkeleton, toast } from "@/components/ui";
 import { childUrl, displayName, type ChildDetail } from "@/features/children";
 import { useI18n } from "@/i18n/I18nProvider";
@@ -30,7 +31,7 @@ export function PackPage() {
   if (!data) {
     if (error)
       return error.status === 404 ? (
-        <EmptyState icon={<Package />} title={t("content.pack.notFound")} action={<ButtonLink to={paths.children()}>{t("children.child.backToList")}</ButtonLink>} />
+        <EmptyState scene="search" title={t("content.pack.notFound")} action={<ButtonLink to={paths.children()}>{t("children.child.backToList")}</ButtonLink>} />
       ) : (
         <Alert tone="error" action={<Button size="sm" variant="outline" onClick={reload}>{t("common.retry")}</Button>}>
           {toMessage(error)}
@@ -58,7 +59,7 @@ export function PackPage() {
     <div className="mx-auto max-w-5xl">
       <PageHeader
         back={{ to: paths.childContent(data.child_id), label: t("content.review.back") }}
-        icon={<Package />}
+        icon={<PackIcon />}
         eyebrow={name ? t("content.review.forChild", { name }) : undefined}
         title={t("content.pack.title")}
         description={t("content.pack.subtitle")}
@@ -73,7 +74,7 @@ export function PackPage() {
       {first && (
         <div className="-mt-3 mb-5 flex flex-wrap gap-2">
           <ModeBadge mode={first.mode} />
-          {first.focus_area_title && <span className="text-sm text-muted" dir="auto">{first.focus_area_title}</span>}
+          {first.focus_area_title && <span className="text-sm text-ink-muted" dir="auto">{first.focus_area_title}</span>}
           <SourceBadge isTemplate={first.is_template} />
         </div>
       )}
@@ -98,19 +99,19 @@ function PackItem({ item }: { item: ContentDetail }) {
       <div className="flex flex-wrap items-start gap-3 p-4 sm:p-5">
         <TypeIcon type={type} size="lg" />
         <div className="min-w-0 flex-1">
-          <p className="text-sm text-muted">{t(`content.types.${type}`)}</p>
+          <p className="text-sm text-ink-muted">{t(`content.types.${type}`)}</p>
           <Link to={paths.content(item.id)} className="block text-lg font-semibold text-ink hover:underline" dir="auto">
             {item.title}
           </Link>
           {goal && (
-            <p className="mt-1 text-sm text-muted" dir="auto">
+            <p className="mt-1 text-sm text-ink-muted" dir="auto">
               {goal}
             </p>
           )}
         </div>
         <div className="flex items-center gap-2">
           <StatusChip status={item.status} />
-          <ButtonLink to={paths.content(item.id)} variant="outline" size="sm" icon={<ChevronRight className="size-4 rtl:rotate-180" aria-hidden />}>
+          <ButtonLink to={paths.content(item.id)} variant="outline" size="sm" icon={<ChevronRight className="size-4 rtl:-scale-x-100" aria-hidden />}>
             {t("content.pack.open")}
           </ButtonLink>
         </div>
@@ -120,7 +121,7 @@ function PackItem({ item }: { item: ContentDetail }) {
           {open ? t("content.pack.hidePreview") : t("content.pack.showPreview")}
         </Button>
         {open && (
-          <div className="mt-2 mb-3 rounded-[var(--radius-card)] bg-surface-2 p-3 sm:p-4">
+          <div className="mt-2 mb-3 rounded-[var(--radius-card)] bg-tray p-3 sm:p-4">
             <ContentPreview item={item} />
           </div>
         )}

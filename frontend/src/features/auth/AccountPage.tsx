@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from "react";
-import { KeyRound, Languages, UserRound } from "lucide-react";
+import { KeyRound, Languages } from "lucide-react";
+import { AccountIcon } from "@/icons";
 import { useAuth, useUser, type User } from "@/auth/AuthProvider";
 import { LocaleSwitcher } from "@/components/layout/LocaleSwitcher";
 import { Avatar } from "@/components/ui/Avatar";
@@ -39,7 +40,7 @@ function ProfileCard() {
 
   return (
     <Card>
-      <CardHeader icon={<UserRound className="size-4" />} title={t("account.profile")} />
+      <CardHeader icon={<AccountIcon />} title={t("account.profile")} />
       <CardBody>
         <div className="mb-5 flex items-center gap-4">
           <Avatar name={user.name} size="lg" />
@@ -47,7 +48,7 @@ function ProfileCard() {
             <p className="truncate font-semibold text-ink" dir="auto">
               {user.name}
             </p>
-            <p className="truncate text-sm text-muted" dir="ltr">
+            <p className="truncate text-sm text-ink-muted" dir="ltr">
               {user.email}
             </p>
             <Badge tone="brand" className="mt-1.5">
@@ -72,7 +73,7 @@ function LanguageCard() {
   const { t } = useI18n();
   return (
     <Card>
-      <CardHeader icon={<Languages className="size-4" />} title={t("common.uiLanguage")} description={t("account.languageHint")} />
+      <CardHeader icon={<Languages className="text-ink-muted" />} title={t("common.uiLanguage")} description={t("account.languageHint")} />
       <CardBody>
         <LocaleSwitcher variant="segmented" />
       </CardBody>
@@ -116,7 +117,7 @@ function PasswordCard() {
 
   return (
     <Card>
-      <CardHeader icon={<KeyRound className="size-4" />} title={t("auth.changePassword")} />
+      <CardHeader icon={<KeyRound className="text-ink-muted" />} title={t("auth.changePassword")} />
       <CardBody>
         <form onSubmit={submit} className="space-y-4" noValidate>
           <Field label={t("auth.currentPassword")} error={currentError} required>
@@ -146,7 +147,7 @@ export function AccountPage() {
   const { t } = useI18n();
   return (
     <div className="mx-auto max-w-4xl">
-      <PageHeader icon={<UserRound />} title={t("account.title")} description={t("account.subtitle")} />
+      <PageHeader icon={<AccountIcon />} title={t("account.title")} description={t("account.subtitle")} />
       <div className="grid gap-5 lg:grid-cols-2">
         <div className="space-y-5">
           <ProfileCard />

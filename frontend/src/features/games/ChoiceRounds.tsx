@@ -45,9 +45,9 @@ export function ChoiceRounds({ game, lang, dir, onDone }: TemplateProps<ChoiceGa
       <KidHeading title={game.title} intro={index === 0 ? game.intro : null} />
       <section key={index} className="animate-rise flex flex-col gap-6">
         {game.template === "what_happens_next" && (
-          <p className="text-center text-lg font-semibold tracking-wide text-brand uppercase">{t("player.game.whatHappensNext")}</p>
+          <p className="font-display text-center text-xl font-semibold text-brand">{t("player.game.whatHappensNext")}</p>
         )}
-        <p dir="auto" className="text-center text-2xl font-semibold text-ink md:text-3xl" data-testid="round-question">
+        <p dir="auto" className="font-display text-display-lg text-center font-semibold text-ink" data-testid="round-question">
           {round.question}
         </p>
         <div className={cn("mx-auto grid w-full max-w-3xl grid-cols-2 gap-4", round.choices.length === 3 && "md:grid-cols-3")}>
@@ -58,6 +58,7 @@ export function ChoiceRounds({ game, lang, dir, onDone }: TemplateProps<ChoiceGa
               emoji={c.emoji}
               size={big ? "lg" : "md"}
               state={stateOf(i)}
+              paint={i + index}
               onClick={() => setPicked(i)}
               data-testid={`choice-${i}`}
             />
@@ -68,7 +69,7 @@ export function ChoiceRounds({ game, lang, dir, onDone }: TemplateProps<ChoiceGa
           <div className="flex justify-center">
             <KidButton onClick={next} data-testid="round-next">
               {last ? t("player.game.allDone") : t("player.next")}
-              <NextArrow dir={dir} className="size-6" />
+              <NextArrow dir={dir} />
             </KidButton>
           </div>
         )}

@@ -3,15 +3,21 @@
  * result-only feedback. Optional: what was observed, the support needed
  * (No / Some / Significant) and what helped. It becomes part of the
  * observation history (the backend mirrors it as an observation).
+ *
+ * Each feedback gets one `client_request_id`, sent with every Save until one
+ * succeeds: a retry after an error or a lost response, even after Cancel and
+ * reopening (the answers are kept too), so the feedback is saved once. The id
+ * changes only after a successful save.
  */
 import { useState } from "react";
-import { Save } from "lucide-react";
+import { Check, Save } from "lucide-react";
 import { Button, Dialog, Field, Textarea, ToggleChip } from "@/components/ui";
 import { useI18n } from "@/i18n/I18nProvider";
 import { useOptions } from "@/lib/options";
 import { useAction } from "@/lib/useAction";
-import { cn } from "@/lib/utils";
-import { FEEDBACK_SUPPORT, RESULT_EMOJI, RESULTS, sendFeedback, type ContentDetail, type FeedbackResult, type FeedbackSupport } from "./api";
+import { cn, requestId as newRequestId } from "@/lib/utils";
+import { FEEDBACK_SUPPORT, RESULTS, sendFeedback, type ContentDetail, type FeedbackResult, type FeedbackSupport } from "./api";
+import { RESULT_ICONS } from "./ui";
 
 export function FeedbackDialog({
   item,
@@ -32,12 +38,17 @@ export function FeedbackDialog({
   const [support, setSupport] = useState<FeedbackSupport | null>(null);
   const [helps, setHelps] = useState<string[]>([]);
   const helpOptions = list("what_helps").filter((h) => h.key !== "other");
+  // One id per feedback, reused on every retry until a save succeeds: a repeat returns the first
+  // save instead of a second feedback. Another content item remounts this dialog (keyed review).
+  const [requestId, setRequestId] = useState(newRequestId);
 
+  /** After a successful save only: the next feedback starts empty, with a new id. */
   function reset() {
     setResult(null);
     setText("");
     setSupport(null);
     setHelps([]);
+    setRequestId(newRequestId());
   }
 
   async function save() {
@@ -47,6 +58,7 @@ export function FeedbackDialog({
       ...(support ? { support_level: support } : {}),
       ...(text.trim() ? { observation: text.trim() } : {}),
       ...(helps.length ? { what_helped: helps } : {}),
+      client_request_id: requestId,
     };
     const r = await run(() => sendFeedback(item.id, body), { success: t("content.feedback.saved") });
     if (r.ok) {
@@ -74,25 +86,33 @@ export function FeedbackDialog({
       }
     >
       <div className="space-y-6">
-        <div role="radiogroup" aria-label={t("content.feedback.title")} className="grid grid-cols-3 gap-2 sm:gap-3">
-          {RESULTS.map((r) => (
-            <button
-              key={r}
-              type="button"
-              role="radio"
-              aria-checked={result === r}
-              onClick={() => setResult(r)}
-              className={cn(
-                "flex min-h-28 flex-col items-center justify-center gap-2 rounded-2xl border-2 bg-card px-2 py-3 text-center transition-colors",
-                result === r ? "border-brand bg-brand-soft" : "border-line hover:border-brand/40",
-              )}
-            >
-              <span className="text-4xl leading-none" aria-hidden>
-                {RESULT_EMOJI[r]}
-              </span>
-              <span className="text-sm font-semibold text-ink sm:text-base">{t(`content.results.${r}`)}</span>
-            </button>
-          ))}
+        {/* "How did it go?" (spec 6.11): three equal tiles, one neutral treatment, the same selection for every outcome. */}
+        <div role="radiogroup" aria-label={t("content.feedback.title")} className="grid grid-cols-3 gap-2">
+          {RESULTS.map((r) => {
+            const Icon = RESULT_ICONS[r];
+            const on = result === r;
+            return (
+              <button
+                key={r}
+                type="button"
+                role="radio"
+                aria-checked={on}
+                onClick={() => setResult(r)}
+                className={cn(
+                  "relative flex min-h-24 flex-col items-center justify-center gap-2 rounded-lg p-3 text-center transition-colors",
+                  on ? "border-2 border-brand bg-brand-soft shadow-lip" : "border-[1.5px] border-line-strong bg-surface hover:bg-tray",
+                )}
+              >
+                <Icon className="size-10 text-ink" aria-hidden />
+                <span className="text-sm font-semibold text-ink sm:text-base">{t(`content.results.${r}`)}</span>
+                {on && (
+                  <span className="absolute end-1.5 top-1.5 flex size-6 items-center justify-center rounded-sm bg-brand text-on-brand" aria-hidden>
+                    <Check className="size-4" strokeWidth={2.5} />
+                  </span>
+                )}
+              </button>
+            );
+          })}
         </div>
 
         <Field label={`${t("content.feedback.observe")} (${t("common.optional")})`}>

@@ -8,7 +8,6 @@ import type { TemplateProps } from "./template-props";
 type Side = "a" | "b";
 type Pick = { side: Side; pair: number };
 
-const MATCHED = ["bg-emerald-50 ring-emerald-300", "bg-sky-50 ring-sky-300", "bg-violet-50 ring-violet-300", "bg-amber-50 ring-amber-300", "bg-rose-50 ring-rose-200", "bg-teal-50 ring-teal-300"];
 
 /**
  * Tap a card in the first column, then its partner in the second column
@@ -45,12 +44,13 @@ export function MatchPairs({ game, lang, replay, onDone }: TemplateProps<MatchPa
     if (pick?.side === side && pick.pair === pair) return "selected";
     return "idle";
   };
-  const matchedClass = (pair: number) => (matched.includes(pair) ? `${MATCHED[matched.indexOf(pair) % MATCHED.length]} opacity-100` : undefined);
+  // Each card is painted by its place in its column; once a pair is matched, both cards share the pair's paint.
+  const paintOf = (pair: number, position: number) => (matched.includes(pair) ? pair : position);
 
   return (
     <div className="flex flex-1 flex-col gap-6" data-testid="game-match_pairs">
       <KidHeading title={game.title} intro={game.intro} />
-      <p className="text-center text-lg text-stone-600">{t("player.game.match.hint")}</p>
+      <p className="text-center text-lg text-ink-muted">{t("player.game.match.hint")}</p>
       <div className="mx-auto grid w-full max-w-3xl grid-cols-2 gap-x-8 gap-y-4 md:gap-x-16">
         <div className="flex flex-col gap-4" data-testid="match-column-a">
           {game.pairs.map((p, i) => (
@@ -59,7 +59,7 @@ export function MatchPairs({ game, lang, replay, onDone }: TemplateProps<MatchPa
               label={p.left.label}
               emoji={p.left.emoji}
               state={stateOf("a", i)}
-              className={matchedClass(i)}
+              paint={paintOf(i, i)}
               disabled={matched.includes(i)}
               onClick={() => tap("a", i)}
               data-testid={`match-a-${i}`}
@@ -67,13 +67,13 @@ export function MatchPairs({ game, lang, replay, onDone }: TemplateProps<MatchPa
           ))}
         </div>
         <div className="flex flex-col gap-4" data-testid="match-column-b">
-          {order.map((i) => (
+          {order.map((i, position) => (
             <ChoiceCard
               key={i}
               label={game.pairs[i]!.right.label}
               emoji={game.pairs[i]!.right.emoji}
               state={stateOf("b", i)}
-              className={matchedClass(i)}
+              paint={paintOf(i, position + 3)}
               disabled={matched.includes(i)}
               onClick={() => tap("b", i)}
               data-testid={`match-b-${i}`}

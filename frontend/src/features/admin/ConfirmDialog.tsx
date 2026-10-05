@@ -41,7 +41,7 @@ export function ConfirmDialog({
         </>
       }
     >
-      {children && <div className="text-sm text-muted">{children}</div>}
+      {children && <div className="text-sm text-ink-muted">{children}</div>}
     </Dialog>
   );
 }

@@ -1,18 +1,40 @@
 import { useRef, type KeyboardEvent, type ReactNode } from "react";
 import { NavLink } from "react-router";
+import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export type TabItem = { key: string; label: ReactNode; icon?: ReactNode; count?: number };
 
+/*
+ * Tabs (spec 6.19) are built like the support scale: a `tray` track with blocks in it.
+ * The selected tab is a raised `surface` block with a 2px brand border and a lip, and a
+ * brand Check always leads its label (before any icon, whose designated primitive is
+ * then "coloured in"). Border, lip and Check are the non-colour cues.
+ * The track scrolls, so it clips at its 4px padding: the ring sits at a 1px offset to fit.
+ */
+const trackClass =
+  "mb-6 flex snap-x gap-1 overflow-x-auto rounded-md bg-tray p-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden";
+
 const tabClass = (active: boolean) =>
   cn(
-    "-mb-px flex min-h-11 shrink-0 items-center gap-1.5 border-b-2 px-3 text-sm font-medium transition-colors",
-    active ? "border-brand text-brand" : "border-transparent text-muted hover:text-ink",
+    "flex min-h-11 shrink-0 snap-start items-center justify-center gap-2 rounded-md px-3.5 text-sm transition-colors focus-visible:outline-offset-1 sm:flex-1 [&_svg]:size-5",
+    active
+      ? "border-2 border-brand bg-surface px-[12px] font-semibold text-ink shadow-lip"
+      : "font-medium text-ink-muted hover:text-ink [--icon-paint:transparent]",
   );
+
+function Lead({ icon, active }: { icon?: ReactNode; active: boolean }) {
+  return (
+    <>
+      {active && <Check className="size-4 shrink-0 text-brand" strokeWidth={2.5} aria-hidden />}
+      {icon}
+    </>
+  );
+}
 
 function CountBubble({ count }: { count?: number }) {
   if (!count) return null;
-  return <span className="tabular rounded-full bg-amber-100 px-1.5 text-xs text-amber-800">{count}</span>;
+  return <span className="tabular text-caption min-w-5 rounded-sm bg-attention-soft px-1.5 text-center font-medium text-ink">{count}</span>;
 }
 
 /**
@@ -21,19 +43,23 @@ function CountBubble({ count }: { count?: number }) {
  */
 export function TabNav({ tabs, label }: { tabs: (TabItem & { to: string; end?: boolean })[]; label?: string }) {
   return (
-    <nav className="-mx-1 mb-6 flex gap-1 overflow-x-auto border-b border-line px-1" aria-label={label}>
+    <nav className={trackClass} aria-label={label}>
       {tabs.map((t) => (
         <NavLink key={t.key} to={t.to} end={t.end} className={({ isActive }) => tabClass(isActive)}>
-          {t.icon}
-          {t.label}
-          <CountBubble count={t.count} />
+          {({ isActive }) => (
+            <>
+              <Lead icon={t.icon} active={isActive} />
+              {t.label}
+              <CountBubble count={t.count} />
+            </>
+          )}
         </NavLink>
       ))}
     </nav>
   );
 }
 
-/** In-page tabs with roving focus (arrow keys follow the reading direction). */
+/** In-page tabs with roving focus (arrow keys follow the reading direction; Home/End jump). */
 export function Tabs({
   tabs,
   value,
@@ -63,7 +89,7 @@ export function Tabs({
     refs.current[next]?.focus();
   }
   return (
-    <div role="tablist" aria-label={label} className={cn("-mx-1 mb-5 flex gap-1 overflow-x-auto border-b border-line px-1", className)}>
+    <div role="tablist" aria-label={label} className={cn(trackClass, "mb-5", className)}>
       {tabs.map((t, i) => {
         const active = t.key === value;
         return (
@@ -80,7 +106,7 @@ export function Tabs({
             onKeyDown={(e) => onKey(e, i)}
             className={tabClass(active)}
           >
-            {t.icon}
+            <Lead icon={t.icon} active={active} />
             {t.label}
             <CountBubble count={t.count} />
           </button>

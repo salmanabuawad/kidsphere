@@ -1,8 +1,8 @@
 import { useState, type ReactNode } from "react";
-import { Link } from "react-router";
-import { BookOpen, ChevronLeft, Languages, LineChart, Pencil, School, Sparkles, UserRound, UsersRound } from "lucide-react";
+import { Languages, Pencil } from "lucide-react";
 import { useAuth } from "@/auth/AuthProvider";
-import { Alert, Button, ButtonLink, Card, PageSkeleton, TabNav } from "@/components/ui";
+import { Alert, BackLink, Badge, BlockCluster, Button, ButtonLink, Card, PageSkeleton, TabNav } from "@/components/ui";
+import { ClassesIcon, ParentHomeIcon } from "@/icons";
 import { useI18n } from "@/i18n/I18nProvider";
 import { useFormat } from "@/lib/format";
 import { useOptions } from "@/lib/options";
@@ -22,18 +22,19 @@ export function ChildTabs({ childId }: { childId: string }) {
     <TabNav
       label={t("children.child.tabs.label")}
       tabs={[
-        { key: "profile", to: paths.child(childId), end: true, label: t("children.child.tabs.profile"), icon: <UserRound className="size-4" aria-hidden /> },
-        { key: "timeline", to: paths.childTimeline(childId), label: t("children.child.tabs.timeline"), icon: <BookOpen className="size-4" aria-hidden /> },
-        { key: "content", to: paths.childContent(childId), label: t("children.child.tabs.content"), icon: <Sparkles className="size-4" aria-hidden /> },
-        { key: "development", to: paths.childDevelopment(childId), label: t("children.child.tabs.development"), icon: <LineChart className="size-4" aria-hidden /> },
+        { key: "profile", to: paths.child(childId), end: true, label: t("children.child.tabs.profile") },
+        { key: "timeline", to: paths.childTimeline(childId), label: t("children.child.tabs.timeline") },
+        { key: "content", to: paths.childContent(childId), label: t("children.child.tabs.content") },
+        { key: "development", to: paths.childDevelopment(childId), label: t("children.child.tabs.development") },
       ]}
     />
   );
 }
 
 /**
- * Child header: photo (with the photo control for staff), name, age, class,
- * languages and "Edit details".
+ * Child header (the profile hero, spec 6.7): photo or initials block (with the photo
+ * control for staff), the name in the display face, age, class, languages, one
+ * decorative block cluster and "Edit details".
  */
 export function ChildHeader({ child, onChanged }: { child: ChildBasics; onChanged?: () => void }) {
   const { t } = useI18n();
@@ -48,28 +49,25 @@ export function ChildHeader({ child, onChanged }: { child: ChildBasics; onChange
 
   return (
     <div className="mb-4">
-      <Link to={paths.children()} className="-ms-1 mb-2 inline-flex min-h-11 items-center gap-1 rounded-lg px-1 text-sm text-muted hover:text-ink">
-        <ChevronLeft className="size-4 rtl:rotate-180" aria-hidden />
-        {t("children.child.backToList")}
-      </Link>
-      <Card className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:p-5">
+      <BackLink to={paths.children()} label={t("children.child.backToList")} className="mb-2" />
+      <Card className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center md:p-5">
         <div className="relative self-center sm:self-auto">
           <ChildAvatar child={child} size="xl" />
           {staff && <PhotoButton hasPhoto={child.has_photo} onClick={() => setPhotoOpen(true)} />}
         </div>
         <div className="min-w-0 flex-1 text-center sm:text-start">
-          <h1 className="text-2xl font-semibold tracking-tight text-ink md:text-3xl" dir="auto">
-            {name}
+          <h1 className="font-display text-display-lg font-semibold text-ink">
+            <bdi>{name}</bdi>
           </h1>
           {child.preferred_name && child.preferred_name !== child.name && (
-            <p className="text-sm text-muted" dir="auto">
+            <p className="text-sm text-ink-muted" dir="auto">
               {child.name}
             </p>
           )}
-          <p className="mt-1 text-base text-ink">{formatAge(child.birth_date)}</p>
-          <div className="mt-2 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-sm text-muted sm:justify-start">
+          <p className="tabular mt-1 text-base text-ink">{formatAge(child.birth_date)}</p>
+          <div className="text-caption mt-2 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-ink-muted sm:justify-start">
             <span className="inline-flex items-center gap-1.5">
-              <School className="size-4" aria-hidden />
+              <ClassesIcon className="size-4" paint={false} aria-hidden />
               <span dir="auto">{child.class ? child.class.name : t("children.child.noClass")}</span>
             </span>
             <span className="inline-flex items-center gap-1.5">
@@ -78,15 +76,20 @@ export function ChildHeader({ child, onChanged }: { child: ChildBasics; onChange
               {languages.map((l) => optionLabel("languages", l)).join(" · ")}
             </span>
           </div>
-          {child.archived && <p className="mt-2 text-sm font-medium text-amber-800">{t("children.list.archived")}</p>}
+          {child.archived && (
+            <Badge tone="muted" className="mt-2">
+              {t("children.list.archived")}
+            </Badge>
+          )}
         </div>
+        <BlockCluster className="self-center sm:self-start" />
         {staff && (
           <div className="flex flex-wrap justify-center gap-2 sm:flex-col sm:items-stretch">
-            <Button variant="outline" icon={<Pencil className="size-4" aria-hidden />} onClick={() => setEditOpen(true)}>
+            <Button variant="ghost" icon={<Pencil aria-hidden />} onClick={() => setEditOpen(true)}>
               {t("children.child.editBasics")}
             </Button>
             {user?.role === "admin" && (
-              <ButtonLink to={paths.adminChildParents(child.id)} variant="ghost" icon={<UsersRound className="size-4" aria-hidden />}>
+              <ButtonLink to={paths.adminChildParents(child.id)} variant="ghost" icon={<ParentHomeIcon paint={false} aria-hidden />}>
                 {t("children.child.parents")}
               </ButtonLink>
             )}

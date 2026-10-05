@@ -1,4 +1,4 @@
-import { Users } from "lucide-react";
+import { ChildrenIcon } from "@/icons";
 import { routePatterns } from "@/lib/paths";
 import type { AppRoute } from "@/lib/routing";
 import { ChildListPage } from "./ChildListPage";
@@ -14,7 +14,7 @@ export const routes: AppRoute[] = [
     path: routePatterns.children,
     element: <ChildListPage />,
     roles: ["teacher", "admin"],
-    nav: { labelKey: "nav.children", icon: Users, order: 10, roles: ["teacher", "admin"] },
+    nav: { labelKey: "nav.children", icon: ChildrenIcon, order: 10, roles: ["teacher", "admin"] },
   },
   { path: routePatterns.child, element: <ChildProfilePage />, roles: ["teacher", "admin"] },
 ];

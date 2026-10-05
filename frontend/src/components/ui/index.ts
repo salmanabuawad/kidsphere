@@ -1,13 +1,13 @@
 export { Alert } from "./Alert";
-export { Avatar } from "./Avatar";
+export { AVATAR_SIZES, Avatar, type AvatarSize } from "./Avatar";
 export { Badge, toneClasses, type Tone } from "./Badge";
 export { Button, ButtonLink, IconButton, buttonClass, type ButtonProps, type ButtonSize, type ButtonVariant } from "./Button";
-export { Card, CardBody, CardFooter, CardHeader } from "./Card";
-export { Chip, ToggleChip } from "./Chip";
+export { Card, CardBody, CardFooter, CardHeader, cardTappable } from "./Card";
+export { Chip, NumeralBlock, ToggleChip, toneGlyph } from "./Chip";
 export { Dialog } from "./Dialog";
-export { EmptyState } from "./EmptyState";
+export { BlockCluster, BlockScene, EmptyState, type EmptyScene } from "./EmptyState";
 export { Checkbox, Field, Input, Label, Select, Textarea, controlClass, type FieldControlProps } from "./Field";
-export { PageHeader, SectionTitle } from "./PageHeader";
+export { BackLink, PageHeader, SectionTitle } from "./PageHeader";
 export { FullPageSpinner, PageSkeleton, Skeleton, Spinner } from "./Spinner";
 export { Table } from "./Table";
 export { TabNav, Tabs, type TabItem } from "./Tabs";

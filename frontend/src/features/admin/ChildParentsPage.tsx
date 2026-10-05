@@ -1,6 +1,7 @@
 import { useMemo, useState, type FormEvent } from "react";
 import { useParams } from "react-router";
-import { HeartHandshake, Link2, Unlink, UserPlus } from "lucide-react";
+import { Link2, Unlink, UserPlus } from "lucide-react";
+import { ParentHomeIcon } from "@/icons";
 import { Alert } from "@/components/ui/Alert";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
@@ -79,8 +80,8 @@ export function ChildParentsPage() {
   if (links.error && isApiError(links.error, "NOT_FOUND")) {
     return (
       <div className="mx-auto max-w-3xl">
-        <PageHeader back={back} icon={<HeartHandshake />} title={t("admin.parents.title")} />
-        <EmptyState icon={<HeartHandshake />} title={t("admin.parents.childNotFound")} />
+        <PageHeader back={back} icon={<ParentHomeIcon />} title={t("admin.parents.title")} />
+        <EmptyState icon={<ParentHomeIcon />} title={t("admin.parents.childNotFound")} />
       </div>
     );
   }
@@ -89,7 +90,7 @@ export function ChildParentsPage() {
     <div className="mx-auto max-w-3xl">
       <PageHeader
         back={back}
-        icon={<HeartHandshake />}
+        icon={<ParentHomeIcon />}
         eyebrow={childName ? <span dir="auto">{childName}</span> : undefined}
         title={childName ? t("admin.parents.titleFor", { name: childName }) : t("admin.parents.title")}
         description={t("admin.parents.subtitle")}
@@ -97,7 +98,7 @@ export function ChildParentsPage() {
 
       <div className="space-y-5">
         <Card>
-          <CardHeader icon={<HeartHandshake className="size-4" />} title={t("admin.parents.linkedTitle")} />
+          <CardHeader icon={<ParentHomeIcon />} title={t("admin.parents.linkedTitle")} />
           <CardBody>
             {links.error ? (
               <Alert tone="error" action={<Button size="sm" variant="outline" onClick={links.reload}>{t("common.retry")}</Button>}>
@@ -106,7 +107,7 @@ export function ChildParentsPage() {
             ) : links.loading && !links.data ? (
               <PageSkeleton />
             ) : linked.length === 0 ? (
-              <p className="text-sm text-muted">{t("admin.parents.none")}</p>
+              <p className="text-sm text-ink-muted">{t("admin.parents.none")}</p>
             ) : (
               <ul className="divide-y divide-line">
                 {linked.map((p) => (
@@ -118,10 +119,10 @@ export function ChildParentsPage() {
                           <span dir="auto" className="truncate">
                             {p.name}
                           </span>
-                          {p.relation && <Badge tone="helps">{optionLabel("relations", p.relation)}</Badge>}
+                          {p.relation && <Badge tone="neutral">{optionLabel("relations", p.relation)}</Badge>}
                           {!p.is_active && <Badge tone="neutral">{t("admin.users.inactive")}</Badge>}
                         </p>
-                        <p className="truncate text-sm text-muted" dir="ltr">
+                        <p className="truncate text-sm text-ink-muted" dir="ltr">
                           <bdi>{p.email}</bdi>
                         </p>
                       </div>
@@ -169,7 +170,7 @@ export function ChildParentsPage() {
               </Button>
             </form>
             <div className="mt-5 flex flex-wrap items-center gap-3 border-t border-line pt-4">
-              <p className="text-sm text-muted">{t("admin.parents.noAccountYet")}</p>
+              <p className="text-sm text-ink-muted">{t("admin.parents.noAccountYet")}</p>
               <Button variant="outline" size="sm" icon={<UserPlus className="size-4" />} onClick={() => setCreating(true)}>
                 {t("admin.parents.createParent")}
               </Button>

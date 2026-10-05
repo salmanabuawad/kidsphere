@@ -175,7 +175,7 @@ describe("CreateContentPage", () => {
     expect(screen.getByText("Choose what to create.")).toBeTruthy();
 
     fireEvent.click(screen.getByTestId("type-real_world_activity"));
-    expect(screen.getByRole("button", { name: "English" }).getAttribute("aria-pressed")).toBe("true");
+    expect(screen.getByRole("radio", { name: "English" }).getAttribute("aria-checked")).toBe("true");
     fireEvent.click(screen.getByRole("button", { name: "Create draft" }));
 
     expect(await screen.findByRole("heading", { level: 1, name: "Build the Garage Together" })).toBeTruthy();
@@ -197,8 +197,8 @@ describe("CreateContentPage", () => {
 
     fireEvent.click(await screen.findByTestId("mode-strength_builder"));
     // the child's own strength plus the generic targets (without duplicates)
-    expect(screen.getAllByRole("button", { name: /Building/ })).toHaveLength(1);
-    fireEvent.click(screen.getByRole("button", { name: /Storytelling/ }));
+    expect(screen.getAllByRole("radio", { name: /Building/ })).toHaveLength(1);
+    fireEvent.click(screen.getByRole("radio", { name: /Storytelling/ }));
     fireEvent.click(screen.getByTestId("type-pack"));
     const video = screen.getByRole("checkbox", { name: "Include a video plan" }) as HTMLInputElement;
     expect(video.checked).toBe(false);
@@ -216,8 +216,8 @@ describe("CreateContentPage", () => {
     expect(screen.getByText("There is no active focus area yet")).toBeTruthy();
     expect(screen.getByRole("link", { name: "Go to focus areas" }).getAttribute("href")).toBe("/children/c1/focus");
     fireEvent.click(screen.getByTestId("type-digital_game"));
-    expect(screen.getByRole("button", { name: "Build a story" })).toBeTruthy();
-    expect(screen.getByRole("button", { name: "Choose for me" }).getAttribute("aria-pressed")).toBe("true");
+    expect(screen.getByRole("radio", { name: "Build a story" })).toBeTruthy();
+    expect(screen.getByRole("radio", { name: "Choose for me" }).getAttribute("aria-checked")).toBe("true");
   });
 
   it("is RTL in Arabic", async () => {
@@ -273,9 +273,84 @@ describe("ContentReviewPage", () => {
     fireEvent.click(screen.getByRole("radio", { name: /Partly/ })); // tap 1
     fireEvent.click(save); // tap 2
     expect(await screen.findByText("Thank you! It was added to the timeline.")).toBeTruthy();
-    expect(body).toEqual({ result: "partly" });
+    expect(body).toEqual({ result: "partly", client_request_id: expect.any(String) });
     await waitFor(() => expect(screen.getByTestId("content-status").textContent).toBe("Used"));
     expect(within(screen.getByTestId("feedback-history")).getByText("Partly")).toBeTruthy();
+  });
+
+  it("feedback resends one request id on a retry and takes a new one after a successful save", async () => {
+    const ids: string[] = [];
+    let fail = true;
+    const approved = row({ status: "approved" });
+    const fb = { id: "fb1", result: "partly", support_level: null, observation: null, what_helped: null, created_at: "2026-10-02T10:00:00Z", by_name: "Rana" };
+    mockFetch({
+      "GET /api/content/s1": { body: { content: approved } },
+      "POST /api/content/s1/feedback": (init) => {
+        ids.push(JSON.parse(String(init?.body)).client_request_id);
+        if (fail) {
+          fail = false;
+          return { status: 500, body: { error: { code: "INTERNAL", message: "x" } } };
+        }
+        return { status: 201, body: { feedback: fb, content: { ...approved, status: "completed", feedback: [fb] } } };
+      },
+    });
+    renderApp({ routes, url: "/content/s1", user: teacher, options });
+
+    fireEvent.click(await screen.findByRole("button", { name: "How did it go?" }));
+    fireEvent.click(screen.getByRole("radio", { name: /Partly/ }));
+    fireEvent.click(screen.getByRole("button", { name: "Save" }));
+    await waitFor(() => expect(ids).toHaveLength(1));
+    await waitFor(() => expect(screen.getByRole("button", { name: "Save" }).hasAttribute("disabled")).toBe(false));
+    fireEvent.click(screen.getByRole("button", { name: "Save" })); // the retry
+    expect(await screen.findByText("Thank you! It was added to the timeline.")).toBeTruthy();
+    expect(ids).toHaveLength(2);
+    expect(typeof ids[0]).toBe("string");
+    expect(ids[0].length).toBeGreaterThan(0);
+    expect(ids[1]).toBe(ids[0]);
+
+    // After the save, the next feedback starts empty, with a new id.
+    await waitFor(() => expect(screen.getByTestId("content-status").textContent).toBe("Used"));
+    fireEvent.click(screen.getByRole("button", { name: "How did it go?" }));
+    expect(screen.getByRole("radio", { name: /Partly/ }).getAttribute("aria-checked")).toBe("false");
+    fireEvent.click(screen.getByRole("radio", { name: /Worked well/ }));
+    fireEvent.click(screen.getByRole("button", { name: "Save" }));
+    await waitFor(() => expect(ids).toHaveLength(3));
+    expect(ids[2]).not.toBe(ids[0]);
+  });
+
+  it("feedback keeps its request id and answers after an error, Cancel and reopening", async () => {
+    // A lost response: the server may have saved it, so Save after reopening must not make a second feedback.
+    const ids: string[] = [];
+    let fail = true;
+    const approved = row({ status: "approved" });
+    const fb = { id: "fb1", result: "partly", support_level: null, observation: null, what_helped: null, created_at: "2026-10-02T10:00:00Z", by_name: "Rana" };
+    mockFetch({
+      "GET /api/content/s1": { body: { content: approved } },
+      "POST /api/content/s1/feedback": (init) => {
+        ids.push(JSON.parse(String(init?.body)).client_request_id);
+        if (fail) {
+          fail = false;
+          return { status: 500, body: { error: { code: "INTERNAL", message: "x" } } };
+        }
+        return { status: 200, body: { feedback: fb, content: { ...approved, status: "completed", feedback: [fb] } } };
+      },
+    });
+    renderApp({ routes, url: "/content/s1", user: teacher, options });
+
+    fireEvent.click(await screen.findByRole("button", { name: "How did it go?" }));
+    fireEvent.click(screen.getByRole("radio", { name: /Partly/ }));
+    fireEvent.click(screen.getByRole("button", { name: "Save" }));
+    await waitFor(() => expect(ids).toHaveLength(1));
+    await waitFor(() => expect(screen.getByRole("button", { name: "Cancel" }).hasAttribute("disabled")).toBe(false));
+    fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
+    await waitFor(() => expect(screen.queryByRole("radio", { name: /Partly/ })).toBeNull());
+
+    fireEvent.click(screen.getByRole("button", { name: "How did it go?" }));
+    expect(screen.getByRole("radio", { name: /Partly/ }).getAttribute("aria-checked")).toBe("true");
+    fireEvent.click(screen.getByRole("button", { name: "Save" }));
+    expect(await screen.findByText("Thank you! It was added to the timeline.")).toBeTruthy();
+    expect(ids).toHaveLength(2);
+    expect(ids[1]).toBe(ids[0]);
   });
 
   it("leaving Present (?feedback=1) opens How did it go?", async () => {

@@ -1,5 +1,19 @@
 import { clsx, type ClassValue } from "clsx";
-import { twMerge } from "tailwind-merge";
+import { extendTailwindMerge } from "tailwind-merge";
+
+/**
+ * tailwind-merge that knows the KidSphere theme (index.css): without this it would read
+ * `text-caption` as a text colour and drop it next to `text-ink-muted`.
+ */
+const twMerge = extendTailwindMerge({
+  extend: {
+    theme: {
+      text: ["display-xl", "display-lg", "title", "kid-label", "kid-story", "name", "caption"],
+      shadow: ["lip", "lip-lg", "lip-brand", "lip-brand-pressed", "sheet"],
+      animate: ["placed", "sheet", "dialog", "bounce-place", "stamp", "wiggle", "nudge"],
+    },
+  },
+});
 
 /** Merge Tailwind classes (later wins). Use logical utilities only: ms/me/ps/pe/start/end. */
 export function cn(...inputs: ClassValue[]) {
@@ -15,15 +29,6 @@ export function initials(name: string): string {
     .slice(0, 2)
     .map((p) => Array.from(p)[0]!.toLocaleUpperCase())
     .join("");
-}
-
-const AVATAR_COLORS = ["#0f766e", "#0369a1", "#7c3aed", "#b45309", "#be185d", "#4d7c0f", "#c2410c", "#0e7490"];
-
-/** Stable, calm avatar colour for a name or id. */
-export function avatarColor(seed: string): string {
-  let h = 0;
-  for (const ch of seed) h = (h * 31 + ch.codePointAt(0)!) >>> 0;
-  return AVATAR_COLORS[h % AVATAR_COLORS.length]!;
 }
 
 /** Parse "YYYY-MM-DD" as a local calendar date (no timezone shift); other strings via Date. */

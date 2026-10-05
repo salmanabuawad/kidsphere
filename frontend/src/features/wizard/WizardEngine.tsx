@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowLeft, ArrowRight, Save } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, ChevronDown, Save } from "lucide-react";
 import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 import { Card, CardBody } from "@/components/ui/Card";
@@ -128,12 +128,12 @@ export function WizardStep({
     <div className="mx-auto max-w-3xl space-y-5">
       <WizardProgress {...progress} />
       <div className="flex items-start gap-3">
-        <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-brand-soft text-brand" aria-hidden>
-          <Icon className="size-6" />
+        <span className={cn("flex size-12 shrink-0 items-center justify-center rounded-md", def.tile ?? "bg-tray")} aria-hidden>
+          <Icon className="size-7" />
         </span>
         <div className="min-w-0">
-          <h1 className="text-2xl font-semibold tracking-tight text-ink">{t(`wizard.steps.${def.key}.title`, { name })}</h1>
-          <p className="mt-1 text-sm text-muted">{t(`wizard.steps.${def.key}.intro`, { name })}</p>
+          <h1 className="font-display text-display-lg font-semibold text-ink">{t(`wizard.steps.${def.key}.title`, { name })}</h1>
+          <p className="mt-1 text-base text-ink-muted">{t(`wizard.steps.${def.key}.intro`, { name })}</p>
         </div>
       </div>
 
@@ -145,12 +145,10 @@ export function WizardStep({
           {mode === "staff" && perspective === "parent" && <Alert tone="info">{t("wizard.enteringForParent")}</Alert>}
           <StepFields def={def} fields={fields.filter((f) => !f.collapsed)} perspective={perspective} wiz={wiz} name={name} />
           {fields.some((f) => f.collapsed) && (
-            <details className="group rounded-2xl border border-line">
-              <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between px-4 text-sm font-medium text-brand">
+            <details className="group rounded-md border border-line">
+              <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between rounded-md px-4 text-sm font-semibold text-brand hover:bg-tray">
                 {t("wizard.moreOptional")}
-                <span aria-hidden className="transition-transform group-open:rotate-180">
-                  ▾
-                </span>
+                <ChevronDown className="size-5 transition-transform group-open:rotate-180" aria-hidden />
               </summary>
               <div className="space-y-8 border-t border-line p-4">
                 <StepFields def={def} fields={fields.filter((f) => f.collapsed)} perspective={perspective} wiz={wiz} name={name} />
@@ -158,21 +156,21 @@ export function WizardStep({
             </details>
           )}
           {showFocus && <FocusPicker childId={childId} parentPriorities={parentPriorities} strengths={merged} />}
-          {fields.length === 0 && !showFocus && <p className="text-sm text-muted">{t("wizard.nothingHere")}</p>}
+          {fields.length === 0 && !showFocus && <p className="text-sm text-ink-muted">{t("wizard.nothingHere")}</p>}
         </CardBody>
       </Card>
 
       <WizardActions>
-        <Button variant="ghost" icon={<ArrowLeft className="size-4 rtl:rotate-180" aria-hidden />} disabled={wiz.saving} onClick={onBack}>
+        <Button variant="ghost" icon={<ArrowLeft className="rtl:-scale-x-100" aria-hidden />} disabled={wiz.saving} onClick={onBack}>
           {t("common.back")}
         </Button>
         <div className="flex flex-wrap gap-2">
-          <Button variant="outline" icon={<Save className="size-4" aria-hidden />} disabled={wiz.saving} onClick={onSaveExit}>
+          <Button variant="secondary" icon={<Save aria-hidden />} disabled={wiz.saving} onClick={onSaveExit}>
             {t("wizard.saveLater")}
           </Button>
           <Button loading={wiz.saving} onClick={onNext} data-testid="wizard-next">
             {nextLabel ?? t("common.next")}
-            <ArrowRight className="size-4 rtl:rotate-180" aria-hidden />
+            <ArrowRight className="rtl:-scale-x-100" aria-hidden />
           </Button>
         </div>
       </WizardActions>
@@ -183,7 +181,7 @@ export function WizardStep({
 function PerspectiveToggle({ value, onChange }: { value: PerspectiveName; onChange: (p: PerspectiveName) => void }) {
   const { t } = useI18n();
   return (
-    <div className="inline-flex rounded-2xl border border-line bg-white p-1" role="tablist" aria-label={t("wizard.perspective.label")}>
+    <div className="inline-flex gap-1 rounded-md bg-tray p-1" role="tablist" aria-label={t("wizard.perspective.label")}>
       {(["teacher", "parent"] as const).map((p) => (
         <button
           key={p}
@@ -192,10 +190,11 @@ function PerspectiveToggle({ value, onChange }: { value: PerspectiveName; onChan
           aria-selected={value === p}
           onClick={() => onChange(p)}
           className={cn(
-            "min-h-11 rounded-xl px-4 text-sm font-medium transition-colors",
-            value === p ? "bg-brand text-brand-ink shadow-sm" : "text-muted hover:text-ink",
+            "flex min-h-11 items-center gap-1.5 rounded-md px-4 text-sm transition-colors",
+            value === p ? "border-2 border-brand bg-surface px-3.5 font-semibold text-ink shadow-lip" : "font-medium text-ink-muted hover:text-ink",
           )}
         >
+          {value === p && <Check className="size-4 shrink-0 text-brand" strokeWidth={2.5} aria-hidden />}
           {t(`wizard.perspective.${p}`)}
         </button>
       ))}
@@ -210,7 +209,7 @@ function EnteredNote({ stamps, perspective }: { stamps?: EnteredStamp[]; perspec
   if (!last) return null;
   const vars = { name: last.by_name ?? "", date: formatDate(last.at) };
   const key = perspective === "parent" && last.role !== "parent" ? "wizard.entered.onBehalf" : "wizard.entered.by";
-  return <p className="text-xs text-muted">{t(key, vars)}</p>;
+  return <p className="text-caption text-ink-muted">{t(key, vars)}</p>;
 }
 
 function StepFields({ def, fields, perspective, wiz, name }: { def: StepDef; fields: FieldDef[]; perspective: PerspectiveName; wiz: WizardProfile; name: string }) {

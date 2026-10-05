@@ -33,9 +33,9 @@ export function Sequence({ game, lang, dir, replay, onDone }: TemplateProps<Sequ
   return (
     <div className="flex flex-1 flex-col gap-6" data-testid="game-sequence">
       <KidHeading title={game.title} intro={game.intro} />
-      <p className="text-center text-lg text-stone-600">{t("player.game.sequence.hint")}</p>
+      <p className="text-center text-lg text-ink-muted">{t("player.game.sequence.hint")}</p>
 
-      <ol dir={dir} className="mx-auto flex w-full max-w-4xl flex-row flex-wrap justify-center gap-3 rounded-3xl bg-surface-2 p-4" data-testid="sequence-track">
+      <ol dir={dir} className="mx-auto flex w-full max-w-4xl flex-row flex-wrap justify-center gap-3 rounded-xl bg-tray p-4" data-testid="sequence-track">
         {game.items.map((_, slot) => {
           const item = placed[slot] !== undefined ? game.items[placed[slot]!]! : null;
           return (
@@ -43,15 +43,15 @@ export function Sequence({ game, lang, dir, replay, onDone }: TemplateProps<Sequ
               key={slot}
               className={
                 item
-                  ? "animate-pop flex min-h-24 min-w-24 flex-col items-center justify-center gap-1 rounded-2xl bg-white p-3 shadow-sm ring-2 ring-emerald-300"
-                  : "flex min-h-24 min-w-24 items-center justify-center rounded-2xl border-2 border-dashed border-stone-300"
+                  ? "animate-bounce-place flex min-h-24 min-w-24 flex-col items-center justify-center gap-1 rounded-lg border-[3px] border-ink bg-surface p-3 shadow-lip"
+                  : "flex min-h-24 min-w-24 items-center justify-center rounded-lg border-[3px] border-dashed border-line-strong"
               }
               data-testid={item ? "sequence-placed" : "sequence-slot"}
             >
               {item && (
                 <>
                   <Pic emoji={item.emoji} className="text-4xl" />
-                  <span dir="auto" className="text-lg font-semibold">
+                  <span dir="auto" className="font-display text-lg font-semibold text-ink">
                     {item.label}
                   </span>
                 </>
@@ -70,6 +70,7 @@ export function Sequence({ game, lang, dir, replay, onDone }: TemplateProps<Sequ
               label={game.items[i]!.label}
               emoji={game.items[i]!.emoji}
               state={hint === i ? "hint" : "idle"}
+              paint={i}
               onClick={() => tap(i)}
               data-testid={`sequence-item-${i}`}
             />

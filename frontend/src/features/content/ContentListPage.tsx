@@ -4,7 +4,8 @@
  */
 import { useState } from "react";
 import { Link, useParams } from "react-router";
-import { ChevronDown, ChevronRight, Package, Play, Plus, Sparkles } from "lucide-react";
+import { ChevronDown, ChevronRight, Plus } from "lucide-react";
+import { PackIcon, PresentIcon } from "@/icons";
 import { Alert, Badge, Button, ButtonLink, EmptyState, Skeleton } from "@/components/ui";
 import { ChildLayout } from "@/features/children";
 import { useI18n } from "@/i18n/I18nProvider";
@@ -36,7 +37,7 @@ export function ContentList({ childId }: { childId: string }) {
   return (
     <div className="space-y-8">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="text-xl font-semibold text-ink">{t("content.list.title")}</h2>
+        <h2 className="font-display text-title font-semibold text-ink">{t("content.list.title")}</h2>
         <ButtonLink to={paths.newContent(childId)} size="lg" icon={<Plus className="size-5" aria-hidden />}>
           {t("content.list.create")}
         </ButtonLink>
@@ -53,7 +54,7 @@ export function ContentList({ childId }: { childId: string }) {
         </div>
       ) : items.length === 0 ? (
         <EmptyState
-          icon={<Sparkles />}
+          scene="content"
           title={t("content.list.empty")}
           description={t("content.list.emptyHint")}
           action={
@@ -91,7 +92,7 @@ function StatusSection({ status, items }: { status: ContentStatus; items: Conten
       <h3 id={titleId} className="text-base font-semibold text-ink">
         {t(`content.list.groups.${status}`)}
       </h3>
-      <p className="mb-3 text-sm text-muted">{t(`content.list.groupHints.${status}`)}</p>
+      <p className="mb-3 text-sm text-ink-muted">{t(`content.list.groupHints.${status}`)}</p>
       <ul className="space-y-3">
         {groupByPack(items).map((g) =>
           g.packId ? (
@@ -112,15 +113,15 @@ function StatusSection({ status, items }: { status: ContentStatus; items: Conten
 function PackGroup({ packId, items }: { packId: string; items: ContentSummary[] }) {
   const { t } = useI18n();
   return (
-    <div className="rounded-[var(--radius-card)] border border-line bg-surface-2 p-3" data-testid="pack-group">
+    <div className="rounded-[var(--radius-card)] border border-line bg-tray p-3" data-testid="pack-group">
       <div className="mb-2 flex items-center justify-between gap-2 px-1">
         <span className="inline-flex items-center gap-2 text-sm font-semibold text-ink">
-          <Package className="size-4 text-brand" aria-hidden />
+          <PackIcon className="size-5" aria-hidden />
           {t("content.types.pack")}
         </span>
-        <Link to={paths.pack(packId)} className="inline-flex min-h-11 items-center gap-1 rounded-lg px-2 text-sm font-medium text-brand hover:underline">
+        <Link to={paths.pack(packId)} className="inline-flex min-h-11 items-center gap-1 rounded-md px-2 text-sm font-medium text-brand hover:underline">
           {t("content.list.openPack")}
-          <ChevronRight className="size-4 rtl:rotate-180" aria-hidden />
+          <ChevronRight className="size-4 rtl:-scale-x-100" aria-hidden />
         </Link>
       </div>
       <ul className="space-y-2">
@@ -140,17 +141,17 @@ function ContentRow({ item, compact }: { item: ContentSummary; compact?: boolean
   return (
     <div
       className={cn(
-        "flex items-center gap-3 rounded-[var(--radius-card)] border border-line bg-card shadow-[var(--shadow-card)] transition-colors hover:border-brand/40",
+        "flex items-center gap-3 rounded-lg border border-line bg-surface shadow-lip",
         compact ? "p-3" : "p-4",
       )}
       data-testid="content-row"
     >
       <TypeIcon type={type} />
-      <Link to={paths.content(item.id)} className="min-w-0 flex-1 rounded-lg focus-visible:outline-offset-4">
+      <Link to={paths.content(item.id)} className="min-w-0 flex-1 rounded-md focus-visible:outline-offset-4">
         <span className="block truncate text-base font-semibold text-ink" dir="auto">
           {item.title}
         </span>
-        <span className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted">
+        <span className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-ink-muted">
           <span>{t(`content.types.${type}`)}</span>
           {item.focus_area_title && (
             <span className="truncate" dir="auto">
@@ -160,12 +161,12 @@ function ContentRow({ item, compact }: { item: ContentSummary; compact?: boolean
         </span>
         <span className="mt-1.5 flex flex-wrap gap-1.5">
           <ModeBadge mode={item.mode} />
-          {item.shared_with_parent && <Badge tone="interest">{t("content.list.shared")}</Badge>}
+          {item.shared_with_parent && <Badge tone="neutral">{t("content.list.shared")}</Badge>}
           {item.last_feedback_result && <ResultBadge result={item.last_feedback_result} />}
         </span>
       </Link>
       {isUsable(item.status) && (
-        <ButtonLink to={paths.presentContent(item.id)} variant="soft" icon={<Play className="size-4" aria-hidden />} aria-label={`${t("content.list.present")}: ${item.title}`}>
+        <ButtonLink to={paths.presentContent(item.id)} variant="soft" icon={<PresentIcon paint={false} aria-hidden />} aria-label={`${t("content.list.present")}: ${item.title}`}>
           <span className="hidden sm:inline">{t("content.list.present")}</span>
         </ButtonLink>
       )}

@@ -84,6 +84,12 @@ def test_age_parts():
 
 def test_teacher_list_is_scoped_and_shaped(db, teacher_client, child, other_child):
     _focus(db, child)
+    profile = db.scalar(select(ChildProfile).where(ChildProfile.child_id == child.id))
+    profile.strengths = [
+        {"key": "imagination", "sources": ["teacher"], "added_by": "x"},
+        {"custom": "Tall towers", "sources": ["parent"]},
+    ]
+    db.commit()
     _observation(db, child, observed_at=datetime(2026, 9, 1, 9, 0, tzinfo=timezone.utc))
     _content(db, child, "draft")
     _content(db, child, "draft")
@@ -104,6 +110,11 @@ def test_teacher_list_is_scoped_and_shaped(db, teacher_client, child, other_chil
     assert card["active_focus_count"] == 1
     assert card["last_observation_at"].startswith("2026-09-01")
     assert card["draft_content_count"] == 2
+    # Strengths lead the card: {key|custom, sources} only, like the parent view.
+    assert card["strengths"] == [
+        {"key": "imagination", "sources": ["teacher"]},
+        {"custom": "Tall towers", "sources": ["parent"]},
+    ]
     assert "photo_path" not in card
 
 
@@ -118,7 +129,7 @@ def test_parent_list_has_only_linked_children_without_profile_fields(parent_clie
     assert r.status_code == 200
     cards = r.json()["children"]
     assert [c["name"] for c in cards] == ["Adam"]
-    for key in ("active_focus_count", "last_observation_at", "draft_content_count", "wizard_completed"):
+    for key in ("active_focus_count", "last_observation_at", "draft_content_count", "wizard_completed", "strengths"):
         assert key not in cards[0]
 
 

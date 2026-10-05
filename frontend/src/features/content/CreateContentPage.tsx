@@ -9,8 +9,9 @@
  */
 import { useState, type ReactNode } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router";
-import { Target, Wand } from "lucide-react";
-import { Alert, Button, ButtonLink, Card, CardBody, Checkbox, EmptyState, PageHeader, PageSkeleton, Spinner, ToggleChip } from "@/components/ui";
+import { Wand } from "lucide-react";
+import { Alert, Button, ButtonLink, Card, CardBody, Checkbox, EmptyState, NumeralBlock, PageHeader, PageSkeleton, Spinner, ToggleChip } from "@/components/ui";
+import { CurrentFocusIcon } from "@/icons";
 import { childUrl, displayName, isStaffView, type ChildDetail } from "@/features/children";
 import { GAME_TEMPLATES, type GameTemplate } from "@/features/player";
 import { LOCALE_NAMES, LOCALES, isLocale, type AppLocale } from "@/i18n/config";
@@ -52,14 +53,14 @@ function Step({ n, title, hint, children }: { n: number; title: ReactNode; hint?
   return (
     <section className="space-y-3" aria-labelledby={`create-step-${n}`}>
       <div className="flex items-start gap-3">
-        <span className="tabular flex size-8 shrink-0 items-center justify-center rounded-full bg-brand text-sm font-semibold text-brand-ink" aria-hidden>
+        <span className="font-display tabular flex size-8 shrink-0 items-center justify-center rounded-sm bg-brand text-base font-bold text-on-brand" aria-hidden>
           {n}
         </span>
         <div>
-          <h2 id={`create-step-${n}`} className="text-lg font-semibold text-ink">
+          <h2 id={`create-step-${n}`} className="font-display text-title font-semibold text-ink">
             {title}
           </h2>
-          {hint && <p className="text-sm text-muted">{hint}</p>}
+          {hint && <p className="text-sm text-ink-muted">{hint}</p>}
         </div>
       </div>
       <div className="ps-0 sm:ps-11">{children}</div>
@@ -121,7 +122,7 @@ function CreateForm({ childId, child }: { childId: string; child: ChildDetail })
           <CardBody className="flex flex-col items-center gap-4 py-12 text-center" aria-live="polite">
             <Spinner className="size-10 text-brand" />
             <p className="text-lg font-semibold text-ink">{t("content.create.generating")}</p>
-            <p className="max-w-sm text-sm text-muted">{t("content.create.generatingHint")}</p>
+            <p className="max-w-sm text-sm text-ink-muted">{t("content.create.generatingHint")}</p>
           </CardBody>
         </Card>
       ) : (
@@ -139,8 +140,8 @@ function CreateForm({ childId, child }: { childId: string; child: ChildDetail })
                     icon={
                       <span
                         className={cn(
-                          "flex size-12 shrink-0 items-center justify-center rounded-2xl [&_svg]:size-6",
-                          m === "strength_builder" ? "bg-strength/10 text-strength" : "bg-helps/10 text-helps",
+                          "flex size-14 shrink-0 items-center justify-center rounded-md text-ink [&_svg]:size-10",
+                          m === "strength_builder" ? "bg-strength-soft" : "bg-focus-soft",
                         )}
                         aria-hidden
                       >
@@ -159,7 +160,7 @@ function CreateForm({ childId, child }: { childId: string; child: ChildDetail })
                 <h3 className="text-base font-semibold text-ink">{t("content.create.focusStep")}</h3>
                 {focusAreas.length === 0 ? (
                   <EmptyState
-                    icon={<Target />}
+                    icon={<CurrentFocusIcon paint="var(--paint-grape)" />}
                     title={t("content.create.noFocus")}
                     description={t("content.create.noFocusHint")}
                     action={
@@ -177,9 +178,7 @@ function CreateForm({ childId, child }: { childId: string; child: ChildDetail })
                         selected={chosenFocus === f.id}
                         onSelect={() => setFocusId(f.id)}
                         icon={
-                          <span className="tabular flex size-9 shrink-0 items-center justify-center rounded-full bg-attention/10 text-sm font-semibold text-attention" aria-hidden>
-                            {i + 1}
-                          </span>
+                          <NumeralBlock n={i + 1} className="mt-0.5" />
                         }
                         title={f.title}
                         hint={f.plan?.what_we_will_do || f.description || undefined}
@@ -191,14 +190,14 @@ function CreateForm({ childId, child }: { childId: string; child: ChildDetail })
             )}
 
             {mode === "strength_builder" && (
-              <div className="mt-6 space-y-4">
+              <div className="mt-6 space-y-4" role="radiogroup" aria-label={t("content.create.strengthStep")}>
                 <h3 className="text-base font-semibold text-ink">{t("content.create.strengthStep")}</h3>
                 {ownStrengths.length > 0 && (
                   <div>
-                    <p className="mb-2 text-sm text-muted">{t("content.create.childStrengths", { name })}</p>
+                    <p className="mb-2 text-sm text-ink-muted">{t("content.create.childStrengths", { name })}</p>
                     <div className="flex flex-wrap gap-2">
                       {ownStrengths.map((k) => (
-                        <ToggleChip key={k} tone="strength" selected={strength === k} onToggle={() => setStrength(k)}>
+                        <ToggleChip key={k} tone="strength" single selected={strength === k} onToggle={() => setStrength(k)}>
                           {strengthName(k)}
                         </ToggleChip>
                       ))}
@@ -207,10 +206,10 @@ function CreateForm({ childId, child }: { childId: string; child: ChildDetail })
                 )}
                 {targets.length > 0 && (
                   <div>
-                    <p className="mb-2 text-sm text-muted">{t("content.create.moreStrengths")}</p>
+                    <p className="mb-2 text-sm text-ink-muted">{t("content.create.moreStrengths")}</p>
                     <div className="flex flex-wrap gap-2">
                       {targets.map((o) => (
-                        <ToggleChip key={o.key} tone="strength" icon={o.icon} selected={strength === o.key} onToggle={() => setStrength(o.key)}>
+                        <ToggleChip key={o.key} tone="strength" single icon={o.icon} selected={strength === o.key} onToggle={() => setStrength(o.key)}>
                           {labelOf(o)}
                         </ToggleChip>
                       ))}
@@ -238,12 +237,12 @@ function CreateForm({ childId, child }: { childId: string; child: ChildDetail })
             {type === "digital_game" && (
               <div className="mt-5">
                 <p className="mb-2 text-sm font-medium text-ink">{t("content.create.templateLabel")}</p>
-                <div className="flex flex-wrap gap-2">
-                  <ToggleChip selected={template === null} onToggle={() => setTemplate(null)}>
+                <div className="flex flex-wrap gap-2" role="radiogroup" aria-label={t("content.create.templateLabel")}>
+                  <ToggleChip single selected={template === null} onToggle={() => setTemplate(null)}>
                     {t("content.create.templateAuto")}
                   </ToggleChip>
                   {GAME_TEMPLATES.map((g) => (
-                    <ToggleChip key={g} selected={template === g} onToggle={() => setTemplate(g)}>
+                    <ToggleChip key={g} single selected={template === g} onToggle={() => setTemplate(g)}>
                       {t(`content.templates.${g}`)}
                     </ToggleChip>
                   ))}
@@ -251,9 +250,9 @@ function CreateForm({ childId, child }: { childId: string; child: ChildDetail })
               </div>
             )}
             {type === "pack" && (
-              <div className="mt-5 rounded-2xl border border-line bg-card px-4 py-2">
+              <div className="mt-5 rounded-lg border border-line bg-surface px-4 py-2">
                 <Checkbox label={t("content.create.includeVideo")} checked={includeVideo} onChange={(e) => setIncludeVideo(e.target.checked)} />
-                <p className="pb-2 text-xs text-muted">{t("content.create.includeVideoHint")}</p>
+                <p className="pb-2 text-caption text-ink-muted">{t("content.create.includeVideoHint")}</p>
               </div>
             )}
             {type === "video" && (
@@ -266,7 +265,7 @@ function CreateForm({ childId, child }: { childId: string; child: ChildDetail })
           <Step n={3} title={t("content.create.languageStep")} hint={t("content.create.languageHint")}>
             <div className="flex flex-wrap gap-2" role="radiogroup" aria-label={t("content.create.languageStep")}>
               {LOCALES.map((l) => (
-                <ToggleChip key={l} selected={language === l} onToggle={() => setLanguage(l)}>
+                <ToggleChip key={l} single selected={language === l} onToggle={() => setLanguage(l)}>
                   <span lang={l}>{LOCALE_NAMES[l]}</span>
                 </ToggleChip>
               ))}
@@ -274,7 +273,7 @@ function CreateForm({ childId, child }: { childId: string; child: ChildDetail })
           </Step>
 
           <div className="flex flex-col items-stretch gap-2 border-t border-line pt-6 sm:flex-row sm:items-center sm:justify-end">
-            {missing && <p className="text-sm text-muted sm:me-auto">{missing}</p>}
+            {missing && <p className="text-sm text-ink-muted sm:me-auto">{missing}</p>}
             <Button size="xl" onClick={() => void submit()} disabled={!!missing} icon={<Wand className="size-6" aria-hidden />}>
               {t("content.create.generate")}
             </Button>

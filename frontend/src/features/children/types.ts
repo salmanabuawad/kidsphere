@@ -21,6 +21,8 @@ export type ChildCard = {
   last_observation_at?: string | null;
   draft_content_count?: number;
   archived?: boolean;
+  /** Merged strengths ({key|custom, sources}), so the card can lead with them (staff only). */
+  strengths?: ProfileItem[];
 };
 
 /** GET /api/children → cards plus the classes this user may add children to (and filter by). */

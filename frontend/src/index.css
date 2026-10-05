@@ -1,119 +1,592 @@
 @import "tailwindcss";
 
 /*
- * Kidsphere design tokens (ported from the legacy src/app/globals.css).
- * Warm neutral surfaces, one calm brand colour and soft meaning-coded tints:
- *   emerald = strengths, sky = interests, violet = what helps,
- *   amber = needs attention (never red for educational needs), rose = errors only.
- * Layout uses logical properties only (ms/me/ps/pe/start/end) so RTL is native.
+ * rtl: and ltr: follow the nearest dir through :dir(), not any [dir="rtl"] ancestor, so an
+ * LTR island (an English story in present mode inside the Arabic UI) never mirrors its icons.
+ */
+@custom-variant rtl (&:where(:dir(rtl)));
+@custom-variant ltr (&:where(:dir(ltr)));
+
+/*
+ * KidSphere design tokens: "Painted Block Box" (design spec DESIGN-SPEC.md, sections 2-4).
+ *
+ * Three colour layers, each with one job:
+ *   1. ground + ink (calm): birch `ground`, white `surface` cards, graphite `ink` text.
+ *   2. tints (meaning): `<tone>-soft` fill + `<tone>-ink`, always with an icon and a word.
+ *        strength = sunflower, interest = berry, helps = leaf, focus = grape,
+ *        attention = tangerine ("worth a look", never red). `danger` is for system errors only.
+ *   3. paint (kid layer): saturated `paint-*`, only inside ink-outlined icons, picture
+ *      blocks, stickers, the brand mark and empty-state scenes. Never text, never a big fill.
+ *
+ * Light values on :root; dark values ("walnut night playroom") under prefers-color-scheme
+ * unless <html data-theme="light">, and under <html data-theme="dark">.
+ * Layout uses logical properties only (ms/me/ps/pe/start/end), so RTL is native.
  */
 :root {
-  --brand: #0f766e;
-  --brand-strong: #115e59;
-  --brand-soft: #e6f2f0;
-  --brand-ink: #ffffff;
-  --surface: #faf8f5;
-  --surface-2: #f3efe9;
-  --card: #ffffff;
-  --ink: #1c1917;
-  --muted: #78716c;
-  --line: #e7e2dc;
-  --strength: #047857;
-  --interest: #0369a1;
-  --helps: #6d28d9;
-  --attention: #b45309;
-  --danger: #be123c;
+  color-scheme: light;
+
+  --ground: #fbf6ec;
+  --surface: #ffffff;
+  --surface-raised: #ffffff;
+  --tray: #f3ebdd;
+  --line: #e5daca;
+  --line-strong: #8a7e6c;
+  --ink: #1f2233;
+  --ink-muted: #57525f;
+  --brand: #005dbd;
+  --brand-strong: #004a9c;
+  --brand-soft: #d1ebff;
+  --on-brand: #ffffff;
+  --strength-soft: #fbe794;
+  --strength-ink: #735603;
+  --interest-soft: #ffc9d5;
+  --interest-ink: #a42056;
+  --helps-soft: #c3f3ce;
+  --helps-ink: #206b38;
+  --focus-soft: #efc4f9;
+  --focus-ink: #7c2d88;
+  --attention-soft: #ffd1aa;
+  --attention-ink: #984500;
+  --danger: #be2323;
+  --ring: #004fb1;
+  --paint-sun: #fdc010;
+  --paint-berry: #ee4e89;
+  --paint-leaf: #4db956;
+  --paint-grape: #bc6ece;
+  --paint-tangerine: #fa8927;
+  --paint-sky: #33a7e0;
+  --on-paint: #1f2233;
+  /* Aliases (tokens.json writes them as "{helps-ink}" and "{attention-ink}"). */
+  --success: var(--helps-ink);
+  --warning: var(--attention-ink);
+
+  /* Hard "block lips"; blur only on sheets. */
+  --lip: 0 2px 0 0 rgb(31 34 51 / 0.14);
+  --lip-lg: 0 4px 0 0 rgb(31 34 51 / 0.18);
+  --lip-brand: 0 3px 0 0 #033b7a;
+  --lip-brand-pressed: 0 1px 0 0 #033b7a;
+  --sheet: 0 12px 32px -12px rgb(31 34 51 / 0.3), 0 -6px 20px -14px rgb(31 34 51 / 0.2);
+  --backdrop: rgb(31 34 51 / 0.45);
+
+  /* Body and every teacher control, all three scripts (the display stacks are with the type scale below). */
+  --font-body: "Rubik Variable", "Rubik", system-ui, "Segoe UI", Tahoma, sans-serif;
+
+  /* Legacy names kept for one release so untouched code still renders. */
+  --radius-card: 20px;
+  --shadow-card: none;
+  --shadow-raised: var(--lip-brand);
 }
 
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+
+    --ground: #16120e;
+    --surface: #27221d;
+    --surface-raised: #312b26;
+    --tray: #0e0a07;
+    --line: #4f4740;
+    --line-strong: #8f847a;
+    --ink: #f3eee6;
+    --ink-muted: #c0b8ad;
+    --brand: #8cb4fe;
+    --brand-strong: #aecbff;
+    --brand-soft: #1f3559;
+    --on-brand: #0c121a;
+    --strength-soft: #433706;
+    --strength-ink: #f7d471;
+    --interest-soft: #4c222d;
+    --interest-ink: #fdaebe;
+    --helps-soft: #183b23;
+    --helps-ink: #95dfa4;
+    --focus-soft: #3e1946;
+    --focus-ink: #d79fe9;
+    --attention-soft: #4e270c;
+    --attention-ink: #fab27b;
+    --danger: #f47c6b;
+    --ring: #98c7ff;
+    --paint-sun: #f9c635;
+    --paint-berry: #f56696;
+    --paint-leaf: #61c568;
+    --paint-grape: #c77dd8;
+    --paint-tangerine: #fa9947;
+    --paint-sky: #43b5e8;
+    --on-paint: #1f2233;
+
+    --lip: 0 2px 0 0 rgb(0 0 0 / 0.55);
+    --lip-lg: 0 4px 0 0 rgb(0 0 0 / 0.6);
+    --lip-brand: 0 3px 0 0 #4d70b2;
+    --lip-brand-pressed: 0 1px 0 0 #4d70b2;
+    --sheet: 0 12px 32px -12px rgb(0 0 0 / 0.7), 0 -6px 20px -14px rgb(0 0 0 / 0.5);
+    --backdrop: rgb(0 0 0 / 0.6);
+
+    /*
+     * TRANSITIONAL legibility shim for code not yet moved to the tokens (it still uses
+     * Tailwind's light-only palette, e.g. bg-white + text-ink). In dark mode those palette
+     * steps follow the tokens, so "white" becomes the card surface and a solid -600 fill
+     * becomes the light tone ink (which then reads with dark "text-white" text, like
+     * on-brand). Remove once nothing uses stone/emerald/sky/violet/amber/rose/teal/white.
+     */
+    --color-white: var(--surface);
+    --color-stone-50: var(--tray);
+    --color-stone-100: var(--tray);
+    --color-stone-200: var(--line);
+    --color-stone-300: var(--line-strong);
+    --color-stone-400: var(--line-strong);
+    --color-stone-500: var(--ink-muted);
+    --color-stone-600: var(--ink-muted);
+    --color-stone-700: var(--ink-muted);
+    --color-stone-800: var(--ink);
+    --color-stone-900: var(--ink);
+    --color-emerald-50: var(--helps-soft);
+    --color-emerald-100: var(--helps-soft);
+    --color-emerald-200: var(--helps-soft);
+    --color-emerald-300: var(--helps-ink);
+    --color-emerald-500: var(--helps-ink);
+    --color-emerald-600: var(--helps-ink);
+    --color-emerald-700: var(--helps-ink);
+    --color-emerald-800: var(--helps-ink);
+    --color-emerald-900: var(--helps-ink);
+    --color-sky-50: var(--brand-soft);
+    --color-sky-100: var(--brand-soft);
+    --color-sky-200: var(--brand-soft);
+    --color-sky-600: var(--brand);
+    --color-sky-800: var(--brand);
+    --color-violet-50: var(--focus-soft);
+    --color-violet-100: var(--focus-soft);
+    --color-violet-600: var(--focus-ink);
+    --color-violet-800: var(--focus-ink);
+    --color-amber-50: var(--attention-soft);
+    --color-amber-100: var(--attention-soft);
+    --color-amber-200: var(--attention-soft);
+    --color-amber-400: var(--attention-ink);
+    --color-amber-500: var(--attention-ink);
+    --color-amber-600: var(--attention-ink);
+    --color-amber-800: var(--attention-ink);
+    --color-amber-900: var(--attention-ink);
+    --color-rose-600: var(--danger);
+    --color-rose-700: var(--danger);
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --ground: #16120e;
+  --surface: #27221d;
+  --surface-raised: #312b26;
+  --tray: #0e0a07;
+  --line: #4f4740;
+  --line-strong: #8f847a;
+  --ink: #f3eee6;
+  --ink-muted: #c0b8ad;
+  --brand: #8cb4fe;
+  --brand-strong: #aecbff;
+  --brand-soft: #1f3559;
+  --on-brand: #0c121a;
+  --strength-soft: #433706;
+  --strength-ink: #f7d471;
+  --interest-soft: #4c222d;
+  --interest-ink: #fdaebe;
+  --helps-soft: #183b23;
+  --helps-ink: #95dfa4;
+  --focus-soft: #3e1946;
+  --focus-ink: #d79fe9;
+  --attention-soft: #4e270c;
+  --attention-ink: #fab27b;
+  --danger: #f47c6b;
+  --ring: #98c7ff;
+  --paint-sun: #f9c635;
+  --paint-berry: #f56696;
+  --paint-leaf: #61c568;
+  --paint-grape: #c77dd8;
+  --paint-tangerine: #fa9947;
+  --paint-sky: #43b5e8;
+  --on-paint: #1f2233;
+
+  --lip: 0 2px 0 0 rgb(0 0 0 / 0.55);
+  --lip-lg: 0 4px 0 0 rgb(0 0 0 / 0.6);
+  --lip-brand: 0 3px 0 0 #4d70b2;
+  --lip-brand-pressed: 0 1px 0 0 #4d70b2;
+  --sheet: 0 12px 32px -12px rgb(0 0 0 / 0.7), 0 -6px 20px -14px rgb(0 0 0 / 0.5);
+  --backdrop: rgb(0 0 0 / 0.6);
+
+  /* TRANSITIONAL legibility shim: see the prefers-color-scheme block above. */
+  --color-white: var(--surface);
+  --color-stone-50: var(--tray);
+  --color-stone-100: var(--tray);
+  --color-stone-200: var(--line);
+  --color-stone-300: var(--line-strong);
+  --color-stone-400: var(--line-strong);
+  --color-stone-500: var(--ink-muted);
+  --color-stone-600: var(--ink-muted);
+  --color-stone-700: var(--ink-muted);
+  --color-stone-800: var(--ink);
+  --color-stone-900: var(--ink);
+  --color-emerald-50: var(--helps-soft);
+  --color-emerald-100: var(--helps-soft);
+  --color-emerald-200: var(--helps-soft);
+  --color-emerald-300: var(--helps-ink);
+  --color-emerald-500: var(--helps-ink);
+  --color-emerald-600: var(--helps-ink);
+  --color-emerald-700: var(--helps-ink);
+  --color-emerald-800: var(--helps-ink);
+  --color-emerald-900: var(--helps-ink);
+  --color-sky-50: var(--brand-soft);
+  --color-sky-100: var(--brand-soft);
+  --color-sky-200: var(--brand-soft);
+  --color-sky-600: var(--brand);
+  --color-sky-800: var(--brand);
+  --color-violet-50: var(--focus-soft);
+  --color-violet-100: var(--focus-soft);
+  --color-violet-600: var(--focus-ink);
+  --color-violet-800: var(--focus-ink);
+  --color-amber-50: var(--attention-soft);
+  --color-amber-100: var(--attention-soft);
+  --color-amber-200: var(--attention-soft);
+  --color-amber-400: var(--attention-ink);
+  --color-amber-500: var(--attention-ink);
+  --color-amber-600: var(--attention-ink);
+  --color-amber-800: var(--attention-ink);
+  --color-amber-900: var(--attention-ink);
+  --color-rose-600: var(--danger);
+  --color-rose-700: var(--danger);
+}
+
+/* Colour utilities: bg-ground, bg-surface, text-ink-muted, border-line-strong, bg-paint-sun, outline-ring... */
 @theme inline {
+  --color-ground: var(--ground);
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-tray: var(--tray);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
   --color-brand: var(--brand);
   --color-brand-strong: var(--brand-strong);
   --color-brand-soft: var(--brand-soft);
-  --color-brand-ink: var(--brand-ink);
-  --color-surface: var(--surface);
-  --color-surface-2: var(--surface-2);
-  --color-card: var(--card);
-  --color-ink: var(--ink);
-  --color-muted: var(--muted);
-  --color-line: var(--line);
-  --color-strength: var(--strength);
-  --color-interest: var(--interest);
-  --color-helps: var(--helps);
-  --color-attention: var(--attention);
+  --color-on-brand: var(--on-brand);
+  --color-strength-soft: var(--strength-soft);
+  --color-strength-ink: var(--strength-ink);
+  --color-interest-soft: var(--interest-soft);
+  --color-interest-ink: var(--interest-ink);
+  --color-helps-soft: var(--helps-soft);
+  --color-helps-ink: var(--helps-ink);
+  --color-focus-soft: var(--focus-soft);
+  --color-focus-ink: var(--focus-ink);
+  --color-attention-soft: var(--attention-soft);
+  --color-attention-ink: var(--attention-ink);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
   --color-danger: var(--danger);
-  --font-sans:
-    "Rubik Variable", "Rubik", ui-sans-serif, system-ui, "Segoe UI", "Noto Sans Arabic", "Noto Sans Hebrew", "Arial Hebrew", Tahoma,
-    Arial, sans-serif;
-  --radius-card: 1rem;
-  --shadow-card: 0 1px 2px rgb(28 25 23 / 0.04), 0 1px 3px rgb(28 25 23 / 0.03);
-  --shadow-raised: 0 8px 24px -8px rgb(15 118 110 / 0.45);
+  --color-ring: var(--ring);
+  --color-paint-sun: var(--paint-sun);
+  --color-paint-berry: var(--paint-berry);
+  --color-paint-leaf: var(--paint-leaf);
+  --color-paint-grape: var(--paint-grape);
+  --color-paint-tangerine: var(--paint-tangerine);
+  --color-paint-sky: var(--paint-sky);
+  --color-on-paint: var(--on-paint);
+
+  /*
+   * Transition aliases (spec section 9), one release only: the old names keep rendering
+   * in code that has not moved yet. card -> surface, muted -> ink-muted, surface-2 -> tray,
+   * brand-ink -> on-brand, strength/interest/helps/attention -> their -ink.
+   */
+  --color-card: var(--surface);
+  --color-muted: var(--ink-muted);
+  --color-surface-2: var(--tray);
+  --color-brand-ink: var(--on-brand);
+  --color-strength: var(--strength-ink);
+  --color-interest: var(--interest-ink);
+  --color-helps: var(--helps-ink);
+  --color-attention: var(--attention-ink);
+
+  --font-sans: var(--font-body);
+
+  /* shadow-lip, shadow-lip-lg, shadow-lip-brand, shadow-sheet (per theme). */
+  --shadow-lip: var(--lip);
+  --shadow-lip-lg: var(--lip-lg);
+  --shadow-lip-brand: var(--lip-brand);
+  --shadow-lip-brand-pressed: var(--lip-brand-pressed);
+  --shadow-sheet: var(--sheet);
 }
 
-html {
-  -webkit-text-size-adjust: 100%;
-  -webkit-tap-highlight-color: transparent;
+@theme {
+  /* Radius: blocks, not pills. Chips and avatars are rounded squares. */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+
+  /*
+   * Type scale (spec 3.3). Sizes follow the script: Arabic display styles are 2px larger
+   * with taller lines (Baloo's content box is 1.71em), see the per-script blocks below,
+   * which also hold the live values (these are the defaults Tailwind builds utilities from).
+   * body = text-base, body-strong = text-base font-semibold, label = text-sm.
+   */
+  --text-display-xl: 2.5rem;
+  --text-display-xl--line-height: 3rem;
+  --text-display-lg: 1.75rem;
+  --text-display-lg--line-height: 2.25rem;
+  --text-title: 1.25rem;
+  --text-title--line-height: 1.75rem;
+  --text-kid-label: 1.5rem;
+  --text-kid-label--line-height: 2rem;
+  --text-kid-story: 1.75rem;
+  --text-kid-story--line-height: 2.625rem;
+  --text-name: 1.125rem;
+  --text-name--line-height: 1.625rem;
+  --text-caption: 0.8125rem;
+  --text-caption--line-height: 1.125rem;
+
+  --animate-placed: ks-placed 180ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  --animate-sheet: ks-sheet 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  --animate-dialog: ks-dialog 180ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  --animate-bounce-place: ks-bounce-place 240ms cubic-bezier(0.34, 1.3, 0.64, 1) both;
+  --animate-stamp: ks-stamp 320ms cubic-bezier(0.34, 1.3, 0.64, 1) both;
+  --animate-wiggle: ks-wiggle 360ms ease-in-out 1;
+  --animate-nudge: ks-nudge 240ms ease-out 1;
 }
 
-body {
-  background: var(--surface);
-  color: var(--ink);
-  font-family: var(--font-sans);
-  line-height: 1.5;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
+/*
+ * Per-script display face and type sizes. Present mode follows the content language
+ * (lang on the stage root), so an English story inside the Arabic UI gets Fredoka and
+ * the Latin sizes back: custom properties inherit, hence the explicit :lang(en/he) reset.
+ *   Latin and Hebrew: Fredoka first; an Arabic name inside falls through to Baloo by unicode-range.
+ *   Arabic: Baloo first, so digits and Latin inside an Arabic heading share one face and metrics.
+ */
+:root,
+:lang(en),
+:lang(he) {
+  --font-display:
+    "Fredoka Variable", "Fredoka", "Baloo Bhaijaan 2 Variable", "Baloo Bhaijaan 2", "Rubik Variable", "Rubik", system-ui, sans-serif;
+  --text-display-xl: 2.5rem;
+  --text-display-xl--line-height: 3rem;
+  --text-display-lg: 1.75rem;
+  --text-display-lg--line-height: 2.25rem;
+  --text-title: 1.25rem;
+  --text-title--line-height: 1.75rem;
+  --text-kid-label: 1.5rem;
+  --text-kid-label--line-height: 2rem;
+  --text-kid-story: 1.75rem;
+  --text-kid-story--line-height: 2.625rem;
+  --text-name--line-height: 1.625rem;
+  --text-caption: 0.8125rem;
+  --text-caption--line-height: 1.125rem;
+  /* body = text-base 16/24 and label = text-sm 14/20; Hebrew body is 16/26 (below). */
+  --text-base--line-height: 1.5rem;
+  --text-sm--line-height: 1.25rem;
 }
 
-/* Arabic and Hebrew read better with slightly more line height. */
-html[lang="ar"] body,
-html[lang="he"] body {
-  line-height: 1.65;
+:lang(he) {
+  --text-base--line-height: 1.625rem;
 }
 
-/* Visible, consistent keyboard focus everywhere. */
-:focus-visible {
-  outline: 3px solid color-mix(in oklab, var(--brand) 55%, white);
-  outline-offset: 2px;
+@media (max-width: 599px) {
+  :root,
+  :lang(en),
+  :lang(he) {
+    --text-display-xl: 2rem;
+    --text-display-xl--line-height: 2.5rem;
+  }
 }
 
-/* Native <dialog> backdrop. */
-dialog::backdrop {
-  background: rgb(28 25 23 / 0.45);
-  backdrop-filter: blur(2px);
+:lang(ar) {
+  --font-display:
+    "Baloo Bhaijaan 2 Variable", "Baloo Bhaijaan 2", "Fredoka Variable", "Fredoka", "Rubik Variable", "Rubik", system-ui, sans-serif;
+  --text-display-xl: 2.625rem;
+  --text-display-xl--line-height: 3.75rem;
+  --text-display-lg: 1.875rem;
+  --text-display-lg--line-height: 2.75rem;
+  --text-title: 1.375rem;
+  --text-title--line-height: 2rem;
+  --text-kid-label: 1.625rem;
+  --text-kid-label--line-height: 2.375rem;
+  --text-kid-story: 1.875rem;
+  --text-kid-story--line-height: 2.875rem;
+  --text-name--line-height: 1.875rem;
+  /* The caption floor is 14px in Arabic. */
+  --text-caption: 0.875rem;
+  --text-caption--line-height: 1.375rem;
+  /* body-ar 16/26 and label-ar 14/22. */
+  --text-base--line-height: 1.625rem;
+  --text-sm--line-height: 1.375rem;
 }
 
-/* Keep numbers aligned in tables and stats. */
+@media (max-width: 599px) {
+  :lang(ar) {
+    --text-display-xl: 2.125rem;
+    --text-display-xl--line-height: 3rem;
+  }
+}
+
+/* The display face: titles, child-facing text, numeral blocks, avatar initials, the wordmark. Never in controls. */
+@utility font-display {
+  font-family: var(--font-display);
+}
+
+/*
+ * Element defaults live in the base layer, so a utility on an element (e.g. a kid tile's
+ * focus-visible:outline-offset-[3px]) can still refine them.
+ */
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--font-body);
+    line-height: 1.5;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Arabic and Hebrew read better with more line height. */
+  html:lang(ar) body,
+  html:lang(he) body {
+    line-height: 1.65;
+  }
+
+  /* Keyboard focus: a solid 3px ring at a 2px offset on every interactive element (3px on kid tiles). */
+  :focus-visible {
+    outline: 3px solid var(--ring);
+    outline-offset: 2px;
+  }
+
+  /* Native <dialog> backdrop: flat, no blur. */
+  dialog::backdrop {
+    background: var(--backdrop);
+  }
+
+  ::placeholder {
+    color: var(--ink-muted);
+    opacity: 1;
+  }
+}
+
+/* Dates, ages, times and counts. */
 .tabular {
   font-variant-numeric: tabular-nums;
 }
 
-@keyframes ks-pop {
-  0% {
-    transform: scale(0.96);
+/* Motion (spec 4.4). Teacher screens: 180ms or less, no overshoot, nothing idle or looping. */
+@keyframes ks-placed {
+  from {
+    translate: 0 6px;
     opacity: 0;
   }
-  100% {
-    transform: scale(1);
+  to {
+    translate: 0 0;
     opacity: 1;
   }
 }
 
-@keyframes ks-rise {
-  0% {
-    transform: translateY(8px);
+@keyframes ks-sheet {
+  from {
+    translate: 0 100%;
+  }
+  to {
+    translate: 0 0;
+  }
+}
+
+@keyframes ks-dialog {
+  from {
+    scale: 0.97;
     opacity: 0;
   }
-  100% {
-    transform: translateY(0);
+  to {
+    scale: 1;
     opacity: 1;
   }
 }
 
-.animate-pop {
-  animation: ks-pop 180ms ease-out;
+/* Present mode only (children). */
+@keyframes ks-bounce-place {
+  from {
+    translate: 0 -24px;
+    opacity: 0;
+  }
+  to {
+    translate: 0 0;
+    opacity: 1;
+  }
 }
 
+@keyframes ks-stamp {
+  0% {
+    scale: 0.6;
+    rotate: -6deg;
+    opacity: 0;
+  }
+  60% {
+    scale: 1.08;
+    opacity: 1;
+  }
+  100% {
+    scale: 1;
+    rotate: 0deg;
+    opacity: 1;
+  }
+}
+
+@keyframes ks-wiggle {
+  0%,
+  50%,
+  100% {
+    rotate: 0deg;
+  }
+  12.5%,
+  62.5% {
+    rotate: 2deg;
+  }
+  37.5%,
+  87.5% {
+    rotate: -2deg;
+  }
+}
+
+@keyframes ks-nudge {
+  0%,
+  100% {
+    scale: 1;
+  }
+  50% {
+    scale: 1.04;
+  }
+}
+
+@keyframes ks-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Legacy names, kept so existing screens animate the new way. */
+.animate-pop,
 .animate-rise {
-  animation: ks-rise 220ms ease-out;
+  animation: ks-placed 180ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/*
+ * Press and lift: elements marked .ks-press sink into the floor when pressed (and may
+ * lift on hover). Under reduced motion they never move; only colour and lip change.
+ */
+.ks-press {
+  transition-property: translate, box-shadow, background-color, border-color, color, opacity;
+  transition-duration: 120ms;
+  transition-timing-function: ease-out;
+}
+.ks-press:active {
+  transition-duration: 90ms;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -121,8 +594,30 @@ dialog::backdrop {
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+
+  .ks-press,
+  .ks-press:hover,
+  .ks-press:active {
+    translate: none !important;
+  }
+
+  /* State changes become a short fade at most; things that build themselves render in place. */
+  .animate-placed,
+  .animate-pop,
+  .animate-rise,
+  .animate-bounce-place,
+  .animate-stamp,
+  .animate-dialog {
+    animation: ks-fade 120ms linear !important;
+  }
+  .animate-wiggle,
+  .animate-nudge,
+  .animate-sheet {
+    animation: none !important;
   }
 }

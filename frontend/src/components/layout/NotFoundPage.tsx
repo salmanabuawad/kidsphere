@@ -1,4 +1,4 @@
-import { Compass, RefreshCw } from "lucide-react";
+import { RotateCcw } from "lucide-react";
 import { isRouteErrorResponse, useRouteError } from "react-router";
 import { buttonClass, ButtonLink } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -9,7 +9,7 @@ export function NotFoundPage() {
   return (
     <div className="mx-auto max-w-xl py-10">
       <EmptyState
-        icon={<Compass />}
+        scene="search"
         title={t("errors.notFoundTitle")}
         description={t("errors.notFoundBody")}
         action={<ButtonLink to="/">{t("errors.goHome")}</ButtonLink>}
@@ -25,18 +25,19 @@ export function RouteError() {
   if (isRouteErrorResponse(error) && error.status === 404) return <NotFoundPage />;
   if (import.meta.env.DEV) console.error(error);
   return (
-    <div className="mx-auto flex min-h-dvh max-w-xl items-center px-4">
+    <div className="mx-auto flex min-h-dvh max-w-xl items-center bg-ground px-4">
       <EmptyState
         className="w-full"
-        icon={<RefreshCw />}
+        scene="search"
         title={t("errors.errorTitle")}
         description={t("errors.errorBody")}
         action={
           <div className="flex flex-wrap justify-center gap-2">
             <button type="button" onClick={() => window.location.reload()} className={buttonClass("primary")}>
+              <RotateCcw aria-hidden />
               {t("common.retry")}
             </button>
-            <a href="/" className={buttonClass("outline")}>
+            <a href="/" className={buttonClass("secondary")}>
               {t("errors.goHome")}
             </a>
           </div>

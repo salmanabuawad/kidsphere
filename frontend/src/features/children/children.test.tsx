@@ -48,6 +48,11 @@ const adam: ChildCard = {
   active_focus_count: 1,
   last_observation_at: daysAgo(2),
   draft_content_count: 2,
+  strengths: [
+    { key: "imagination", sources: ["teacher"] },
+    { key: "building", sources: ["parent"] },
+    { custom: "Tall towers", sources: ["teacher"] },
+  ],
 };
 const maya: ChildCard = {
   ...adam,
@@ -58,6 +63,7 @@ const maya: ChildCard = {
   draft_content_count: 0,
   last_observation_at: daysAgo(20),
   wizard_completed: false,
+  strengths: [],
 };
 const listing: ChildListResponse = { children: [adam, maya], classes: [classA, classB] };
 
@@ -139,6 +145,15 @@ describe("ChildListPage", () => {
     expect(within(cards).getByText("Adam")).toBeTruthy();
     expect(within(cards).getByText("Maya")).toBeTruthy();
     expect(within(cards).getAllByText(/\d+ years?/).length).toBe(2);
+
+    // The whole card is one link, and it leads with the first two strengths, then "+N".
+    const adamCard = screen.getByTestId("child-card-c1");
+    expect(adamCard.getAttribute("href")).toBe("/children/c1");
+    expect(within(adamCard).getByText("Imagination")).toBeTruthy();
+    expect(within(adamCard).getByText("Building")).toBeTruthy();
+    expect(within(adamCard).queryByText("Tall towers")).toBeNull();
+    expect(within(adamCard).getByText("+1")).toBeTruthy();
+    expect(within(adamCard).queryByRole("link")).toBeNull();
 
     const add = screen.getAllByRole("link", { name: /add child/i })[0]!;
     expect(add.getAttribute("href")).toBe("/children/new");

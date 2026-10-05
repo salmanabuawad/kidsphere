@@ -7,7 +7,8 @@
  */
 import { useEffect, useState, type ReactNode } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router";
-import { Archive, Check, Copy, MessageCircleHeart, Package, Pencil, Play, RefreshCw, Share2, Trash2 } from "lucide-react";
+import { Archive, Check, Copy, MessageCircleHeart, Pencil, RefreshCw, Share2, Trash2 } from "lucide-react";
+import { PackIcon, PresentIcon } from "@/icons";
 import { Alert, Badge, Button, ButtonLink, Card, CardBody, CardHeader, Dialog, EmptyState, Field, PageHeader, PageSkeleton, Tabs, Textarea } from "@/components/ui";
 import { childUrl, displayName, type ChildDetail } from "@/features/children";
 import { LOCALE_NAMES, isLocale } from "@/i18n/config";
@@ -48,7 +49,7 @@ export function ContentReviewPage() {
   if (!item) {
     if (error)
       return error.status === 404 ? (
-        <EmptyState title={t("content.review.notFound")} action={<ButtonLink to={paths.children()}>{t("children.child.backToList")}</ButtonLink>} />
+        <EmptyState scene="search" title={t("content.review.notFound")} action={<ButtonLink to={paths.children()}>{t("children.child.backToList")}</ButtonLink>} />
       ) : (
         <Alert tone="error" action={<Button size="sm" variant="outline" onClick={reload}>{t("common.retry")}</Button>}>
           {toMessage(error)}
@@ -119,10 +120,10 @@ function Review({ item, onChange }: { item: ContentDetail; onChange: (c: Content
         <StatusChip status={status} />
         <ModeBadge mode={item.mode} />
         <SourceBadge isTemplate={item.is_template} />
-        {item.shared_with_parent && <Badge tone="interest">{t("content.review.shared")}</Badge>}
+        {item.shared_with_parent && <Badge tone="neutral">{t("content.review.shared")}</Badge>}
         {item.pack_id && (
-          <Link to={paths.pack(item.pack_id)} className="inline-flex min-h-8 items-center gap-1 rounded-full px-2 text-sm font-medium text-brand hover:underline">
-            <Package className="size-4" aria-hidden />
+          <Link to={paths.pack(item.pack_id)} className="inline-flex min-h-11 items-center gap-1 rounded-sm px-2 text-sm font-semibold text-brand hover:underline">
+            <PackIcon className="size-4" paint={false} aria-hidden />
             {t("content.review.openPack")}
           </Link>
         )}
@@ -157,7 +158,7 @@ function Review({ item, onChange }: { item: ContentDetail; onChange: (c: Content
               }}
             />
           ) : (
-            <div className="rounded-[var(--radius-card)] border border-line bg-surface-2 p-3 sm:p-5" data-testid="content-preview">
+            <div className="rounded-[var(--radius-card)] border border-line bg-tray p-3 sm:p-5" data-testid="content-preview">
               <ContentPreview item={item} />
             </div>
           )}
@@ -173,7 +174,7 @@ function Review({ item, onChange }: { item: ContentDetail; onChange: (c: Content
               )}
               {isUsable(status) && (
                 <>
-                  <ButtonLink size="lg" className="w-full" to={paths.presentContent(item.id)} icon={<Play className="size-5" aria-hidden />}>
+                  <ButtonLink size="lg" className="w-full" to={paths.presentContent(item.id)} icon={<PresentIcon paint={false} aria-hidden />}>
                     {t("content.review.present")}
                   </ButtonLink>
                   <Button size="lg" variant="soft" className="w-full" onClick={() => setFeedbackOpen(true)} icon={<MessageCircleHeart className="size-5" aria-hidden />}>
@@ -193,7 +194,7 @@ function Review({ item, onChange }: { item: ContentDetail; onChange: (c: Content
                   {item.shared_with_parent ? t("content.review.shared") : t("content.review.share")}
                 </Button>
               )}
-              {!canShare(status) && status === "draft" && <p className="text-xs text-muted">{t("content.review.shareNeedsApproval")}</p>}
+              {!canShare(status) && status === "draft" && <p className="text-caption text-ink-muted">{t("content.review.shareNeedsApproval")}</p>}
               <div className="grid grid-cols-1 gap-2 pt-2">
                 {editable && (
                   <>
@@ -355,7 +356,7 @@ function ConfirmDialog({
 function Row({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div>
-      <dt className="text-xs font-medium text-muted">{label}</dt>
+      <dt className="text-caption font-medium text-ink-muted">{label}</dt>
       <dd className="mt-0.5 text-sm text-ink" dir="auto">
         {children}
       </dd>
@@ -411,7 +412,7 @@ function FeedbackHistory({ item }: { item: ContentDetail }) {
       <CardHeader title={t("content.review.feedbackHistory")} />
       <CardBody>
         {list.length === 0 ? (
-          <p className="text-sm text-muted">{t("content.review.noFeedback")}</p>
+          <p className="text-sm text-ink-muted">{t("content.review.noFeedback")}</p>
         ) : (
           <ul className="space-y-4">
             {list.map((f) => (
@@ -419,7 +420,7 @@ function FeedbackHistory({ item }: { item: ContentDetail }) {
                 <div className="flex flex-wrap items-center gap-2">
                   <ResultBadge result={f.result as FeedbackResult} />
                   {f.support_level && f.support_level !== "not_observed" && (
-                    <span className="text-xs text-muted">{t("content.review.supportLine", { level: t(`content.support.${f.support_level}`) })}</span>
+                    <span className="text-caption text-ink-muted">{t("content.review.supportLine", { level: t(`content.support.${f.support_level}`) })}</span>
                   )}
                 </div>
                 {f.observation && (
@@ -428,13 +429,13 @@ function FeedbackHistory({ item }: { item: ContentDetail }) {
                   </p>
                 )}
                 {f.what_helped && f.what_helped.length > 0 && (
-                  <p className="text-xs text-muted" dir="auto">
+                  <p className="text-caption text-ink-muted" dir="auto">
                     {t("content.review.helpedLine", {
                       items: f.what_helped.map((h) => (h.key ? optionLabel("what_helps", h.key) : (h.custom ?? ""))).join(" · "),
                     })}
                   </p>
                 )}
-                <p className="text-xs text-muted">{[f.by_name, formatDate(f.created_at)].filter(Boolean).join(" · ")}</p>
+                <p className="text-caption text-ink-muted">{[f.by_name, formatDate(f.created_at)].filter(Boolean).join(" · ")}</p>
               </li>
             ))}
           </ul>

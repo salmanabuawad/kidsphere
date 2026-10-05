@@ -49,9 +49,9 @@ export function PresentFrame({ lang, dir: dirProp, onExit, holdMs = 1200, childr
   );
 
   return (
-    <div dir={dir} lang={lang} className="fixed inset-0 z-50 flex flex-col overflow-y-auto bg-surface text-ink" data-testid="present-frame">
+    <div dir={dir} lang={lang} className="fixed inset-0 z-50 flex flex-col overflow-y-auto bg-ground text-ink" data-testid="present-frame">
       {onExit && (
-        <div className="flex justify-end px-3 pt-3">
+        <div className="flex justify-end px-3 pt-[max(0.75rem,env(safe-area-inset-top))]">
           <button
             type="button"
             onPointerDown={start}
@@ -68,8 +68,8 @@ export function PresentFrame({ lang, dir: dirProp, onExit, holdMs = 1200, childr
             aria-label={t("player.present.exit")}
             title={t("player.present.holdToExit")}
             className={cn(
-              "inline-flex h-11 items-center gap-1.5 rounded-full bg-white/70 px-4 text-sm text-stone-500 ring-1 ring-stone-200 transition select-none",
-              holding && "bg-stone-200 text-stone-800",
+              "inline-flex h-11 items-center gap-1.5 rounded-md border-[1.5px] border-line-strong bg-surface px-4 text-sm font-medium text-ink-muted transition-colors select-none",
+              holding && "bg-tray text-ink",
             )}
             data-testid="present-exit"
           >
@@ -78,7 +78,7 @@ export function PresentFrame({ lang, dir: dirProp, onExit, holdMs = 1200, childr
           </button>
         </div>
       )}
-      <div className="mx-auto flex w-full max-w-5xl flex-1 flex-col px-4 py-6 md:px-8">{children}</div>
+      <div className="mx-auto flex w-full max-w-[960px] flex-1 flex-col p-6 md:p-12">{children}</div>
     </div>
   );
 }

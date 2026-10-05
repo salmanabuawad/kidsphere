@@ -172,7 +172,7 @@ function EditForm({ child, onClose, onSaved }: { child: ChildBasics; onClose: ()
               </ToggleChip>
             ))}
         </div>
-        {errors.additional_languages && <p className="mt-1 text-xs text-rose-700">{errors.additional_languages}</p>}
+        {errors.additional_languages && <p className="text-caption mt-1 font-medium text-danger">{errors.additional_languages}</p>}
       </fieldset>
 
       <div className="grid gap-4 sm:grid-cols-2">
@@ -215,7 +215,7 @@ function EditForm({ child, onClose, onSaved }: { child: ChildBasics; onClose: ()
 
       <div className="flex flex-wrap items-center justify-end gap-2 border-t border-line pt-4">
         {!child.archived && !confirmArchive && (
-          <Button variant="ghost" className="me-auto text-muted" icon={<Archive className="size-4" aria-hidden />} onClick={() => setConfirmArchive(true)}>
+          <Button variant="ghost" className="me-auto" icon={<Archive className="size-4" aria-hidden />} onClick={() => setConfirmArchive(true)}>
             {t("children.edit.archive")}
           </Button>
         )}

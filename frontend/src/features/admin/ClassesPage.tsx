@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
-import { ChevronDown, HeartHandshake, Pencil, Plus, School, Trash2, UserRoundCog, UsersRound } from "lucide-react";
+import { ChevronDown, Pencil, Plus, Trash2, UserRoundCog } from "lucide-react";
+import { ChildrenIcon, ClassesIcon, ParentHomeIcon } from "@/icons";
 import { Alert } from "@/components/ui/Alert";
 import { Avatar } from "@/components/ui/Avatar";
 import { Button, ButtonLink } from "@/components/ui/Button";
@@ -25,8 +26,8 @@ function ClassChildren({ klass }: { klass: ClassRow }) {
   const { data, error, loading } = useFetch<unknown>("/api/children", { class_id: klass.id });
   const kids = childrenOf(data).filter((c) => !c.class_id || c.class_id === klass.id);
   if (loading && data === undefined) return <Spinner label={t("common.loading")} />;
-  if (error) return <p className="text-sm text-muted">{isApiError(error, "NOT_FOUND") ? t("admin.classes.childrenUnavailable") : toMessage(error)}</p>;
-  if (kids.length === 0) return <p className="text-sm text-muted">{t("admin.classes.noChildren")}</p>;
+  if (error) return <p className="text-sm text-ink-muted">{isApiError(error, "NOT_FOUND") ? t("admin.classes.childrenUnavailable") : toMessage(error)}</p>;
+  if (kids.length === 0) return <p className="text-sm text-ink-muted">{t("admin.classes.noChildren")}</p>;
   return (
     <ul className="divide-y divide-line">
       {kids.map((c) => (
@@ -37,7 +38,7 @@ function ClassChildren({ klass }: { klass: ClassRow }) {
               {displayName(c)}
             </span>
           </span>
-          <ButtonLink to={paths.adminChildParents(c.id)} size="sm" variant="soft" icon={<HeartHandshake className="size-4" />}>
+          <ButtonLink to={paths.adminChildParents(c.id)} size="sm" variant="soft" icon={<ParentHomeIcon paint={false} />}>
             {t("admin.classes.parents")}
           </ButtonLink>
         </li>
@@ -67,7 +68,7 @@ function ClassCard({
             <h3 className="text-base font-semibold text-ink" dir="auto">
               {klass.name}
             </h3>
-            <p className="text-sm text-muted">{t("admin.classes.childCount", { count: klass.child_count })}</p>
+            <p className="text-sm text-ink-muted">{t("admin.classes.childCount", { count: klass.child_count })}</p>
           </div>
           <div className="flex flex-wrap gap-1">
             <Button size="sm" variant="ghost" icon={<Pencil className="size-4" />} onClick={onEdit}>
@@ -80,13 +81,13 @@ function ClassCard({
         </div>
 
         <div>
-          <p className="mb-1.5 text-xs font-medium text-muted">{t("admin.classes.teachers")}</p>
+          <p className="mb-1.5 text-caption font-medium text-ink-muted">{t("admin.classes.teachers")}</p>
           <div className="flex flex-wrap items-center gap-2">
             {klass.teachers.length === 0 ? (
-              <span className="text-sm text-muted">{t("admin.classes.noTeacherAssigned")}</span>
+              <span className="text-sm text-ink-muted">{t("admin.classes.noTeacherAssigned")}</span>
             ) : (
               klass.teachers.map((tch) => (
-                <Chip key={tch.id} tone="interest">
+                <Chip key={tch.id} tone="outline">
                   {tch.name}
                 </Chip>
               ))
@@ -102,13 +103,13 @@ function ClassCard({
             type="button"
             aria-expanded={open}
             onClick={() => setOpen((o) => !o)}
-            className="flex min-h-11 w-full items-center justify-between gap-2 rounded-lg text-sm font-medium text-ink hover:text-brand"
+            className="flex min-h-11 w-full items-center justify-between gap-2 rounded-md text-sm font-medium text-ink hover:text-brand"
           >
             <span className="flex items-center gap-2">
-              <UsersRound className="size-4 text-muted" aria-hidden />
+              <ChildrenIcon className="size-5" paint={false} aria-hidden />
               {t("admin.classes.showChildren")}
             </span>
-            <ChevronDown className={cn("size-4 text-muted transition-transform", open && "rotate-180")} aria-hidden />
+            <ChevronDown className={cn("size-4 text-ink-muted transition-transform", open && "rotate-180")} aria-hidden />
           </button>
           {open && (
             <div className="pt-1">
@@ -151,7 +152,7 @@ export function ClassesPage() {
   return (
     <div className="mx-auto max-w-5xl">
       <PageHeader
-        icon={<School />}
+        icon={<ClassesIcon />}
         title={t("admin.classes.title")}
         description={t("admin.classes.subtitle")}
         actions={
@@ -169,7 +170,7 @@ export function ClassesPage() {
         <PageSkeleton />
       ) : classes.length === 0 ? (
         <EmptyState
-          icon={<School />}
+          icon={<ClassesIcon />}
           title={t("admin.classes.empty")}
           description={t("admin.classes.emptyHint")}
           action={
@@ -182,7 +183,7 @@ export function ClassesPage() {
         <div className="space-y-8">
           {groups.map((g) => (
             <section key={g.kindergarten} aria-label={g.kindergarten}>
-              <SectionTitle icon={<School className="size-4" />}>
+              <SectionTitle icon={<ClassesIcon className="size-5" />}>
                 <span dir="auto">{g.kindergarten}</span>
               </SectionTitle>
               <div className="grid gap-4 md:grid-cols-2">

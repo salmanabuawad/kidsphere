@@ -7,7 +7,8 @@
  * Labels: wizard.fields.<name>.label / .hint; option labels come from
  * GET /api/options (backend/app/data/options.json).
  */
-import { Footprints, Heart, Leaf, MessagesSquare, Sparkles, Target, type LucideIcon } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+import { ActivityIcon, AttentionIcon, ChildrenIcon, CurrentFocusIcon, StrengthsIcon, WhatHelpsIcon } from "@/icons";
 import type { Tone } from "@/components/ui/Badge";
 import type { PerspectiveName, SectionName } from "./api";
 
@@ -27,7 +28,10 @@ export type StepDef = {
   step: number;
   key: string;
   section: SectionName;
+  /** A painted KidSphere icon (they are drop-ins for lucide icons). */
   icon: LucideIcon;
+  /** The header tile behind the icon: the step's meaning tint, or tray. */
+  tile?: string;
   fields: FieldDef[];
   /** Step 7: the teacher picks up to 3 Current Focus areas (focus API, not a profile section). */
   focusPicker?: boolean;
@@ -42,7 +46,8 @@ export const STEPS: StepDef[] = [
     step: 2,
     key: "who",
     section: "who",
-    icon: Sparkles,
+    icon: StrengthsIcon,
+    tile: "bg-strength-soft",
     fields: [
       { kind: "items", name: "strengths", list: "strengths", custom: true, tone: "strength", who: "both" },
       { kind: "items", name: "interests", list: "interests", custom: true, tone: "interest", who: "both" },
@@ -55,7 +60,8 @@ export const STEPS: StepDef[] = [
     step: 3,
     key: "emotions",
     section: "emotions",
-    icon: Heart,
+    icon: WhatHelpsIcon,
+    tile: "bg-helps-soft",
     fields: [
       { kind: "items", name: "calming_helps", list: "calming_helps", custom: true, tone: "helps", who: "both" },
       { kind: "items", name: "frustration_reactions", list: "frustration_reactions", custom: true, tone: "attention", who: "both" },
@@ -71,7 +77,7 @@ export const STEPS: StepDef[] = [
     step: 4,
     key: "social",
     section: "social",
-    icon: MessagesSquare,
+    icon: ChildrenIcon,
     fields: [
       { kind: "keys", name: "social", list: "social", who: "both" },
       { kind: "keys", name: "communication", list: "communication", who: "both" },
@@ -82,7 +88,7 @@ export const STEPS: StepDef[] = [
     step: 5,
     key: "independence",
     section: "independence",
-    icon: Footprints,
+    icon: ActivityIcon,
     fields: [
       { kind: "levels", name: "levels", list: "independence_areas", who: "both" },
       { kind: "text", name: "independence_notes", who: "both", collapsed: true },
@@ -92,7 +98,8 @@ export const STEPS: StepDef[] = [
     step: 6,
     key: "environment",
     section: "environment",
-    icon: Leaf,
+    icon: AttentionIcon,
+    tile: "bg-attention-soft",
     fields: [
       { kind: "sensitivities", name: "items", who: "both" },
       { kind: "text", name: "environment_notes", who: "both", collapsed: true },
@@ -102,7 +109,8 @@ export const STEPS: StepDef[] = [
     step: 7,
     key: "priorities",
     section: "priorities",
-    icon: Target,
+    icon: CurrentFocusIcon,
+    tile: "bg-focus-soft",
     focusPicker: true,
     fields: [
       { kind: "keys", name: "parent_priorities", list: "priority_categories", tone: "brand", who: "parent" },

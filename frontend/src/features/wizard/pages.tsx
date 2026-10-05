@@ -1,5 +1,6 @@
 import { Navigate, useNavigate, useParams, useSearchParams } from "react-router";
-import { CheckCircle2, Heart } from "lucide-react";
+import { Check } from "lucide-react";
+import { ParentHomeIcon } from "@/icons";
 import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 import { Card, CardBody } from "@/components/ui/Card";
@@ -108,12 +109,12 @@ function ParentWizard({ childId }: { childId: string }) {
         <WizardProgress current={total + 1} total={total} onPick={(k) => go(k + FIRST_SECTION_STEP - 1)} />
         <Card>
           <CardBody className="space-y-4 py-8 text-center">
-            <Heart className="mx-auto size-12 text-brand" aria-hidden />
-            <h1 className="text-2xl font-semibold text-ink">{t("wizard.parent.doneTitle")}</h1>
-            <p className="text-muted">{t("wizard.parent.doneIntro")}</p>
+            <ParentHomeIcon className="mx-auto size-16" aria-hidden />
+            <h1 className="font-display text-display-lg font-semibold text-ink">{t("wizard.parent.doneTitle")}</h1>
+            <p className="text-ink-muted">{t("wizard.parent.doneIntro")}</p>
             {wiz.data.wizard.completed_at && (
-              <p className="inline-flex items-center gap-2 text-sm text-emerald-700">
-                <CheckCircle2 className="size-4" aria-hidden />
+              <p className="inline-flex items-center gap-2 rounded-md border-[1.5px] border-success px-3 py-1.5 text-sm font-semibold text-success">
+                <Check className="size-4" strokeWidth={2.5} aria-hidden />
                 {t("wizard.parent.alreadySent")}
               </p>
             )}
