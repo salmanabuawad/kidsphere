@@ -35,8 +35,8 @@ export function LoginForm({ next }: { next: string | null }) {
   return (
     <form onSubmit={onSubmit} className="mt-6 space-y-4" noValidate>
       {error && <Alert tone="error">{error}</Alert>}
-      <Field label={t("common.email")} required>
-        {(p) => <Input {...p} type="email" autoComplete="username" dir="ltr" value={email} onChange={(e) => setEmail(e.target.value)} required name="email" />}
+      <Field label={t("auth.identifier")} required>
+        {(p) => <Input {...p} type="text" autoCapitalize="none" spellCheck={false} autoComplete="username" dir="ltr" value={email} onChange={(e) => setEmail(e.target.value)} required name="email" />}
       </Field>
       <Field label={t("auth.password")} required>
         {(p) => (

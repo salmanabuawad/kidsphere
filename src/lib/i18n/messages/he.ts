@@ -95,6 +95,7 @@ export const he: Messages = {
     signingIn: "נכנס…",
     welcome: "ברוכים הבאים ל-Kidsphere",
     welcomeSub: "היכנסו כדי להמשיך לסביבת העבודה.",
+    identifier: "דוא״ל או שם משתמש",
     password: "סיסמה",
     forgot: "שכחתם סיסמה?",
     forgotTitle: "איפוס סיסמה",

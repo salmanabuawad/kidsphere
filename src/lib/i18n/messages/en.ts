@@ -93,6 +93,7 @@ export const en = {
     signingIn: "Signing in…",
     welcome: "Welcome to Kidsphere",
     welcomeSub: "Sign in to continue to your workspace.",
+    identifier: "Email or username",
     password: "Password",
     forgot: "Forgot password?",
     forgotTitle: "Reset your password",

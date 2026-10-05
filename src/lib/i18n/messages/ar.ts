@@ -95,6 +95,7 @@ export const ar: Messages = {
     signingIn: "جارٍ تسجيل الدخول…",
     welcome: "أهلاً بكم في Kidsphere",
     welcomeSub: "سجّلوا الدخول للمتابعة إلى مساحة العمل.",
+    identifier: "البريد الإلكتروني أو اسم المستخدم",
     password: "كلمة المرور",
     forgot: "نسيت كلمة المرور؟",
     forgotTitle: "إعادة تعيين كلمة المرور",

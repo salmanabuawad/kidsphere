@@ -91,7 +91,19 @@ export const CATEGORY_VALUES = [
 export const RELATION_VALUES = ["CHILD", "MOTHER", "FATHER", "SIBLING", "GRANDPARENT", "FAMILY_MEMBER", "FRIEND"] as const;
 
 // ── Auth ──
-export const loginSchema = z.object({ email: z.string().trim().toLowerCase().email(), password: z.string().min(1).max(200) }).strict();
+/** "email" accepts an e-mail address or a plain username (e.g. "admin"). */
+export const loginSchema = z
+  .object({
+    email: z
+      .string()
+      .trim()
+      .toLowerCase()
+      .min(2)
+      .max(200)
+      .regex(/^[a-z0-9._%+@-]+$/),
+    password: z.string().min(1).max(200),
+  })
+  .strict();
 export const forgotSchema = z.object({ email: z.string().trim().toLowerCase().email() }).strict();
 export const resetSchema = z.object({ token: z.string().min(10).max(200), password: z.string().min(10).max(200) }).strict();
 export const changePasswordSchema = z.object({ currentPassword: z.string().min(1), newPassword: z.string().min(10).max(200) }).strict();
