@@ -1,0 +1,51 @@
+<!-- @dsCard group="Feedback" height=370 subtitle="A short ink bar with a painted glyph block; success, warning, info and error" -->
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Toast preview</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@400..800&family=Fredoka:wght@300..700&family=Rubik:wght@300..900&display=swap">
+</head>
+<body>
+<div class="ks-preview" lang="en" dir="ltr">
+  <div class="ks-cols">
+    <div class="ks-toast-dock">
+      <div class="ks-toast" role="status">
+        <span class="ks-toast__block ks-toast__block--success"><svg class="ks-glyph ks-glyph--18 ks-glyph--heavy" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></span>
+        <span class="ks-toast__text">Observation saved</span>
+        <button type="button" class="ks-toast__close" aria-label="Close" title="Close"><svg class="ks-glyph ks-glyph--18" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
+      </div>
+      <div class="ks-toast" role="status">
+        <span class="ks-toast__block ks-toast__block--warning"><svg class="ks-glyph ks-glyph--18" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg></span>
+        <span class="ks-toast__text">The video is still being made.</span>
+        <button type="button" class="ks-toast__close" aria-label="Close" title="Close"><svg class="ks-glyph ks-glyph--18" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
+      </div>
+      <div class="ks-toast" role="status">
+        <span class="ks-toast__block ks-toast__block--info"><svg class="ks-glyph ks-glyph--18" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></span>
+        <span class="ks-toast__text">Shared with the parents.</span>
+        <button type="button" class="ks-toast__action">Undo</button>
+      </div>
+      <div class="ks-toast" role="alert">
+        <span class="ks-toast__block ks-toast__block--error"><svg class="ks-glyph ks-glyph--18" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg></span>
+        <span class="ks-toast__text">The observation wasn't saved.</span>
+        <button type="button" class="ks-toast__action">Try again</button>
+        <button type="button" class="ks-toast__close" aria-label="Close" title="Close"><svg class="ks-glyph ks-glyph--18" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
+      </div>
+    </div>
+    <div class="ks-toast-dock">
+      <div class="ks-toast" role="status" lang="ar" dir="rtl">
+        <span class="ks-toast__block ks-toast__block--success"><svg class="ks-glyph ks-glyph--18 ks-glyph--heavy" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></span>
+        <span class="ks-toast__text">تم حفظ الملاحظة</span>
+        <button type="button" class="ks-toast__close" aria-label="إغلاق" title="إغلاق"><svg class="ks-glyph ks-glyph--18" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
+      </div>
+      <div class="ks-toast" role="status" lang="he" dir="rtl">
+        <span class="ks-toast__block ks-toast__block--success"><svg class="ks-glyph ks-glyph--18 ks-glyph--heavy" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></span>
+        <span class="ks-toast__text">תודה! נוסף לציר הזמן.</span>
+        <button type="button" class="ks-toast__close" aria-label="סגירה" title="סגירה"><svg class="ks-glyph ks-glyph--18" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

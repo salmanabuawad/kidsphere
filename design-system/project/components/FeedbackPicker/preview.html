@@ -1,0 +1,83 @@
+<!-- @dsCard group="Forms" height=880 subtitle="How did it go? Three block towers, one neutral selection for every outcome, then optional details" -->
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FeedbackPicker preview</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@400..800&family=Fredoka:wght@300..700&family=Rubik:wght@300..900&display=swap">
+</head>
+<body>
+<div class="ks-preview" lang="en" dir="ltr">
+  <section class="ks-card ks-stack" aria-labelledby="fb-title">
+    <div class="ks-card__head-text">
+      <h3 class="ks-title" id="fb-title">How did it go?</h3>
+      <p class="ks-caption">One tap is enough. The details are optional.</p>
+    </div>
+    <div class="ks-fb" role="radiogroup" aria-labelledby="fb-title">
+      <button type="button" role="radio" class="ks-fb__tile" aria-checked="true">
+        <img class="ks-ico ks-ico--40 ks-ico--l" src="../../assets/Icons/worked-well.svg" alt=""><img class="ks-ico ks-ico--40 ks-ico--d" src="../../assets/Icons/dark/worked-well.svg" alt="">
+        Worked well
+        <span class="ks-checkblock"><svg class="ks-glyph ks-glyph--16" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></span>
+      </button>
+      <button type="button" role="radio" class="ks-fb__tile is-hover" aria-checked="false">
+        <img class="ks-ico ks-ico--40 ks-ico--mirror ks-ico--l" src="../../assets/Icons/partly.svg" alt=""><img class="ks-ico ks-ico--40 ks-ico--mirror ks-ico--d" src="../../assets/Icons/dark/partly.svg" alt="">
+        Partly
+        <span class="ks-checkblock"><svg class="ks-glyph ks-glyph--16" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></span>
+      </button>
+      <button type="button" role="radio" class="ks-fb__tile" aria-checked="false">
+        <img class="ks-ico ks-ico--40 ks-ico--mirror ks-ico--l" src="../../assets/Icons/did-not-work.svg" alt=""><img class="ks-ico ks-ico--40 ks-ico--mirror ks-ico--d" src="../../assets/Icons/dark/did-not-work.svg" alt="">
+        Did not work
+        <span class="ks-checkblock"><svg class="ks-glyph ks-glyph--16" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></span>
+      </button>
+    </div>
+
+    <div class="ks-followup ks-placed">
+      <div class="ks-fieldset">
+        <span class="ks-legend" id="fb-sup">Did the child need support?</span>
+        <div class="ks-seg" role="radiogroup" aria-labelledby="fb-sup">
+          <button type="button" role="radio" class="ks-seg__opt" aria-checked="false"><svg class="ks-glyph ks-glyph--16 ks-seg__check" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>No</button>
+          <button type="button" role="radio" class="ks-seg__opt" aria-checked="true"><svg class="ks-glyph ks-glyph--16 ks-seg__check" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Some</button>
+          <button type="button" role="radio" class="ks-seg__opt" aria-checked="false"><svg class="ks-glyph ks-glyph--16 ks-seg__check" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Significant</button>
+        </div>
+      </div>
+      <div class="ks-fieldset">
+        <span class="ks-legend">What helped?</span>
+        <div class="ks-chips" role="group" aria-label="What helped?">
+          <button type="button" class="ks-tchip ks-tchip--helps" aria-pressed="true"><svg class="ks-glyph ks-glyph--16 ks-tchip__check" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span class="ks-pod" aria-hidden="true">🏅</span>A special helper role</button>
+          <button type="button" class="ks-tchip ks-tchip--helps" aria-pressed="false"><svg class="ks-glyph ks-glyph--16 ks-tchip__check" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span class="ks-pod" aria-hidden="true">🤔</span>Having a choice</button>
+          <button type="button" class="ks-tchip ks-tchip--helps" aria-pressed="false"><svg class="ks-glyph ks-glyph--16 ks-tchip__check" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span class="ks-pod" aria-hidden="true">👏</span>Praise and encouragement</button>
+        </div>
+      </div>
+      <label class="ks-field">
+        <span class="ks-field__label">What did you observe? <span class="ks-muted">(optional)</span></span>
+        <textarea class="ks-input ks-textarea" rows="3" placeholder="For example: joined after a prompt and stayed for a while"></textarea>
+      </label>
+      <div class="ks-row"><button type="button" class="ks-btn ks-btn--primary">Save</button></div>
+    </div>
+  </section>
+
+  <section class="ks-card ks-stack" aria-labelledby="fb-title-ar" lang="ar" dir="rtl">
+    <h3 class="ks-title" id="fb-title-ar">كيف جرى الأمر؟</h3>
+    <div class="ks-fb" role="radiogroup" aria-labelledby="fb-title-ar">
+      <button type="button" role="radio" class="ks-fb__tile" aria-checked="false">
+        <img class="ks-ico ks-ico--40 ks-ico--l" src="../../assets/Icons/worked-well.svg" alt=""><img class="ks-ico ks-ico--40 ks-ico--d" src="../../assets/Icons/dark/worked-well.svg" alt="">
+        نجح جيداً
+        <span class="ks-checkblock"><svg class="ks-glyph ks-glyph--16" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></span>
+      </button>
+      <button type="button" role="radio" class="ks-fb__tile is-focus" aria-checked="true">
+        <img class="ks-ico ks-ico--40 ks-ico--mirror ks-ico--l" src="../../assets/Icons/partly.svg" alt=""><img class="ks-ico ks-ico--40 ks-ico--mirror ks-ico--d" src="../../assets/Icons/dark/partly.svg" alt="">
+        جزئياً
+        <span class="ks-checkblock"><svg class="ks-glyph ks-glyph--16" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></span>
+      </button>
+      <button type="button" role="radio" class="ks-fb__tile" aria-checked="false">
+        <img class="ks-ico ks-ico--40 ks-ico--mirror ks-ico--l" src="../../assets/Icons/did-not-work.svg" alt=""><img class="ks-ico ks-ico--40 ks-ico--mirror ks-ico--d" src="../../assets/Icons/dark/did-not-work.svg" alt="">
+        لم ينجح
+        <span class="ks-checkblock"><svg class="ks-glyph ks-glyph--16" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></span>
+      </button>
+    </div>
+    <p class="ks-note">تم اختيار "جزئياً" بنفس المعاملة تماماً، والأبراج معكوسة من اليمين إلى اليسار.</p>
+  </section>
+</div>
+</body>
+</html>

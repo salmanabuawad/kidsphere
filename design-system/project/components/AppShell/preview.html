@@ -1,0 +1,112 @@
+<!-- @dsCard group="Navigation" height=690 width=1080 subtitle="Phone-first shell: top bar, bottom bar with the raised Observe block, and the side nav from lg" -->
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AppShell preview</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@400..800&family=Fredoka:wght@300..700&family=Rubik:wght@300..900&display=swap">
+</head>
+<body>
+<div class="ks-preview">
+  <div class="ks-row ks-row--top">
+
+    <div class="ks-shell-phone" lang="en" dir="ltr">
+      <header class="ks-topbar">
+        <a class="ks-brand" href="#home"><img class="ks-brand__mark ks-ico--l" src="../../assets/Icons/brand-mark.svg" alt=""><img class="ks-brand__mark ks-ico--d" src="../../assets/Icons/dark/brand-mark.svg" alt=""><span class="ks-brand__word" lang="en">KidSphere</span></a>
+        <div class="ks-topbar__end">
+          <button type="button" class="ks-iconbtn" aria-label="Interface language" title="Interface language"><svg class="ks-glyph" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/></svg></button>
+          <button type="button" class="ks-iconbtn" aria-label="Account menu" title="Account menu"><span class="ks-avatar ks-avatar--32" aria-hidden="true">R</span></button>
+        </div>
+      </header>
+      <main class="ks-main ks-stack">
+        <div class="ks-stack ks-stack--tight">
+          <h1 class="ks-display-lg">Children</h1>
+          <p class="ks-caption">Each child, what they are good at and what is happening now.</p>
+        </div>
+        <a class="ks-card ks-card--tap ks-child" href="#adam">
+          <span class="ks-avatar" aria-hidden="true">A</span>
+          <span class="ks-child__text">
+            <span class="ks-name ks-child__name">Adam</span>
+            <span class="ks-caption">4 years 2 months</span>
+            <span class="ks-child__chips"><span class="ks-chip ks-chip--strength ks-chip--lead"><img class="ks-ico ks-ico--16 ks-ico--l" src="../../assets/Icons/strengths.svg" alt=""><img class="ks-ico ks-ico--16 ks-ico--d" src="../../assets/Icons/dark/strengths.svg" alt="">Imagination</span><span class="ks-chip ks-chip--neutral" dir="ltr">+3</span></span>
+          </span>
+          <span class="ks-child__meta">2 days ago</span>
+        </a>
+        <a class="ks-card ks-card--tap ks-child" href="#yousef">
+          <span class="ks-avatar" aria-hidden="true">Y</span>
+          <span class="ks-child__text">
+            <span class="ks-name ks-child__name">Yousef</span>
+            <span class="ks-caption">3 years 11 months</span>
+            <span class="ks-child__chips"><span class="ks-chip ks-chip--strength ks-chip--lead"><img class="ks-ico ks-ico--16 ks-ico--l" src="../../assets/Icons/strengths.svg" alt=""><img class="ks-ico ks-ico--16 ks-ico--d" src="../../assets/Icons/dark/strengths.svg" alt="">Music</span></span>
+          </span>
+          <span class="ks-child__meta">9 days ago</span>
+          <span class="ks-strip"><img class="ks-ico ks-ico--16 ks-ico--l" src="../../assets/Icons/attention.svg" alt=""><img class="ks-ico ks-ico--16 ks-ico--d" src="../../assets/Icons/dark/attention.svg" alt="">Not observed for 9 days</span>
+        </a>
+      </main>
+      <nav class="ks-bbar" aria-label="Main navigation">
+        <div class="ks-bbar__row">
+          <a class="ks-bbar__item" href="#children" aria-current="page"><span class="ks-bbar__pill"><svg class="ks-glyph ks-glyph--24" viewBox="0 0 24 24" aria-hidden="true"><g class="ks-p-brand" stroke="none" transform="translate(0 1.5)"><path d="M13.39 15.98A4 4 0 0 1 20.5 18.5V20H13.5V17A5 5 0 0 0 13.39 15.98Z"/></g><circle cx="8.5" cy="6" r="3"/><path d="M3.5 20V17A5 5 0 0 1 13.5 17V20Z"/><circle cx="16.5" cy="9" r="2.5"/><path d="M13.39 15.98A4 4 0 0 1 20.5 18.5V20H13.5"/></svg></span><span class="ks-bbar__label">Children</span></a>
+          <a class="ks-bbar__item" href="#users"><span class="ks-bbar__pill"><svg class="ks-glyph ks-glyph--24" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6.86V5.5A2.5 2.5 0 0 1 10.5 3H18.5A2.5 2.5 0 0 1 21 5.5V16.5A2.5 2.5 0 0 1 18.5 19H17.14" transform="rotate(8 14.5 11)"/><rect x="3" y="6" width="13" height="16" rx="2.5"/><circle cx="9.5" cy="11.5" r="2"/><path d="M6.5 16.5H12.5M6.5 19H10.5"/></svg></span><span class="ks-bbar__label">Users</span></a>
+          <a class="ks-bbar__item ks-bbar__item--observe" href="#observe"><span class="ks-observe"><svg class="ks-glyph ks-glyph--28" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.4 15.4 20.5 20.5" stroke-width="3"/><path d="M8 10.5h5M10.5 8v5" stroke-width="2.5"/></svg></span><span class="ks-bbar__label">Observe</span></a>
+          <a class="ks-bbar__item" href="#classes"><span class="ks-bbar__pill"><svg class="ks-glyph ks-glyph--24" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 11.5V19A2 2 0 0 0 7 21H17A2 2 0 0 0 19 19V11.5"/><path d="M3 11.5L12 3.5L21 11.5Z"/><circle cx="12" cy="8.3" r="1.5"/><path d="M10 21V17A2 2 0 0 1 14 17V21"/></svg></span><span class="ks-bbar__label">Classes</span></a>
+          <a class="ks-bbar__item" href="#account"><span class="ks-bbar__pill"><svg class="ks-glyph ks-glyph--24" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="9" r="2.75"/><path d="M6.5 20.77V20A5.5 5.5 0 0 1 17.5 20V20.77"/></svg></span><span class="ks-bbar__label">My account</span></a>
+        </div>
+      </nav>
+    </div>
+
+    <div class="ks-shell-phone" lang="ar" dir="rtl">
+      <header class="ks-topbar">
+        <a class="ks-brand" href="#home"><img class="ks-brand__mark ks-ico--l" src="../../assets/Icons/brand-mark.svg" alt=""><img class="ks-brand__mark ks-ico--d" src="../../assets/Icons/dark/brand-mark.svg" alt=""><span class="ks-brand__word" lang="en">KidSphere</span></a>
+        <div class="ks-topbar__end">
+          <button type="button" class="ks-iconbtn" aria-label="لغة الواجهة" title="لغة الواجهة"><svg class="ks-glyph" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/></svg></button>
+          <button type="button" class="ks-iconbtn" aria-label="قائمة الحساب" title="قائمة الحساب"><span class="ks-avatar ks-avatar--32" aria-hidden="true">ر</span></button>
+        </div>
+      </header>
+      <main class="ks-main ks-stack">
+        <div class="ks-stack ks-stack--tight">
+          <h1 class="ks-display-lg">الأطفال</h1>
+          <p class="ks-caption">كل طفل، وما يُحسنه، وما يحدث معه الآن.</p>
+        </div>
+        <a class="ks-card ks-card--tap ks-child" href="#lina">
+          <span class="ks-avatar" aria-hidden="true">ل</span>
+          <span class="ks-child__text">
+            <span class="ks-name ks-child__name">لينا</span>
+            <span class="ks-caption">5 سنوات وشهر</span>
+            <span class="ks-child__chips"><span class="ks-chip ks-chip--strength ks-chip--lead"><img class="ks-ico ks-ico--16 ks-ico--l" src="../../assets/Icons/strengths.svg" alt=""><img class="ks-ico ks-ico--16 ks-ico--d" src="../../assets/Icons/dark/strengths.svg" alt="">الخيال</span><span class="ks-chip ks-chip--neutral" dir="ltr">+2</span></span>
+          </span>
+          <span class="ks-child__meta">اليوم</span>
+        </a>
+      </main>
+      <nav class="ks-bbar" aria-label="التنقّل الرئيسي">
+        <div class="ks-bbar__row">
+          <a class="ks-bbar__item" href="#children" aria-current="page"><span class="ks-bbar__pill"><svg class="ks-glyph ks-glyph--24" viewBox="0 0 24 24" aria-hidden="true"><g class="ks-p-brand" stroke="none" transform="translate(0 1.5)"><path d="M13.39 15.98A4 4 0 0 1 20.5 18.5V20H13.5V17A5 5 0 0 0 13.39 15.98Z"/></g><circle cx="8.5" cy="6" r="3"/><path d="M3.5 20V17A5 5 0 0 1 13.5 17V20Z"/><circle cx="16.5" cy="9" r="2.5"/><path d="M13.39 15.98A4 4 0 0 1 20.5 18.5V20H13.5"/></svg></span><span class="ks-bbar__label">الأطفال</span></a>
+          <a class="ks-bbar__item" href="#users"><span class="ks-bbar__pill"><svg class="ks-glyph ks-glyph--24" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6.86V5.5A2.5 2.5 0 0 1 10.5 3H18.5A2.5 2.5 0 0 1 21 5.5V16.5A2.5 2.5 0 0 1 18.5 19H17.14" transform="rotate(8 14.5 11)"/><rect x="3" y="6" width="13" height="16" rx="2.5"/><circle cx="9.5" cy="11.5" r="2"/><path d="M6.5 16.5H12.5M6.5 19H10.5"/></svg></span><span class="ks-bbar__label">المستخدمون</span></a>
+          <a class="ks-bbar__item ks-bbar__item--observe" href="#observe"><span class="ks-observe is-hover"><svg class="ks-glyph ks-glyph--28" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.4 15.4 20.5 20.5" stroke-width="3"/><path d="M8 10.5h5M10.5 8v5" stroke-width="2.5"/></svg></span><span class="ks-bbar__label">ملاحظة</span></a>
+          <a class="ks-bbar__item" href="#classes"><span class="ks-bbar__pill"><svg class="ks-glyph ks-glyph--24" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 11.5V19A2 2 0 0 0 7 21H17A2 2 0 0 0 19 19V11.5"/><path d="M3 11.5L12 3.5L21 11.5Z"/><circle cx="12" cy="8.3" r="1.5"/><path d="M10 21V17A2 2 0 0 1 14 17V21"/></svg></span><span class="ks-bbar__label">الصفوف</span></a>
+          <a class="ks-bbar__item" href="#account"><span class="ks-bbar__pill"><svg class="ks-glyph ks-glyph--24" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="9" r="2.75"/><path d="M6.5 20.77V20A5.5 5.5 0 0 1 17.5 20V20.77"/></svg></span><span class="ks-bbar__label">حسابي</span></a>
+        </div>
+      </nav>
+    </div>
+
+    <aside class="ks-sidenav" lang="he" dir="rtl">
+      <a class="ks-brand" href="#home"><img class="ks-brand__mark ks-ico--l" src="../../assets/Icons/brand-mark.svg" alt=""><img class="ks-brand__mark ks-ico--d" src="../../assets/Icons/dark/brand-mark.svg" alt=""><span class="ks-brand__word" lang="en">KidSphere</span></a>
+      <button type="button" class="ks-btn ks-btn--primary ks-btn--lg ks-btn--block"><svg class="ks-glyph" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.4 15.4 20.5 20.5" stroke-width="3"/><path d="M8 10.5h5M10.5 8v5" stroke-width="2.5"/></svg>הוספת תצפית</button>
+      <nav aria-label="ניווט ראשי">
+        <ul class="ks-navlist">
+          <li><a class="ks-navitem" href="#children" aria-current="page"><svg class="ks-glyph ks-glyph--24" viewBox="0 0 24 24" aria-hidden="true"><g class="ks-p-brand" stroke="none" transform="translate(0 1.5)"><path d="M13.39 15.98A4 4 0 0 1 20.5 18.5V20H13.5V17A5 5 0 0 0 13.39 15.98Z"/></g><circle cx="8.5" cy="6" r="3"/><path d="M3.5 20V17A5 5 0 0 1 13.5 17V20Z"/><circle cx="16.5" cy="9" r="2.5"/><path d="M13.39 15.98A4 4 0 0 1 20.5 18.5V20H13.5"/></svg>ילדים</a></li>
+          <li><a class="ks-navitem is-hover" href="#users"><svg class="ks-glyph ks-glyph--24" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6.86V5.5A2.5 2.5 0 0 1 10.5 3H18.5A2.5 2.5 0 0 1 21 5.5V16.5A2.5 2.5 0 0 1 18.5 19H17.14" transform="rotate(8 14.5 11)"/><rect x="3" y="6" width="13" height="16" rx="2.5"/><circle cx="9.5" cy="11.5" r="2"/><path d="M6.5 16.5H12.5M6.5 19H10.5"/></svg>משתמשים</a></li>
+          <li><a class="ks-navitem" href="#classes"><svg class="ks-glyph ks-glyph--24" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 11.5V19A2 2 0 0 0 7 21H17A2 2 0 0 0 19 19V11.5"/><path d="M3 11.5L12 3.5L21 11.5Z"/><circle cx="12" cy="8.3" r="1.5"/><path d="M10 21V17A2 2 0 0 1 14 17V21"/></svg>כיתות</a></li>
+        </ul>
+      </nav>
+      <div class="ks-sidenav__foot">
+        <div class="ks-user"><span class="ks-avatar ks-avatar--36" aria-hidden="true">מ</span><span class="ks-user__text"><span class="ks-user__name">מיכל לוי</span><span class="ks-user__role">גננת / צוות</span></span></div>
+        <button type="button" class="ks-btn ks-btn--ghost ks-btn--sm ks-btn--start"><svg class="ks-glyph ks-glyph--18" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/></svg>עברית</button>
+        <button type="button" class="ks-btn ks-btn--ghost ks-btn--sm ks-btn--start"><svg class="ks-glyph ks-glyph--18 ks-glyph--mirror" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>התנתקות</button>
+      </div>
+    </aside>
+
+  </div>
+</div>
+</body>
+</html>

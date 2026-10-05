@@ -1,0 +1,63 @@
+<!-- @dsCard group="Overlays" height=780 subtitle="Centred dialogs on a flat backdrop: the title names the object, the primary action comes last" -->
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dialog preview</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@400..800&family=Fredoka:wght@300..700&family=Rubik:wght@300..900&display=swap">
+</head>
+<body>
+<div class="ks-preview" lang="en" dir="ltr">
+  <div class="ks-cols">
+    <div class="ks-scrim">
+      <div class="ks-dialog" role="dialog" aria-modal="true" aria-labelledby="d1">
+        <div class="ks-dialog__head">
+          <h2 class="ks-title" id="d1">Delete this observation?</h2>
+          <button type="button" class="ks-iconbtn" aria-label="Close" title="Close"><svg class="ks-glyph" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
+        </div>
+        <div class="ks-dialog__body">
+          <p class="ks-body">The note and the support level from 3 October will be removed from Adam's timeline. This can't be undone.</p>
+        </div>
+        <div class="ks-dialog__foot">
+          <button type="button" class="ks-btn ks-btn--ghost">Cancel</button>
+          <button type="button" class="ks-btn ks-btn--danger">Delete</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="ks-scrim">
+      <div class="ks-dialog" role="dialog" aria-modal="true" aria-labelledby="d2">
+        <div class="ks-dialog__head">
+          <h2 class="ks-title" id="d2">Create a new baseline?</h2>
+          <button type="button" class="ks-iconbtn" aria-label="Close" title="Close"><svg class="ks-glyph" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
+        </div>
+        <div class="ks-dialog__body">
+          <p class="ks-body">This saves a new snapshot of the profile as it is today, for example after the family answered more questions. Earlier baselines stay in the history.</p>
+        </div>
+        <div class="ks-dialog__foot">
+          <button type="button" class="ks-btn ks-btn--ghost">Cancel</button>
+          <button type="button" class="ks-btn ks-btn--primary">Create baseline</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="ks-scrim" lang="he" dir="rtl">
+      <div class="ks-dialog" role="dialog" aria-modal="true" aria-labelledby="d3">
+        <div class="ks-dialog__head">
+          <h2 class="ks-title" id="d3">למחוק את הטיוטה?</h2>
+          <button type="button" class="ks-iconbtn" aria-label="סגירה" title="סגירה"><svg class="ks-glyph" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
+        </div>
+        <div class="ks-dialog__body">
+          <p class="ks-body">הטיוטה „אדם והאוטובוס האדום” תימחק עם כל השינויים שלה. אי אפשר לבטל את זה.</p>
+        </div>
+        <div class="ks-dialog__foot">
+          <button type="button" class="ks-btn ks-btn--ghost">ביטול</button>
+          <button type="button" class="ks-btn ks-btn--danger">מחיקה</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

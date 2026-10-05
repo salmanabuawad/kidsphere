@@ -1,0 +1,64 @@
+<!-- @dsCard group="Forms" height=550 subtitle="Selectable block chips: multi-select takes the list's tint, single-select fills with its ink" -->
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ToggleChip preview</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@400..800&family=Fredoka:wght@300..700&family=Rubik:wght@300..900&display=swap">
+</head>
+<body>
+<div class="ks-preview" lang="en" dir="ltr">
+  <div class="ks-stack ks-stack--tight">
+    <p class="ks-label">What is Adam good at?</p>
+    <div class="ks-chips" role="group" aria-label="Strengths">
+      <button type="button" class="ks-tchip ks-tchip--strength" aria-pressed="true"><svg class="ks-glyph ks-glyph--16 ks-tchip__check" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span class="ks-pod" aria-hidden="true">🌈</span>Imagination</button>
+      <button type="button" class="ks-tchip ks-tchip--strength" aria-pressed="true"><svg class="ks-glyph ks-glyph--16 ks-tchip__check" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span class="ks-pod" aria-hidden="true">🧱</span>Building</button>
+      <button type="button" class="ks-tchip ks-tchip--strength" aria-pressed="false"><svg class="ks-glyph ks-glyph--16 ks-tchip__check" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span class="ks-pod" aria-hidden="true">🔍</span>Curiosity</button>
+      <button type="button" class="ks-tchip ks-tchip--strength" aria-pressed="false"><svg class="ks-glyph ks-glyph--16 ks-tchip__check" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span class="ks-pod" aria-hidden="true">📖</span>Rich vocabulary</button>
+    </div>
+  </div>
+  <div class="ks-stack ks-stack--tight">
+    <p class="ks-label">What does Adam love?</p>
+    <div class="ks-chips" role="group" aria-label="Interests">
+      <button type="button" class="ks-tchip ks-tchip--interest" aria-pressed="true"><svg class="ks-glyph ks-glyph--16 ks-tchip__check" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span class="ks-pod" aria-hidden="true">🚗</span>Cars &amp; transportation</button>
+      <button type="button" class="ks-tchip ks-tchip--interest" aria-pressed="false"><svg class="ks-glyph ks-glyph--16 ks-tchip__check" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span class="ks-pod" aria-hidden="true">🐘</span>Animals</button>
+      <button type="button" class="ks-tchip ks-tchip--interest" aria-pressed="false"><svg class="ks-glyph ks-glyph--16 ks-tchip__check" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span class="ks-pod" aria-hidden="true">🧱</span>Blocks</button>
+    </div>
+  </div>
+  <div class="ks-stack ks-stack--tight">
+    <p class="ks-label">Where? <span class="ks-muted">(quick observation, brand default)</span></p>
+    <div class="ks-chips" role="group" aria-label="Where?">
+      <button type="button" class="ks-tchip" aria-pressed="true"><svg class="ks-glyph ks-glyph--16 ks-tchip__check" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span class="ks-pod" aria-hidden="true">🧸</span>Free play</button>
+      <button type="button" class="ks-tchip" aria-pressed="false"><svg class="ks-glyph ks-glyph--16 ks-tchip__check" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span class="ks-pod" aria-hidden="true">🌳</span>Yard</button>
+      <button type="button" class="ks-tchip" aria-pressed="false"><svg class="ks-glyph ks-glyph--16 ks-tchip__check" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span class="ks-pod" aria-hidden="true">🍎</span>Meal</button>
+    </div>
+  </div>
+  <div class="ks-stack ks-stack--tight">
+    <p class="ks-label">Which strength? <span class="ks-muted">(single-select, radio semantics)</span></p>
+    <div class="ks-chips" role="radiogroup" aria-label="Which strength?">
+      <button type="button" role="radio" class="ks-tchip ks-tchip--strength" aria-checked="true"><svg class="ks-glyph ks-glyph--16 ks-tchip__check" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Building</button>
+      <button type="button" role="radio" class="ks-tchip ks-tchip--strength" aria-checked="false"><svg class="ks-glyph ks-glyph--16 ks-tchip__check" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Imagination</button>
+      <button type="button" role="radio" class="ks-tchip ks-tchip--strength" aria-checked="false"><svg class="ks-glyph ks-glyph--16 ks-tchip__check" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Rich vocabulary</button>
+    </div>
+  </div>
+  <div class="ks-stack ks-stack--tight">
+    <p class="ks-note">States: hover, pressed, keyboard focus, disabled</p>
+    <div class="ks-chips">
+      <button type="button" class="ks-tchip is-hover" aria-pressed="false">Music</button>
+      <button type="button" class="ks-tchip is-pressed" aria-pressed="false">Music</button>
+      <button type="button" class="ks-tchip ks-tchip--helps is-focus" aria-pressed="true"><svg class="ks-glyph ks-glyph--16 ks-tchip__check" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Having a choice</button>
+      <button type="button" class="ks-tchip" aria-pressed="false" disabled>Music</button>
+    </div>
+  </div>
+  <div class="ks-stack ks-stack--tight" lang="he" dir="rtl">
+    <p class="ks-label">מה עזר?</p>
+    <div class="ks-chips" role="group" aria-label="מה עזר?">
+      <button type="button" class="ks-tchip ks-tchip--helps" aria-pressed="true"><svg class="ks-glyph ks-glyph--16 ks-tchip__check" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span class="ks-pod" aria-hidden="true">🛋️</span>פינה שקטה</button>
+      <button type="button" class="ks-tchip ks-tchip--helps" aria-pressed="false"><svg class="ks-glyph ks-glyph--16 ks-tchip__check" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span class="ks-pod" aria-hidden="true">⏳</span>ספירה לאחור או טיימר</button>
+      <button type="button" class="ks-tchip ks-tchip--helps" aria-pressed="false"><svg class="ks-glyph ks-glyph--16 ks-tchip__check" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>אפשרות לבחור</button>
+    </div>
+  </div>
+</div>
+</body>
+</html>

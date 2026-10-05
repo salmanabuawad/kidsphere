@@ -1,0 +1,40 @@
+<!-- @dsCard group="Play" height=590 subtitle="The sun-yellow round arrow for next, back and replay; direction follows the content language" -->
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RoundButton preview</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@400..800&family=Fredoka:wght@300..700&family=Rubik:wght@300..900&display=swap">
+</head>
+<body>
+<div class="ks-preview">
+  <div class="ks-stage" lang="en" dir="ltr">
+    <div class="ks-stage__inner ks-stack">
+      <div class="ks-row">
+        <button type="button" class="ks-roundbtn" aria-label="Back" title="Back"><img class="ks-ico ks-ico--36 ks-ico--fixed ks-ico--mirror ks-ico--flip" src="../../assets/Icons/arrow-next.svg" alt="" data-arrow="left"></button>
+        <button type="button" class="ks-roundbtn" aria-label="Next" title="Next"><img class="ks-ico ks-ico--36 ks-ico--fixed ks-ico--mirror" src="../../assets/Icons/arrow-next.svg" alt="" data-arrow="right"></button>
+        <button type="button" class="ks-roundbtn ks-roundbtn--brand" aria-label="Next" title="Next"><svg class="ks-glyph ks-glyph--36 ks-glyph--heavy" viewBox="0 0 24 24" aria-hidden="true" data-arrow="right"><path d="M4.5 12H18"/><path d="M12 5.5 18.5 12 12 18.5"/></svg></button>
+        <button type="button" class="ks-roundbtn ks-roundbtn--plain" aria-label="Read again" title="Read again"><svg class="ks-glyph ks-glyph--36" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg></button>
+      </div>
+      <p class="ks-note">English, left to right: Back, Next (sun, the default), Next (brand), Replay (plain)</p>
+      <div class="ks-row">
+        <button type="button" class="ks-roundbtn is-pressed" aria-label="Next" title="Next"><img class="ks-ico ks-ico--36 ks-ico--fixed ks-ico--mirror" src="../../assets/Icons/arrow-next.svg" alt="" data-arrow="right"></button>
+        <button type="button" class="ks-roundbtn is-focus" aria-label="Next" title="Next"><img class="ks-ico ks-ico--36 ks-ico--fixed ks-ico--mirror" src="../../assets/Icons/arrow-next.svg" alt="" data-arrow="right"></button>
+        <button type="button" class="ks-roundbtn" disabled aria-label="Next" title="Next"><img class="ks-ico ks-ico--36 ks-ico--fixed ks-ico--mirror" src="../../assets/Icons/arrow-next.svg" alt="" data-arrow="right"></button>
+      </div>
+      <p class="ks-note">pressed, keyboard focus, disabled</p>
+    </div>
+  </div>
+  <div class="ks-stage" lang="ar" dir="rtl">
+    <div class="ks-stage__inner ks-stack">
+      <div class="ks-row">
+        <button type="button" class="ks-roundbtn" aria-label="السابق" title="السابق"><img class="ks-ico ks-ico--36 ks-ico--fixed ks-ico--mirror ks-ico--flip" src="../../assets/Icons/arrow-next.svg" alt="" data-arrow="right"></button>
+        <button type="button" class="ks-roundbtn" aria-label="التالي" title="التالي"><img class="ks-ico ks-ico--36 ks-ico--fixed ks-ico--mirror" src="../../assets/Icons/arrow-next.svg" alt="" data-arrow="left"></button>
+      </div>
+      <p class="ks-note">بالعربية، من اليمين إلى اليسار: السابق يشير إلى اليمين، والتالي إلى اليسار</p>
+    </div>
+  </div>
+</div>
+</body>
+</html>

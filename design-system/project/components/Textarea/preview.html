@@ -1,0 +1,48 @@
+<!-- @dsCard group="Forms" height=520 subtitle="Multi-line text for what the teacher saw, in the child's own language" -->
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Textarea preview</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@400..800&family=Fredoka:wght@300..700&family=Rubik:wght@300..900&display=swap">
+</head>
+<body>
+<div class="ks-preview" lang="en" dir="ltr">
+  <div class="ks-cols">
+    <div class="ks-field">
+      <label class="ks-field__label" for="t1">What happened?</label>
+      <textarea class="ks-input ks-textarea" id="t1" rows="3" dir="auto" placeholder="For example: asked a friend to build together"></textarea>
+      <p class="ks-field__help">Write what you saw. Everything else is optional.</p>
+    </div>
+    <div class="ks-field">
+      <label class="ks-field__label" for="t2">What happened?</label>
+      <textarea class="ks-input ks-textarea is-focus" id="t2" rows="3" dir="auto">Asked Lina to build the bridge together and waited for his turn with the long block.</textarea>
+      <p class="ks-field__help">Keyboard focus</p>
+    </div>
+    <div class="ks-field">
+      <label class="ks-field__label" for="t3">What happened?</label>
+      <textarea class="ks-input ks-textarea" id="t3" rows="3" aria-invalid="true" aria-describedby="t3e"></textarea>
+      <p class="ks-field__error" id="t3e"><svg class="ks-glyph ks-glyph--16" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>Please write what happened.</p>
+    </div>
+    <div class="ks-field">
+      <label class="ks-field__label" for="t4">Note for the teacher</label>
+      <textarea class="ks-input ks-textarea" id="t4" rows="3" disabled>Read the bus page slowly; Adam likes to point at each wheel.</textarea>
+      <p class="ks-field__help">Disabled</p>
+    </div>
+  </div>
+  <div class="ks-cols">
+    <div class="ks-field" lang="he" dir="rtl">
+      <label class="ks-field__label" for="t5">מה קרה?</label>
+      <textarea class="ks-input ks-textarea" id="t5" rows="3" dir="auto">נועה הזמינה שתי חברות לבנות איתה מגדל, וחילקה ביניהן את הקוביות.</textarea>
+      <p class="ks-field__help">כתבו מה ראיתם. כל השאר אופציונלי.</p>
+    </div>
+    <div class="ks-field" lang="ar" dir="rtl">
+      <label class="ks-field__label" for="t6">ماذا حدث؟</label>
+      <textarea class="ks-input ks-textarea" id="t6" rows="3" dir="auto" placeholder="مثلاً: طلب من صديق أن يبنيا معاً"></textarea>
+      <p class="ks-field__help">اكتبي ما رأيتِ. كل ما عدا ذلك اختياري.</p>
+    </div>
+  </div>
+</div>
+</body>
+</html>

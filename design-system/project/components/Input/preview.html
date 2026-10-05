@@ -1,0 +1,89 @@
+<!-- @dsCard group="Forms" height=760 subtitle="48px fields with a line-strong border, a solid focus ring, and errors in words; plus search, date, checkbox and radio" -->
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Input preview</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@400..800&family=Fredoka:wght@300..700&family=Rubik:wght@300..900&display=swap">
+</head>
+<body>
+<div class="ks-preview" lang="en" dir="ltr">
+  <div class="ks-cols">
+    <div class="ks-field">
+      <label class="ks-field__label" for="i1">Preferred name</label>
+      <input class="ks-input" id="i1" value="Adam" aria-describedby="i1h">
+      <p class="ks-field__help" id="i1h">What the child likes to be called</p>
+    </div>
+    <div class="ks-field">
+      <label class="ks-field__label" for="i2">Parent or guardian name</label>
+      <input class="ks-input" id="i2" placeholder="For example: Rana Haddad">
+      <p class="ks-field__help">Placeholder in ink-muted</p>
+    </div>
+    <div class="ks-field">
+      <label class="ks-field__label" for="i3">Full name</label>
+      <input class="ks-input is-hover" id="i3" value="Adam Haddad">
+      <p class="ks-field__help">Hover: the border darkens to ink-muted</p>
+    </div>
+    <div class="ks-field">
+      <label class="ks-field__label" for="i4">Full name</label>
+      <input class="ks-input is-focus" id="i4" value="Adam Haddad">
+      <p class="ks-field__help">Keyboard focus: brand border and the ring</p>
+    </div>
+    <div class="ks-field">
+      <label class="ks-field__label" for="i5">Parent contact</label>
+      <input class="ks-input" id="i5" value="050-12" aria-invalid="true" aria-describedby="i5e">
+      <p class="ks-field__error" id="i5e"><svg class="ks-glyph ks-glyph--16" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>Please enter a full phone number or an email.</p>
+    </div>
+    <div class="ks-field">
+      <label class="ks-field__label" for="i6">Class</label>
+      <input class="ks-input" id="i6" value="Sunflowers" disabled>
+      <p class="ks-field__help">Disabled: only an administrator can move a child</p>
+    </div>
+    <div class="ks-field">
+      <label class="ks-field__label" for="i7">Date of birth</label>
+      <input class="ks-input ks-tabular" id="i7" value="12/08/2022" readonly>
+      <p class="ks-field__help">Read-only</p>
+    </div>
+    <div class="ks-field">
+      <label class="ks-field__label" for="i8">When</label>
+      <div class="ks-input-wrap">
+        <input class="ks-input ks-input--date" id="i8" value="Today, 10:20">
+        <svg class="ks-glyph ks-glyph--end" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/></svg>
+      </div>
+    </div>
+    <div class="ks-field">
+      <label class="ks-field__label" for="i9">Search children</label>
+      <div class="ks-input-wrap">
+        <svg class="ks-glyph ks-glyph--start" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input class="ks-input ks-search" id="i9" type="search" value="Ad" placeholder="Search by name">
+        <button type="button" class="ks-iconbtn ks-iconbtn--sm ks-search-clear" aria-label="Clear" title="Clear"><svg class="ks-glyph" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
+      </div>
+    </div>
+    <div class="ks-stack ks-stack--tight">
+      <label class="ks-checkrow"><span class="ks-checkbox"><input type="checkbox" checked><svg class="ks-glyph ks-glyph--16 ks-glyph--heavy" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></span>Share with parents</label>
+      <label class="ks-checkrow"><span class="ks-checkbox"><input type="checkbox"><svg class="ks-glyph ks-glyph--16 ks-glyph--heavy" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></span>Include a video plan</label>
+      <div role="radiogroup" aria-label="Main language" class="ks-row">
+        <label class="ks-checkrow"><input class="ks-radio" type="radio" name="lang" checked>Arabic</label>
+        <label class="ks-checkrow"><input class="ks-radio" type="radio" name="lang">Hebrew</label>
+      </div>
+    </div>
+  </div>
+
+  <div class="ks-cols" lang="ar" dir="rtl">
+    <div class="ks-field">
+      <label class="ks-field__label" for="a1">الاسم المفضّل</label>
+      <input class="ks-input" id="a1" value="يوسف" aria-describedby="a1h">
+      <p class="ks-field__help" id="a1h">ما يحب الطفل أن يُنادى به</p>
+    </div>
+    <div class="ks-field">
+      <label class="ks-field__label" for="a2">البحث عن طفل</label>
+      <div class="ks-input-wrap">
+        <svg class="ks-glyph ks-glyph--start" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input class="ks-input ks-search" id="a2" type="search" placeholder="ابحث بالاسم">
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

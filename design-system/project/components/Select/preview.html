@@ -1,0 +1,63 @@
+<!-- @dsCard group="Forms" height=370 subtitle="A native select in the field box, with a ChevronDown at the inline end that never mirrors" -->
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Select preview</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@400..800&family=Fredoka:wght@300..700&family=Rubik:wght@300..900&display=swap">
+</head>
+<body>
+<div class="ks-preview" lang="en" dir="ltr">
+  <div class="ks-cols">
+    <div class="ks-field">
+      <label class="ks-field__label" for="s1">Class</label>
+      <div class="ks-input-wrap">
+        <select class="ks-input ks-select" id="s1"><option>All classes</option><option selected>Sunflowers</option><option>Butterflies</option></select>
+        <svg class="ks-glyph ks-glyph--end" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+      </div>
+    </div>
+    <div class="ks-field">
+      <label class="ks-field__label" for="s2">Main language</label>
+      <div class="ks-input-wrap">
+        <select class="ks-input ks-select is-hover" id="s2"><option selected>Arabic</option><option>Hebrew</option><option>English</option></select>
+        <svg class="ks-glyph ks-glyph--end" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+      </div>
+      <p class="ks-field__help">Hover</p>
+    </div>
+    <div class="ks-field">
+      <label class="ks-field__label" for="s3">Game type</label>
+      <div class="ks-input-wrap">
+        <select class="ks-input ks-select is-focus" id="s3"><option selected>Choose for me</option><option>Match the pairs</option><option>Put in order</option></select>
+        <svg class="ks-glyph ks-glyph--end" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+      </div>
+      <p class="ks-field__help">Keyboard focus</p>
+    </div>
+    <div class="ks-field">
+      <label class="ks-field__label" for="s4">Area</label>
+      <div class="ks-input-wrap">
+        <select class="ks-input ks-select" id="s4" aria-invalid="true" aria-describedby="s4e"><option selected>Choose…</option><option>Social</option><option>Transitions</option></select>
+        <svg class="ks-glyph ks-glyph--end" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+      </div>
+      <p class="ks-field__error" id="s4e"><svg class="ks-glyph ks-glyph--16" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>Choose a focus area.</p>
+    </div>
+    <div class="ks-field">
+      <label class="ks-field__label" for="s5">Language</label>
+      <div class="ks-input-wrap">
+        <select class="ks-input ks-select" id="s5" disabled><option selected>Arabic</option></select>
+        <svg class="ks-glyph ks-glyph--end" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+      </div>
+      <p class="ks-field__help">Disabled</p>
+    </div>
+    <div class="ks-field" lang="ar" dir="rtl">
+      <label class="ks-field__label" for="s6">الصف</label>
+      <div class="ks-input-wrap">
+        <select class="ks-input ks-select" id="s6"><option>كل الصفوف</option><option selected>دوّار الشمس</option><option>الفراشات</option></select>
+        <svg class="ks-glyph ks-glyph--end" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+      </div>
+      <p class="ks-field__help">السهم في نهاية الحقل، جهة اليسار</p>
+    </div>
+  </div>
+</div>
+</body>
+</html>

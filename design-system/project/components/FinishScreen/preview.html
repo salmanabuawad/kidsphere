@@ -1,0 +1,52 @@
+<!-- @dsCard group="Play" height=610 subtitle="The end of a game: a block tower stacks itself and a star sticker stamps in; no points, no scores" -->
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FinishScreen preview</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@400..800&family=Fredoka:wght@300..700&family=Rubik:wght@300..900&display=swap">
+</head>
+<body>
+<div class="ks-preview">
+  <div class="ks-cols">
+    <div class="ks-stage" lang="en" dir="ltr">
+      <section class="ks-finish" data-testid="finish-screen" aria-labelledby="fin-en">
+        <div class="ks-finish__scene" aria-hidden="true">
+          <svg class="ks-finish__tower" viewBox="-4 -4 168 168">
+            <g class="ks-finish__piece ks-finish__piece--1"><path class="ks-p-brand ks-s-ink" stroke-width="3" d="M34 104H126A14 14 0 0 1 140 118V146A14 14 0 0 1 126 160H100A20 20 0 0 0 60 160H34A14 14 0 0 1 20 146V118A14 14 0 0 1 34 104Z"/></g>
+            <g class="ks-finish__piece ks-finish__piece--2"><rect class="ks-p-berry ks-s-ink" stroke-width="3" x="52" y="48" width="56" height="56" rx="10"/></g>
+            <g class="ks-finish__piece ks-finish__piece--3"><circle class="ks-p-sun ks-s-ink" stroke-width="3" cx="80" cy="24" r="24"/></g>
+          </svg>
+          <img class="ks-ico ks-ico--56 ks-finish__sticker ks-ico--l" src="../../assets/Icons/strengths.svg" alt=""><img class="ks-ico ks-ico--56 ks-finish__sticker ks-ico--d" src="../../assets/Icons/dark/strengths.svg" alt="">
+        </div>
+        <h2 class="ks-display-xl" id="fin-en">Well done!</h2>
+        <p class="ks-finish__body">We played together all the way to the end.</p>
+        <button type="button" class="ks-kidbtn ks-kidbtn--brand" data-testid="play-again">
+          <svg class="ks-glyph ks-glyph--28" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+          Play again
+        </button>
+      </section>
+    </div>
+    <div class="ks-stage" lang="ar" dir="rtl">
+      <section class="ks-finish" data-testid="finish-screen" aria-labelledby="fin-ar">
+        <div class="ks-finish__scene" aria-hidden="true">
+          <svg class="ks-finish__tower" viewBox="-4 -4 168 168">
+            <g class="ks-finish__piece ks-finish__piece--1"><path class="ks-p-brand ks-s-ink" stroke-width="3" d="M34 104H126A14 14 0 0 1 140 118V146A14 14 0 0 1 126 160H100A20 20 0 0 0 60 160H34A14 14 0 0 1 20 146V118A14 14 0 0 1 34 104Z"/></g>
+            <g class="ks-finish__piece ks-finish__piece--2"><rect class="ks-p-berry ks-s-ink" stroke-width="3" x="52" y="48" width="56" height="56" rx="10"/></g>
+            <g class="ks-finish__piece ks-finish__piece--3"><circle class="ks-p-sun ks-s-ink" stroke-width="3" cx="80" cy="24" r="24"/></g>
+          </svg>
+          <img class="ks-ico ks-ico--56 ks-finish__sticker ks-ico--l" src="../../assets/Icons/strengths.svg" alt=""><img class="ks-ico ks-ico--56 ks-finish__sticker ks-ico--d" src="../../assets/Icons/dark/strengths.svg" alt="">
+        </div>
+        <h2 class="ks-display-xl" id="fin-ar">أحسنت!</h2>
+        <p class="ks-finish__body">لعبنا معًا حتى النهاية.</p>
+        <button type="button" class="ks-kidbtn ks-kidbtn--brand" data-testid="play-again">
+          <svg class="ks-glyph ks-glyph--28" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+          نلعب مرة أخرى
+        </button>
+      </section>
+    </div>
+  </div>
+</div>
+</body>
+</html>

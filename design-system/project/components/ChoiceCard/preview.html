@@ -1,0 +1,96 @@
+<!-- @dsCard group="Play" height=860 subtitle="The child's picture block: colouring-book outline, painted block, emoji pod; all seven states, never red, never an X" -->
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ChoiceCard preview</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@400..800&family=Fredoka:wght@300..700&family=Rubik:wght@300..900&display=swap">
+</head>
+<body>
+<div class="ks-preview">
+  <div class="ks-stage" lang="en" dir="ltr">
+    <div class="ks-stage__inner ks-choices">
+      <div class="ks-stack ks-stack--tight">
+        <button type="button" class="ks-choice" data-state="idle">
+          <span class="ks-choice__block ks-bg-sun"><span class="ks-choice__pod" aria-hidden="true">🚗</span></span>
+          <span class="ks-choice__label" dir="auto">Car</span>
+        </button>
+        <p class="ks-note">idle</p>
+      </div>
+      <div class="ks-stack ks-stack--tight">
+        <button type="button" class="ks-choice" data-state="selected" aria-pressed="true">
+          <span class="ks-choice__block ks-bg-sky"><span class="ks-choice__pod" aria-hidden="true">🚌</span></span>
+          <span class="ks-choice__label" dir="auto">Bus</span>
+          <span class="ks-checkblock ks-checkblock--28" aria-hidden="true"><svg class="ks-glyph ks-glyph--18 ks-glyph--heavy" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></span>
+        </button>
+        <p class="ks-note">selected</p>
+      </div>
+      <div class="ks-stack ks-stack--tight">
+        <button type="button" class="ks-choice" data-state="preferred" aria-pressed="true">
+          <span class="ks-choice__block ks-bg-berry"><span class="ks-choice__pod" aria-hidden="true">🚲</span></span>
+          <span class="ks-choice__label" dir="auto">Bicycle</span>
+          <img class="ks-choice__mark ks-ico ks-ico--40 ks-ico--l" src="../../assets/Icons/strengths.svg" alt=""><img class="ks-choice__mark ks-ico ks-ico--40 ks-ico--d" src="../../assets/Icons/dark/strengths.svg" alt="">
+        </button>
+        <p class="ks-note">preferred, with the star sticker</p>
+      </div>
+      <div class="ks-stack ks-stack--tight">
+        <button type="button" class="ks-choice" data-state="other" aria-pressed="true">
+          <span class="ks-choice__block ks-bg-leaf"><span class="ks-choice__pod" aria-hidden="true">🚂</span></span>
+          <span class="ks-choice__label" dir="auto">Train</span>
+        </button>
+        <p class="ks-note">other: "Let's try another one"</p>
+      </div>
+      <div class="ks-stack ks-stack--tight">
+        <button type="button" class="ks-choice" data-state="suggested">
+          <span class="ks-choice__block ks-bg-tangerine"><span class="ks-choice__pod" aria-hidden="true">⛵</span></span>
+          <span class="ks-choice__label" dir="auto">Boat</span>
+          <svg class="ks-choice__mark ks-sticker ks-sticker--28" viewBox="0 0 24 24" aria-hidden="true"><polygon class="ks-p-none ks-s-ink" stroke-width="2" points="12,3.5 14.47,9.1 20.56,9.72 15.99,13.8 17.29,19.78 12,16.7 6.71,19.78 8.01,13.8 3.44,9.72 9.53,9.1"/></svg>
+        </button>
+        <p class="ks-note">suggested, after an other pick</p>
+      </div>
+      <div class="ks-stack ks-stack--tight">
+        <button type="button" class="ks-choice" data-state="done">
+          <span class="ks-choice__block ks-bg-grape"><span class="ks-choice__pod" aria-hidden="true">✈️</span></span>
+          <span class="ks-choice__label" dir="auto">Plane</span>
+          <span class="ks-checkblock ks-checkblock--28 ks-checkblock--success" aria-hidden="true"><svg class="ks-glyph ks-glyph--18 ks-glyph--heavy" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></span>
+        </button>
+        <p class="ks-note">done: a matched pair</p>
+      </div>
+      <div class="ks-stack ks-stack--tight">
+        <button type="button" class="ks-choice" data-state="hint">
+          <span class="ks-choice__block ks-bg-sun"><span class="ks-choice__pod" aria-hidden="true">🚜</span></span>
+          <span class="ks-choice__label" dir="auto">Tractor</span>
+        </button>
+        <p class="ks-note">hint: look here</p>
+      </div>
+      <div class="ks-stack ks-stack--tight">
+        <button type="button" class="ks-choice is-focus" data-state="idle">
+          <span class="ks-choice__block ks-bg-sky"><span class="ks-choice__pod ks-choice__pod--initial" aria-hidden="true">F</span></span>
+          <span class="ks-choice__label" dir="auto">Fire engine</span>
+        </button>
+        <p class="ks-note">no emoji: the initial; keyboard focus</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="ks-stage" lang="ar" dir="rtl">
+    <div class="ks-stage__inner ks-row ks-row--top">
+      <button type="button" class="ks-choice ks-choice--lg" data-state="idle">
+        <span class="ks-choice__block ks-bg-sun"><span class="ks-choice__pod" aria-hidden="true">🐘</span></span>
+        <span class="ks-choice__label" dir="auto">فيل</span>
+      </button>
+      <button type="button" class="ks-choice ks-choice--lg" data-state="preferred" aria-pressed="true">
+        <span class="ks-choice__block ks-bg-sky"><span class="ks-choice__pod" aria-hidden="true">🐟</span></span>
+        <span class="ks-choice__label" dir="auto">سمكة</span>
+        <img class="ks-choice__mark ks-ico ks-ico--40 ks-ico--l" src="../../assets/Icons/strengths.svg" alt=""><img class="ks-choice__mark ks-ico ks-ico--40 ks-ico--d" src="../../assets/Icons/dark/strengths.svg" alt="">
+      </button>
+      <button type="button" class="ks-choice ks-choice--lg" data-state="other" aria-pressed="true">
+        <span class="ks-choice__block ks-bg-berry"><span class="ks-choice__pod ks-choice__pod--initial" aria-hidden="true">ق</span></span>
+        <span class="ks-choice__label" dir="auto">قطة</span>
+      </button>
+    </div>
+  </div>
+</div>
+</body>
+</html>
