@@ -1,0 +1,148 @@
+{
+  "_doc": "Generic sentence frames for the template provider. Slots as in themes.json plus {interest} {strength} {focus} {helper} {love} {group} {item} {emoji} {n}.",
+  "default_interest": {"en": "free play", "ar": "اللعب الحر", "he": "משחק חופשי"},
+  "default_strength": {"en": "Curiosity", "ar": "حب الاستطلاع", "he": "סקרנות"},
+  "default_focus": {"en": "the current focus", "ar": "التركيز الحالي", "he": "המיקוד הנוכחי"},
+  "story_open": [
+    {"en": "{Hero} loved {love}.", "ar": "كان {hero} يحبّ {love}.", "he": "{hero} אהב {love}."},
+    {"en": "Once upon a time there was {hero}. More than anything, {hero} loved {love}.", "ar": "كان يا ما كان، كان هناك {hero}. وكان يحبّ {love} أكثر من أي شيء.", "he": "היה היה פעם {hero}. יותר מכל, הוא אהב {love}."}
+  ],
+  "close_growth": {"en": "{name}, you can say it too: “{phrase}”", "ar": "وأنت يا {name}، تستطيع أن تقولها أيضاً: «{phrase}»", "ar_f": "وأنتِ يا {name}، تستطيعين أن تقوليها أيضاً: «{phrase}»", "he": "{name}, גם את/ה יכול/ה להגיד: ״{phrase}״"},
+  "praise_default": {"en": "{name}, you can do it too!", "ar": "وأنت يا {name}، تستطيع ذلك أيضاً!", "ar_f": "وأنتِ يا {name}، تستطيعين ذلك أيضاً!", "he": "{name}, גם את/ה יכול/ה!"},
+  "q_say": {"en": "What did {hero} say?", "ar": "ماذا قال {hero}؟", "he": "מה {hero} אמר?"},
+  "q_do": {"en": "What did {hero} do?", "ar": "ماذا فعل {hero}؟", "he": "מה {hero} עשה?"},
+  "q_feel": {"en": "How did {hero} feel at the end of the story?", "ar": "بماذا شعر {hero} في نهاية القصة؟", "he": "איך {hero} הרגיש בסוף הסיפור?"},
+  "goal_growth": {"en": "Supports the current focus “{focus}” through the interest “{interest}” and the strength “{strength}”.", "ar": "يدعم التركيز الحالي «{focus}» من خلال الاهتمام «{interest}» ونقطة القوة «{strength}».", "he": "תומך במיקוד הנוכחי ״{focus}״ דרך תחום העניין ״{interest}״ והחוזקה ״{strength}״."},
+  "goal_strength": {"en": "Deepens the strength “{strength}” through the interest “{interest}”.", "ar": "يعمّق نقطة القوة «{strength}» من خلال الاهتمام «{interest}».", "he": "מעמיק את החוזקה ״{strength}״ דרך תחום העניין ״{interest}״."},
+  "note_growth": {"en": "Template-generated draft. Read slowly and pause at the words “{phrase}”; invite {name} to say them with you. Personal details used: interest “{interest}”, strength “{strength}”, focus “{focus}”. Edit freely before approving.", "ar": "مسودة من قالب جاهز. اقرؤوا ببطء وتوقّفوا عند عبارة «{phrase}»، وشجّعوا {name} على قولها معكم. التفاصيل الشخصية المستخدمة: الاهتمام «{interest}»، نقطة القوة «{strength}»، التركيز «{focus}». يمكن التعديل بحرية قبل الموافقة.", "he": "טיוטה מתבנית מוכנה. לקרוא לאט ולעצור במילים ״{phrase}״; להזמין את {name} להגיד אותן יחד. פרטים אישיים ששימשו: תחום עניין ״{interest}״, חוזקה ״{strength}״, מיקוד ״{focus}״. אפשר לערוך בחופשיות לפני האישור."},
+  "note_strength": {"en": "Template-generated draft. After reading, invite {name} to retell the story or add a new part. Personal details used: interest “{interest}”, strength “{strength}”. Edit freely before approving.", "ar": "مسودة من قالب جاهز. بعد القراءة، شجّعوا {name} على إعادة حكاية القصة أو إضافة جزء جديد. التفاصيل الشخصية المستخدمة: الاهتمام «{interest}»، نقطة القوة «{strength}». يمكن التعديل بحرية قبل الموافقة.", "he": "טיוטה מתבנית מוכנה. אחרי הקריאה, להזמין את {name} לספר מחדש את הסיפור או להוסיף לו חלק חדש. פרטים אישיים ששימשו: תחום עניין ״{interest}״, חוזקה ״{strength}״. אפשר לערוך בחופשיות לפני האישור."},
+  "activity_close": {"en": "End with warm, specific words about what {name} tried.", "ar": "اختموا بكلمات دافئة ومحدّدة عمّا جرّبه {name}.", "he": "לסיים במילים חמות ומדויקות על מה ש{name} ניסה/תה."},
+  "observe_support": {"en": "How much adult support was needed: none, a little, or a lot?", "ar": "كم من دعم الكبار كان مطلوباً: لا شيء، قليل، أم كثير؟", "he": "כמה תמיכה של מבוגר נדרשה: בכלל לא, קצת או הרבה?"},
+  "adapt_helper": {"en": "What usually helps {name}: “{helper}”. Use it during the activity.", "ar": "ما يساعد {name} عادةً: «{helper}». استخدموه خلال النشاط.", "he": "מה שבדרך כלל עוזר ל{name}: ״{helper}״. כדאי להשתמש בזה במהלך הפעילות."},
+  "helpers": {
+    "adult_mediation": {"en": "The teacher stayed close and smiled.", "ar": "بقيت المعلمة قريبة وابتسمت.", "he": "הגננת נשארה קרוב וחייכה."},
+    "visual_support": {"en": "A picture card showed what to do.", "ar": "أظهرت بطاقة مصوّرة ما يجب فعله.", "he": "כרטיס תמונה הראה מה לעשות."},
+    "countdown_timer": {"en": "The teacher counted down: three, two, one!", "ar": "عدّت المعلمة تنازلياً: ثلاثة، اثنان، واحد!", "he": "הגננת ספרה לאחור: שלוש, שתיים, אחת!"},
+    "advance_preparation": {"en": "The teacher had explained what would happen.", "ar": "كانت المعلمة قد شرحت ما سيحدث.", "he": "הגננת הסבירה מראש מה יקרה."},
+    "short_instruction": {"en": "The teacher said one short, clear sentence.", "ar": "قالت المعلمة جملة قصيرة وواضحة.", "he": "הגננת אמרה משפט אחד קצר וברור."},
+    "movement": {"en": "First, {hero} jumped up and down three times.", "ar": "أولاً، قفز {hero} ثلاث مرات.", "he": "קודם {hero} קפץ שלוש פעמים."},
+    "reduced_stimulation": {"en": "It was quiet and calm.", "ar": "كان المكان هادئاً.", "he": "היה שקט ורגוע."},
+    "positive_reinforcement": {"en": "“Well done for trying!” said the teacher.", "ar": "«أحسنت لأنك حاولت!» قالت المعلمة.", "he": "״כל הכבוד שניסית!״ אמרה הגננת."},
+    "first_then": {"en": "“First we try, then we play,” said the teacher.", "ar": "«أولاً نحاول، ثم نلعب» قالت المعلمة.", "he": "״קודם מנסים, ואחר כך משחקים,״ אמרה הגננת."},
+    "offering_choice": {"en": "{Hero} could choose how to start.", "ar": "استطاع {hero} أن يختار كيف يبدأ.", "he": "{hero} יכול היה לבחור איך להתחיל."},
+    "peer_modeling": {"en": "A friend showed how to do it.", "ar": "أرى صديقٌ كيف نفعلها.", "he": "חבר הראה איך עושים את זה."},
+    "explanation": {"en": "The teacher explained what comes next.", "ar": "شرحت المعلمة ما سيأتي بعد ذلك.", "he": "הגננת הסבירה מה יבוא אחר כך."},
+    "adult_reassurance": {"en": "The teacher gave a warm smile.", "ar": "ابتسمت المعلمة ابتسامة دافئة.", "he": "הגננת חייכה חיוך חם."},
+    "hug": {"en": "A warm hug helped {hero} feel calm.", "ar": "ساعد حضن دافئ {hero} على الهدوء.", "he": "חיבוק חם עזר להירגע."},
+    "quiet_space": {"en": "{Hero} rested for a moment in a quiet corner.", "ar": "ارتاح {hero} لحظة في ركن هادئ.", "he": "{hero} נח רגע בפינה שקטה."},
+    "favorite_object": {"en": "{Hero} held a favourite little toy.", "ar": "أمسك {hero} لعبته الصغيرة المفضّلة.", "he": "{hero} החזיק צעצוע קטן ואהוב."},
+    "music": {"en": "Everyone sang a short song together.", "ar": "غنّى الجميع أغنية قصيرة معاً.", "he": "כולם שרו יחד שיר קצר."},
+    "default": {"en": "The teacher was close by, ready to help.", "ar": "كانت المعلمة قريبة، مستعدة للمساعدة.", "he": "הגננת הייתה קרובה, מוכנה לעזור."}
+  },
+  "game_titles": {
+    "multiple_choice": {"en": "Choose with {HeroTitle}", "ar": "اختر مع {hero}", "he": "בוחרים עם {hero}"},
+    "emotion_choice": {"en": "How Does {HeroTitle} Feel?", "ar": "بماذا يشعر {hero}؟", "he": "מה מרגיש {hero}?"},
+    "what_happens_next": {"en": "{HeroTitle}: What Happens Next?", "ar": "{hero}: ماذا يحدث بعد ذلك؟", "he": "{hero}: מה קורה אחר כך?"},
+    "match_pairs": {"en": "Match the Pairs with {HeroTitle}", "ar": "طابق الأزواج مع {hero}", "he": "מתאימים זוגות עם {hero}"},
+    "sequence": {"en": "{HeroTitle}: Put It in Order", "ar": "{hero}: رتّب بالتسلسل", "he": "{hero}: מסדרים לפי הסדר"},
+    "categorize": {"en": "Sort It Out with {HeroTitle}", "ar": "صنّف مع {hero}", "he": "ממיינים עם {hero}"},
+    "story_builder": {"en": "Build a Story with {HeroTitle}", "ar": "ابنِ قصة مع {hero}", "he": "בונים סיפור עם {hero}"}
+  },
+  "game_intros": {
+    "multiple_choice": {"en": "Listen to the question and choose a picture.", "ar": "استمع إلى السؤال واختر صورة.", "ar_f": "استمعي إلى السؤال واختاري صورة.", "he": "מקשיבים לשאלה ובוחרים תמונה."},
+    "emotion_choice": {"en": "Look at the moment and choose a feeling. Every feeling is okay.", "ar": "انظر إلى اللحظة واختر شعوراً. كل المشاعر مقبولة.", "ar_f": "انظري إلى اللحظة واختاري شعوراً. كل المشاعر مقبولة.", "he": "מסתכלים על הרגע ובוחרים רגש. כל רגש הוא בסדר."},
+    "what_happens_next": {"en": "What will happen next? Choose a picture.", "ar": "ماذا سيحدث بعد ذلك؟ اختر صورة.", "ar_f": "ماذا سيحدث بعد ذلك؟ اختاري صورة.", "he": "מה יקרה אחר כך? בוחרים תמונה."},
+    "match_pairs": {"en": "Find the pairs that go together.", "ar": "ابحث عن الأزواج التي تتناسب معاً.", "ar_f": "ابحثي عن الأزواج التي تتناسب معاً.", "he": "מוצאים זוגות שמתאימים."},
+    "sequence": {"en": "Put the pictures in the right order.", "ar": "رتّب الصور بالترتيب الصحيح.", "ar_f": "رتّبي الصور بالترتيب الصحيح.", "he": "מסדרים את התמונות לפי הסדר הנכון."},
+    "categorize": {"en": "Tap a picture, then tap its group.", "ar": "اضغط على صورة، ثم اضغط على مجموعتها.", "ar_f": "اضغطي على صورة، ثم اضغطي على مجموعتها.", "he": "לוחצים על תמונה, ואז על הקבוצה שלה."},
+    "story_builder": {"en": "Choose, choose, choose, and make your own story!", "ar": "اختر، واختر، واختر، واصنع قصتك الخاصة!", "ar_f": "اختاري، واختاري، واختاري، واصنعي قصتك الخاصة!", "he": "בוחרים, בוחרים, בוחרים – ובונים סיפור משלך!"}
+  },
+  "mc_q1": {"en": "What can {hero} say to {goal_child}?", "ar": "ماذا يمكن أن يقول {hero} لكي {goal_child}؟", "he": "מה {hero} יכול להגיד כדי {goal_child}?"},
+  "mc_e1": {"en": "“{phrase}” is a great way to {goal_child}.", "ar": "«{phrase}» طريقة رائعة لكي {goal_child}.", "he": "״{phrase}״ – דרך נהדרת {goal_child}."},
+  "mc_q2": {"en": "Which one belongs to “{group}”?", "ar": "أيّها ينتمي إلى «{group}»؟", "he": "מה שייך ל״{group}״?"},
+  "mc_e2": {"en": "{item} {emoji} belongs to “{group}”.", "ar": "{item} {emoji} من «{group}».", "he": "ב״{group}״ יש {item} {emoji}."},
+  "mc_choice_emojis": ["💬", "💭", "🔔"],
+  "feelings": [
+    {"key": "happy", "emoji": "😊", "en": "Happy", "ar": "سعيد", "he": "שמח"},
+    {"key": "sad", "emoji": "😢", "en": "Sad", "ar": "حزين", "he": "עצוב"},
+    {"key": "angry", "emoji": "😠", "en": "Angry", "ar": "غاضب", "he": "כועס"},
+    {"key": "surprised", "emoji": "😮", "en": "Surprised", "ar": "متفاجئ", "he": "מופתע"}
+  ],
+  "emo_ask1": {"en": "How might {hero} feel?", "ar": "بماذا قد يشعر {hero}؟", "he": "איך {hero} אולי מרגיש?"},
+  "emo_e1": {"en": "Every feeling is okay. Naming a feeling helps.", "ar": "كل المشاعر مقبولة. تسمية الشعور تساعد.", "he": "כל רגש הוא בסדר. לתת לרגש שם – זה עוזר."},
+  "emo_ask2": {"en": "How does {hero} feel now?", "ar": "بماذا يشعر {hero} الآن؟", "he": "איך {hero} מרגיש עכשיו?"},
+  "emo_e2": {"en": "{Hero} feels happy now!", "ar": "يشعر {hero} بالسعادة الآن!", "he": "{hero} שמח עכשיו!"},
+  "whn_ask": {"en": "What happens next?", "ar": "ماذا يحدث بعد ذلك؟", "he": "מה קורה אחר כך?"},
+  "whn_good": {"emoji": "💬", "en": "{Hero} says: “{phrase}”", "ar": "يقول {hero}: «{phrase}»", "he": "{hero} אומר: ״{phrase}״"},
+  "whn_alts": [
+    {"emoji": "👀", "en": "{Hero} waits and watches", "ar": "ينتظر {hero} ويراقب", "he": "{hero} מחכה ומסתכל"},
+    {"emoji": "🚶", "en": "{Hero} goes to play alone", "ar": "يذهب {hero} ليلعب وحده", "he": "{hero} הולך לשחק לבד"}
+  ],
+  "whn_q2": {"en": "The game is over. What happens next?", "ar": "انتهت اللعبة. ماذا يحدث بعد ذلك؟", "he": "המשחק נגמר. מה קורה אחר כך?"},
+  "whn_q2_good": {"emoji": "🧺", "en": "Everyone tidies up together", "ar": "الجميع يرتّبون معاً", "he": "כולם מסדרים יחד"},
+  "whn_q2_alt": {"emoji": "🧸", "en": "The toys stay on the floor", "ar": "تبقى الألعاب على الأرض", "he": "הצעצועים נשארים על הרצפה"},
+  "whn_e2": {"en": "Tidying up together is part of the fun!", "ar": "الترتيب معاً جزء من المتعة!", "he": "לסדר יחד זה חלק מהכיף!"},
+  "story_builder": [
+    {
+      "prompt": {"en": "Choose an animal for your story", "ar": "اختر حيواناً لقصتك", "ar_f": "اختاري حيواناً لقصتك", "he": "בחר/י חיה לסיפור שלך"},
+      "choices": [
+        {"emoji": "🦁", "en": "Lion", "ar": "أسد", "he": "אריה"},
+        {"emoji": "🐰", "en": "Rabbit", "ar": "أرنب", "he": "ארנב"},
+        {"emoji": "🐘", "en": "Elephant", "ar": "فيل", "he": "פיל"},
+        {"emoji": "🦉", "en": "Owl", "ar": "بومة", "he": "ינשוף"}
+      ]
+    },
+    {
+      "prompt": {"en": "Where does the story happen?", "ar": "أين تحدث القصة؟", "he": "איפה קורה הסיפור?"},
+      "choices": [
+        {"emoji": "🌳", "en": "In the forest", "ar": "في الغابة", "he": "ביער"},
+        {"emoji": "🌊", "en": "By the sea", "ar": "عند البحر", "he": "ליד הים"},
+        {"emoji": "🏙️", "en": "In the city", "ar": "في المدينة", "he": "בעיר"},
+        {"emoji": "🚀", "en": "In space", "ar": "في الفضاء", "he": "בחלל"}
+      ]
+    },
+    {
+      "prompt": {"en": "Oh no! What is the problem?", "ar": "يا إلهي! ما المشكلة؟", "he": "אוי! מה הבעיה?"},
+      "choices": [
+        {"emoji": "🧭", "en": "Lost the way", "ar": "ضلّ الطريق", "he": "הלך לאיבוד"},
+        {"emoji": "🌧️", "en": "It starts to rain", "ar": "بدأ المطر", "he": "התחיל לרדת גשם"},
+        {"emoji": "😢", "en": "A friend is sad", "ar": "صديق حزين", "he": "חבר עצוב"},
+        {"emoji": "🌉", "en": "The bridge broke", "ar": "انكسر الجسر", "he": "הגשר נשבר"}
+      ]
+    },
+    {
+      "prompt": {"en": "How do they solve it?", "ar": "كيف يحلّون المشكلة؟", "he": "איך פותרים את זה?"},
+      "choices": [
+        {"emoji": "🤝", "en": "Ask a friend for help", "ar": "يطلبون المساعدة من صديق", "he": "מבקשים עזרה מחבר"},
+        {"emoji": "🔨", "en": "Build something new", "ar": "يبنون شيئاً جديداً", "he": "בונים משהו חדש"},
+        {"emoji": "💡", "en": "Think of a clever plan", "ar": "يفكّرون في خطة ذكية", "he": "חושבים על תוכנית חכמה"},
+        {"emoji": "🎵", "en": "Sing a happy song", "ar": "يغنّون أغنية سعيدة", "he": "שרים שיר שמח"}
+      ]
+    }
+  ],
+  "story_builder_closing": {"en": "Now tell your story!", "ar": "والآن احكِ قصتك!", "ar_f": "والآن احكي قصتك!", "he": "עכשיו ספר/י את הסיפור שלך!"},
+  "discussion": [
+    {"en": "When could you say “{phrase}”?", "ar": "متى يمكنك أن تقول «{phrase}»؟", "ar_f": "متى يمكنكِ أن تقولي «{phrase}»؟", "he": "מתי אפשר להגיד ״{phrase}״?"},
+    {"en": "{Hero} loved {love}. What do you love to do?", "ar": "كان {hero} يحبّ {love}. وماذا تحبّ أنت أن تفعل؟", "ar_f": "كان {hero} يحبّ {love}. وماذا تحبّين أنتِ أن تفعلي؟", "he": "{hero} אהב {love}. מה את/ה אוהב/ת לעשות?"},
+    {"en": "What was your favourite part of the story?", "ar": "ما الجزء الذي أحببته أكثر في القصة؟", "he": "איזה חלק בסיפור הכי אהבת?"}
+  ],
+  "video_scene": {"en": "Scene {n}: an illustrated moment with {hero} {emoji}.", "ar": "المشهد {n}: لحظة مصوّرة مع {hero} {emoji}.", "he": "סצנה {n}: רגע מאויר עם {hero} {emoji}."},
+  "video_visual": "Soft, colourful children's picture-book illustration of {hero_en} {emoji}, scene {n}: {beat}. Warm light, friendly faces, no real people, no text on screen.",
+  "video_beats": ["introducing the character", "the moment that sets the story going", "the key action", "the happy ending", "a warm closing smile"],
+  "understanding": {
+    "intro": {"en": "{name} appears to enjoy {interests}.", "ar": "يبدو أن {name} يستمتع بـ{interests}.", "he": "נראה שיש ל{name} עניין רב ב{interests}."},
+    "intro_none": {"en": "This draft is an early picture of {name}.", "ar": "هذه المسودة صورة أولية عن {name}.", "he": "הטיוטה הזו היא תמונה ראשונית של {name}."},
+    "strengths": {"en": "Strengths noticed so far include {strengths}.", "ar": "من نقاط القوة التي لوحظت حتى الآن: {strengths}.", "he": "בין החוזקות שנראו עד כה: {strengths}."},
+    "count": {"en": "Observations since the latest baseline: {n}.", "ar": "عدد الملاحظات منذ آخر نقطة بداية: {n}.", "he": "מספר התצפיות מאז תמונת הפתיחה האחרונה: {n}."},
+    "few": {"en": "With only a few observations so far, this is a tentative picture; more observations will help.", "ar": "ولأن عدد الملاحظات ما زال قليلاً، فهذه صورة مبدئية؛ وستساعد ملاحظات إضافية.", "he": "מכיוון שיש עד כה מעט תצפיות, זו תמונה ראשונית; תצפיות נוספות יעזרו."},
+    "focus": {"en": "Current focus: {focus}.", "ar": "التركيز الحالي: {focus}.", "he": "המיקוד הנוכחי: {focus}."},
+    "adaptations": {"en": "Keep using what helps {name}: {helps}.", "ar": "استمرّوا في استخدام ما يساعد {name}: {helps}.", "he": "להמשיך להשתמש במה שעוזר ל{name}: {helps}."},
+    "adaptations_none": {"en": "Keep noting what helps {name} in everyday moments.", "ar": "استمرّوا في ملاحظة ما يساعد {name} في اللحظات اليومية.", "he": "להמשיך לשים לב מה עוזר ל{name} ברגעים יומיומיים."},
+    "next_steps": {"en": "Continue short, playful activities built on “{interest}”, and note what {name} does with and without support.", "ar": "تابعوا أنشطة قصيرة وممتعة مبنية على «{interest}»، ولاحظوا ما يفعله {name} مع الدعم وبدونه.", "he": "להמשיך בפעילויות קצרות ומשחקיות שמבוססות על ״{interest}״, ולתעד מה {name} עושה עם תמיכה ובלי."},
+    "bv_few": {"en": "Fewer than 3 related observations since the baseline; keep observing.", "ar": "أقلّ من 3 ملاحظات ذات صلة منذ نقطة البداية؛ استمرّوا في الملاحظة.", "he": "פחות מ-3 תצפיות קשורות מאז תמונת הפתיחה; כדאי להמשיך לצפות."},
+    "bv_some": {"en": "{n} related observations since the baseline; please review them and decide.", "ar": "{n} ملاحظات ذات صلة منذ نقطة البداية؛ يرجى مراجعتها واتخاذ القرار.", "he": "{n} תצפיות קשורות מאז תמונת הפתיחה; כדאי לעבור עליהן ולהחליט."},
+    "fr_few": {"en": "Fewer than 3 observations linked to this focus since the baseline; keep observing.", "ar": "أقلّ من 3 ملاحظات مرتبطة بهذا التركيز منذ نقطة البداية؛ استمرّوا في الملاحظة.", "he": "פחות מ-3 תצפיות שקשורות למיקוד הזה מאז תמונת הפתיחה; כדאי להמשיך לצפות."},
+    "fr_less_support": {"en": "{n} linked observations: the support needed appears to be decreasing.", "ar": "{n} ملاحظات مرتبطة: يبدو أن الدعم المطلوب يقلّ.", "he": "{n} תצפיות קשורות: נראה שהתמיכה הנדרשת הולכת ופוחתת."},
+    "fr_no_change": {"en": "{n} linked observations: no clear change yet.", "ar": "{n} ملاحظات مرتبطة: لا تغيير واضح بعد.", "he": "{n} תצפיות קשורות: אין עדיין שינוי ברור."}
+  }
+}

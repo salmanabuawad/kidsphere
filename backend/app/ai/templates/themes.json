@@ -1,0 +1,619 @@
+{
+  "_doc": "Theme slot tables for the template provider. growth_support picks a theme by focus category (category_theme), strength_builder by target strength (strength_theme). 'suggestions' override phrase/goal_child for specific focus suggestions. Slots: {name} {hero} {Hero} {HeroTitle} {thing} {Thing} {material} {material_lc} {placing} {phrase}. Hebrew x/y slash forms follow the child's gender when it is set. 'ar_f' is used for a girl in Arabic.",
+  "category_theme": {
+    "emotional": "emotional",
+    "social": "social",
+    "language": "language",
+    "communication": "communication",
+    "independence": "independence",
+    "attention": "attention",
+    "motor": "motor",
+    "learning": "learning",
+    "transitions": "transitions",
+    "confidence": "confidence",
+    "other": "social"
+  },
+  "strength_theme": {
+    "storytelling": "storytelling",
+    "language": "language",
+    "vocabulary": "language",
+    "communication": "language",
+    "creativity": "creativity",
+    "imagination": "creativity",
+    "drawing": "creativity",
+    "music": "creativity",
+    "humor": "creativity",
+    "problem_solving": "problem_solving",
+    "curiosity": "problem_solving",
+    "persistence": "problem_solving",
+    "building": "building",
+    "empathy": "empathy",
+    "social_connection": "empathy",
+    "memory": "memory",
+    "observation": "memory",
+    "confidence": "confidence",
+    "movement": "confidence",
+    "independence": "confidence",
+    "leadership": "confidence"
+  },
+  "game_growth": {
+    "social": "what_happens_next",
+    "emotional": "emotion_choice",
+    "transitions": "sequence",
+    "communication": "multiple_choice",
+    "language": "sequence",
+    "independence": "sequence",
+    "attention": "match_pairs",
+    "motor": "sequence",
+    "learning": "categorize",
+    "confidence": "what_happens_next"
+  },
+  "game_strength": {
+    "storytelling": "story_builder",
+    "language": "story_builder",
+    "creativity": "story_builder",
+    "problem_solving": "sequence",
+    "building": "sequence",
+    "empathy": "emotion_choice",
+    "memory": "match_pairs",
+    "confidence": "what_happens_next"
+  },
+  "suggestions": {
+    "participating_in_group_activities": {
+      "phrase": {"en": "Can I join you?", "ar": "هل يمكنني أن ألعب معكم؟", "he": "אפשר להצטרף?"},
+      "goal_child": {"en": "join the group", "ar": "ينضمّ إلى المجموعة", "he": "להצטרף לקבוצה"}
+    },
+    "taking_turns": {
+      "phrase": {"en": "Can I have the next turn?", "ar": "هل يمكن أن يكون الدور التالي لي؟", "he": "אפשר את התור הבא?"},
+      "goal_child": {"en": "wait for a turn", "ar": "ينتظر دوره", "he": "לחכות לתור"}
+    },
+    "sharing_toys": {
+      "phrase": {"en": "Do you want to play with this too?", "ar": "هل تريد أن تلعب بهذا أيضاً؟", "he": "רוצה לשחק בזה גם?"},
+      "goal_child": {"en": "share the toys", "ar": "يشارك الألعاب", "he": "לשתף בצעצועים"}
+    },
+    "calming_after_frustration": {
+      "phrase": {"en": "I need a break.", "ar": "أحتاج إلى استراحة.", "he": "רגע של הפסקה, בבקשה."},
+      "goal_child": {"en": "calm down", "ar": "يهدأ", "he": "להירגע"}
+    },
+    "separating_in_the_morning": {
+      "phrase": {"en": "Bye-bye! See you later!", "ar": "مع السلامة! أراك لاحقاً!", "he": "ביי ביי! נתראה אחר כך!"},
+      "goal_child": {"en": "say goodbye", "ar": "يودّع", "he": "להיפרד"}
+    },
+    "listening_during_story_time": {
+      "phrase": {"en": "Ears listening, eyes looking!", "ar": "آذان تسمع وعيون ترى!", "he": "אוזניים מקשיבות, עיניים מסתכלות!"},
+      "goal_child": {"en": "listen to the story", "ar": "يستمع إلى القصة", "he": "להקשיב לסיפור"}
+    },
+    "coping_with_mistakes": {
+      "phrase": {"en": "Oops! I can try again.", "ar": "أوه! أستطيع أن أحاول مرة أخرى.", "he": "אופס! אפשר לנסות שוב."},
+      "goal_child": {"en": "try again", "ar": "يحاول مرة أخرى", "he": "לנסות שוב"}
+    },
+    "telling_about_an_experience": {
+      "phrase": {"en": "Guess what happened today!", "ar": "خمّنوا ماذا حدث اليوم!", "he": "נחשו מה קרה היום!"},
+      "goal_child": {"en": "tell what happened", "ar": "يحكي ما حدث", "he": "לספר מה קרה"}
+    }
+  },
+  "themes": {
+    "social": {
+      "duration": 15,
+      "goal_child": {"en": "join the game", "ar": "ينضمّ إلى اللعب", "he": "להצטרף למשחק"},
+      "phrase": {"en": "Can we build this together?", "ar": "هل يمكن أن نبني هذا معاً؟", "he": "אפשר לבנות את זה ביחד?"},
+      "situation": {"en": "One day, {hero} saw two friends building something big. {Hero} wanted to play too.", "ar": "في يوم من الأيام، رأى {hero} صديقين يبنيان شيئاً كبيراً. وأراد أن يلعب معهما.", "he": "יום אחד {hero} ראה שני חברים בונים משהו גדול. גם הוא רצה לשחק."},
+      "action": {"en": "{Hero} walked over and asked: “{phrase}”", "ar": "اقترب {hero} وسأل: «{phrase}»", "he": "{hero} ניגש ושאל: ״{phrase}״"},
+      "ending": {"en": "“Yes!” said the friends. They built a {thing} together, one piece at a time. {Hero} felt happy.", "ar": "«نعم!» قال الصديقان. وبنوا {thing} معاً، قطعة بعد قطعة. شعر {hero} بالسعادة.", "he": "״כן!״ אמרו החברים. הם בנו יחד {thing}, חלק אחרי חלק. {hero} הרגיש שמח."},
+      "story_title": {"en": "{HeroTitle} Builds Together", "ar": "{hero} يبني مع الأصدقاء", "he": "{hero} בונה עם חברים"},
+      "question": {"en": "What can you say when you want to join a game?", "ar": "ماذا يمكنك أن تقول عندما تريد أن تنضمّ إلى لعبة؟", "ar_f": "ماذا يمكنكِ أن تقولي عندما تريدين أن تنضمّي إلى لعبة؟", "he": "מה אפשר להגיד כשרוצים להצטרף למשחק?"},
+      "activity_title": {"en": "Build the {Thing} Together", "ar": "لنبنِ {thing} معاً", "he": "בונים {thing} ביחד"},
+      "materials": [
+        {"en": "Blocks", "ar": "مكعبات", "he": "קוביות"},
+        {"en": "A small rug or mat", "ar": "سجادة صغيرة", "he": "שטיח קטן"}
+      ],
+      "steps": [
+        {"en": "Put blocks and {material_lc} on the rug. Invite {name} and one other child to build a {thing} together.", "ar": "ضعوا المكعبات و{material} على السجادة. ادعوا {name} وطفلاً آخر ليبنيا {thing} معاً.", "he": "להניח על השטיח קוביות ו{material}. להזמין את {name} וחבר או חברה מהגן לבנות יחד {thing}."},
+        {"en": "Before you start, model the phrase “{phrase}” and invite {name} to say it to the friend.", "ar": "قبل البدء، قولوا العبارة «{phrase}» كنموذج، وشجّعوا {name} على قولها للصديق.", "he": "לפני שמתחילים, להדגים את המשפט ״{phrase}״ ולעודד את {name} להגיד אותו לשותף למשחק."},
+        {"en": "Each child adds one piece at a time, taking turns.", "ar": "يضيف كل طفل قطعة واحدة في كل مرة، بالدور.", "he": "כל ילד מוסיף חלק אחד בכל פעם, לפי התור."},
+        {"en": "Let the children choose together {placing}.", "ar": "دعوا الأطفال يختارون معاً {placing}.", "he": "לתת לילדים לבחור יחד {placing}."}
+      ],
+      "observe": [
+        {"en": "Did {name} initiate the shared play on their own, or after a prompt?", "ar": "هل بادر {name} إلى اللعب المشترك بنفسه، أم بعد تلميح من الكبار؟", "he": "האם {name} יזם/ה את המשחק המשותף בעצמו/ה, או אחרי הכוונה?"},
+        {"en": "Did {name} accept the other child's idea (for example, where a piece goes)?", "ar": "هل تقبّل {name} فكرة الطفل الآخر (مثلاً أين توضع القطعة)؟", "he": "האם {name} קיבל/ה את הרעיון של הילד השני (למשל איפה לשים חלק)?"}
+      ],
+      "adaptation": {"en": "If joining feels hard, the teacher plays as the first partner and then invites one friend in. Keep the group to two children.", "ar": "إذا كان الانضمام صعباً، تلعب المعلمة أولاً كشريكة، ثم تدعو صديقاً واحداً للانضمام. اجعلوا المجموعة من طفلين فقط.", "he": "אם קשה להצטרף, הגננת משחקת קודם כשותפה ואחר כך מזמינה חבר אחד. כדאי לשמור על קבוצה של שני ילדים."},
+      "sequence": [
+        {"emoji": "👀", "en": "See friends playing", "ar": "يرى الأصدقاء يلعبون", "he": "רואים חברים משחקים"},
+        {"emoji": "💬", "en": "Ask: “{phrase}”", "ar": "يسأل: «{phrase}»", "he": "שואלים: ״{phrase}״"},
+        {"emoji": "🧱", "en": "Build together", "ar": "يبنون معاً", "he": "בונים ביחד"},
+        {"emoji": "😊", "en": "Smile and play", "ar": "يبتسمون ويلعبون", "he": "מחייכים ומשחקים"}
+      ]
+    },
+    "emotional": {
+      "duration": 10,
+      "goal_child": {"en": "say how it feels", "ar": "يعبّر عن شعوره بالكلمات", "he": "להגיד במילים מה מרגישים"},
+      "phrase": {"en": "I need help, please.", "ar": "أحتاج إلى مساعدة، من فضلك.", "he": "תעזרו לי, בבקשה."},
+      "situation": {"en": "{Hero} built a tall tower, and it fell down. {Hero} felt a big, hot feeling inside.", "ar": "بنى {hero} برجاً عالياً، فسقط البرج. شعر {hero} بشعور كبير وحارّ في داخله.", "he": "{hero} בנה מגדל גבוה, והמגדל נפל. {hero} הרגיש בפנים רגש גדול וחם."},
+      "action": {"en": "{Hero} took a deep breath and said: “{phrase}”", "ar": "أخذ {hero} نفساً عميقاً وقال: «{phrase}»", "he": "{hero} לקח נשימה עמוקה ואמר: ״{phrase}״"},
+      "ending": {"en": "A friend came to help. Together they built the tower again, even taller. {Hero} felt calm and proud.", "ar": "جاء صديق ليساعد. وبنيا البرج من جديد، أعلى من قبل. شعر {hero} بالهدوء والفخر.", "he": "חבר בא לעזור. יחד הם בנו את המגדל מחדש, גבוה עוד יותר. {hero} הרגיש רגוע וגאה."},
+      "story_title": {"en": "{HeroTitle} Uses Words", "ar": "{hero} يتكلّم عن مشاعره", "he": "{hero} אומר במילים"},
+      "question": {"en": "What can you say when you feel angry or sad?", "ar": "ماذا يمكنك أن تقول عندما تشعر بالغضب أو الحزن؟", "ar_f": "ماذا يمكنكِ أن تقولي عندما تشعرين بالغضب أو الحزن؟", "he": "מה אפשר להגיד כשמרגישים כעס או עצב?"},
+      "activity_title": {"en": "Feelings Cards with {HeroTitle}", "ar": "بطاقات المشاعر مع {hero}", "he": "קלפי רגשות עם {hero}"},
+      "materials": [
+        {"en": "Feeling cards (happy, sad, angry, calm)", "ar": "بطاقات مشاعر (سعيد، حزين، غاضب، هادئ)", "he": "קלפי רגשות (שמח, עצוב, כועס, רגוע)"},
+        {"en": "A soft toy", "ar": "دمية طرية", "he": "בובה רכה"}
+      ],
+      "steps": [
+        {"en": "Show the feeling cards and name each feeling together.", "ar": "اعرضوا بطاقات المشاعر وسمّوا كل شعور معاً.", "he": "להציג את קלפי הרגשות ולקרוא יחד בשם לכל רגש."},
+        {"en": "Use the soft toy to act out a small moment: a tower falls down. Ask: “How does it feel?”", "ar": "مثّلوا بالدمية لحظة صغيرة: يسقط برج. واسألوا: «بماذا تشعر الدمية؟»", "he": "להמחיש עם הבובה רגע קטן: מגדל נופל. לשאול: ״איך הבובה מרגישה?״"},
+        {"en": "Practise the words together: “{phrase}”", "ar": "تدرّبوا معاً على الكلمات: «{phrase}»", "he": "לתרגל יחד את המילים: ״{phrase}״"},
+        {"en": "Let {name} choose a card, show the face and say the words.", "ar": "دعوا {name} يختار بطاقة ويقلّد الوجه ويقول الكلمات.", "he": "לתת ל{name} לבחור קלף, להראות את הפרצוף ולהגיד את המילים."}
+      ],
+      "observe": [
+        {"en": "Did {name} name a feeling with words?", "ar": "هل سمّى {name} شعوراً بالكلمات؟", "he": "האם {name} קרא/ה לרגש בשם במילים?"},
+        {"en": "Did {name} use the words “{phrase}” (or similar words) in the game or later in the day?", "ar": "هل استخدم {name} عبارة «{phrase}» (أو كلمات مشابهة) في اللعبة أو لاحقاً خلال اليوم؟", "he": "האם {name} השתמש/ה במילים ״{phrase}״ (או במילים דומות) במשחק או מאוחר יותר במהלך היום?"}
+      ],
+      "adaptation": {"en": "Point to the cards instead of using words, and start with happy feelings.", "ar": "أشيروا إلى البطاقات بدلاً من الكلمات، وابدؤوا بالمشاعر السعيدة.", "he": "אפשר להצביע על הקלפים במקום מילים, ולהתחיל ברגשות שמחים."},
+      "sequence": [
+        {"emoji": "🧱", "en": "The tower falls", "ar": "يسقط البرج", "he": "המגדל נופל"},
+        {"emoji": "😣", "en": "A big feeling", "ar": "شعور كبير", "he": "רגש גדול"},
+        {"emoji": "🌬️", "en": "A deep breath", "ar": "نفس عميق", "he": "נשימה עמוקה"},
+        {"emoji": "💬", "en": "Say: “{phrase}”", "ar": "يقول: «{phrase}»", "he": "אומרים: ״{phrase}״"},
+        {"emoji": "🏗️", "en": "Build again", "ar": "يبنون من جديد", "he": "בונים מחדש"}
+      ]
+    },
+    "transitions": {
+      "duration": 10,
+      "goal_child": {"en": "get ready for what comes next", "ar": "يستعدّ لما سيأتي بعد ذلك", "he": "להתכונן למה שבא אחר כך"},
+      "phrase": {"en": "Time for the next thing!", "ar": "حان وقت الشيء التالي!", "he": "הגיע הזמן לדבר הבא!"},
+      "situation": {"en": "{Hero} was playing happily. Then it was time to stop and go outside.", "ar": "كان {hero} يلعب بسعادة. ثم حان وقت التوقف والخروج إلى الساحة.", "he": "{hero} שיחק בשמחה. ואז הגיע הזמן להפסיק ולצאת לחצר."},
+      "action": {"en": "The teacher showed a picture of what comes next. {Hero} said: “{phrase}”", "ar": "أرت المعلمة صورة لما سيأتي بعد ذلك. فقال {hero}: «{phrase}»", "he": "הגננת הראתה תמונה של מה שבא אחר כך. {hero} אמר: ״{phrase}״"},
+      "ending": {"en": "{Hero} put the toys away and went outside with everyone. Outside was fun too!", "ar": "رتّب {hero} الألعاب وخرج مع الجميع. وكان اللعب في الخارج ممتعاً أيضاً!", "he": "{hero} סידר את הצעצועים ויצא עם כולם. גם בחוץ היה כיף!"},
+      "story_title": {"en": "{HeroTitle} Is Ready for What's Next", "ar": "{hero} مستعدّ لما سيأتي", "he": "{hero} מוכן למה שבא"},
+      "question": {"en": "What helps you when it is time to stop playing?", "ar": "ما الذي يساعدك عندما يحين وقت التوقف عن اللعب؟", "he": "מה עוזר לך כשמגיע הזמן להפסיק לשחק?"},
+      "activity_title": {"en": "Countdown Game with {HeroTitle}", "ar": "لعبة العدّ التنازلي مع {hero}", "he": "משחק ספירה לאחור עם {hero}"},
+      "materials": [
+        {"en": "A timer or a countdown card", "ar": "مؤقّت أو بطاقة عدّ تنازلي", "he": "טיימר או כרטיס ספירה לאחור"},
+        {"en": "Pictures of the daily routine", "ar": "صور للروتين اليومي", "he": "תמונות של סדר היום"}
+      ],
+      "steps": [
+        {"en": "Play a short game with {name} using the {material_lc}.", "ar": "العبوا لعبة قصيرة مع {name} باستخدام {material}.", "he": "לשחק משחק קצר עם {name} עם {material}."},
+        {"en": "Before stopping, show the picture of what comes next and count down together: “3, 2, 1!”", "ar": "قبل التوقف، اعرضوا صورة ما سيأتي وعدّوا معاً: «3، 2، 1!»", "he": "לפני שמפסיקים, להראות את התמונה של מה שבא ולספור יחד: ״3, 2, 1!״"},
+        {"en": "Practise the phrase together: “{phrase}”", "ar": "تدرّبوا معاً على العبارة: «{phrase}»", "he": "לתרגל יחד את המשפט: ״{phrase}״"},
+        {"en": "Move together to the next activity and name it.", "ar": "انتقلوا معاً إلى النشاط التالي وسمّوه.", "he": "לעבור יחד לפעילות הבאה ולומר את שמה."}
+      ],
+      "observe": [
+        {"en": "How did {name} respond to the countdown and the picture?", "ar": "كيف تجاوب {name} مع العدّ التنازلي والصورة؟", "he": "איך {name} הגיב/ה לספירה לאחור ולתמונה?"},
+        {"en": "Did {name} move on to the next activity, and how long did it take?", "ar": "هل انتقل {name} إلى النشاط التالي، وكم استغرق ذلك من الوقت؟", "he": "האם {name} עבר/ה לפעילות הבאה, וכמה זמן זה לקח?"}
+      ],
+      "adaptation": {"en": "Give an early reminder a few minutes before the change, and let {name} carry one small object to the next activity.", "ar": "أعطوا تذكيراً مبكراً قبل التغيير ببضع دقائق، ودعوا {name} يحمل غرضاً صغيراً إلى النشاط التالي.", "he": "לתת תזכורת מוקדמת כמה דקות לפני השינוי, ולאפשר ל{name} לקחת חפץ קטן לפעילות הבאה."},
+      "sequence": [
+        {"emoji": "🧸", "en": "Play", "ar": "اللعب", "he": "משחק"},
+        {"emoji": "⏳", "en": "Countdown: 3, 2, 1", "ar": "عدّ تنازلي: 3، 2، 1", "he": "ספירה לאחור: 3, 2, 1"},
+        {"emoji": "🧺", "en": "Tidy up", "ar": "الترتيب", "he": "מסדרים"},
+        {"emoji": "➡️", "en": "Next activity", "ar": "النشاط التالي", "he": "הפעילות הבאה"}
+      ]
+    },
+    "communication": {
+      "duration": 10,
+      "goal_child": {"en": "ask for help", "ar": "يطلب المساعدة", "he": "לבקש עזרה"},
+      "phrase": {"en": "Can you help me, please?", "ar": "هل يمكنك أن تساعدني، من فضلك؟", "he": "אפשר עזרה, בבקשה?"},
+      "situation": {"en": "{Hero} wanted the big box on the high shelf, but it was too high to reach.", "ar": "أراد {hero} الصندوق الكبير على الرفّ العالي، لكنه كان عالياً جداً.", "he": "{hero} רצה את הקופסה הגדולה שעל המדף הגבוה, אבל היא הייתה גבוהה מדי."},
+      "action": {"en": "{Hero} went to the teacher and asked: “{phrase}”", "ar": "ذهب {hero} إلى المعلمة وسأل: «{phrase}»", "he": "{hero} הלך לגננת ושאל: ״{phrase}״"},
+      "ending": {"en": "“Of course!” said the teacher. Together they took the box down. {Hero} smiled.", "ar": "«طبعاً!» قالت المعلمة. وأنزلا الصندوق معاً. ابتسم {hero}.", "he": "״בטח!״ אמרה הגננת. יחד הם הורידו את הקופסה. {hero} חייך."},
+      "story_title": {"en": "{HeroTitle} Asks for Help", "ar": "{hero} يطلب المساعدة", "he": "{hero} מבקש עזרה"},
+      "question": {"en": "Who can you ask when you need help?", "ar": "مَن يمكنك أن تسأل عندما تحتاج إلى مساعدة؟", "ar_f": "مَن يمكنكِ أن تسألي عندما تحتاجين إلى مساعدة؟", "he": "למי אפשר לפנות כשצריכים עזרה?"},
+      "activity_title": {"en": "The Helper Mission", "ar": "مهمة المساعدة", "he": "משימת העזרה"},
+      "materials": [
+        {"en": "A box with a lid that is a little tricky to open", "ar": "صندوق بغطاء يصعب فتحه قليلاً", "he": "קופסה עם מכסה שקצת קשה לפתוח"},
+        {"en": "A small surprise to put inside", "ar": "مفاجأة صغيرة توضع في داخله", "he": "הפתעה קטנה לשים בפנים"}
+      ],
+      "steps": [
+        {"en": "Place the box near {name} and say there is a surprise inside.", "ar": "ضعوا الصندوق قرب {name} وقولوا إن في داخله مفاجأة.", "he": "להניח את הקופסה ליד {name} ולספר שיש בה הפתעה."},
+        {"en": "Wait a moment and let {name} try to open it.", "ar": "انتظروا قليلاً ودعوا {name} يحاول فتحه.", "he": "לחכות רגע ולתת ל{name} לנסות לפתוח."},
+        {"en": "Model the words “{phrase}” and invite {name} to ask (words, a gesture or pointing all count).", "ar": "قولوا العبارة «{phrase}» كنموذج، وشجّعوا {name} على الطلب (بالكلمات أو بالإشارة، كل طريقة مقبولة).", "he": "להדגים את המילים ״{phrase}״ ולעודד את {name} לבקש (במילים, בתנועה או בהצבעה – הכול בסדר)."},
+        {"en": "Open the box together and enjoy the surprise.", "ar": "افتحوا الصندوق معاً واستمتعوا بالمفاجأة.", "he": "לפתוח יחד את הקופסה וליהנות מההפתעה."}
+      ],
+      "observe": [
+        {"en": "How did {name} ask for help (words, a gesture, pointing, bringing the box)?", "ar": "كيف طلب {name} المساعدة (بالكلمات، بإشارة، بالتأشير، بإحضار الصندوق)؟", "he": "איך {name} ביקש/ה עזרה (במילים, בתנועה, בהצבעה, בהבאת הקופסה)?"},
+        {"en": "Did {name} ask an adult or a friend, and with or without a prompt?", "ar": "هل طلب {name} المساعدة من شخص بالغ أو من صديق، ومع تلميح أو بدونه؟", "he": "האם {name} ביקש/ה ממבוגר או מחבר, עם הכוונה או בלי?"}
+      ],
+      "adaptation": {"en": "Offer a picture card that says “help” so {name} can point to it, and welcome any way of asking.", "ar": "قدّموا بطاقة مصوّرة تعني «مساعدة» ليشير إليها {name}، ورحّبوا بأي طريقة للطلب.", "he": "להציע כרטיס תמונה של ״עזרה״ להצבעה, ולקבל בברכה כל דרך לבקש."},
+      "sequence": [
+        {"emoji": "📦", "en": "Try to open the box", "ar": "يحاول فتح الصندوق", "he": "מנסים לפתוח את הקופסה"},
+        {"emoji": "🙋", "en": "Ask: “{phrase}”", "ar": "يسأل: «{phrase}»", "he": "שואלים: ״{phrase}״"},
+        {"emoji": "🤝", "en": "Open it together", "ar": "يفتحونه معاً", "he": "פותחים ביחד"},
+        {"emoji": "🎁", "en": "Enjoy the surprise", "ar": "يستمتعون بالمفاجأة", "he": "נהנים מההפתעה"}
+      ]
+    },
+    "language": {
+      "duration": 15,
+      "goal_child": {"en": "listen and follow two steps", "ar": "يستمع وينفّذ خطوتين", "he": "להקשיב ולעשות שני שלבים"},
+      "phrase": {"en": "First this, then that!", "ar": "أولاً هذا، ثم ذاك!", "he": "קודם זה, ואחר כך זה!"},
+      "situation": {"en": "{Hero} went on a treasure hunt. The map said: first find the tree, then look under the big stone.", "ar": "خرج {hero} في رحلة بحث عن كنز. وكانت الخريطة تقول: أولاً جد الشجرة، ثم انظر تحت الحجر الكبير.", "he": "{hero} יצא לחיפוש אוצר. במפה היה כתוב: קודם למצוא את העץ, ואחר כך להסתכל מתחת לאבן הגדולה."},
+      "action": {"en": "{Hero} said: “{phrase}” and followed the map, step by step.", "ar": "قال {hero}: «{phrase}» وتبع الخريطة خطوة بخطوة.", "he": "{hero} אמר: ״{phrase}״ והלך לפי המפה, צעד אחר צעד."},
+      "ending": {"en": "Under the stone was a shiny treasure! {Hero} told all the friends how it was found.", "ar": "تحت الحجر كان هناك كنز لامع! وحكى {hero} للأصدقاء كيف وجده.", "he": "מתחת לאבן היה אוצר נוצץ! {hero} סיפר לכל החברים איך מצא אותו."},
+      "story_title": {"en": "{HeroTitle} and the Treasure Map", "ar": "{hero} وخريطة الكنز", "he": "{hero} ומפת האוצר"},
+      "question": {"en": "What did {hero} do first, and what came next?", "ar": "ماذا فعل {hero} أولاً، وماذا فعل بعد ذلك؟", "he": "מה {hero} עשה קודם, ומה אחר כך?"},
+      "activity_title": {"en": "Two-Step Treasure Hunt", "ar": "البحث عن الكنز بخطوتين", "he": "חיפוש אוצר בשני שלבים"},
+      "materials": [
+        {"en": "A small treasure (a toy or a sticker)", "ar": "كنز صغير (لعبة أو ملصق)", "he": "אוצר קטן (צעצוע או מדבקה)"},
+        {"en": "Two or three hiding places in the room", "ar": "مكانان أو ثلاثة للاختباء في الغرفة", "he": "שניים או שלושה מקומות מסתור בחדר"}
+      ],
+      "steps": [
+        {"en": "Hide the treasure and give a two-step instruction, for example: “First go to the door, then look in the basket.”", "ar": "خبّئوا الكنز وأعطوا تعليمات من خطوتين، مثلاً: «أولاً اذهب إلى الباب، ثم انظر في السلة.»", "he": "להחביא את האוצר ולתת הוראה בשני שלבים, למשל: ״קודם ללכת לדלת, ואחר כך להסתכל בסל.״"},
+        {"en": "Say the words together: “{phrase}”", "ar": "قولوا الكلمات معاً: «{phrase}»", "he": "להגיד יחד את המילים: ״{phrase}״"},
+        {"en": "Let {name} find the treasure and then tell what happened.", "ar": "دعوا {name} يجد الكنز ثم يحكي ما حدث.", "he": "לתת ל{name} למצוא את האוצר ואז לספר מה קרה."},
+        {"en": "Swap roles: {name} hides the treasure and gives the instructions.", "ar": "تبادلوا الأدوار: {name} يخبّئ الكنز ويعطي التعليمات.", "he": "מחליפים תפקידים: {name} מחביא/ה את האוצר ונותן/ת את ההוראות."}
+      ],
+      "observe": [
+        {"en": "Did {name} follow both steps, and with how many reminders?", "ar": "هل نفّذ {name} الخطوتين، وكم تذكيراً احتاج؟", "he": "האם {name} ביצע/ה את שני השלבים, ועם כמה תזכורות?"},
+        {"en": "Which words did {name} use to tell what happened?", "ar": "ما الكلمات التي استخدمها {name} ليحكي ما حدث؟", "he": "באילו מילים {name} השתמש/ה כדי לספר מה קרה?"}
+      ],
+      "adaptation": {"en": "Start with one step and show it with a gesture or a picture; add the second step when it feels easy.", "ar": "ابدؤوا بخطوة واحدة واعرضوها بإشارة أو صورة؛ وأضيفوا الخطوة الثانية عندما تصبح سهلة.", "he": "להתחיל בשלב אחד ולהראות אותו בתנועה או בתמונה; להוסיף את השלב השני כשזה נעשה קל."},
+      "sequence": [
+        {"emoji": "🗺️", "en": "Look at the map", "ar": "ينظر إلى الخريطة", "he": "מסתכלים במפה"},
+        {"emoji": "🌳", "en": "Find the tree", "ar": "يجد الشجرة", "he": "מוצאים את העץ"},
+        {"emoji": "🪨", "en": "Look under the stone", "ar": "ينظر تحت الحجر", "he": "מסתכלים מתחת לאבן"},
+        {"emoji": "💎", "en": "The treasure!", "ar": "الكنز!", "he": "האוצר!"}
+      ],
+      "praise": {"en": "{name}, you use wonderful words too!", "ar": "وأنت يا {name}، تستخدم كلمات رائعة أيضاً!", "ar_f": "وأنتِ يا {name}، تستخدمين كلمات رائعة أيضاً!", "he": "{name}, גם את/ה משתמש/ת במילים נהדרות!"}
+    },
+    "independence": {
+      "duration": 10,
+      "goal_child": {"en": "do it alone", "ar": "يفعلها بنفسه", "he": "לעשות את זה לבד"},
+      "phrase": {"en": "I can do it myself!", "ar": "أستطيع أن أفعلها بنفسي!", "he": "אני יכול/ה לבד!"},
+      "situation": {"en": "It was time to go outside. {Hero} wanted to put on a coat, one step at a time.", "ar": "حان وقت الخروج. أراد {hero} أن يلبس معطفه، خطوة بخطوة.", "he": "הגיע הזמן לצאת החוצה. {hero} רצה ללבוש מעיל, צעד אחר צעד."},
+      "action": {"en": "{Hero} said: “{phrase}” First one sleeve, then the other.", "ar": "قال {hero}: «{phrase}» أولاً كمّ، ثم الكمّ الآخر.", "he": "{hero} אמר: ״{phrase}״ קודם שרוול אחד, ואחר כך השני."},
+      "ending": {"en": "The coat was on! {Hero} felt proud and ran outside to play.", "ar": "لبس المعطف! شعر {hero} بالفخر وخرج ليلعب.", "he": "המעיל עליו! {hero} הרגיש גאה ויצא לשחק בחוץ."},
+      "story_title": {"en": "{HeroTitle} Does It Alone", "ar": "{hero} يفعلها بنفسه", "he": "{hero} עושה לבד"},
+      "question": {"en": "What can you do by yourself?", "ar": "ماذا تستطيع أن تفعل بنفسك؟", "ar_f": "ماذا تستطيعين أن تفعلي بنفسكِ؟", "he": "מה את/ה יכול/ה לעשות לבד?"},
+      "activity_title": {"en": "The Dress-Up Station", "ar": "ركن ارتداء الملابس", "he": "פינת ההתלבשות"},
+      "materials": [
+        {"en": "Easy dress-up clothes (a coat, a hat, a scarf)", "ar": "ملابس سهلة للتنكّر (معطف، قبعة، وشاح)", "he": "בגדים קלים להתלבשות (מעיל, כובע, צעיף)"},
+        {"en": "A mirror", "ar": "مرآة", "he": "מראה"}
+      ],
+      "steps": [
+        {"en": "Lay the clothes on a mat in the order they go on.", "ar": "ضعوا الملابس على سجادة بالترتيب الذي تُلبس به.", "he": "לסדר את הבגדים על שטיח לפי הסדר שבו לובשים אותם."},
+        {"en": "Show one step at a time with a picture or a gesture.", "ar": "اعرضوا خطوة واحدة في كل مرة بصورة أو بإشارة.", "he": "להראות שלב אחד בכל פעם, בתמונה או בתנועה."},
+        {"en": "Invite {name} to try each step and say: “{phrase}”", "ar": "شجّعوا {name} على تجربة كل خطوة وقول: «{phrase}»", "he": "לעודד את {name} לנסות כל שלב ולהגיד: ״{phrase}״"},
+        {"en": "Look in the mirror together and celebrate.", "ar": "انظروا في المرآة معاً واحتفلوا.", "he": "להסתכל יחד במראה ולחגוג."}
+      ],
+      "observe": [
+        {"en": "Which steps did {name} do alone, and where was help needed?", "ar": "ما الخطوات التي قام بها {name} وحده، وأين احتاج إلى مساعدة؟", "he": "אילו שלבים {name} עשה/תה לבד, ואיפה נדרשה עזרה?"},
+        {"en": "How did {name} react when a step took a few tries?", "ar": "كيف تصرّف {name} عندما احتاجت خطوة إلى عدة محاولات؟", "he": "איך {name} הגיב/ה כששלב דרש כמה ניסיונות?"}
+      ],
+      "adaptation": {"en": "Do the first part together (for example, hold the sleeve open) and let {name} finish the last step alone.", "ar": "قوموا بالجزء الأول معاً (مثلاً أمسكوا الكمّ مفتوحاً) ودعوا {name} يُنهي الخطوة الأخيرة وحده.", "he": "לעשות יחד את החלק הראשון (למשל להחזיק את השרוול פתוח) ולתת ל{name} לסיים לבד את השלב האחרון."},
+      "sequence": [
+        {"emoji": "🧥", "en": "Take the coat", "ar": "يأخذ المعطف", "he": "לוקחים מעיל"},
+        {"emoji": "👉", "en": "One sleeve", "ar": "كمّ واحد", "he": "שרוול אחד"},
+        {"emoji": "👈", "en": "The other sleeve", "ar": "الكمّ الآخر", "he": "השרוול השני"},
+        {"emoji": "🌳", "en": "Ready to go out", "ar": "جاهز للخروج", "he": "מוכנים לצאת"}
+      ]
+    },
+    "attention": {
+      "duration": 10,
+      "goal_child": {"en": "keep going until it is finished", "ar": "يستمرّ حتى ينتهي", "he": "להמשיך עד הסוף"},
+      "phrase": {"en": "I keep going until it's done!", "ar": "سأستمرّ حتى أنتهي!", "he": "ממשיכים עד הסוף!"},
+      "situation": {"en": "{Hero} was making a long road of blocks. It was a big job!", "ar": "كان {hero} يبني طريقاً طويلاً من المكعبات. كانت مهمة كبيرة!", "he": "{hero} בנה כביש ארוך מקוביות. זו הייתה עבודה גדולה!"},
+      "action": {"en": "Every time {hero} wanted to stop, {hero} said: “{phrase}”", "ar": "في كل مرة أراد فيها {hero} أن يتوقف، كان يقول: «{phrase}»", "he": "בכל פעם ש{hero} רצה להפסיק, הוא אמר: ״{phrase}״"},
+      "ending": {"en": "At last the road was finished, all the way to the door! {Hero} felt proud.", "ar": "وأخيراً اكتمل الطريق حتى الباب! شعر {hero} بالفخر.", "he": "סוף סוף הכביש היה גמור, עד הדלת! {hero} הרגיש גאה."},
+      "story_title": {"en": "{HeroTitle} Keeps Going", "ar": "{hero} يستمرّ حتى النهاية", "he": "{hero} ממשיך עד הסוף"},
+      "question": {"en": "What helps you keep going until you finish?", "ar": "ما الذي يساعدك على الاستمرار حتى تنتهي؟", "he": "מה עוזר לך להמשיך עד שמסיימים?"},
+      "activity_title": {"en": "The Long Road Mission", "ar": "مهمة الطريق الطويل", "he": "משימת הכביש הארוך"},
+      "materials": [
+        {"en": "Blocks or paper strips", "ar": "مكعبات أو شرائط ورق", "he": "קוביות או רצועות נייר"},
+        {"en": "A small toy to drive along the road", "ar": "لعبة صغيرة تسير على الطريق", "he": "צעצוע קטן שייסע על הכביש"}
+      ],
+      "steps": [
+        {"en": "Mark a start and an end on the floor.", "ar": "حدّدوا بداية ونهاية على الأرض.", "he": "לסמן על הרצפה התחלה וסוף."},
+        {"en": "Invite {name} to build a road from the start to the end, one piece at a time.", "ar": "شجّعوا {name} على بناء طريق من البداية إلى النهاية، قطعة بعد قطعة.", "he": "להזמין את {name} לבנות כביש מההתחלה עד הסוף, חלק אחרי חלק."},
+        {"en": "When {name} pauses, say together: “{phrase}”", "ar": "عندما يتوقف {name}، قولوا معاً: «{phrase}»", "he": "כש{name} עוצר/ת, להגיד יחד: ״{phrase}״"},
+        {"en": "When the road is finished, drive the toy along it together.", "ar": "عندما يكتمل الطريق، سيّروا اللعبة عليه معاً.", "he": "כשהכביש גמור, לנסוע עליו יחד עם הצעצוע."}
+      ],
+      "observe": [
+        {"en": "How long did {name} stay with the task, and what helped to continue?", "ar": "كم بقي {name} مع المهمة، وما الذي ساعده على الاستمرار؟", "he": "כמה זמן {name} נשאר/ה במשימה, ומה עזר להמשיך?"},
+        {"en": "When {name}'s attention moved away, what brought it back?", "ar": "عندما انشغل {name} بشيء آخر، ما الذي أعاده إلى المهمة؟", "he": "כשתשומת הלב של {name} עברה למשהו אחר, מה החזיר אותה?"}
+      ],
+      "adaptation": {"en": "Make the road shorter and add a fun goal at the end; offer a short movement break halfway.", "ar": "اجعلوا الطريق أقصر وضعوا هدفاً ممتعاً في نهايته؛ وقدّموا استراحة حركة قصيرة في المنتصف.", "he": "לקצר את הכביש ולשים בסופו יעד כיפי; להציע הפסקת תנועה קצרה באמצע."},
+      "sequence": [
+        {"emoji": "🏁", "en": "Start the road", "ar": "بداية الطريق", "he": "מתחילים כביש"},
+        {"emoji": "🧱", "en": "Add more pieces", "ar": "إضافة قطع أخرى", "he": "מוסיפים עוד חלקים"},
+        {"emoji": "💪", "en": "Keep going", "ar": "الاستمرار", "he": "ממשיכים"},
+        {"emoji": "🎉", "en": "The road is done!", "ar": "اكتمل الطريق!", "he": "הכביש גמור!"}
+      ]
+    },
+    "motor": {
+      "duration": 10,
+      "goal_child": {"en": "make things with careful hands", "ar": "يصنع أشياء بيدين هادئتين", "he": "ליצור בידיים זהירות"},
+      "phrase": {"en": "Slowly, slowly, I can do it!", "ar": "ببطء، ببطء، أستطيع!", "he": "לאט לאט, זה מצליח!"},
+      "situation": {"en": "{Hero} wanted to make a paper road for the friends, but the paper was too long.", "ar": "أراد {hero} أن يصنع طريقاً من الورق للأصدقاء، لكن الورقة كانت طويلة جداً.", "he": "{hero} רצה להכין כביש מנייר לחברים, אבל הנייר היה ארוך מדי."},
+      "action": {"en": "{Hero} held the scissors carefully and said: “{phrase}” Snip, snip!", "ar": "أمسك {hero} المقص بحذر وقال: «{phrase}» قص، قص!", "he": "{hero} החזיק את המספריים בזהירות ואמר: ״{phrase}״ צ'יק צ'יק!"},
+      "ending": {"en": "Now there was a long paper road, and all the friends played on it. {Hero} was happy.", "ar": "صار هناك طريق طويل من الورق، ولعب عليه كل الأصدقاء. كان {hero} سعيداً.", "he": "עכשיו היה כביש ארוך מנייר, וכל החברים שיחקו עליו. {hero} היה שמח."},
+      "story_title": {"en": "{HeroTitle} Makes a Paper Road", "ar": "{hero} يصنع طريقاً من الورق", "he": "{hero} מכין כביש מנייר"},
+      "question": {"en": "What can you make with your hands?", "ar": "ماذا تستطيع أن تصنع بيديك؟", "ar_f": "ماذا تستطيعين أن تصنعي بيديكِ؟", "he": "מה אפשר להכין בידיים?"},
+      "activity_title": {"en": "Cut the Road", "ar": "لنقصّ الطريق", "he": "גוזרים כביש"},
+      "materials": [
+        {"en": "Child-safe scissors", "ar": "مقص آمن للأطفال", "he": "מספריים בטיחותיים לילדים"},
+        {"en": "Paper strips with thick lines to cut along", "ar": "شرائط ورق عليها خطوط سميكة للقص", "he": "רצועות נייר עם קווים עבים לגזירה"}
+      ],
+      "steps": [
+        {"en": "Show how to hold the scissors, thumb on top.", "ar": "أروا كيف نمسك المقص، والإبهام إلى الأعلى.", "he": "להראות איך מחזיקים מספריים, האגודל למעלה."},
+        {"en": "Cut along the thick line together, slowly.", "ar": "قصّوا معاً على الخط السميك ببطء.", "he": "לגזור יחד לאורך הקו העבה, לאט."},
+        {"en": "Say the phrase while cutting: “{phrase}”", "ar": "قولوا العبارة أثناء القص: «{phrase}»", "he": "להגיד את המשפט בזמן הגזירה: ״{phrase}״"},
+        {"en": "Join the pieces into a road and play on it.", "ar": "صِلوا القطع لتصبح طريقاً والعبوا عليه.", "he": "לחבר את החלקים לכביש ולשחק עליו."}
+      ],
+      "observe": [
+        {"en": "How did {name} hold the scissors and the paper?", "ar": "كيف أمسك {name} المقص والورقة؟", "he": "איך {name} החזיק/ה את המספריים ואת הנייר?"},
+        {"en": "Did {name} keep trying when the line was long?", "ar": "هل واصل {name} المحاولة عندما كان الخط طويلاً؟", "he": "האם {name} המשיך/ה לנסות כשהקו היה ארוך?"}
+      ],
+      "adaptation": {"en": "Use shorter strips and thicker paper, or let {name} tear the paper first.", "ar": "استخدموا شرائط أقصر وورقاً أسمك، أو دعوا {name} يمزّق الورق أولاً.", "he": "להשתמש ברצועות קצרות יותר ובנייר עבה יותר, או לתת ל{name} לקרוע את הנייר קודם."},
+      "sequence": [
+        {"emoji": "✂️", "en": "Hold the scissors", "ar": "يمسك المقص", "he": "מחזיקים מספריים"},
+        {"emoji": "📏", "en": "Cut slowly", "ar": "يقصّ ببطء", "he": "גוזרים לאט"},
+        {"emoji": "🛣️", "en": "Make a road", "ar": "يصنع طريقاً", "he": "מכינים כביש"},
+        {"emoji": "🚗", "en": "Play on it", "ar": "يلعب عليه", "he": "משחקים עליו"}
+      ]
+    },
+    "learning": {
+      "duration": 10,
+      "goal_child": {"en": "sort and match", "ar": "يصنّف ويطابق", "he": "למיין ולהתאים"},
+      "phrase": {"en": "This one goes here!", "ar": "هذا مكانه هنا!", "he": "זה הולך לכאן!"},
+      "situation": {"en": "All of {hero}'s toys were mixed up in one big box.", "ar": "كانت كل ألعاب {hero} مختلطة في صندوق كبير.", "he": "כל הצעצועים של {hero} היו מעורבבים בקופסה אחת גדולה."},
+      "action": {"en": "{Hero} looked at each toy and said: “{phrase}” Red with red, blue with blue.", "ar": "نظر {hero} إلى كل لعبة وقال: «{phrase}» الأحمر مع الأحمر، والأزرق مع الأزرق.", "he": "{hero} הסתכל על כל צעצוע ואמר: ״{phrase}״ אדום עם אדום, כחול עם כחול."},
+      "ending": {"en": "Soon every toy was in its place. {Hero} could find everything!", "ar": "وسرعان ما صارت كل لعبة في مكانها. وصار {hero} يجد كل شيء!", "he": "עד מהרה כל צעצוע היה במקום שלו. {hero} יכול היה למצוא הכול!"},
+      "story_title": {"en": "{HeroTitle} Sorts the Toys", "ar": "{hero} يرتّب الألعاب", "he": "{hero} ממיין את הצעצועים"},
+      "question": {"en": "How would you sort your toys?", "ar": "كيف ترتّب ألعابك؟", "ar_f": "كيف ترتّبين ألعابكِ؟", "he": "איך היית ממיין/ת את הצעצועים שלך?"},
+      "activity_title": {"en": "Sorting Baskets", "ar": "سلال التصنيف", "he": "סלסלות מיון"},
+      "materials": [
+        {"en": "Two or three baskets", "ar": "سلتان أو ثلاث", "he": "שתיים או שלוש סלסלות"},
+        {"en": "Toys in different colours and shapes", "ar": "ألعاب بألوان وأشكال مختلفة", "he": "צעצועים בצבעים ובצורות שונים"}
+      ],
+      "steps": [
+        {"en": "Put all the toys in one pile and the baskets in a row.", "ar": "ضعوا كل الألعاب في كومة واحدة والسلال في صف.", "he": "לשים את כל הצעצועים בערימה אחת ואת הסלסלות בשורה."},
+        {"en": "Choose a sorting rule together (colour, size or kind).", "ar": "اختاروا معاً قاعدة للتصنيف (اللون أو الحجم أو النوع).", "he": "לבחור יחד כלל מיון (צבע, גודל או סוג)."},
+        {"en": "Sort together, saying: “{phrase}”", "ar": "صنّفوا معاً وأنتم تقولون: «{phrase}»", "he": "למיין יחד ולהגיד: ״{phrase}״"},
+        {"en": "Ask {name} to choose a new rule and sort again.", "ar": "اطلبوا من {name} أن يختار قاعدة جديدة ويصنّف من جديد.", "he": "לבקש מ{name} לבחור כלל חדש ולמיין שוב."}
+      ],
+      "observe": [
+        {"en": "Which sorting rule did {name} use or suggest?", "ar": "ما القاعدة التي استخدمها {name} أو اقترحها للتصنيف؟", "he": "באיזה כלל מיון {name} השתמש/ה או הציע/ה?"},
+        {"en": "How did {name} explain where things go?", "ar": "كيف شرح {name} أين توضع الأشياء؟", "he": "איך {name} הסביר/ה לאן הולך כל דבר?"}
+      ],
+      "adaptation": {"en": "Start with two very different groups (for example, cars and animals) and only a few toys.", "ar": "ابدؤوا بمجموعتين مختلفتين جداً (مثلاً سيارات وحيوانات) وعدد قليل من الألعاب.", "he": "להתחיל בשתי קבוצות שונות מאוד (למשל מכוניות וחיות) ובמעט צעצועים."},
+      "sequence": [
+        {"emoji": "📦", "en": "A mixed box", "ar": "صندوق مختلط", "he": "קופסה מעורבבת"},
+        {"emoji": "🤔", "en": "Choose a rule", "ar": "نختار قاعدة", "he": "בוחרים כלל"},
+        {"emoji": "🧺", "en": "Sort into baskets", "ar": "نصنّف في السلال", "he": "ממיינים לסלסלות"},
+        {"emoji": "✅", "en": "Everything in place", "ar": "كل شيء في مكانه", "he": "הכול במקום"}
+      ]
+    },
+    "confidence": {
+      "duration": 10,
+      "goal_child": {"en": "try something new", "ar": "يجرّب شيئاً جديداً", "he": "לנסות משהו חדש"},
+      "phrase": {"en": "I can try!", "ar": "سأحاول!", "he": "אני אנסה!"},
+      "situation": {"en": "There was a new slide in the park. {Hero} had never tried it before.", "ar": "كانت هناك زحليقة جديدة في الحديقة. ولم يجرّبها {hero} من قبل.", "he": "בגן השעשועים הייתה מגלשה חדשה. {hero} עוד לא ניסה אותה."},
+      "action": {"en": "{Hero} took a breath and said: “{phrase}” Up the steps, one by one.", "ar": "أخذ {hero} نفساً وقال: «{phrase}» وصعد الدرجات واحدة واحدة.", "he": "{hero} לקח נשימה ואמר: ״{phrase}״ ועלה במדרגות, אחת אחת."},
+      "ending": {"en": "Wheee! {Hero} slid down and laughed. Trying new things can be fun!", "ar": "هيييه! انزلق {hero} وضحك. تجربة أشياء جديدة يمكن أن تكون ممتعة!", "he": "ווווי! {hero} גלש למטה וצחק. לנסות דברים חדשים יכול להיות כיף!"},
+      "story_title": {"en": "{HeroTitle} Tries Something New", "ar": "{hero} يجرّب شيئاً جديداً", "he": "{hero} מנסה משהו חדש"},
+      "question": {"en": "What new thing would you like to try?", "ar": "ما الشيء الجديد الذي تحب أن تجرّبه؟", "ar_f": "ما الشيء الجديد الذي تحبين أن تجرّبيه؟", "he": "איזה דבר חדש היית רוצה לנסות?"},
+      "activity_title": {"en": "The Try-It Station", "ar": "ركن التجربة", "he": "תחנת הניסיונות"},
+      "materials": [
+        {"en": "A new, simple game or material", "ar": "لعبة أو مادة جديدة وبسيطة", "he": "משחק או חומר חדש ופשוט"},
+        {"en": "A small bell to ring after each try", "ar": "جرس صغير نقرعه بعد كل محاولة", "he": "פעמון קטן לצלצל אחרי כל ניסיון"}
+      ],
+      "steps": [
+        {"en": "Put the new game on the table and explore it together first.", "ar": "ضعوا اللعبة الجديدة على الطاولة واستكشفوها معاً أولاً.", "he": "להניח את המשחק החדש על השולחן ולחקור אותו יחד קודם."},
+        {"en": "Invite {name} to try one small step and say: “{phrase}”", "ar": "شجّعوا {name} على تجربة خطوة صغيرة وقول: «{phrase}»", "he": "להזמין את {name} לנסות צעד קטן אחד ולהגיד: ״{phrase}״"},
+        {"en": "Ring the bell after each try, whatever happens.", "ar": "اقرعوا الجرس بعد كل محاولة، مهما كانت النتيجة.", "he": "לצלצל בפעמון אחרי כל ניסיון, מה שלא יקרה."},
+        {"en": "Talk about what {name} tried and what was fun.", "ar": "تحدثوا عمّا جرّبه {name} وما كان ممتعاً.", "he": "לדבר על מה ש{name} ניסה/תה ועל מה שהיה כיף."}
+      ],
+      "observe": [
+        {"en": "How did {name} approach the new activity (watched first, joined right away, needed encouragement)?", "ar": "كيف اقترب {name} من النشاط الجديد (راقب أولاً، انضمّ فوراً، احتاج إلى تشجيع)؟", "he": "איך {name} ניגש/ה לפעילות החדשה (הסתכל/ה קודם, הצטרף/ה מיד, נזקק/ה לעידוד)?"},
+        {"en": "What did {name} do when something did not work the first time?", "ar": "ماذا فعل {name} عندما لم ينجح شيء من المرة الأولى؟", "he": "מה {name} עשה/תה כשמשהו לא הצליח בפעם הראשונה?"}
+      ],
+      "adaptation": {"en": "Let {name} watch a friend first, and break the activity into one very small first step.", "ar": "دعوا {name} يشاهد صديقاً أولاً، وقسّموا النشاط إلى خطوة أولى صغيرة جداً.", "he": "לתת ל{name} לצפות קודם בחבר, ולפרק את הפעילות לצעד ראשון קטן מאוד."},
+      "sequence": [
+        {"emoji": "👀", "en": "See something new", "ar": "يرى شيئاً جديداً", "he": "רואים משהו חדש"},
+        {"emoji": "💬", "en": "Say: “{phrase}”", "ar": "يقول: «{phrase}»", "he": "אומרים: ״{phrase}״"},
+        {"emoji": "👣", "en": "Try a small step", "ar": "يجرّب خطوة صغيرة", "he": "מנסים צעד קטן"},
+        {"emoji": "🎉", "en": "Have fun", "ar": "يستمتع", "he": "נהנים"}
+      ],
+      "praise": {"en": "{name}, you can try new things too!", "ar": "وأنت يا {name}، تستطيع أن تجرّب أشياء جديدة أيضاً!", "ar_f": "وأنتِ يا {name}، تستطيعين أن تجرّبي أشياء جديدة أيضاً!", "he": "{name}, גם את/ה יכול/ה לנסות דברים חדשים!"}
+    },
+    "storytelling": {
+      "duration": 15,
+      "goal_child": {"en": "tell a story", "ar": "يحكي قصة", "he": "לספר סיפור"},
+      "phrase": {"en": "Once upon a time...", "ar": "كان يا ما كان...", "he": "היה היה פעם..."},
+      "situation": {"en": "One evening, the friends sat in a circle and asked {hero} for a story.", "ar": "في إحدى الأمسيات، جلس الأصدقاء في دائرة وطلبوا من {hero} أن يحكي قصة.", "he": "ערב אחד ישבו החברים במעגל וביקשו מ{hero} סיפור."},
+      "action": {"en": "{Hero} smiled and began: “{phrase}” The story had a brave hero, a deep forest and a happy ending.", "ar": "ابتسم {hero} وبدأ: «{phrase}» وكان في القصة بطل شجاع وغابة كبيرة ونهاية سعيدة.", "he": "{hero} חייך והתחיל: ״{phrase}״ בסיפור היו גיבור אמיץ, יער עמוק וסוף שמח."},
+      "ending": {"en": "Everyone clapped. They wanted to hear another story tomorrow!", "ar": "صفّق الجميع. وأرادوا أن يسمعوا قصة أخرى غداً!", "he": "כולם מחאו כפיים. הם רצו לשמוע עוד סיפור מחר!"},
+      "story_title": {"en": "{HeroTitle} Tells a Story", "ar": "{hero} يحكي قصة", "he": "{hero} מספר סיפור"},
+      "question": {"en": "What story would you tell your friends?", "ar": "ما القصة التي تحب أن تحكيها لأصدقائك؟", "ar_f": "ما القصة التي تحبين أن تحكيها لأصدقائكِ؟", "he": "איזה סיפור היית מספר/ת לחברים?"},
+      "activity_title": {"en": "Story Circle with Picture Cards", "ar": "حلقة القصص مع البطاقات المصوّرة", "he": "מעגל סיפורים עם כרטיסי תמונות"},
+      "materials": [
+        {"en": "Picture cards (animals, places, objects)", "ar": "بطاقات مصوّرة (حيوانات، أماكن، أشياء)", "he": "כרטיסי תמונות (חיות, מקומות, חפצים)"},
+        {"en": "A cushion for the storyteller", "ar": "وسادة للراوي", "he": "כרית למספר/ת הסיפור"}
+      ],
+      "steps": [
+        {"en": "Spread the picture cards face down.", "ar": "انشروا البطاقات المصوّرة ووجهها إلى الأسفل.", "he": "לפזר את כרטיסי התמונות הפוכים."},
+        {"en": "Invite {name} to sit on the storyteller cushion and pick three cards.", "ar": "ادعوا {name} للجلوس على وسادة الراوي واختيار ثلاث بطاقات.", "he": "להזמין את {name} לשבת על כרית המספר/ת ולבחור שלושה כרטיסים."},
+        {"en": "{name} starts with “{phrase}” and uses all three cards in the story.", "ar": "يبدأ {name} بعبارة «{phrase}» ويستخدم البطاقات الثلاث في القصة.", "he": "{name} מתחיל/ה ב״{phrase}״ ומשלב/ת בסיפור את שלושת הכרטיסים."},
+        {"en": "The listeners ask one question about the story.", "ar": "يسأل المستمعون سؤالاً واحداً عن القصة.", "he": "המקשיבים שואלים שאלה אחת על הסיפור."}
+      ],
+      "observe": [
+        {"en": "Which new words and story parts (beginning, middle, end) did {name} use?", "ar": "ما الكلمات الجديدة وأجزاء القصة (البداية، الوسط، النهاية) التي استخدمها {name}؟", "he": "באילו מילים חדשות ובאילו חלקי סיפור (התחלה, אמצע, סוף) {name} השתמש/ה?"},
+        {"en": "How did {name} respond to the listeners' questions?", "ar": "كيف أجاب {name} عن أسئلة المستمعين؟", "he": "איך {name} ענה/תה על שאלות המקשיבים?"}
+      ],
+      "adaptation": {"en": "Use only two cards and help with the first sentence, then let {name} continue.", "ar": "استخدموا بطاقتين فقط وساعدوا في الجملة الأولى، ثم دعوا {name} يكمل.", "he": "להשתמש רק בשני כרטיסים ולעזור במשפט הראשון, ואז לתת ל{name} להמשיך."},
+      "sequence": [
+        {"emoji": "🃏", "en": "Pick the cards", "ar": "نختار البطاقات", "he": "בוחרים כרטיסים"},
+        {"emoji": "💬", "en": "Say: “{phrase}”", "ar": "نقول: «{phrase}»", "he": "אומרים: ״{phrase}״"},
+        {"emoji": "🌲", "en": "Tell what happens", "ar": "نحكي ما يحدث", "he": "מספרים מה קורה"},
+        {"emoji": "🌟", "en": "A happy ending", "ar": "نهاية سعيدة", "he": "סוף שמח"}
+      ],
+      "praise": {"en": "{name}, you tell wonderful stories too!", "ar": "وأنت يا {name}، تحكي قصصاً رائعة أيضاً!", "ar_f": "وأنتِ يا {name}، تحكين قصصاً رائعة أيضاً!", "he": "{name}, גם את/ה מספר/ת סיפורים נהדרים!"}
+    },
+    "creativity": {
+      "duration": 20,
+      "goal_child": {"en": "make something new", "ar": "يصنع شيئاً جديداً", "he": "ליצור משהו חדש"},
+      "phrase": {"en": "I have an idea!", "ar": "عندي فكرة!", "he": "יש לי רעיון!"},
+      "situation": {"en": "The friends wanted a new game, but nobody knew what to play.", "ar": "أراد الأصدقاء لعبة جديدة، لكن لم يعرف أحد ماذا يلعبون.", "he": "החברים רצו משחק חדש, אבל אף אחד לא ידע מה לשחק."},
+      "action": {"en": "{Hero} said: “{phrase}” Let's turn the boxes into a magic train!", "ar": "قال {hero}: «{phrase}» لنحوّل الصناديق إلى قطار سحري!", "he": "{hero} אמר: ״{phrase}״ בואו נהפוך את הקופסאות לרכבת קסומה!"},
+      "ending": {"en": "They painted the boxes and rode the magic train all day. What a wonderful idea!", "ar": "لوّنوا الصناديق وركبوا القطار السحري طوال اليوم. يا لها من فكرة رائعة!", "he": "הם צבעו את הקופסאות ונסעו ברכבת הקסומה כל היום. איזה רעיון נפלא!"},
+      "story_title": {"en": "{HeroTitle} Has an Idea", "ar": "{hero} عنده فكرة", "he": "{hero} והרעיון הנפלא"},
+      "question": {"en": "What could you make from a big box?", "ar": "ماذا يمكنك أن تصنع من صندوق كبير؟", "ar_f": "ماذا يمكنكِ أن تصنعي من صندوق كبير؟", "he": "מה אפשר להכין מקופסה גדולה?"},
+      "activity_title": {"en": "The Magic Box Workshop", "ar": "ورشة الصندوق السحري", "he": "סדנת הקופסה הקסומה"},
+      "materials": [
+        {"en": "Empty boxes and tubes", "ar": "صناديق وأنابيب كرتون فارغة", "he": "קופסאות וגלילים ריקים"},
+        {"en": "Crayons, tape and stickers", "ar": "ألوان وشريط لاصق وملصقات", "he": "צבעים, סלוטייפ ומדבקות"}
+      ],
+      "steps": [
+        {"en": "Put the boxes in the middle and ask: “What could this become?”", "ar": "ضعوا الصناديق في الوسط واسألوا: «ماذا يمكن أن يصبح هذا؟»", "he": "לשים את הקופסאות באמצע ולשאול: ״מה זה יכול להיות?״"},
+        {"en": "Invite {name} to say “{phrase}” and share an idea.", "ar": "شجّعوا {name} على قول «{phrase}» ومشاركة فكرته.", "he": "להזמין את {name} להגיד ״{phrase}״ ולשתף רעיון."},
+        {"en": "Build and decorate the idea together.", "ar": "ابنوا الفكرة وزيّنوها معاً.", "he": "לבנות ולקשט יחד את הרעיון."},
+        {"en": "{name} shows the creation and explains how it works.", "ar": "يعرض {name} ما صنعه ويشرح كيف يعمل.", "he": "{name} מציג/ה את היצירה ומסביר/ה איך היא עובדת."}
+      ],
+      "observe": [
+        {"en": "Which original ideas did {name} suggest?", "ar": "ما الأفكار الأصيلة التي اقترحها {name}؟", "he": "אילו רעיונות מקוריים {name} הציע/ה?"},
+        {"en": "How did {name} explain or change the idea while building?", "ar": "كيف شرح {name} فكرته أو غيّرها أثناء البناء؟", "he": "איך {name} הסביר/ה או שינה/תה את הרעיון בזמן הבנייה?"}
+      ],
+      "adaptation": {"en": "Offer two ideas to choose from, then ask {name} to add one new detail.", "ar": "اقترحوا فكرتين للاختيار بينهما، ثم اطلبوا من {name} إضافة تفصيل جديد.", "he": "להציע שני רעיונות לבחירה, ואז לבקש מ{name} להוסיף פרט חדש אחד."},
+      "sequence": [
+        {"emoji": "📦", "en": "Look at the box", "ar": "ننظر إلى الصندوق", "he": "מסתכלים על הקופסה"},
+        {"emoji": "💡", "en": "Say: “{phrase}”", "ar": "نقول: «{phrase}»", "he": "אומרים: ״{phrase}״"},
+        {"emoji": "🎨", "en": "Build and paint", "ar": "نبني ونلوّن", "he": "בונים וצובעים"},
+        {"emoji": "🌟", "en": "Show the creation", "ar": "نعرض ما صنعناه", "he": "מציגים את היצירה"}
+      ],
+      "praise": {"en": "{name}, you have wonderful ideas too!", "ar": "وأنت يا {name}، عندك أفكار رائعة أيضاً!", "ar_f": "وأنتِ يا {name}، عندكِ أفكار رائعة أيضاً!", "he": "{name}, גם לך יש רעיונות נהדרים!"}
+    },
+    "problem_solving": {
+      "duration": 15,
+      "goal_child": {"en": "find a clever way", "ar": "يجد طريقة ذكية", "he": "למצוא דרך חכמה"},
+      "phrase": {"en": "Let's think of a plan!", "ar": "لنفكّر في خطة!", "he": "בואו נחשוב על תוכנית!"},
+      "situation": {"en": "The ball rolled under the big cupboard. Nobody could reach it.", "ar": "تدحرجت الكرة تحت الخزانة الكبيرة. ولم يستطع أحد الوصول إليها.", "he": "הכדור התגלגל מתחת לארון הגדול. אף אחד לא הצליח להגיע אליו."},
+      "action": {"en": "{Hero} said: “{phrase}” Maybe a long stick? Maybe a broom?", "ar": "قال {hero}: «{phrase}» ربما عصا طويلة؟ ربما مكنسة؟", "he": "{hero} אמר: ״{phrase}״ אולי מקל ארוך? אולי מטאטא?"},
+      "ending": {"en": "With the broom, the ball rolled out! Everyone cheered for the clever plan.", "ar": "بالمكنسة خرجت الكرة! وهتف الجميع للخطة الذكية.", "he": "בעזרת המטאטא הכדור יצא! כולם הריעו לתוכנית החכמה."},
+      "story_title": {"en": "{HeroTitle}'s Clever Plan", "ar": "خطة {hero} الذكية", "he": "התוכנית החכמה של {hero}"},
+      "question": {"en": "How would you get the ball out?", "ar": "كيف كنت ستُخرج الكرة؟", "ar_f": "كيف كنتِ ستُخرجين الكرة؟", "he": "איך היית מוציא/ה את הכדור?"},
+      "activity_title": {"en": "The Clever Plan Challenge", "ar": "تحدّي الخطة الذكية", "he": "אתגר התוכנית החכמה"},
+      "materials": [
+        {"en": "A toy placed safely out of easy reach", "ar": "لعبة موضوعة بأمان في مكان يصعب الوصول إليه", "he": "צעצוע שמונח בבטחה במקום שקשה להגיע אליו"},
+        {"en": "Tools to choose from: a stick, a string, a box", "ar": "أدوات للاختيار: عصا، خيط، صندوق", "he": "כלים לבחירה: מקל, חוט, קופסה"}
+      ],
+      "steps": [
+        {"en": "Show the challenge: the toy is out of reach.", "ar": "اعرضوا التحدّي: اللعبة بعيدة عن متناول اليد.", "he": "להציג את האתגר: הצעצוע רחוק מהיד."},
+        {"en": "Ask {name}: “What could we try?” and say together: “{phrase}”", "ar": "اسألوا {name}: «ماذا يمكن أن نجرّب؟» وقولوا معاً: «{phrase}»", "he": "לשאול את {name}: ״מה אפשר לנסות?״ ולהגיד יחד: ״{phrase}״"},
+        {"en": "Try {name}'s idea; if it does not work, try another one together.", "ar": "جرّبوا فكرة {name}؛ وإذا لم تنجح، جرّبوا فكرة أخرى معاً.", "he": "לנסות את הרעיון של {name}; אם הוא לא עובד, לנסות יחד רעיון אחר."},
+        {"en": "Talk about which plan worked and why.", "ar": "تحدثوا عن الخطة التي نجحت ولماذا.", "he": "לדבר על איזו תוכנית עבדה ולמה."}
+      ],
+      "observe": [
+        {"en": "How many different ideas did {name} suggest?", "ar": "كم فكرة مختلفة اقترح {name}؟", "he": "כמה רעיונות שונים {name} הציע/ה?"},
+        {"en": "How did {name} react when the first plan did not work?", "ar": "كيف تصرّف {name} عندما لم تنجح الخطة الأولى؟", "he": "איך {name} הגיב/ה כשהתוכנית הראשונה לא עבדה?"}
+      ],
+      "adaptation": {"en": "Offer two tools to choose from and think aloud together.", "ar": "قدّموا أداتين للاختيار وفكّروا بصوت عالٍ معاً.", "he": "להציע שני כלים לבחירה ולחשוב יחד בקול רם."},
+      "sequence": [
+        {"emoji": "⚽", "en": "The ball is stuck", "ar": "علقت الكرة", "he": "הכדור תקוע"},
+        {"emoji": "🤔", "en": "Think of a plan", "ar": "نفكّر في خطة", "he": "חושבים על תוכנית"},
+        {"emoji": "🧹", "en": "Try the broom", "ar": "نجرّب المكنسة", "he": "מנסים את המטאטא"},
+        {"emoji": "🎉", "en": "The ball is out!", "ar": "خرجت الكرة!", "he": "הכדור בחוץ!"}
+      ],
+      "praise": {"en": "{name}, you think of clever plans too!", "ar": "وأنت يا {name}، تفكّر في خطط ذكية أيضاً!", "ar_f": "وأنتِ يا {name}، تفكّرين في خطط ذكية أيضاً!", "he": "{name}, גם את/ה חושב/ת על תוכניות חכמות!"}
+    },
+    "building": {
+      "duration": 20,
+      "goal_child": {"en": "build something strong", "ar": "يبني شيئاً قوياً", "he": "לבנות משהו חזק"},
+      "phrase": {"en": "Let's build a bridge!", "ar": "لنبنِ جسراً!", "he": "בואו נבנה גשר!"},
+      "situation": {"en": "The toy cars wanted to cross the river, but there was no bridge.", "ar": "أرادت السيارات الصغيرة أن تعبر النهر، لكن لم يكن هناك جسر.", "he": "המכוניות הקטנות רצו לחצות את הנהר, אבל לא היה גשר."},
+      "action": {"en": "{Hero} said: “{phrase}” Block by block, the bridge grew long and strong.", "ar": "قال {hero}: «{phrase}» مكعباً بعد مكعب، صار الجسر طويلاً وقوياً.", "he": "{hero} אמר: ״{phrase}״ קובייה אחרי קובייה, הגשר נהיה ארוך וחזק."},
+      "ending": {"en": "All the cars crossed the bridge, beep beep! {Hero} explained why the bridge was so strong.", "ar": "عبرت كل السيارات الجسر، بيب بيب! وشرح {hero} لماذا كان الجسر قوياً.", "he": "כל המכוניות עברו על הגשר, טוט טוט! {hero} הסביר למה הגשר היה כל כך חזק."},
+      "story_title": {"en": "{HeroTitle} Builds a Bridge", "ar": "{hero} يبني جسراً", "he": "{hero} בונה גשר"},
+      "question": {"en": "How would you make a bridge strong?", "ar": "كيف تجعل الجسر قوياً؟", "ar_f": "كيف تجعلين الجسر قوياً؟", "he": "איך היית בונה גשר חזק?"},
+      "activity_title": {"en": "Design a Bridge for the Cars", "ar": "صمّموا جسراً للسيارات", "he": "מתכננים גשר למכוניות"},
+      "materials": [
+        {"en": "Blocks", "ar": "مكعبات", "he": "קוביות"},
+        {"en": "Toy cars", "ar": "سيارات لعبة", "he": "מכוניות צעצוע"},
+        {"en": "A blue cloth or paper for the river", "ar": "قماش أو ورق أزرق للنهر", "he": "בד או נייר כחול לנהר"}
+      ],
+      "steps": [
+        {"en": "Lay the blue cloth as a river and put the cars on one side.", "ar": "افرشوا القماش الأزرق كنهر وضعوا السيارات على جانب واحد.", "he": "לפרוש את הבד הכחול כנהר ולשים את המכוניות בצד אחד."},
+        {"en": "Ask {name} to plan a bridge so the cars can cross: “{phrase}”", "ar": "اطلبوا من {name} أن يخطط لجسر لتعبر السيارات: «{phrase}»", "he": "לבקש מ{name} לתכנן גשר כדי שהמכוניות יעברו: ״{phrase}״"},
+        {"en": "{name} builds the bridge and tests it with a car.", "ar": "يبني {name} الجسر ويختبره بسيارة.", "he": "{name} בונה את הגשר ובודק/ת אותו עם מכונית."},
+        {"en": "{name} explains how the bridge works and what makes it strong.", "ar": "يشرح {name} كيف يعمل الجسر وما الذي يجعله قوياً.", "he": "{name} מסביר/ה איך הגשר עובד ומה עושה אותו חזק."}
+      ],
+      "observe": [
+        {"en": "How did {name} plan and test the bridge?", "ar": "كيف خطّط {name} للجسر واختبره؟", "he": "איך {name} תכנן/ה ובדק/ה את הגשר?"},
+        {"en": "Which words did {name} use to explain how it works?", "ar": "ما الكلمات التي استخدمها {name} ليشرح كيف يعمل؟", "he": "באילו מילים {name} השתמש/ה כדי להסביר איך זה עובד?"}
+      ],
+      "adaptation": {"en": "Start with a narrow river and offer long blocks; build the first part together.", "ar": "ابدؤوا بنهر ضيّق وقدّموا مكعبات طويلة؛ وابنوا الجزء الأول معاً.", "he": "להתחיל בנהר צר ולהציע קוביות ארוכות; לבנות יחד את החלק הראשון."},
+      "sequence": [
+        {"emoji": "🌊", "en": "A river, no bridge", "ar": "نهر بلا جسر", "he": "נהר בלי גשר"},
+        {"emoji": "📐", "en": "Plan the bridge", "ar": "نخطّط للجسر", "he": "מתכננים גשר"},
+        {"emoji": "🧱", "en": "Build block by block", "ar": "نبني مكعباً بعد مكعب", "he": "בונים קובייה אחרי קובייה"},
+        {"emoji": "🚗", "en": "The cars cross", "ar": "تعبر السيارات", "he": "המכוניות עוברות"}
+      ],
+      "praise": {"en": "{name}, you build wonderful things too!", "ar": "وأنت يا {name}، تبني أشياء رائعة أيضاً!", "ar_f": "وأنتِ يا {name}، تبنين أشياء رائعة أيضاً!", "he": "{name}, גם את/ה בונה דברים נהדרים!"}
+    },
+    "empathy": {
+      "duration": 10,
+      "goal_child": {"en": "help a friend feel better", "ar": "يساعد صديقاً ليشعر بتحسّن", "he": "לעזור לחבר להרגיש טוב יותר"},
+      "phrase": {"en": "Is everything okay? I can help.", "ar": "هل كل شيء بخير؟ هل أساعدك؟", "he": "הכול בסדר? אפשר לעזור?"},
+      "situation": {"en": "At the park, {hero} saw a little friend sitting alone and looking sad.", "ar": "في الحديقة، رأى {hero} صديقاً صغيراً يجلس وحده ويبدو حزيناً.", "he": "בגן השעשועים {hero} ראה חבר קטן יושב לבד ונראה עצוב."},
+      "action": {"en": "{Hero} sat down next to the friend and asked: “{phrase}”", "ar": "جلس {hero} بجانب صديقه وسأل: «{phrase}»", "he": "{hero} התיישב ליד החבר ושאל: ״{phrase}״"},
+      "ending": {"en": "The friend smiled. They played together on the swings, and both of them felt happy.", "ar": "ابتسم الصديق. ولعبا معاً على الأرجوحة، وشعر كلاهما بالسعادة.", "he": "החבר חייך. הם שיחקו יחד בנדנדות, ושניהם הרגישו שמחים."},
+      "story_title": {"en": "{HeroTitle} Is a Good Friend", "ar": "{hero} صديق طيّب", "he": "{hero} חבר טוב"},
+      "question": {"en": "What can you do when a friend feels sad?", "ar": "ماذا يمكنك أن تفعل عندما يشعر صديقك بالحزن؟", "ar_f": "ماذا يمكنكِ أن تفعلي عندما تشعر صديقتكِ بالحزن؟", "he": "מה אפשר לעשות כשחבר מרגיש עצוב?"},
+      "activity_title": {"en": "The Caring Corner", "ar": "ركن الاهتمام", "he": "פינת האכפתיות"},
+      "materials": [
+        {"en": "Soft toys", "ar": "دمى طرية", "he": "בובות רכות"},
+        {"en": "Feeling cards", "ar": "بطاقات المشاعر", "he": "קלפי רגשות"}
+      ],
+      "steps": [
+        {"en": "Use a soft toy to show a small moment: the toy feels sad.", "ar": "استخدموا دمية لتمثيل لحظة صغيرة: الدمية حزينة.", "he": "להמחיש עם בובה רגע קטן: הבובה עצובה."},
+        {"en": "Ask {name}: “How does the toy feel? What could help?”", "ar": "اسألوا {name}: «بماذا تشعر الدمية؟ ما الذي قد يساعدها؟»", "he": "לשאול את {name}: ״איך הבובה מרגישה? מה יכול לעזור לה?״"},
+        {"en": "Practise the words: “{phrase}”", "ar": "تدرّبوا على الكلمات: «{phrase}»", "he": "לתרגל את המילים: ״{phrase}״"},
+        {"en": "{name} helps the toy feel better (a hug, a blanket, a game).", "ar": "يساعد {name} الدمية لتشعر بتحسّن (حضن، غطاء، لعبة).", "he": "{name} עוזר/ת לבובה להרגיש טוב יותר (חיבוק, שמיכה, משחק)."}
+      ],
+      "observe": [
+        {"en": "How did {name} notice and name the toy's feeling?", "ar": "كيف لاحظ {name} شعور الدمية وسمّاه؟", "he": "איך {name} שם/ה לב לרגש של הבובה וקרא/ה לו בשם?"},
+        {"en": "Which caring ideas did {name} suggest?", "ar": "ما أفكار الاهتمام التي اقترحها {name}؟", "he": "אילו רעיונות של אכפתיות {name} הציע/ה?"}
+      ],
+      "adaptation": {"en": "Show two feeling cards to choose from and suggest one caring action to start.", "ar": "اعرضوا بطاقتي مشاعر للاختيار واقترحوا فعلاً واحداً للاهتمام للبداية.", "he": "להציג שני קלפי רגשות לבחירה ולהציע פעולה אכפתית אחת להתחלה."},
+      "sequence": [
+        {"emoji": "😢", "en": "A sad friend", "ar": "صديق حزين", "he": "חבר עצוב"},
+        {"emoji": "💬", "en": "Ask: “{phrase}”", "ar": "نسأل: «{phrase}»", "he": "שואלים: ״{phrase}״"},
+        {"emoji": "🤗", "en": "Help", "ar": "نساعد", "he": "עוזרים"},
+        {"emoji": "😊", "en": "Both feel happy", "ar": "كلاهما سعيد", "he": "שניהם שמחים"}
+      ],
+      "praise": {"en": "{name}, you are a caring friend too!", "ar": "وأنت يا {name}، صديق طيّب أيضاً!", "ar_f": "وأنتِ يا {name}، صديقة طيّبة أيضاً!", "he": "{name}, גם את/ה חבר/ה אכפתי/ת!"}
+    },
+    "memory": {
+      "duration": 10,
+      "goal_child": {"en": "remember the way", "ar": "يتذكّر الطريق", "he": "לזכור את הדרך"},
+      "phrase": {"en": "I remember!", "ar": "أنا أتذكّر!", "he": "אני זוכר/ת!"},
+      "situation": {"en": "{Hero} visited a friend. On the way home, the path had many turns.", "ar": "زار {hero} صديقاً. وفي طريق العودة، كان في الطريق منعطفات كثيرة.", "he": "{hero} ביקר אצל חבר. בדרך הביתה היו הרבה פניות."},
+      "action": {"en": "{Hero} said: “{phrase}” Left at the big tree, right at the red house.", "ar": "قال {hero}: «{phrase}» يساراً عند الشجرة الكبيرة، ويميناً عند البيت الأحمر.", "he": "{hero} אמר: ״{phrase}״ שמאלה ליד העץ הגדול, ימינה ליד הבית האדום."},
+      "ending": {"en": "{Hero} found the way home and told everyone the whole path. Hooray!", "ar": "وجد {hero} طريق العودة وحكى للجميع الطريق كله. هيه!", "he": "{hero} מצא את הדרך הביתה וסיפר לכולם את כל הדרך. הידד!"},
+      "story_title": {"en": "{HeroTitle} Remembers the Way", "ar": "{hero} يتذكّر الطريق", "he": "{hero} זוכר את הדרך"},
+      "question": {"en": "What do you remember from your way to the kindergarten?", "ar": "ماذا تتذكّر من طريقك إلى الروضة؟", "ar_f": "ماذا تتذكّرين من طريقكِ إلى الروضة؟", "he": "מה את/ה זוכר/ת מהדרך לגן?"},
+      "activity_title": {"en": "What Is Missing?", "ar": "ما الذي اختفى؟", "he": "מה חסר?"},
+      "materials": [
+        {"en": "Five small toys", "ar": "خمس ألعاب صغيرة", "he": "חמישה צעצועים קטנים"},
+        {"en": "A cloth to cover them", "ar": "قطعة قماش لتغطيتها", "he": "בד לכיסוי"}
+      ],
+      "steps": [
+        {"en": "Put the toys in a row and name them together.", "ar": "ضعوا الألعاب في صف وسمّوها معاً.", "he": "לסדר את הצעצועים בשורה ולקרוא להם בשם יחד."},
+        {"en": "Cover them with the cloth and take one away.", "ar": "غطّوها بالقماش وأخفوا واحدة منها.", "he": "לכסות אותם בבד ולהוציא אחד."},
+        {"en": "Uncover them; {name} says “{phrase}” and names the missing toy.", "ar": "اكشفوا الألعاب؛ يقول {name} «{phrase}» ويسمّي اللعبة المختفية.", "he": "לגלות את הצעצועים; {name} אומר/ת ״{phrase}״ וקורא/ת בשם לצעצוע שחסר."},
+        {"en": "Swap roles: {name} hides a toy for the teacher.", "ar": "تبادلوا الأدوار: يخفي {name} لعبة لتجدها المعلمة.", "he": "מחליפים תפקידים: {name} מחביא/ה צעצוע בשביל הגננת."}
+      ],
+      "observe": [
+        {"en": "Which strategies helped {name} remember (naming, pointing, looking again)?", "ar": "ما الطرق التي ساعدت {name} على التذكّر (التسمية، الإشارة، النظر مرة أخرى)؟", "he": "אילו דרכים עזרו ל{name} לזכור (לקרוא בשם, להצביע, להסתכל שוב)?"},
+        {"en": "How did {name} enjoy the leader role?", "ar": "كيف استمتع {name} بدور القائد؟", "he": "איך {name} נהנה/תה מתפקיד המוביל/ה?"}
+      ],
+      "adaptation": {"en": "Start with three toys and name them together twice before covering.", "ar": "ابدؤوا بثلاث ألعاب وسمّوها معاً مرتين قبل التغطية.", "he": "להתחיל בשלושה צעצועים ולקרוא להם בשם יחד פעמיים לפני הכיסוי."},
+      "sequence": [
+        {"emoji": "👀", "en": "Look at the toys", "ar": "ننظر إلى الألعاب", "he": "מסתכלים על הצעצועים"},
+        {"emoji": "🧣", "en": "Cover them", "ar": "نغطّيها", "he": "מכסים"},
+        {"emoji": "🤔", "en": "Guess what is missing", "ar": "نخمّن ما اختفى", "he": "מנחשים מה חסר"},
+        {"emoji": "🎉", "en": "Say: “{phrase}”", "ar": "نقول: «{phrase}»", "he": "אומרים: ״{phrase}״"}
+      ],
+      "praise": {"en": "{name}, you remember so many things too!", "ar": "وأنت يا {name}، تتذكّر أشياء كثيرة أيضاً!", "ar_f": "وأنتِ يا {name}، تتذكّرين أشياء كثيرة أيضاً!", "he": "{name}, גם את/ה זוכר/ת כל כך הרבה דברים!"}
+    }
+  }
+}

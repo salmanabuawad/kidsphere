@@ -1,0 +1,134 @@
+{
+  "_doc": "Interest-based characters for the template provider. Heroes are grammatically masculine in ar/he so the frames agree. 'title' is only needed in en (title case for headings). Pair lefts are unique across heroes (used as categorize items and quiz choices).",
+  "order": ["car", "builder", "lion", "drum", "owl", "painter", "puppy"],
+  "by_interest": {
+    "cars_transportation": "car",
+    "technology": "car",
+    "construction": "builder",
+    "blocks": "builder",
+    "puzzles": "builder",
+    "animals": "lion",
+    "nature": "lion",
+    "music": "drum",
+    "dancing": "drum",
+    "stories": "owl",
+    "books": "owl",
+    "pretend_play": "owl",
+    "drawing": "painter",
+    "crafts": "painter",
+    "outdoor_play": "puppy",
+    "sports": "puppy",
+    "water": "puppy",
+    "social_games": "puppy",
+    "cooking": "puppy"
+  },
+  "avoid": {"noise": "drum", "messy_play": "painter"},
+  "default": "puppy",
+  "heroes": {
+    "car": {
+      "emoji": "🚗",
+      "name": {"en": "the little red car", "ar": "الباص الأحمر الصغير", "he": "האוטו האדום הקטן"},
+      "title": {"en": "The Little Red Car"},
+      "love": {"en": "driving around the town", "ar": "التجوّل في المدينة", "he": "לנסוע ברחבי העיר"},
+      "thing": {"en": "garage", "ar": "المرآب", "he": "חניון"},
+      "material": {"en": "Toy cars", "ar": "سيارات لعبة", "he": "מכוניות צעצוע"},
+      "placing": {"en": "where each car parks", "ar": "أين تقف كل سيارة", "he": "איפה חונה כל מכונית"},
+      "group": {"en": "Things that move", "ar": "أشياء تتحرّك", "he": "דברים שנוסעים"},
+      "pairs": [
+        [{"emoji": "🚗", "en": "Car", "ar": "سيارة", "he": "מכונית"}, {"emoji": "🛣️", "en": "Road", "ar": "طريق", "he": "כביש"}],
+        [{"emoji": "🚂", "en": "Train", "ar": "قطار", "he": "רכבת"}, {"emoji": "🛤️", "en": "Tracks", "ar": "سكة", "he": "מסילה"}],
+        [{"emoji": "✈️", "en": "Plane", "ar": "طائرة", "he": "מטוס"}, {"emoji": "☁️", "en": "Sky", "ar": "سماء", "he": "שמיים"}]
+      ]
+    },
+    "builder": {
+      "emoji": "👷",
+      "name": {"en": "the little builder", "ar": "البنّاء الصغير", "he": "הבנאי הקטן"},
+      "title": {"en": "The Little Builder"},
+      "love": {"en": "building tall towers", "ar": "بناء الأبراج العالية", "he": "לבנות מגדלים גבוהים"},
+      "thing": {"en": "tower", "ar": "البرج", "he": "מגדל"},
+      "material": {"en": "A toy crane and trucks", "ar": "رافعة وشاحنات لعبة", "he": "מנוף ומשאיות צעצוע"},
+      "placing": {"en": "where each truck goes", "ar": "أين تذهب كل شاحنة", "he": "לאן נוסעת כל משאית"},
+      "group": {"en": "Building tools", "ar": "أدوات البناء", "he": "כלי בנייה"},
+      "pairs": [
+        [{"emoji": "🧱", "en": "Block", "ar": "مكعب", "he": "קובייה"}, {"emoji": "🏰", "en": "Castle", "ar": "قلعة", "he": "טירה"}],
+        [{"emoji": "🏗️", "en": "Crane", "ar": "رافعة", "he": "מנוף"}, {"emoji": "📦", "en": "Box", "ar": "صندوق", "he": "ארגז"}],
+        [{"emoji": "🪣", "en": "Bucket", "ar": "دلو", "he": "דלי"}, {"emoji": "🏖️", "en": "Sand", "ar": "رمل", "he": "חול"}]
+      ]
+    },
+    "lion": {
+      "emoji": "🦁",
+      "name": {"en": "the little lion", "ar": "الأسد الصغير", "he": "האריה הקטן"},
+      "title": {"en": "The Little Lion"},
+      "love": {"en": "running through the tall grass", "ar": "الركض بين العشب الطويل", "he": "לרוץ בין העשב הגבוה"},
+      "thing": {"en": "zoo", "ar": "حديقة الحيوانات", "he": "גן חיות"},
+      "material": {"en": "Toy animals", "ar": "حيوانات لعبة", "he": "חיות צעצוע"},
+      "placing": {"en": "where each animal lives", "ar": "أين يسكن كل حيوان", "he": "איפה גרה כל חיה"},
+      "group": {"en": "Animals", "ar": "الحيوانات", "he": "בעלי חיים"},
+      "pairs": [
+        [{"emoji": "🐄", "en": "Cow", "ar": "بقرة", "he": "פרה"}, {"emoji": "🥛", "en": "Milk", "ar": "حليب", "he": "חלב"}],
+        [{"emoji": "🐝", "en": "Bee", "ar": "نحلة", "he": "דבורה"}, {"emoji": "🍯", "en": "Honey", "ar": "عسل", "he": "דבש"}],
+        [{"emoji": "🐦", "en": "Bird", "ar": "عصفور", "he": "ציפור"}, {"emoji": "🪺", "en": "Nest", "ar": "عشّ", "he": "קן"}]
+      ]
+    },
+    "drum": {
+      "emoji": "🥁",
+      "name": {"en": "the little drum", "ar": "الطبل الصغير", "he": "התוף הקטן"},
+      "title": {"en": "The Little Drum"},
+      "love": {"en": "playing happy songs", "ar": "عزف الأغاني السعيدة", "he": "לנגן שירים שמחים"},
+      "thing": {"en": "stage", "ar": "المسرح", "he": "במה"},
+      "material": {"en": "Small instruments (a drum, shakers)", "ar": "آلات موسيقية صغيرة (طبل، خشخيشات)", "he": "כלי נגינה קטנים (תוף, רעשנים)"},
+      "placing": {"en": "where each instrument stands", "ar": "أين توضع كل آلة", "he": "איפה עומד כל כלי"},
+      "group": {"en": "Music", "ar": "الموسيقى", "he": "מוזיקה"},
+      "pairs": [
+        [{"emoji": "🎹", "en": "Piano", "ar": "بيانو", "he": "פסנתר"}, {"emoji": "🎶", "en": "Notes", "ar": "نغمات", "he": "צלילים"}],
+        [{"emoji": "🎤", "en": "Microphone", "ar": "ميكروفون", "he": "מיקרופון"}, {"emoji": "🗣️", "en": "Singing", "ar": "غناء", "he": "שירה"}],
+        [{"emoji": "🎺", "en": "Trumpet", "ar": "بوق", "he": "חצוצרה"}, {"emoji": "🎵", "en": "Tune", "ar": "لحن", "he": "מנגינה"}]
+      ]
+    },
+    "owl": {
+      "emoji": "🦉",
+      "name": {"en": "the wise little owl", "ar": "البوم الحكيم الصغير", "he": "הינשוף הקטן והחכם"},
+      "title": {"en": "The Wise Little Owl"},
+      "love": {"en": "reading books under the moon", "ar": "قراءة الكتب تحت ضوء القمر", "he": "לקרוא ספרים לאור הירח"},
+      "thing": {"en": "library", "ar": "المكتبة", "he": "ספרייה"},
+      "material": {"en": "Picture books", "ar": "كتب مصوّرة", "he": "ספרי תמונות"},
+      "placing": {"en": "where each book goes", "ar": "أين يوضع كل كتاب", "he": "איפה שמים כל ספר"},
+      "group": {"en": "Bedtime", "ar": "وقت النوم", "he": "לפני השינה"},
+      "pairs": [
+        [{"emoji": "🌙", "en": "Moon", "ar": "قمر", "he": "ירח"}, {"emoji": "⭐", "en": "Stars", "ar": "نجوم", "he": "כוכבים"}],
+        [{"emoji": "🛏️", "en": "Bed", "ar": "سرير", "he": "מיטה"}, {"emoji": "💤", "en": "Sleep", "ar": "نوم", "he": "שינה"}],
+        [{"emoji": "📚", "en": "Book", "ar": "كتاب", "he": "ספר"}, {"emoji": "📖", "en": "Story", "ar": "قصة", "he": "סיפור"}]
+      ]
+    },
+    "painter": {
+      "emoji": "🎨",
+      "name": {"en": "the little painter", "ar": "الرسّام الصغير", "he": "הצייר הקטן"},
+      "title": {"en": "The Little Painter"},
+      "love": {"en": "painting with bright colours", "ar": "الرسم بالألوان الزاهية", "he": "לצייר בצבעים עזים"},
+      "thing": {"en": "castle", "ar": "القلعة", "he": "טירה"},
+      "material": {"en": "Crayons and paper", "ar": "ألوان شمعية وورق", "he": "צבעים ונייר"},
+      "placing": {"en": "which colour each wall gets", "ar": "أيّ لون يأخذ كل جدار", "he": "באיזה צבע יהיה כל קיר"},
+      "group": {"en": "Art things", "ar": "أدوات الفن", "he": "כלי יצירה"},
+      "pairs": [
+        [{"emoji": "🖌️", "en": "Brush", "ar": "فرشاة", "he": "מכחול"}, {"emoji": "🎨", "en": "Paint", "ar": "ألوان", "he": "צבע"}],
+        [{"emoji": "✂️", "en": "Scissors", "ar": "مقص", "he": "מספריים"}, {"emoji": "📄", "en": "Paper", "ar": "ورق", "he": "נייר"}],
+        [{"emoji": "🖍️", "en": "Crayon", "ar": "قلم تلوين", "he": "צבע פנדה"}, {"emoji": "🖼️", "en": "Picture", "ar": "لوحة", "he": "ציור"}]
+      ]
+    },
+    "puppy": {
+      "emoji": "🐶",
+      "name": {"en": "the little puppy", "ar": "الجرو الصغير", "he": "הכלבלב הקטן"},
+      "title": {"en": "The Little Puppy"},
+      "love": {"en": "playing with a ball", "ar": "اللعب بالكرة", "he": "לשחק בכדור"},
+      "thing": {"en": "playground", "ar": "الملعب", "he": "מגרש משחקים"},
+      "material": {"en": "A soft ball", "ar": "كرة طرية", "he": "כדור רך"},
+      "placing": {"en": "where each ball goes", "ar": "أين توضع كل كرة", "he": "איפה שמים כל כדור"},
+      "group": {"en": "Playing outside", "ar": "اللعب في الخارج", "he": "משחק בחוץ"},
+      "pairs": [
+        [{"emoji": "⚽", "en": "Ball", "ar": "كرة", "he": "כדור"}, {"emoji": "🥅", "en": "Goal", "ar": "مرمى", "he": "שער"}],
+        [{"emoji": "🛝", "en": "Slide", "ar": "زحليقة", "he": "מגלשה"}, {"emoji": "🏞️", "en": "Park", "ar": "حديقة", "he": "פארק"}],
+        [{"emoji": "🪁", "en": "Kite", "ar": "طائرة ورقية", "he": "עפיפון"}, {"emoji": "🌬️", "en": "Wind", "ar": "ريح", "he": "רוח"}]
+      ]
+    }
+  }
+}
