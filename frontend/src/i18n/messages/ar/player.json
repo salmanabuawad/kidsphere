@@ -1,0 +1,88 @@
+{
+  "next": "التالي",
+  "back": "السابق",
+  "listen": "استمع",
+  "stopReading": "توقّف",
+  "story": {
+    "questionsTitle": "لنتحدّث عن القصة",
+    "teacherNote": "ملاحظة للمعلّمة",
+    "readAgain": "نقرأ مرة أخرى"
+  },
+  "activity": {
+    "minutes_zero": "{count} دقيقة",
+    "minutes_one": "دقيقة واحدة",
+    "minutes_two": "دقيقتان",
+    "minutes_few": "{count} دقائق",
+    "minutes_many": "{count} دقيقة",
+    "minutes_other": "{count} دقيقة",
+    "print": "طباعة",
+    "goal": "الهدف",
+    "materials": "المواد",
+    "noMaterials": "لا حاجة إلى مواد خاصة",
+    "steps": "الخطوات",
+    "observe": "ماذا نلاحظ",
+    "adaptation": "إذا احتاج الطفل إلى دعم إضافي"
+  },
+  "video": {
+    "status": {
+      "script_ready": "النص جاهز",
+      "generating": "جارٍ إنتاج الفيديو",
+      "ready": "الفيديو جاهز",
+      "failed": "لم يكتمل الفيديو"
+    },
+    "duration_zero": "نحو {count} ثانية",
+    "duration_one": "نحو ثانية واحدة",
+    "duration_two": "نحو ثانيتين",
+    "duration_few": "نحو {count} ثوانٍ",
+    "duration_many": "نحو {count} ثانية",
+    "duration_other": "نحو {count} ثانية",
+    "learningGoal": "هدف التعلّم",
+    "providerNotConnected": "خدمة إنتاج الفيديو غير متصلة بعد. النص والمشاهد جاهزة للاستخدام.",
+    "script": "النص",
+    "scenes": "المشاهد",
+    "scene": "المشهد {n}",
+    "narration": "السرد",
+    "visualPrompt": "وصف الصورة"
+  },
+  "present": {
+    "exit": "خروج",
+    "holdToExit": "اضغط مطوّلًا للخروج"
+  },
+  "fallback": {
+    "title": "عذرًا! لا يمكن عرض هذا الآن.",
+    "body": "اطلب المساعدة من المعلّمة."
+  },
+  "finish": {
+    "title": "أحسنت!",
+    "body": "لعبنا معًا حتى النهاية.",
+    "playAgain": "نلعب مرة أخرى"
+  },
+  "game": {
+    "thanks": "شكرًا على اختيارك!",
+    "greatIdea": "فكرة رائعة!",
+    "thinkTogether": "لنفكّر معًا",
+    "whatHappensNext": "ماذا يحدث بعد ذلك؟",
+    "allDone": "انتهينا!",
+    "tryAnother": "لنجرّب واحدة أخرى",
+    "match": {
+      "hint": "اضغط على بطاقة، ثم على البطاقة التي تناسبها",
+      "yes": "رائع! هاتان معًا!"
+    },
+    "sequence": {
+      "hint": "اضغط على الصور بالترتيب",
+      "whatFirst": "همم، ماذا يأتي أولًا؟",
+      "whatNext": "همم، ماذا يأتي بعد ذلك؟"
+    },
+    "categorize": {
+      "hint": "اضغط على صورة، ثم على المكان المناسب لها",
+      "yes": "أحسنت! هذا مكانها.",
+      "again": "لنجرّب مكانًا آخر",
+      "pickFirst": "اضغط على صورة أولًا"
+    },
+    "storyBuilder": {
+      "yourStory": "قصتك",
+      "tellYourStory": "الآن احكِ قصتك!",
+      "toldIt": "حكيتُ قصتي!"
+    }
+  }
+}

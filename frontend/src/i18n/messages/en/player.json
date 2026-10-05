@@ -1,0 +1,80 @@
+{
+  "next": "Next",
+  "back": "Back",
+  "listen": "Listen",
+  "stopReading": "Stop",
+  "story": {
+    "questionsTitle": "Let's talk about it",
+    "teacherNote": "Note for the teacher",
+    "readAgain": "Read again"
+  },
+  "activity": {
+    "minutes_one": "{count} minute",
+    "minutes_other": "{count} minutes",
+    "print": "Print",
+    "goal": "Goal",
+    "materials": "Materials",
+    "noMaterials": "No special materials needed",
+    "steps": "Steps",
+    "observe": "What to observe",
+    "adaptation": "If the child needs more support"
+  },
+  "video": {
+    "status": {
+      "script_ready": "Script ready",
+      "generating": "Making the video",
+      "ready": "Video ready",
+      "failed": "Video not finished"
+    },
+    "duration_one": "About {count} second",
+    "duration_other": "About {count} seconds",
+    "learningGoal": "Learning goal",
+    "providerNotConnected": "The video provider is not connected yet. The script and scenes are ready to use.",
+    "script": "Script",
+    "scenes": "Scenes",
+    "scene": "Scene {n}",
+    "narration": "Narration",
+    "visualPrompt": "Picture description"
+  },
+  "present": {
+    "exit": "Exit",
+    "holdToExit": "Press and hold to exit"
+  },
+  "fallback": {
+    "title": "Oops! This can't be shown right now.",
+    "body": "Please ask your teacher for help."
+  },
+  "finish": {
+    "title": "Well done!",
+    "body": "We played together all the way to the end.",
+    "playAgain": "Play again"
+  },
+  "game": {
+    "thanks": "Thank you for choosing!",
+    "greatIdea": "Great idea!",
+    "thinkTogether": "Let's think together",
+    "whatHappensNext": "What happens next?",
+    "allDone": "All done!",
+    "tryAnother": "Let's try another one",
+    "match": {
+      "hint": "Tap a card, then tap the card that goes with it",
+      "yes": "Yes! They go together!"
+    },
+    "sequence": {
+      "hint": "Tap the pictures in order",
+      "whatFirst": "Hmm, what comes first?",
+      "whatNext": "Hmm, what comes next?"
+    },
+    "categorize": {
+      "hint": "Tap a picture, then tap where it belongs",
+      "yes": "Well done! That's its place.",
+      "again": "Let's try another place",
+      "pickFirst": "First tap a picture"
+    },
+    "storyBuilder": {
+      "yourStory": "Your story",
+      "tellYourStory": "Now tell your story!",
+      "toldIt": "I told my story!"
+    }
+  }
+}

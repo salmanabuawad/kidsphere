@@ -1,0 +1,85 @@
+{
+  "not_an_object": "multiple_choice",
+  "null_game": null,
+  "a_list": [],
+  "unknown_template": { "template": "racing_3d", "title": "Fast cars" },
+  "answer_not_in_choices": {
+    "template": "multiple_choice",
+    "title": "Cars",
+    "rounds": [
+      {
+        "question": "Which one?",
+        "choices": [{ "label": "Red" }, { "label": "Blue" }],
+        "correct_or_preferred_answer": 5,
+        "explanation": "Both are nice."
+      }
+    ]
+  },
+  "answer_not_a_number": {
+    "template": "what_happens_next",
+    "title": "Cars",
+    "rounds": [
+      {
+        "question": "Which one?",
+        "choices": [{ "label": "Red" }, { "label": "Blue" }],
+        "correct_or_preferred_answer": "Red",
+        "explanation": "Both are nice."
+      }
+    ]
+  },
+  "no_rounds": { "template": "emotion_choice", "title": "Feelings", "rounds": [] },
+  "missing_categories": {
+    "template": "categorize",
+    "title": "Tidy up",
+    "items": [
+      { "label": "Bus", "category": "vehicles" },
+      { "label": "Cat", "category": "animals" },
+      { "label": "Car", "category": "vehicles" },
+      { "label": "Dog", "category": "animals" }
+    ]
+  },
+  "unknown_category": {
+    "template": "categorize",
+    "title": "Tidy up",
+    "categories": [
+      { "key": "vehicles", "label": "Vehicles" },
+      { "key": "animals", "label": "Animals" }
+    ],
+    "items": [
+      { "label": "Bus", "category": "vehicles" },
+      { "label": "Cat", "category": "animals" },
+      { "label": "Car", "category": "vehicles" },
+      { "label": "Apple", "category": "fruit" }
+    ]
+  },
+  "sequence_too_short": { "template": "sequence", "title": "Order", "items": [{ "label": "One" }, { "label": "Two" }] },
+  "duplicate_pairs": {
+    "template": "match_pairs",
+    "title": "Pairs",
+    "pairs": [
+      { "left": { "label": "Car" }, "right": { "label": "Road" } },
+      { "left": { "label": "Car" }, "right": { "label": "Sea" } }
+    ]
+  },
+  "story_builder_no_closing": {
+    "template": "story_builder",
+    "title": "Story",
+    "steps": [
+      { "prompt": "Who?", "choices": [{ "label": "Lion" }, { "label": "Owl" }] },
+      { "prompt": "Where?", "choices": [{ "label": "Forest" }, { "label": "Sea" }] },
+      { "prompt": "What?", "choices": [{ "label": "Rain" }, { "label": "Sun" }] }
+    ]
+  },
+  "label_not_text": {
+    "template": "multiple_choice",
+    "title": "Cars",
+    "rounds": [
+      {
+        "question": "Which one?",
+        "choices": [{ "label": { "html": "<b>x</b>" } }, { "label": "Blue" }],
+        "correct_or_preferred_answer": 0,
+        "explanation": "Ok."
+      }
+    ]
+  }
+}

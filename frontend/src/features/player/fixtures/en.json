@@ -1,0 +1,139 @@
+{
+  "language": "en",
+  "story": {
+    "title": "Adam and the Big Red Car",
+    "goal": "Practise asking a friend to join the play.",
+    "story": [
+      "Adam loved his big red car. Every morning he drove it around the play mat.",
+      "One day Adam saw Lina building a tall garage with blocks.",
+      "Adam took a deep breath and said: \"Can my car park in your garage?\"",
+      "Lina smiled. \"Yes! Let's build a ramp together.\" They played until lunch time."
+    ],
+    "questions": ["What did Adam want to do?", "How did Adam ask Lina?", "What could you build with a friend?"],
+    "teacher_note": "Read slowly and pause after Adam asks. Invite the child to show how they would ask.",
+    "illustrations": ["🚗", "🧱", "🙂", "🎉"]
+  },
+  "activity": {
+    "title": "Car Wash Team",
+    "goal": "Take turns and share a role in a small group game.",
+    "duration_minutes": 15,
+    "materials": ["Toy cars", "Sponges", "A shallow tray of water"],
+    "instructions": [
+      "Set up a car wash with two stations: wash and dry.",
+      "Invite two friends to join the child.",
+      "Each child chooses a station, then they swap after every car.",
+      "Celebrate each clean car together."
+    ],
+    "what_to_observe": ["Does the child invite a friend to swap?", "How does the child wait for a turn?"],
+    "adaptation": "Start with one friend and a clear picture card that shows whose turn it is."
+  },
+  "video": {
+    "title": "Taking Turns at the Slide",
+    "learning_goal": "Waiting for a turn calmly.",
+    "script": "Mia and Sam want the slide at the same time. They count to three and take turns.",
+    "scenes": [
+      { "description": "Two children run to the slide.", "narration": "Mia and Sam both want to slide!", "visual_prompt": "Bright playground, two smiling children, cartoon style" },
+      { "description": "They count together.", "narration": "One, two, three: Mia goes first.", "visual_prompt": "Children holding up fingers, friendly faces" },
+      { "description": "Sam slides next and they cheer.", "narration": "Now it is Sam's turn. Hooray!", "visual_prompt": "Boy on the slide, girl clapping" }
+    ],
+    "duration_seconds": 45
+  },
+  "games": {
+    "multiple_choice": {
+      "template": "multiple_choice",
+      "title": "Car Friends",
+      "intro": "Let's help Adam play with friends.",
+      "rounds": [
+        {
+          "question": "Adam wants to play with Lina. What can he say?",
+          "choices": [{ "label": "Can I play too?", "emoji": "🙋" }, { "label": "Go away!", "emoji": "😠" }, { "label": "Say nothing", "emoji": "🤐" }],
+          "correct_or_preferred_answer": 0,
+          "explanation": "Asking kindly helps friends say yes."
+        },
+        {
+          "question": "Lina is using the blue car. What can Adam do?",
+          "choices": [{ "label": "Wait for a turn", "emoji": "⏳" }, { "label": "Grab the car", "emoji": "✋" }],
+          "correct_or_preferred_answer": 0,
+          "explanation": "Waiting for a turn keeps the game fun for everyone."
+        }
+      ]
+    },
+    "emotion_choice": {
+      "template": "emotion_choice",
+      "title": "How Do They Feel?",
+      "rounds": [
+        {
+          "question": "Adam's tower fell down. How might he feel?",
+          "choices": [{ "label": "Sad", "emoji": "😢" }, { "label": "Happy", "emoji": "😄" }, { "label": "Surprised", "emoji": "😮" }],
+          "correct_or_preferred_answer": null,
+          "explanation": "Many feelings are okay. We can build it again together."
+        },
+        {
+          "question": "Lina got a hug from her friend. How does she feel?",
+          "choices": [{ "label": "Happy", "emoji": "😊" }, { "label": "Angry", "emoji": "😡" }],
+          "correct_or_preferred_answer": 0,
+          "explanation": "A hug from a friend can feel warm and happy."
+        }
+      ]
+    },
+    "what_happens_next": {
+      "template": "what_happens_next",
+      "title": "The Block Tower",
+      "rounds": [
+        {
+          "question": "Adam and Lina build a very tall tower. What happens next?",
+          "choices": [{ "label": "They add one more block together", "emoji": "🧱" }, { "label": "They knock it down on purpose", "emoji": "💥" }],
+          "correct_or_preferred_answer": 0,
+          "explanation": "Building together makes the tower even taller!"
+        }
+      ]
+    },
+    "match_pairs": {
+      "template": "match_pairs",
+      "title": "Who Goes With What?",
+      "intro": "Find the pairs.",
+      "pairs": [
+        { "left": { "label": "Car", "emoji": "🚗" }, "right": { "label": "Road", "emoji": "🛣️" } },
+        { "left": { "label": "Boat", "emoji": "⛵" }, "right": { "label": "Sea", "emoji": "🌊" } },
+        { "left": { "label": "Plane", "emoji": "✈️" }, "right": { "label": "Sky", "emoji": "☁️" } }
+      ]
+    },
+    "sequence": {
+      "template": "sequence",
+      "title": "Washing Hands",
+      "items": [
+        { "label": "Turn on the water", "emoji": "🚰" },
+        { "label": "Use soap", "emoji": "🧼" },
+        { "label": "Rinse", "emoji": "💧" },
+        { "label": "Dry your hands", "emoji": "🧻" }
+      ]
+    },
+    "categorize": {
+      "template": "categorize",
+      "title": "Tidy Up Time",
+      "intro": "Help put the toys away.",
+      "categories": [
+        { "key": "vehicles", "label": "Vehicles", "emoji": "🚙" },
+        { "key": "animals", "label": "Animals", "emoji": "🐾" }
+      ],
+      "items": [
+        { "label": "Bus", "emoji": "🚌", "category": "vehicles" },
+        { "label": "Cat", "emoji": "🐱", "category": "animals" },
+        { "label": "Truck", "emoji": "🚚", "category": "vehicles" },
+        { "label": "Dog", "emoji": "🐶", "category": "animals" }
+      ]
+    },
+    "story_builder": {
+      "template": "story_builder",
+      "title": "Maya's Animal Story",
+      "intro": "Choose a card at each step to build your story.",
+      "steps": [
+        { "prompt": "Who is in your story?", "choices": [{ "label": "A lion", "emoji": "🦁" }, { "label": "A rabbit", "emoji": "🐰" }, { "label": "An owl", "emoji": "🦉" }] },
+        { "prompt": "Where are they?", "choices": [{ "label": "In the forest", "emoji": "🌳" }, { "label": "By the sea", "emoji": "🏖️" }] },
+        { "prompt": "What happens?", "choices": [{ "label": "They lose their hat", "emoji": "🎩" }, { "label": "It starts to rain", "emoji": "🌧️" }] },
+        { "prompt": "How does it end?", "choices": [{ "label": "A friend helps", "emoji": "🤝" }, { "label": "They find a clever idea", "emoji": "💡" }] }
+      ],
+      "closing_prompt": "Tell your story to a friend or your teacher."
+    }
+  }
+}

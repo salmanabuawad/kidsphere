@@ -1,0 +1,82 @@
+{
+  "next": "הבא",
+  "back": "הקודם",
+  "listen": "הקשבה",
+  "stopReading": "עצירה",
+  "story": {
+    "questionsTitle": "בואו נדבר על הסיפור",
+    "teacherNote": "הערה לגננת",
+    "readAgain": "קוראים שוב"
+  },
+  "activity": {
+    "minutes_one": "דקה אחת",
+    "minutes_two": "שתי דקות",
+    "minutes_other": "{count} דקות",
+    "print": "הדפסה",
+    "goal": "מטרה",
+    "materials": "חומרים",
+    "noMaterials": "אין צורך בחומרים מיוחדים",
+    "steps": "שלבים",
+    "observe": "מה כדאי לראות",
+    "adaptation": "אם הילד/ה צריך/ה עוד תמיכה"
+  },
+  "video": {
+    "status": {
+      "script_ready": "התסריט מוכן",
+      "generating": "הסרטון בהפקה",
+      "ready": "הסרטון מוכן",
+      "failed": "הסרטון לא הושלם"
+    },
+    "duration_one": "כשנייה אחת",
+    "duration_two": "כשתי שניות",
+    "duration_other": "כ־{count} שניות",
+    "learningGoal": "מטרת למידה",
+    "providerNotConnected": "שירות הפקת הווידאו עדיין לא מחובר. התסריט והסצנות מוכנים לשימוש.",
+    "script": "תסריט",
+    "scenes": "סצנות",
+    "scene": "סצנה {n}",
+    "narration": "קריינות",
+    "visualPrompt": "תיאור התמונה"
+  },
+  "present": {
+    "exit": "יציאה",
+    "holdToExit": "לחיצה ארוכה ליציאה"
+  },
+  "fallback": {
+    "title": "אופס! אי אפשר להציג את זה עכשיו.",
+    "body": "אפשר לבקש עזרה מהגננת."
+  },
+  "finish": {
+    "title": "כל הכבוד!",
+    "body": "שיחקנו יחד עד הסוף.",
+    "playAgain": "משחקים שוב"
+  },
+  "game": {
+    "thanks": "תודה על הבחירה!",
+    "greatIdea": "רעיון נהדר!",
+    "thinkTogether": "בואו נחשוב יחד",
+    "whatHappensNext": "מה קורה אחר כך?",
+    "allDone": "סיימנו!",
+    "tryAnother": "בואו ננסה עוד אחד",
+    "match": {
+      "hint": "לחץ/י על כרטיס, ואז על הכרטיס שמתאים לו",
+      "yes": "יופי! הם הולכים יחד!"
+    },
+    "sequence": {
+      "hint": "לחץ/י על התמונות לפי הסדר",
+      "whatFirst": "הממ, מה בא קודם?",
+      "whatNext": "הממ, מה בא אחר כך?"
+    },
+    "categorize": {
+      "hint": "לחץ/י על תמונה, ואז על המקום שמתאים לה",
+      "yes": "כל הכבוד! זה המקום שלה.",
+      "again": "בואו ננסה מקום אחר",
+      "pickFirst": "קודם לחץ/י על תמונה"
+    },
+    "storyBuilder": {
+      "yourStory": "הסיפור שלך",
+      "tellYourStory": "עכשיו ספר/י את הסיפור שלך!",
+      "toldIt": "סיפרתי את הסיפור!"
+    }
+  }
+}

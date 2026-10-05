@@ -1,0 +1,181 @@
+{
+  "language": "he",
+  "story": {
+    "title": "אדם והמכונית האדומה הגדולה",
+    "goal": "תרגול הזמנת חבר להצטרף למשחק.",
+    "story": [
+      "אדם אהב את המכונית האדומה הגדולה שלו. כל בוקר הוא נסע איתה על שטיח המשחק.",
+      "יום אחד אדם ראה את לינה בונה חניון גבוה מקוביות.",
+      "אדם לקח נשימה עמוקה ואמר: \"אפשר שהמכונית שלי תחנה בחניון שלך?\"",
+      "לינה חייכה. \"כן! בוא נבנה רמפה יחד.\" הם שיחקו עד ארוחת הצהריים."
+    ],
+    "questions": ["מה אדם רצה לעשות?", "איך אדם שאל את לינה?", "מה אפשר לבנות עם חבר?"],
+    "teacher_note": "קראו לאט ועצרו אחרי השאלה של אדם. הזמינו את הילד/ה להראות איך היה/הייתה שואל/ת.",
+    "illustrations": ["🚗", "🧱", "🙂", "🎉"]
+  },
+  "activity": {
+    "title": "צוות שטיפת המכוניות",
+    "goal": "להתחלף בתורות ולשתף תפקיד במשחק קבוצתי קטן.",
+    "duration_minutes": 15,
+    "materials": ["מכוניות צעצוע", "ספוגים", "מגש רדוד עם מים"],
+    "instructions": [
+      "הכינו שטיפת מכוניות עם שתי עמדות: שטיפה וייבוש.",
+      "הזמינו שני חברים להצטרף.",
+      "כל ילד/ה בוחר/ת עמדה, ואחרי כל מכונית מתחלפים.",
+      "חוגגים יחד כל מכונית נקייה."
+    ],
+    "what_to_observe": ["האם הילד/ה מזמין/ה חבר להתחלף?", "איך הילד/ה מחכה לתור?"],
+    "adaptation": "מתחילים עם חבר אחד וכרטיס תמונה ברור שמראה של מי התור."
+  },
+  "video": {
+    "title": "מחכים לתור במגלשה",
+    "learning_goal": "לחכות לתור בשקט.",
+    "script": "מיה וסאם רוצים את המגלשה באותו זמן. הם סופרים עד שלוש ומתחלפים.",
+    "scenes": [
+      { "description": "שני ילדים רצים למגלשה.", "narration": "מיה וסאם רוצים לגלוש!", "visual_prompt": "גן שעשועים צבעוני, שני ילדים מחייכים, סגנון מצויר" },
+      { "description": "הם סופרים יחד.", "narration": "אחת, שתיים, שלוש: מיה ראשונה.", "visual_prompt": "ילדים מרימים אצבעות, פנים ידידותיות" },
+      { "description": "סאם גולש אחריה והם מריעים.", "narration": "עכשיו התור של סאם. הידד!", "visual_prompt": "ילד על המגלשה וילדה מוחאת כפיים" }
+    ],
+    "duration_seconds": 45
+  },
+  "games": {
+    "multiple_choice": {
+      "template": "multiple_choice",
+      "title": "חברים של מכוניות",
+      "intro": "בואו נעזור לאדם לשחק עם חברים.",
+      "rounds": [
+        {
+          "question": "אדם רוצה לשחק עם לינה. מה הוא יכול להגיד?",
+          "choices": [
+            { "label": "אפשר לשחק איתך?", "emoji": "🙋" },
+            { "label": "לכי מפה!", "emoji": "😠" },
+            { "label": "לא להגיד כלום", "emoji": "🤐" }
+          ],
+          "correct_or_preferred_answer": 0,
+          "explanation": "כששואלים בנחמדות, לחברים קל יותר להגיד כן."
+        },
+        {
+          "question": "לינה משחקת במכונית הכחולה. מה אדם יכול לעשות?",
+          "choices": [
+            { "label": "לחכות לתור", "emoji": "⏳" },
+            { "label": "לחטוף את המכונית", "emoji": "✋" }
+          ],
+          "correct_or_preferred_answer": 0,
+          "explanation": "כשמחכים לתור, המשחק כיף לכולם."
+        }
+      ]
+    },
+    "emotion_choice": {
+      "template": "emotion_choice",
+      "title": "איך הם מרגישים?",
+      "rounds": [
+        {
+          "question": "המגדל של אדם נפל. איך הוא אולי מרגיש?",
+          "choices": [
+            { "label": "עצוב", "emoji": "😢" },
+            { "label": "שמח", "emoji": "😄" },
+            { "label": "מופתע", "emoji": "😮" }
+          ],
+          "correct_or_preferred_answer": null,
+          "explanation": "כל הרגשות בסדר. אפשר לבנות אותו שוב יחד."
+        },
+        {
+          "question": "לינה קיבלה חיבוק מחברה. איך היא מרגישה?",
+          "choices": [
+            { "label": "שמחה", "emoji": "😊" },
+            { "label": "כועסת", "emoji": "😡" }
+          ],
+          "correct_or_preferred_answer": 0,
+          "explanation": "חיבוק מחברה מרגיש חם ושמח."
+        }
+      ]
+    },
+    "what_happens_next": {
+      "template": "what_happens_next",
+      "title": "מגדל הקוביות",
+      "rounds": [
+        {
+          "question": "אדם ולינה בונים מגדל גבוה מאוד. מה קורה אחר כך?",
+          "choices": [
+            { "label": "מוסיפים עוד קובייה יחד", "emoji": "🧱" },
+            { "label": "מפילים אותו בכוונה", "emoji": "💥" }
+          ],
+          "correct_or_preferred_answer": 0,
+          "explanation": "כשבונים יחד, המגדל נהיה עוד יותר גבוה!"
+        }
+      ]
+    },
+    "match_pairs": {
+      "template": "match_pairs",
+      "title": "מה מתאים למה?",
+      "intro": "מצאו את הזוגות.",
+      "pairs": [
+        { "left": { "label": "מכונית", "emoji": "🚗" }, "right": { "label": "כביש", "emoji": "🛣️" } },
+        { "left": { "label": "סירה", "emoji": "⛵" }, "right": { "label": "ים", "emoji": "🌊" } },
+        { "left": { "label": "מטוס", "emoji": "✈️" }, "right": { "label": "שמיים", "emoji": "☁️" } }
+      ]
+    },
+    "sequence": {
+      "template": "sequence",
+      "title": "שוטפים ידיים",
+      "items": [
+        { "label": "פותחים את המים", "emoji": "🚰" },
+        { "label": "סבון", "emoji": "🧼" },
+        { "label": "שוטפים", "emoji": "💧" },
+        { "label": "מנגבים את הידיים", "emoji": "🧻" }
+      ]
+    },
+    "categorize": {
+      "template": "categorize",
+      "title": "זמן לסדר",
+      "intro": "עזרו לסדר את הצעצועים.",
+      "categories": [
+        { "key": "vehicles", "label": "כלי רכב", "emoji": "🚙" },
+        { "key": "animals", "label": "בעלי חיים", "emoji": "🐾" }
+      ],
+      "items": [
+        { "label": "אוטובוס", "emoji": "🚌", "category": "vehicles" },
+        { "label": "חתול", "emoji": "🐱", "category": "animals" },
+        { "label": "משאית", "emoji": "🚚", "category": "vehicles" },
+        { "label": "כלב", "emoji": "🐶", "category": "animals" }
+      ]
+    },
+    "story_builder": {
+      "template": "story_builder",
+      "title": "סיפור החיות של מאיה",
+      "intro": "בחר/י כרטיס בכל שלב כדי לבנות את הסיפור שלך.",
+      "steps": [
+        {
+          "prompt": "מי בסיפור שלך?",
+          "choices": [
+            { "label": "אריה", "emoji": "🦁" },
+            { "label": "ארנב", "emoji": "🐰" },
+            { "label": "ינשוף", "emoji": "🦉" }
+          ]
+        },
+        {
+          "prompt": "איפה הם?",
+          "choices": [
+            { "label": "ביער", "emoji": "🌳" },
+            { "label": "ליד הים", "emoji": "🏖️" }
+          ]
+        },
+        {
+          "prompt": "מה קורה?",
+          "choices": [
+            { "label": "הכובע הולך לאיבוד", "emoji": "🎩" },
+            { "label": "מתחיל לרדת גשם", "emoji": "🌧️" }
+          ]
+        },
+        {
+          "prompt": "איך זה נגמר?",
+          "choices": [
+            { "label": "חבר עוזר", "emoji": "🤝" },
+            { "label": "מוצאים רעיון חכם", "emoji": "💡" }
+          ]
+        }
+      ],
+      "closing_prompt": "ספר/י את הסיפור שלך לחבר או לגננת."
+    }
+  }
+}
