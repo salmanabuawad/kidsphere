@@ -1,0 +1,438 @@
+{
+  "lists": {
+    "languages": [
+      {"key": "ar", "label": {"en": "Arabic", "ar": "العربية", "he": "ערבית"}},
+      {"key": "he", "label": {"en": "Hebrew", "ar": "العبرية", "he": "עברית"}},
+      {"key": "en", "label": {"en": "English", "ar": "الإنجليزية", "he": "אנגלית"}},
+      {"key": "ru", "label": {"en": "Russian", "ar": "الروسية", "he": "רוסית"}},
+      {"key": "am", "label": {"en": "Amharic", "ar": "الأمهرية", "he": "אמהרית"}},
+      {"key": "fr", "label": {"en": "French", "ar": "الفرنسية", "he": "צרפתית"}},
+      {"key": "es", "label": {"en": "Spanish", "ar": "الإسبانية", "he": "ספרדית"}},
+      {"key": "other", "label": {"en": "Other", "ar": "لغة أخرى", "he": "שפה אחרת"}}
+    ],
+    "genders": [
+      {"key": "girl", "label": {"en": "Girl", "ar": "بنت", "he": "בת"}},
+      {"key": "boy", "label": {"en": "Boy", "ar": "ولد", "he": "בן"}},
+      {"key": "unspecified", "label": {"en": "Not specified", "ar": "غير محدد", "he": "לא צוין"}}
+    ],
+    "relations": [
+      {"key": "mother", "label": {"en": "Mother", "ar": "الأم", "he": "אמא"}},
+      {"key": "father", "label": {"en": "Father", "ar": "الأب", "he": "אבא"}},
+      {"key": "guardian", "label": {"en": "Guardian", "ar": "وليّ الأمر", "he": "אפוטרופוס/ית"}},
+      {"key": "other", "label": {"en": "Other", "ar": "صلة أخرى", "he": "קרבה אחרת"}}
+    ],
+    "contact_preferences": [
+      {"key": "personal_conversation", "icon": "🗣️", "label": {"en": "Personal conversation", "ar": "محادثة شخصية", "he": "שיחה אישית"}},
+      {"key": "phone", "icon": "📞", "label": {"en": "Phone call", "ar": "مكالمة هاتفية", "he": "שיחת טלפון"}},
+      {"key": "message", "icon": "✉️", "label": {"en": "Message", "ar": "رسالة", "he": "הודעה"}},
+      {"key": "meeting", "icon": "📅", "label": {"en": "Planned meeting", "ar": "لقاء مخطط", "he": "פגישה מתוכננת"}}
+    ],
+    "describe_words": [
+      {"key": "curious", "label": {"en": "Curious", "ar": "محب للاستطلاع", "he": "סקרן/ית"}},
+      {"key": "kind", "label": {"en": "Kind", "ar": "طيب القلب", "he": "טוב/ת לב"}},
+      {"key": "energetic", "label": {"en": "Energetic", "ar": "نشيط", "he": "מלא/ת אנרגיה"}},
+      {"key": "gentle", "label": {"en": "Gentle", "ar": "رقيق", "he": "עדין/ה"}},
+      {"key": "funny", "label": {"en": "Funny", "ar": "مرح", "he": "מצחיק/ה"}},
+      {"key": "thoughtful", "label": {"en": "Thoughtful", "ar": "يراعي الآخرين", "he": "מתחשב/ת"}},
+      {"key": "creative", "label": {"en": "Creative", "ar": "مبدع", "he": "יצירתי/ת"}},
+      {"key": "determined", "label": {"en": "Determined", "ar": "مصمّم", "he": "נחוש/ה"}},
+      {"key": "shy_at_first", "label": {"en": "Shy at first", "ar": "خجول في البداية", "he": "ביישן/ית בהתחלה"}},
+      {"key": "cheerful", "label": {"en": "Cheerful", "ar": "بشوش", "he": "עליז/ה"}},
+      {"key": "caring", "label": {"en": "Caring", "ar": "حنون", "he": "אכפתי/ת"}},
+      {"key": "imaginative", "label": {"en": "Imaginative", "ar": "واسع الخيال", "he": "בעל/ת דמיון עשיר"}},
+      {"key": "loves_to_talk", "label": {"en": "Loves to talk", "ar": "يحب الحديث", "he": "אוהב/ת לדבר"}},
+      {"key": "calm", "label": {"en": "Calm", "ar": "هادئ", "he": "רגוע/ה"}},
+      {"key": "independent", "label": {"en": "Independent", "ar": "مستقل", "he": "עצמאי/ת"}},
+      {"key": "sensitive", "label": {"en": "Sensitive", "ar": "حسّاس", "he": "רגיש/ה"}},
+      {"key": "brave", "label": {"en": "Brave", "ar": "شجاع", "he": "אמיץ/ה"}},
+      {"key": "playful", "label": {"en": "Playful", "ar": "يحب اللعب", "he": "אוהב/ת לשחק"}}
+    ],
+    "strengths": [
+      {"key": "imagination", "icon": "🌈", "label": {"en": "Imagination", "ar": "الخيال", "he": "דמיון"}},
+      {"key": "curiosity", "icon": "🔍", "label": {"en": "Curiosity", "ar": "حب الاستطلاع", "he": "סקרנות"}},
+      {"key": "communication", "icon": "💬", "label": {"en": "Communication", "ar": "التواصل والتعبير", "he": "תקשורת"}},
+      {"key": "vocabulary", "icon": "📖", "label": {"en": "Rich vocabulary", "ar": "مفردات غنية", "he": "אוצר מילים עשיר"}},
+      {"key": "memory", "icon": "🧠", "label": {"en": "Good memory", "ar": "ذاكرة جيدة", "he": "זיכרון טוב"}},
+      {"key": "creativity", "icon": "✨", "label": {"en": "Creativity", "ar": "الإبداع", "he": "יצירתיות"}},
+      {"key": "building", "icon": "🧱", "label": {"en": "Building", "ar": "البناء والتركيب", "he": "בנייה והרכבה"}},
+      {"key": "drawing", "icon": "🖍️", "label": {"en": "Drawing", "ar": "الرسم", "he": "ציור"}},
+      {"key": "music", "icon": "🎶", "label": {"en": "Music", "ar": "الحس الموسيقي", "he": "מוזיקליות"}},
+      {"key": "movement", "icon": "🤸", "label": {"en": "Movement", "ar": "المهارات الحركية", "he": "תנועה"}},
+      {"key": "problem_solving", "icon": "🧩", "label": {"en": "Problem solving", "ar": "حل المشكلات", "he": "פתרון בעיות"}},
+      {"key": "independence", "icon": "🧭", "label": {"en": "Independence", "ar": "الاستقلالية", "he": "עצמאות"}},
+      {"key": "empathy", "icon": "🤗", "label": {"en": "Empathy", "ar": "التعاطف", "he": "אמפתיה"}},
+      {"key": "humor", "icon": "😄", "label": {"en": "Sense of humor", "ar": "حس الفكاهة", "he": "חוש הומור"}},
+      {"key": "persistence", "icon": "💪", "label": {"en": "Persistence", "ar": "المثابرة", "he": "התמדה"}},
+      {"key": "leadership", "icon": "⭐", "label": {"en": "Leadership", "ar": "القيادة", "he": "מנהיגות"}},
+      {"key": "observation", "icon": "👀", "label": {"en": "Noticing details", "ar": "دقة الملاحظة", "he": "כושר הבחנה"}},
+      {"key": "social_connection", "icon": "🤝", "label": {"en": "Connecting with others", "ar": "بناء العلاقات مع الآخرين", "he": "קשר עם אחרים"}}
+    ],
+    "interests": [
+      {"key": "pretend_play", "icon": "🎭", "label": {"en": "Pretend play", "ar": "اللعب التخيلي", "he": "משחק דמיון"}},
+      {"key": "cars_transportation", "icon": "🚗", "label": {"en": "Cars & transportation", "ar": "السيارات ووسائل النقل", "he": "מכוניות וכלי תחבורה"}},
+      {"key": "construction", "icon": "🏗️", "label": {"en": "Construction", "ar": "البناء والتركيب", "he": "בנייה והרכבה"}},
+      {"key": "blocks", "icon": "🧱", "label": {"en": "Blocks", "ar": "المكعبات", "he": "קוביות"}},
+      {"key": "drawing", "icon": "🎨", "label": {"en": "Drawing", "ar": "الرسم", "he": "ציור"}},
+      {"key": "crafts", "icon": "✂️", "label": {"en": "Crafts", "ar": "الأشغال اليدوية", "he": "יצירה"}},
+      {"key": "music", "icon": "🎵", "label": {"en": "Music & singing", "ar": "الموسيقى والغناء", "he": "מוזיקה ושירה"}},
+      {"key": "dancing", "icon": "💃", "label": {"en": "Dancing", "ar": "الرقص", "he": "ריקוד"}},
+      {"key": "stories", "icon": "📖", "label": {"en": "Stories", "ar": "القصص", "he": "סיפורים"}},
+      {"key": "books", "icon": "📚", "label": {"en": "Books", "ar": "الكتب", "he": "ספרים"}},
+      {"key": "outdoor_play", "icon": "🌳", "label": {"en": "Outdoor play", "ar": "اللعب في الخارج", "he": "משחק בחוץ"}},
+      {"key": "animals", "icon": "🐘", "label": {"en": "Animals", "ar": "الحيوانات", "he": "בעלי חיים"}},
+      {"key": "nature", "icon": "🌼", "label": {"en": "Nature", "ar": "الطبيعة", "he": "טבע"}},
+      {"key": "sports", "icon": "⚽", "label": {"en": "Sports", "ar": "الرياضة", "he": "ספורט"}},
+      {"key": "puzzles", "icon": "🧩", "label": {"en": "Puzzles", "ar": "ألعاب البازل", "he": "פאזלים"}},
+      {"key": "technology", "icon": "💻", "label": {"en": "Technology & screens", "ar": "التكنولوجيا والشاشات", "he": "טכנולוגיה ומסכים"}},
+      {"key": "water", "icon": "💧", "label": {"en": "Water play", "ar": "اللعب بالماء", "he": "משחקי מים"}},
+      {"key": "cooking", "icon": "🍳", "label": {"en": "Cooking", "ar": "الطبخ", "he": "בישול"}},
+      {"key": "social_games", "icon": "🤝", "label": {"en": "Social games", "ar": "الألعاب الجماعية", "he": "משחקים חברתיים"}}
+    ],
+    "motivators": [
+      {"key": "praise", "icon": "👏", "label": {"en": "Praise and encouragement", "ar": "المديح والتشجيع", "he": "מילה טובה ועידוד"}},
+      {"key": "special_role", "icon": "🏅", "label": {"en": "Having a special role", "ar": "دور خاص يقوم به", "he": "תפקיד מיוחד"}},
+      {"key": "helping_adults", "icon": "🙌", "label": {"en": "Helping adults", "ar": "مساعدة الكبار", "he": "לעזור למבוגרים"}},
+      {"key": "new_challenges", "icon": "🚀", "label": {"en": "New challenges", "ar": "تحديات جديدة", "he": "אתגרים חדשים"}},
+      {"key": "movement_breaks", "icon": "🏃", "label": {"en": "Moving and active play", "ar": "الحركة واللعب النشط", "he": "תנועה ומשחק פעיל"}},
+      {"key": "having_choices", "icon": "🤔", "label": {"en": "Having a choice", "ar": "حرية الاختيار", "he": "אפשרות לבחור"}},
+      {"key": "favorite_topics", "icon": "⭐", "label": {"en": "Favorite topics and characters", "ar": "مواضيعه وشخصياته المفضلة", "he": "נושאים ודמויות אהובים"}},
+      {"key": "one_on_one_time", "icon": "🧑‍🏫", "label": {"en": "One-on-one time with an adult", "ar": "وقت خاص مع شخص بالغ", "he": "זמן אישי עם מבוגר"}},
+      {"key": "playing_with_friends", "icon": "👫", "label": {"en": "Playing with friends", "ar": "اللعب مع الأصدقاء", "he": "משחק עם חברים"}},
+      {"key": "hands_on_exploring", "icon": "🔬", "label": {"en": "Hands-on exploring", "ar": "الاستكشاف والتجربة باليدين", "he": "חקירה והתנסות בידיים"}},
+      {"key": "songs_and_music", "icon": "🎵", "label": {"en": "Songs and music", "ar": "الأغاني والموسيقى", "he": "שירים ומוזיקה"}},
+      {"key": "showing_their_work", "icon": "🖼️", "label": {"en": "Showing what they made", "ar": "عرض ما صنعه", "he": "להראות מה הכין/ה"}}
+    ],
+    "sad_helps": [
+      {"key": "hug", "icon": "🤗", "label": {"en": "A hug", "ar": "حضن", "he": "חיבוק"}},
+      {"key": "talking_it_through", "icon": "💬", "label": {"en": "Talking about what happened", "ar": "الحديث عمّا حدث", "he": "לדבר על מה שקרה"}},
+      {"key": "adult_reassurance", "icon": "🫶", "label": {"en": "Reassuring words from an adult", "ar": "كلمات طمأنة من شخص بالغ", "he": "מילים מרגיעות של מבוגר"}},
+      {"key": "staying_close", "icon": "🧑‍🧒", "label": {"en": "Staying close to an adult", "ar": "البقاء قريباً من شخص بالغ", "he": "להיות קרוב/ה למבוגר"}},
+      {"key": "quiet_time", "icon": "🛋️", "label": {"en": "Quiet time", "ar": "وقت هادئ", "he": "זמן שקט"}},
+      {"key": "favorite_object", "icon": "🧸", "label": {"en": "A favorite object", "ar": "غرض مفضّل", "he": "חפץ אהוב"}},
+      {"key": "favorite_activity", "icon": "🎈", "label": {"en": "A favorite game or activity", "ar": "لعبة أو نشاط مفضّل", "he": "משחק או פעילות אהובים"}},
+      {"key": "music", "icon": "🎵", "label": {"en": "A song or music", "ar": "أغنية أو موسيقى", "he": "שיר או מוזיקה"}},
+      {"key": "humor", "icon": "😄", "label": {"en": "Humor", "ar": "الدعابة", "he": "הומור"}},
+      {"key": "time_alone", "icon": "⏳", "label": {"en": "A little time alone", "ar": "قليل من الوقت وحده", "he": "קצת זמן לבד"}},
+      {"key": "other", "label": {"en": "Other", "ar": "أخرى", "he": "אחר"}}
+    ],
+    "frustration_reactions": [
+      {"key": "cries", "label": {"en": "Cries", "ar": "يبكي", "he": "בוכה"}},
+      {"key": "shouts", "label": {"en": "Shouts", "ar": "يصرخ", "he": "צועק/ת"}},
+      {"key": "moves_away", "label": {"en": "Moves away", "ar": "يبتعد", "he": "מתרחק/ת"}},
+      {"key": "asks_adult_help", "label": {"en": "Asks an adult for help", "ar": "يطلب مساعدة شخص بالغ", "he": "פונה למבוגר לעזרה"}},
+      {"key": "asks_for_hug", "label": {"en": "Asks for a hug", "ar": "يطلب حضناً", "he": "מבקש/ת חיבוק"}},
+      {"key": "needs_quiet_time", "label": {"en": "Needs quiet time", "ar": "يحتاج وقتاً هادئاً", "he": "צריך/ה זמן שקט"}},
+      {"key": "takes_time_to_calm", "label": {"en": "Takes time to calm down", "ar": "يحتاج وقتاً ليهدأ", "he": "לוקח לו/ה זמן להירגע"}},
+      {"key": "throws_or_pushes", "label": {"en": "Throws or pushes", "ar": "يرمي الأشياء أو يدفع", "he": "זורק/ת או דוחף/ת"}},
+      {"key": "becomes_silent", "label": {"en": "Goes quiet", "ar": "يصمت", "he": "משתתק/ת"}},
+      {"key": "other", "label": {"en": "Other", "ar": "أخرى", "he": "אחר"}}
+    ],
+    "calming_helps": [
+      {"key": "adult_reassurance", "icon": "🫶", "label": {"en": "Adult reassurance", "ar": "طمأنة من شخص بالغ", "he": "הרגעה של מבוגר"}},
+      {"key": "hug", "icon": "🤗", "label": {"en": "A hug", "ar": "حضن", "he": "חיבוק"}},
+      {"key": "quiet_space", "icon": "🛋️", "label": {"en": "A quiet space", "ar": "مكان هادئ", "he": "פינה שקטה"}},
+      {"key": "movement", "icon": "🏃", "label": {"en": "Movement", "ar": "الحركة", "he": "תנועה"}},
+      {"key": "explanation", "icon": "💬", "label": {"en": "Explaining what is happening", "ar": "شرح ما يحدث", "he": "הסבר על מה שקורה"}},
+      {"key": "visual_support", "icon": "🖼️", "label": {"en": "Visual support (pictures, signs)", "ar": "دعم بصري (صور وإشارات)", "he": "תמיכה חזותית (תמונות, סימנים)"}},
+      {"key": "advance_preparation", "icon": "🔔", "label": {"en": "Preparation in advance", "ar": "التحضير المسبق", "he": "הכנה מראש"}},
+      {"key": "familiar_routine", "icon": "🔁", "label": {"en": "A familiar routine", "ar": "روتين مألوف", "he": "שגרה מוכרת"}},
+      {"key": "music", "icon": "🎵", "label": {"en": "Music", "ar": "الموسيقى", "he": "מוזיקה"}},
+      {"key": "favorite_object", "icon": "🧸", "label": {"en": "A favorite object", "ar": "غرض مفضّل", "he": "חפץ אהוב"}},
+      {"key": "humor", "icon": "😄", "label": {"en": "Humor", "ar": "الدعابة", "he": "הומור"}},
+      {"key": "time_alone", "icon": "⏳", "label": {"en": "Time alone", "ar": "وقت وحده", "he": "זמן לבד"}},
+      {"key": "other", "label": {"en": "Other", "ar": "أخرى", "he": "אחר"}}
+    ],
+    "transition_reactions": [
+      {"key": "transitions_easily", "label": {"en": "Moves on easily", "ar": "ينتقل بسهولة", "he": "עובר/ת בקלות"}},
+      {"key": "needs_preparation", "label": {"en": "Needs preparation in advance", "ar": "يحتاج إلى تحضير مسبق", "he": "צריך/ה הכנה מראש"}},
+      {"key": "needs_reminder", "label": {"en": "Needs a reminder", "ar": "يحتاج إلى تذكير", "he": "צריך/ה תזכורת"}},
+      {"key": "needs_adult_support", "label": {"en": "Needs adult support", "ar": "يحتاج إلى دعم شخص بالغ", "he": "זקוק/ה לתמיכה של מבוגר"}},
+      {"key": "resists", "label": {"en": "Resists", "ar": "يقاوم", "he": "מתנגד/ת"}},
+      {"key": "becomes_upset", "label": {"en": "Gets upset", "ar": "ينزعج", "he": "נסער/ת"}},
+      {"key": "depends_on_situation", "label": {"en": "Depends on the situation", "ar": "يعتمد على الموقف", "he": "תלוי במצב"}}
+    ],
+    "transition_helps": [
+      {"key": "advance_preparation", "icon": "🔔", "label": {"en": "Preparation in advance", "ar": "التحضير المسبق", "he": "הכנה מראש"}},
+      {"key": "countdown_timer", "icon": "⏳", "label": {"en": "Countdown or timer", "ar": "عدّ تنازلي أو مؤقّت", "he": "ספירה לאחור או טיימר"}},
+      {"key": "visual_support", "icon": "🖼️", "label": {"en": "Visual support (pictures, schedule)", "ar": "دعم بصري (صور، جدول)", "he": "תמיכה חזותית (תמונות, לוח יום)"}},
+      {"key": "explanation", "icon": "💬", "label": {"en": "Explaining what comes next", "ar": "شرح ما سيحدث بعد ذلك", "he": "הסבר מה יקרה אחר כך"}},
+      {"key": "first_then", "icon": "1️⃣", "label": {"en": "First… then…", "ar": "أولاً… ثم…", "he": "קודם… אחר כך…"}},
+      {"key": "offering_choice", "icon": "🤔", "label": {"en": "Offering a choice", "ar": "إعطاء خيار", "he": "מתן בחירה"}},
+      {"key": "favorite_object", "icon": "🧸", "label": {"en": "A favorite object", "ar": "غرض مفضّل", "he": "חפץ אהוב"}},
+      {"key": "goodbye_routine", "icon": "👋", "label": {"en": "A short goodbye routine", "ar": "طقس وداع قصير", "he": "טקס פרידה קצר"}},
+      {"key": "special_role", "icon": "🏅", "label": {"en": "A special helper role", "ar": "دور مساعد خاص", "he": "תפקיד עוזר/ת מיוחד"}},
+      {"key": "adult_reassurance", "icon": "🫶", "label": {"en": "Adult reassurance", "ar": "طمأنة من شخص بالغ", "he": "הרגעה של מבוגר"}},
+      {"key": "other", "label": {"en": "Other", "ar": "أخرى", "he": "אחר"}}
+    ],
+    "morning_separation": [
+      {"key": "easy", "label": {"en": "Says goodbye easily", "ar": "يودّع بسهولة", "he": "נפרד/ת בקלות"}},
+      {"key": "needs_time", "label": {"en": "Needs some time", "ar": "يحتاج بعض الوقت", "he": "זקוק/ה לזמן"}},
+      {"key": "needs_a_lot_of_support", "label": {"en": "Needs a lot of support", "ar": "يحتاج إلى دعم كبير", "he": "זקוק/ה להרבה תמיכה"}},
+      {"key": "varies", "label": {"en": "Changes from day to day", "ar": "يختلف من يوم لآخر", "he": "משתנה מיום ליום"}}
+    ],
+    "social": [
+      {"key": "initiates_play", "label": {"en": "Initiates play", "ar": "يبادر إلى اللعب", "he": "יוזם/ת משחק"}},
+      {"key": "joins_existing_play", "label": {"en": "Joins play that has already started", "ar": "ينضم إلى لعب قائم", "he": "מצטרף/ת למשחק קיים"}},
+      {"key": "waits_for_others", "label": {"en": "Waits for others to approach", "ar": "ينتظر أن يبادر الآخرون", "he": "מחכה שיפנו אליו/ה"}},
+      {"key": "prefers_familiar_children", "label": {"en": "Prefers familiar children", "ar": "يفضّل الأطفال الذين يعرفهم", "he": "מעדיף/ה ילדים מוכרים"}},
+      {"key": "often_plays_independently", "label": {"en": "Often plays on their own", "ar": "يلعب كثيراً بمفرده", "he": "משחק/ת לעיתים קרובות לבד"}},
+      {"key": "enjoys_group_activities", "label": {"en": "Enjoys group activities", "ar": "يستمتع بالأنشطة الجماعية", "he": "נהנה/ית מפעילות קבוצתית"}},
+      {"key": "needs_adult_support_to_join", "label": {"en": "Joins in with adult support", "ar": "ينضم بمساعدة شخص بالغ", "he": "מצטרף/ת בתיווך מבוגר"}},
+      {"key": "learning_turn_taking", "label": {"en": "Still learning to take turns", "ar": "يتعلّم انتظار دوره", "he": "לומד/ת לחכות לתור"}},
+      {"key": "handles_conflict_well", "label": {"en": "Handles disagreements well", "ar": "يتعامل جيداً مع الخلافات", "he": "מתמודד/ת היטב עם מחלוקות"}},
+      {"key": "needs_help_with_conflict", "label": {"en": "Needs help with disagreements", "ar": "يحتاج إلى مساعدة في الخلافات", "he": "נעזר/ת במבוגר במחלוקות"}}
+    ],
+    "communication": [
+      {"key": "expresses_needs_verbally", "label": {"en": "Says what they need in words", "ar": "يعبّر عن احتياجاته بالكلام", "he": "מביע/ה צרכים ורצונות במילים"}},
+      {"key": "uses_full_sentences", "label": {"en": "Uses full sentences", "ar": "يستخدم جملاً كاملة", "he": "משתמש/ת במשפטים מלאים"}},
+      {"key": "asks_questions", "label": {"en": "Asks questions", "ar": "يطرح أسئلة", "he": "שואל/ת שאלות"}},
+      {"key": "tells_about_experiences", "label": {"en": "Tells about experiences", "ar": "يحكي عن تجاربه", "he": "מספר/ת על חוויות"}},
+      {"key": "describes_events", "label": {"en": "Describes events or pictures", "ar": "يصف أحداثاً أو صوراً", "he": "מתאר/ת אירוע או תמונה"}},
+      {"key": "listens_to_others", "label": {"en": "Listens to others", "ar": "يصغي للآخرين", "he": "מקשיב/ה לאחרים"}},
+      {"key": "takes_turns_in_conversation", "label": {"en": "Takes turns in conversation", "ar": "يتبادل الأدوار في الحديث", "he": "מחכה לתורו/ה בשיחה"}},
+      {"key": "uses_gestures", "label": {"en": "Uses gestures", "ar": "يستخدم الإشارات والإيماءات", "he": "משתמש/ת במחוות ובתנועות ידיים"}},
+      {"key": "sometimes_communicates_through_behavior", "label": {"en": "Sometimes shows needs through actions", "ar": "يعبّر أحياناً عن احتياجاته بالأفعال", "he": "לפעמים מביע/ה צרכים דרך מעשים"}},
+      {"key": "needs_adult_support", "label": {"en": "Benefits from adult support", "ar": "يستفيد من دعم شخص بالغ", "he": "נעזר/ת בתמיכה של מבוגר"}},
+      {"key": "understands_instructions", "label": {"en": "Follows simple instructions", "ar": "يفهم التعليمات البسيطة", "he": "מבין/ה הוראות פשוטות"}}
+    ],
+    "independence_areas": [
+      {"key": "eating", "icon": "🍽️", "label": {"en": "Eating", "ar": "الأكل", "he": "אכילה"}},
+      {"key": "drinking", "icon": "🥤", "label": {"en": "Drinking", "ar": "الشرب", "he": "שתייה"}},
+      {"key": "toilet", "icon": "🚽", "label": {"en": "Using the toilet", "ar": "استخدام المرحاض", "he": "שימוש בשירותים"}},
+      {"key": "washing_hands", "icon": "🧼", "label": {"en": "Washing hands", "ar": "غسل اليدين", "he": "רחיצת ידיים"}},
+      {"key": "dressing", "icon": "👕", "label": {"en": "Dressing", "ar": "ارتداء الملابس", "he": "לבוש והתלבשות"}},
+      {"key": "shoes", "icon": "👟", "label": {"en": "Putting on shoes", "ar": "لبس الحذاء", "he": "נעילת נעליים"}},
+      {"key": "tidying_toys", "icon": "🧺", "label": {"en": "Tidying toys", "ar": "ترتيب الألعاب", "he": "סידור משחקים"}},
+      {"key": "keeping_belongings", "icon": "🎒", "label": {"en": "Keeping belongings", "ar": "الحفاظ على أغراضه", "he": "שמירה על חפצים"}},
+      {"key": "starting_activity", "icon": "▶️", "label": {"en": "Starting an activity", "ar": "البدء بنشاط", "he": "התחלת פעילות"}},
+      {"key": "finishing_activity", "icon": "🏁", "label": {"en": "Finishing an activity", "ar": "إنهاء نشاط", "he": "סיום פעילות"}}
+    ],
+    "support_levels": [
+      {"key": "independent", "label": {"en": "Independent", "ar": "مستقل", "he": "עצמאי/ת"}, "short": {"en": "Independent", "ar": "مستقل", "he": "עצמאי/ת"}},
+      {"key": "some_support", "label": {"en": "Needs some support", "ar": "يحتاج إلى بعض الدعم", "he": "זקוק/ה לקצת תמיכה"}, "short": {"en": "With support", "ar": "بمساعدة", "he": "בתיווך"}},
+      {"key": "significant_support", "label": {"en": "Needs significant support", "ar": "يحتاج إلى دعم كبير", "he": "זקוק/ה לתמיכה רבה"}, "short": {"en": "Difficult", "ar": "يجد صعوبة", "he": "מתקשה"}},
+      {"key": "not_observed", "label": {"en": "Not observed / not applicable", "ar": "لم يُلاحظ / لا ينطبق", "he": "לא נצפה / לא רלוונטי"}, "short": {"en": "Not observed", "ar": "لم يُلاحظ", "he": "לא נצפה"}}
+    ],
+    "sensitivities": [
+      {"key": "noise", "icon": "🔊", "label": {"en": "Noise", "ar": "الضجيج", "he": "רעש"}},
+      {"key": "touch", "icon": "✋", "label": {"en": "Touch", "ar": "اللمس", "he": "מגע"}},
+      {"key": "clothing", "icon": "👕", "label": {"en": "Clothing", "ar": "الملابس", "he": "בגדים"}},
+      {"key": "textures", "icon": "🧶", "label": {"en": "Textures", "ar": "الملمس", "he": "מרקמים"}},
+      {"key": "dirt", "icon": "🧼", "label": {"en": "Getting dirty", "ar": "الاتساخ", "he": "לכלוך"}},
+      {"key": "strong_smells", "icon": "👃", "label": {"en": "Strong smells", "ar": "الروائح القوية", "he": "ריחות חזקים"}},
+      {"key": "bright_lights", "icon": "💡", "label": {"en": "Bright lights", "ar": "الأضواء الساطعة", "he": "אור חזק"}},
+      {"key": "crowded_spaces", "icon": "👥", "label": {"en": "Crowded spaces", "ar": "الأماكن المزدحمة", "he": "צפיפות"}},
+      {"key": "movement", "icon": "🎠", "label": {"en": "Movement (swings, spinning)", "ar": "الحركة (الأرجوحة، الدوران)", "he": "תנועה (נדנדה, סחרור)"}},
+      {"key": "certain_foods", "icon": "🍽️", "label": {"en": "Certain foods", "ar": "بعض الأطعمة", "he": "מאכלים מסוימים"}},
+      {"key": "messy_play", "icon": "🎨", "label": {"en": "Messy play (paint, glue, sand)", "ar": "اللعب بالمواد اللزجة (ألوان، غراء، رمل)", "he": "משחק מלכלך (צבע, דבק, חול)"}}
+    ],
+    "sensitivity_helps": [
+      {"key": "quiet_space", "icon": "🛋️", "label": {"en": "A quiet space", "ar": "مكان هادئ", "he": "פינה שקטה"}},
+      {"key": "reduced_stimulation", "icon": "🔈", "label": {"en": "Less noise and stimulation", "ar": "تقليل الضجيج والمثيرات", "he": "הפחתת גירויים"}},
+      {"key": "advance_preparation", "icon": "🔔", "label": {"en": "Preparation in advance", "ar": "التحضير المسبق", "he": "הכנה מראש"}},
+      {"key": "offering_choice", "icon": "🤔", "label": {"en": "Offering a choice", "ar": "إعطاء خيار", "he": "מתן בחירה"}},
+      {"key": "adult_reassurance", "icon": "🫶", "label": {"en": "Adult reassurance", "ar": "طمأنة من شخص بالغ", "he": "הרגעה של מבוגר"}},
+      {"key": "movement", "icon": "🏃", "label": {"en": "Movement", "ar": "الحركة", "he": "תנועה"}},
+      {"key": "other", "label": {"en": "Other", "ar": "أخرى", "he": "אחר"}}
+    ],
+    "priority_categories": [
+      {"key": "emotional", "icon": "💛", "label": {"en": "Emotional", "ar": "المجال العاطفي", "he": "רגשי"}},
+      {"key": "social", "icon": "🤝", "label": {"en": "Social", "ar": "المجال الاجتماعي", "he": "חברתי"}},
+      {"key": "language", "icon": "🗣️", "label": {"en": "Language", "ar": "اللغة", "he": "שפה"}},
+      {"key": "communication", "icon": "💬", "label": {"en": "Communication", "ar": "التواصل", "he": "תקשורת"}},
+      {"key": "independence", "icon": "🧭", "label": {"en": "Independence", "ar": "الاستقلالية", "he": "עצמאות"}},
+      {"key": "attention", "icon": "🎯", "label": {"en": "Focus & persistence", "ar": "التركيز والمثابرة", "he": "ריכוז והתמדה"}},
+      {"key": "motor", "icon": "🤸", "label": {"en": "Movement & motor skills", "ar": "المهارات الحركية", "he": "תנועה ומוטוריקה"}},
+      {"key": "learning", "icon": "🧩", "label": {"en": "Learning & thinking", "ar": "التعلّم والتفكير", "he": "למידה וחשיבה"}},
+      {"key": "transitions", "icon": "🔄", "label": {"en": "Transitions & changes", "ar": "الانتقالات والتغييرات", "he": "מעברים ושינויים"}},
+      {"key": "confidence", "icon": "🌱", "label": {"en": "Confidence", "ar": "الثقة بالنفس", "he": "ביטחון עצמי"}},
+      {"key": "other", "icon": "➕", "label": {"en": "Other", "ar": "أخرى", "he": "אחר"}}
+    ],
+    "focus_suggestions": [
+      {"key": "joining_group_play", "category": "social", "label": {"en": "Joining group play", "ar": "الانضمام إلى اللعب الجماعي", "he": "הצטרפות למשחק קבוצתי"}},
+      {"key": "expressing_frustration_in_words", "category": "emotional", "label": {"en": "Expressing frustration in words", "ar": "التعبير عن الإحباط بالكلمات", "he": "ביטוי תסכול במילים"}},
+      {"key": "managing_transitions", "category": "transitions", "label": {"en": "Managing transitions", "ar": "التعامل مع الانتقالات", "he": "התמודדות עם מעברים"}},
+      {"key": "taking_turns", "category": "social", "label": {"en": "Taking turns", "ar": "انتظار الدور", "he": "המתנה לתור"}},
+      {"key": "listening_during_story_time", "category": "attention", "label": {"en": "Listening during story time", "ar": "الإصغاء في وقت القصة", "he": "הקשבה בזמן סיפור"}},
+      {"key": "asking_for_help", "category": "communication", "label": {"en": "Asking for help", "ar": "طلب المساعدة", "he": "בקשת עזרה"}},
+      {"key": "dressing_independently", "category": "independence", "label": {"en": "Dressing independently", "ar": "ارتداء الملابس باستقلالية", "he": "התלבשות עצמאית"}},
+      {"key": "trying_new_activities", "category": "confidence", "label": {"en": "Trying new activities", "ar": "تجربة أنشطة جديدة", "he": "התנסות בפעילויות חדשות"}},
+      {"key": "completing_tasks", "category": "attention", "label": {"en": "Completing tasks", "ar": "إكمال المهام", "he": "השלמת משימות"}},
+      {"key": "participating_in_group_activities", "category": "social", "label": {"en": "Taking part in group activities", "ar": "المشاركة في الأنشطة الجماعية", "he": "השתתפות בפעילות קבוצתית"}},
+      {"key": "calming_after_frustration", "category": "emotional", "label": {"en": "Calming down after frustration", "ar": "الهدوء بعد الإحباط", "he": "הירגעות אחרי תסכול"}},
+      {"key": "separating_in_the_morning", "category": "transitions", "label": {"en": "Saying goodbye in the morning", "ar": "الوداع في الصباح", "he": "פרידה בבוקר"}},
+      {"key": "sharing_toys", "category": "social", "label": {"en": "Sharing toys", "ar": "مشاركة الألعاب", "he": "שיתוף במשחקים ובחפצים"}},
+      {"key": "following_two_step_instructions", "category": "language", "label": {"en": "Following two-step instructions", "ar": "اتباع تعليمات من خطوتين", "he": "ביצוע הוראה בת שני שלבים"}},
+      {"key": "coping_with_mistakes", "category": "confidence", "label": {"en": "Coping with mistakes", "ar": "التعامل مع الأخطاء", "he": "התמודדות עם טעויות"}},
+      {"key": "telling_about_an_experience", "category": "language", "label": {"en": "Telling about an experience", "ar": "الحديث عن تجربة", "he": "סיפור על חוויה"}},
+      {"key": "using_scissors", "category": "motor", "label": {"en": "Cutting with scissors", "ar": "القص بالمقص", "he": "גזירה במספריים"}},
+      {"key": "sorting_and_matching", "category": "learning", "label": {"en": "Sorting and matching", "ar": "التصنيف والمطابقة", "he": "מיון והתאמה"}}
+    ],
+    "observation_contexts": [
+      {"key": "arrival", "icon": "🚪", "label": {"en": "Morning arrival", "ar": "الاستقبال الصباحي", "he": "קבלת בוקר"}},
+      {"key": "free_play", "icon": "🧸", "label": {"en": "Free play", "ar": "اللعب الحر", "he": "משחק חופשי"}},
+      {"key": "group_time", "icon": "⭕", "label": {"en": "Group time", "ar": "وقت الحلقة", "he": "מפגש"}},
+      {"key": "structured_activity", "icon": "📋", "label": {"en": "Structured activity", "ar": "نشاط موجّه", "he": "פעילות מובנית"}},
+      {"key": "yard", "icon": "🌳", "label": {"en": "Yard", "ar": "الساحة", "he": "חצר"}},
+      {"key": "meal", "icon": "🍎", "label": {"en": "Meal", "ar": "وجبة الطعام", "he": "ארוחה"}},
+      {"key": "art", "icon": "🎨", "label": {"en": "Art & crafts", "ar": "الفن والأشغال", "he": "יצירה"}},
+      {"key": "transition", "icon": "↪️", "label": {"en": "Transitions", "ar": "الانتقالات", "he": "מעברים"}},
+      {"key": "end_of_day", "icon": "🌇", "label": {"en": "End of day", "ar": "نهاية اليوم", "he": "סיום יום"}},
+      {"key": "other", "icon": "•", "label": {"en": "Other", "ar": "أخرى", "he": "אחר"}}
+    ],
+    "what_helps": [
+      {"key": "adult_mediation", "icon": "🧑‍🏫", "label": {"en": "Adult guidance", "ar": "توجيه من شخص بالغ", "he": "תיווך של מבוגר"}},
+      {"key": "visual_support", "icon": "🖼️", "label": {"en": "Visual support", "ar": "دعم بصري", "he": "תמיכה חזותית"}},
+      {"key": "countdown_timer", "icon": "⏳", "label": {"en": "Countdown or timer", "ar": "عدّ تنازلي أو مؤقّت", "he": "ספירה לאחור או טיימר"}},
+      {"key": "advance_preparation", "icon": "🔔", "label": {"en": "Preparation in advance", "ar": "التحضير المسبق", "he": "הכנה מראש"}},
+      {"key": "short_instruction", "icon": "🗒️", "label": {"en": "A short, clear instruction", "ar": "تعليمات قصيرة وواضحة", "he": "הוראה קצרה וברורה"}},
+      {"key": "movement", "icon": "🏃", "label": {"en": "Movement", "ar": "الحركة", "he": "תנועה"}},
+      {"key": "reduced_stimulation", "icon": "🔈", "label": {"en": "Less noise and stimulation", "ar": "تقليل الضجيج والمثيرات", "he": "הפחתת גירויים"}},
+      {"key": "positive_reinforcement", "icon": "👏", "label": {"en": "Encouragement", "ar": "التشجيع", "he": "חיזוק חיובי"}},
+      {"key": "first_then", "icon": "1️⃣", "label": {"en": "First… then…", "ar": "أولاً… ثم…", "he": "קודם… אחר כך…"}},
+      {"key": "offering_choice", "icon": "🤔", "label": {"en": "Offering a choice", "ar": "إعطاء خيار", "he": "מתן בחירה"}},
+      {"key": "peer_modeling", "icon": "👫", "label": {"en": "Learning from a friend", "ar": "التعلّم من صديق", "he": "למידה מחבר/ה"}},
+      {"key": "explanation", "icon": "💬", "label": {"en": "Explaining what comes next", "ar": "شرح ما سيحدث بعد ذلك", "he": "הסבר מה יקרה אחר כך"}},
+      {"key": "other", "label": {"en": "Other", "ar": "أخرى", "he": "אחר"}}
+    ],
+    "hope_child_feels": [
+      {"key": "safe", "icon": "🛡️", "label": {"en": "Safe", "ar": "آمن", "he": "מוגן/ת"}},
+      {"key": "loved", "icon": "❤️", "label": {"en": "Loved", "ar": "محبوب", "he": "אהוב/ה"}},
+      {"key": "belonging", "icon": "🏡", "label": {"en": "A sense of belonging", "ar": "منتمٍ", "he": "שייך/ת"}},
+      {"key": "independent", "icon": "🧭", "label": {"en": "Independent", "ar": "مستقل", "he": "עצמאי/ת"}},
+      {"key": "capable", "icon": "💪", "label": {"en": "Capable", "ar": "قادر", "he": "מסוגל/ת"}},
+      {"key": "happy", "icon": "😊", "label": {"en": "Happy", "ar": "سعيد", "he": "שמח/ה"}},
+      {"key": "socially_accepted", "icon": "🤝", "label": {"en": "Accepted by friends", "ar": "مقبول بين أصدقائه", "he": "מקובל/ת חברתית"}},
+      {"key": "curious", "icon": "🔍", "label": {"en": "Curious", "ar": "محب للاستطلاع", "he": "סקרן/ית"}}
+    ],
+    "content_results": [
+      {"key": "worked_well", "icon": "🌟", "label": {"en": "Worked well", "ar": "نجح جيداً", "he": "עבד טוב"}},
+      {"key": "partly", "icon": "🌤️", "label": {"en": "Partly", "ar": "جزئياً", "he": "חלקית"}},
+      {"key": "did_not_work", "icon": "🌧️", "label": {"en": "Did not work this time", "ar": "لم ينجح هذه المرة", "he": "לא הצליח הפעם"}}
+    ],
+    "review_statuses": [
+      {"key": "improving", "icon": "🌱", "label": {"en": "Improving", "ar": "يتحسّن", "he": "ניכר שיפור"}},
+      {"key": "some_improvement", "icon": "🌤️", "label": {"en": "Some improvement", "ar": "بعض التحسّن", "he": "שיפור חלקי"}},
+      {"key": "no_clear_change", "icon": "➖", "label": {"en": "No clear change yet", "ar": "لا تغيير واضح بعد", "he": "אין עדיין שינוי ברור"}},
+      {"key": "needs_more_observation", "icon": "👀", "label": {"en": "Needs more observation", "ar": "يحتاج إلى مزيد من الملاحظة", "he": "נדרשת תצפית נוספת"}},
+      {"key": "no_longer_needed", "icon": "✅", "label": {"en": "Focus no longer needed", "ar": "لم يعد هذا التركيز ضرورياً", "he": "המיקוד כבר לא נדרש"}}
+    ],
+    "review_decisions": [
+      {"key": "keep", "label": {"en": "Keep this focus", "ar": "الاستمرار في هذا التركيز", "he": "להמשיך במיקוד"}},
+      {"key": "pause", "label": {"en": "Pause", "ar": "إيقاف مؤقت", "he": "להשהות"}},
+      {"key": "close", "label": {"en": "Close this focus", "ar": "إغلاق هذا التركيز", "he": "לסגור את המיקוד"}},
+      {"key": "edit", "label": {"en": "Edit", "ar": "تعديل", "he": "לערוך"}},
+      {"key": "create", "label": {"en": "Add a new focus", "ar": "إضافة تركيز جديد", "he": "להוסיף מיקוד חדש"}}
+    ],
+    "share_next_step": [
+      {"key": "none", "label": {"en": "No further step for now", "ar": "لا حاجة لخطوة إضافية الآن", "he": "אין צורך בצעד נוסף כרגע"}},
+      {"key": "talk_with_parents", "label": {"en": "Talk with the parents", "ar": "حديث مع الأهل", "he": "שיחה עם ההורים"}},
+      {"key": "consult_education_team", "label": {"en": "Consult the education team", "ar": "التشاور مع الطاقم التربوي", "he": "התייעצות עם הצוות החינוכי"}},
+      {"key": "joint_plan_with_parents", "label": {"en": "A joint plan with the parents", "ar": "خطة مشتركة مع الأهل", "he": "תוכנית משותפת עם ההורים"}}
+    ],
+    "validation_statuses": [
+      {"key": "supported", "icon": "✅", "label": {"en": "Supported by observations", "ar": "تدعمه الملاحظات", "he": "נתמך בתצפיות"}},
+      {"key": "partially_supported", "icon": "🌤️", "label": {"en": "Partially supported", "ar": "مدعوم جزئياً", "he": "נתמך חלקית"}},
+      {"key": "needs_more_observation", "icon": "👀", "label": {"en": "Needs more observation", "ar": "يحتاج إلى مزيد من الملاحظة", "he": "נדרשת תצפית נוספת"}},
+      {"key": "may_need_refinement", "icon": "✏️", "label": {"en": "May need refinement", "ar": "قد يحتاج إلى تحديث", "he": "ייתכן שנדרש עדכון"}}
+    ],
+    "modes": [
+      {"key": "strength_builder", "icon": "⭐", "label": {"en": "Strength Builder", "ar": "تعزيز نقاط القوة", "he": "חיזוק חוזקות"}},
+      {"key": "growth_support", "icon": "🌱", "label": {"en": "Growth Support", "ar": "دعم النمو", "he": "תמיכה בצמיחה"}}
+    ],
+    "strength_targets": [
+      {"key": "storytelling", "icon": "📖", "label": {"en": "Storytelling", "ar": "رواية القصص", "he": "סיפור סיפורים"}},
+      {"key": "confidence", "icon": "🌱", "label": {"en": "Confidence", "ar": "الثقة بالنفس", "he": "ביטחון עצמי"}},
+      {"key": "language", "icon": "🗣️", "label": {"en": "Expressive language", "ar": "التعبير اللغوي", "he": "הבעה בשפה"}},
+      {"key": "creativity", "icon": "✨", "label": {"en": "Creativity", "ar": "الإبداع", "he": "יצירתיות"}},
+      {"key": "problem_solving", "icon": "🧩", "label": {"en": "Problem solving", "ar": "حل المشكلات", "he": "פתרון בעיות"}},
+      {"key": "imagination", "icon": "🌈", "label": {"en": "Imagination", "ar": "الخيال", "he": "דמיון"}},
+      {"key": "curiosity", "icon": "🔍", "label": {"en": "Curiosity", "ar": "حب الاستطلاع", "he": "סקרנות"}},
+      {"key": "memory", "icon": "🧠", "label": {"en": "Memory", "ar": "الذاكرة", "he": "זיכרון"}},
+      {"key": "building", "icon": "🧱", "label": {"en": "Building", "ar": "البناء والتركيب", "he": "בנייה והרכבה"}},
+      {"key": "empathy", "icon": "🤗", "label": {"en": "Empathy", "ar": "التعاطف", "he": "אמפתיה"}}
+    ],
+    "content_types": [
+      {"key": "story", "icon": "📖", "label": {"en": "Story", "ar": "قصة", "he": "סיפור"}},
+      {"key": "video", "icon": "🎬", "label": {"en": "Video", "ar": "فيديو", "he": "סרטון"}},
+      {"key": "digital_game", "icon": "🎮", "label": {"en": "Digital game", "ar": "لعبة رقمية", "he": "משחק דיגיטלי"}},
+      {"key": "real_world_activity", "icon": "🤲", "label": {"en": "Real-world activity", "ar": "نشاط عملي في الروضة", "he": "פעילות מעשית בגן"}},
+      {"key": "pack", "icon": "🎁", "label": {"en": "Small pack", "ar": "حزمة صغيرة", "he": "חבילה קטנה"}}
+    ],
+    "game_templates": [
+      {"key": "multiple_choice", "icon": "🔘", "label": {"en": "Choose the answer", "ar": "اختر الإجابة", "he": "בוחרים תשובה"}},
+      {"key": "match_pairs", "icon": "🃏", "label": {"en": "Match the pairs", "ar": "طابق الأزواج", "he": "מתאימים זוגות"}},
+      {"key": "sequence", "icon": "🔢", "label": {"en": "Put in order", "ar": "رتّب بالتسلسل", "he": "מסדרים לפי הסדר"}},
+      {"key": "emotion_choice", "icon": "😊", "label": {"en": "Pick the feeling", "ar": "اختر الشعور", "he": "בוחרים רגש"}},
+      {"key": "categorize", "icon": "🗂️", "label": {"en": "Sort into groups", "ar": "صنّف في مجموعات", "he": "ממיינים לקבוצות"}},
+      {"key": "what_happens_next", "icon": "❓", "label": {"en": "What happens next?", "ar": "ماذا يحدث بعد ذلك؟", "he": "מה קורה אחר כך?"}},
+      {"key": "story_builder", "icon": "🪄", "label": {"en": "Build a story", "ar": "ابنِ قصة", "he": "בונים סיפור"}}
+    ],
+    "content_statuses": [
+      {"key": "draft", "label": {"en": "Draft", "ar": "مسودة", "he": "טיוטה"}},
+      {"key": "approved", "label": {"en": "Approved", "ar": "معتمد", "he": "מאושר"}},
+      {"key": "completed", "label": {"en": "Completed", "ar": "مكتمل", "he": "הושלם"}},
+      {"key": "archived", "label": {"en": "Archived", "ar": "مؤرشف", "he": "בארכיון"}}
+    ],
+    "focus_statuses": [
+      {"key": "active", "label": {"en": "Active", "ar": "نشط", "he": "פעיל"}},
+      {"key": "paused", "label": {"en": "Paused", "ar": "متوقف مؤقتاً", "he": "מושהה"}},
+      {"key": "completed", "label": {"en": "Completed", "ar": "مكتمل", "he": "הושלם"}}
+    ],
+    "video_statuses": [
+      {"key": "script_ready", "label": {"en": "Script ready", "ar": "النص جاهز", "he": "התסריט מוכן"}},
+      {"key": "generating", "label": {"en": "Creating the video", "ar": "جارٍ إنشاء الفيديو", "he": "הסרטון בהכנה"}},
+      {"key": "ready", "label": {"en": "Video ready", "ar": "الفيديو جاهز", "he": "הסרטון מוכן"}},
+      {"key": "failed", "label": {"en": "Could not create the video", "ar": "تعذّر إنشاء الفيديو", "he": "לא ניתן היה ליצור את הסרטון"}}
+    ],
+    "perspectives": [
+      {"key": "parent", "label": {"en": "Parent", "ar": "الأهل", "he": "הורה"}},
+      {"key": "teacher", "label": {"en": "Teacher", "ar": "المعلّمة", "he": "גננת"}}
+    ]
+  },
+  "banned_terms": {
+    "clinical": {
+      "en": [
+        "diagnosis", "diagnose", "diagnosed", "diagnostic",
+        "disorder", "adhd", "attention deficit", "hyperactive", "hyperactivity",
+        "autism", "autistic", "asperger", "on the spectrum",
+        "pathology", "pathological", "deficit", "developmental delay",
+        "syndrome", "abnormal", "disability", "impairment", "dysfunction",
+        "dyslexia", "dyspraxia", "symptom"
+      ],
+      "ar": [
+        "adhd", "تشخيص", "مشخّص", "مشخص", "اضطراب", "توحد", "توحّد", "طيف التوحد",
+        "فرط الحركة", "فرط النشاط", "نقص الانتباه", "تشتت الانتباه",
+        "إعاقة", "اعاقة", "معاق", "باثولوجي", "متلازمة", "تأخر نمائي", "تأخر في النمو",
+        "عجز", "قصور", "غير طبيعي", "صعوبات التعلم", "صعوبات تعلم", "عسر القراءة", "أعراض"
+      ],
+      "he": [
+        "adhd", "אבחון", "אבחנה", "מאובחן", "הפרעה", "הפרעת", "הפרעות", "הפרעת קשב",
+        "קשב וריכוז", "היפראקטיבי", "אוטיזם", "אוטיסט", "הרצף האוטיסטי", "אספרגר",
+        "פתולוגי", "תסמונת", "תסמין", "עיכוב התפתחותי", "לקות", "לקויות", "ליקוי",
+        "דיסלקציה", "פיגור"
+      ]
+    },
+    "child_deficit": {
+      "en": [
+        "weakness", "failure", "failing", "score", "points", "problem child",
+        "bad child", "bad boy", "bad girl", "stupid",
+        "slow learner", "wrong answer", "you lost", "punishment"
+      ],
+      "ar": [
+        "ضعف", "ضعيف", "فشل", "نقاط", "طفل مشكلة", "غبي",
+        "إجابة خاطئة", "خسرت", "عقاب"
+      ],
+      "he": [
+        "חולשה", "חולשות", "כישלון", "נכשל", "ציון", "ניקוד", "נקודות",
+        "ילד בעייתי", "ילדה בעייתית", "ילד רע", "ילדה רעה",
+        "טיפש", "תשובה שגויה", "הפסדת", "עונש"
+      ]
+    },
+    "allow_phrases": {
+      "en": ["problem solving", "problem-solving", "appoint", "checkpoint", "viewpoint", "underscore"],
+      "ar": ["حل المشكلات", "حل المشاكل", "نقاط القوة", "نقاط قوة", "معجز", "مقصورة"],
+      "he": ["פתרון בעיות", "לפתור בעיות", "מחלקות", "חלקות"]
+    }
+  }
+}

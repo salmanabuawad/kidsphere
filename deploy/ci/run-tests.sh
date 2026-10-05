@@ -13,11 +13,13 @@ if [[ $MODE != frontend && -d $RUN/backend ]]; then
   cd "$RUN/backend"
   H=$(cat requirements*.txt 2>/dev/null | sha256sum | cut -c1-16)
   VENV=$CI/cache/venv-$H
-  if [[ ! -x $VENV/bin/python ]]; then
+  # Built in place (console-script shebangs embed the venv path); .ok marks a finished install.
+  if [[ ! -f $VENV/.ok ]]; then
     echo "==> creating venv $VENV"
-    python3 -m venv "$VENV.tmp" && "$VENV.tmp/bin/pip" install -q --upgrade pip \
-      && "$VENV.tmp/bin/pip" install -q -r requirements-dev.txt && mv "$VENV.tmp" "$VENV" \
-      || { rm -rf "$VENV.tmp"; echo "pip install failed"; exit 1; }
+    rm -rf "$VENV"
+    python3 -m venv "$VENV" && "$VENV/bin/pip" install -q --upgrade pip \
+      && "$VENV/bin/pip" install -q -r requirements-dev.txt && touch "$VENV/.ok" \
+      || { rm -rf "$VENV"; echo "pip install failed"; exit 1; }
   fi
   set -a; . "$CI/ci.env"; set +a
   export UPLOAD_DIR=$RUN/uploads ANTHROPIC_API_KEY= COOKIE_SECURE=false

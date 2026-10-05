@@ -1,0 +1,31 @@
+{
+  "lists": {
+    "strengths": [
+      {"key": "imagination", "icon": "✨", "label": {"en": "Imagination", "ar": "الخيال", "he": "דמיון"}},
+      {"key": "building", "icon": "🧱", "label": {"en": "Building", "ar": "البناء", "he": "בנייה"}},
+      {"key": "vocabulary", "icon": "💬", "label": {"en": "Vocabulary", "ar": "المفردات", "he": "אוצר מילים"}}
+    ],
+    "interests": [
+      {"key": "cars_transportation", "icon": "🚗", "label": {"en": "Cars & transportation", "ar": "السيارات والمواصلات", "he": "מכוניות ותחבורה"}},
+      {"key": "animals", "icon": "🦁", "label": {"en": "Animals", "ar": "الحيوانات", "he": "בעלי חיים"}}
+    ],
+    "support_levels": [
+      {"key": "independent", "label": {"en": "Independent", "ar": "مستقل", "he": "עצמאי"}},
+      {"key": "some_support", "label": {"en": "With support", "ar": "مع دعم", "he": "בתיווך"}},
+      {"key": "significant_support", "label": {"en": "Difficult", "ar": "صعب", "he": "מתקשה"}},
+      {"key": "not_observed", "label": {"en": "Not observed", "ar": "لم يُلاحظ", "he": "לא נצפה"}}
+    ],
+    "focus_suggestions": [
+      {"key": "joining_group_play", "category": "social", "icon": "🤝", "label": {"en": "Joining group play", "ar": "الانضمام إلى اللعب الجماعي", "he": "הצטרפות למשחק קבוצתי"}},
+      {"key": "flat_format_item", "category": "language", "en": "Flat item", "ar": "عنصر", "he": "פריט"}
+    ],
+    "partial_labels": [
+      {"key": "only_english", "label": {"en": "Only English"}}
+    ]
+  },
+  "banned_terms": {
+    "en": ["diagnosis", "disorder"],
+    "ar": ["تشخيص"],
+    "he": ["אבחנה"]
+  }
+}
