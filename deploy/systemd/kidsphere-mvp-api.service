@@ -1,12 +1,12 @@
 [Unit]
-Description=KidSphere API (FastAPI)
+Description=KidSphere MVP API (FastAPI)
 After=network.target postgresql.service
 Wants=postgresql.service
 
 [Service]
 Type=simple
-User=kidsphere
-Group=kidsphere
+User=kidsphere-mvp
+Group=kidsphere-mvp
 WorkingDirectory=/var/www/kidsphere/backend
 EnvironmentFile=/var/www/kidsphere/backend/.env
 Environment=PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
