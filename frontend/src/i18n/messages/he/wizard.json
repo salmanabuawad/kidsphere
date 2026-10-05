@@ -1,0 +1,171 @@
+{
+  "theChild": "הילד/ה",
+  "stepOf": "שלב {current} מתוך {total}",
+  "reviewStep": "סיכום",
+  "progress": "התקדמות",
+  "saveLater": "שמירה והמשך מאוחר יותר",
+  "saved": "נשמר",
+  "toReview": "לסיכום",
+  "loadError": "לא ניתן לטעון את הפרופיל. אפשר לנסות שוב.",
+  "moreOptional": "עוד (רשות)",
+  "nothingHere": "אין כאן מה למלא.",
+  "choose": "בחירה…",
+  "add": "הוספה",
+  "addOwn": "הוספה משלך",
+  "addOwnPlaceholder": "הוספה משלך…",
+  "chosenOfMax": "נבחרו {count} מתוך {max}",
+  "enteringForParent": "את/ה ממלא/ת את תשובות המשפחה בשמה. הן נשמרות כתשובות ההורים שהוזנו על ידך.",
+  "perspective": {
+    "label": "של מי התשובות",
+    "parent": "תשובות ההורים",
+    "teacher": "תשובות הגננת"
+  },
+  "entered": {
+    "by": "עודכן לאחרונה על ידי {name} · {date}",
+    "onBehalf": "הוזן על ידי {name} בשם המשפחה · {date}"
+  },
+  "steps": {
+    "who": {
+      "title": "להכיר את {name}",
+      "intro": "מתחילים בחוזקות ובמה ש{name} אוהב/ת.",
+      "short": "היכרות"
+    },
+    "emotions": {
+      "title": "רגשות ומעברים",
+      "intro": "קצר ומעשי: מה עוזר ל{name} להירגע ולעבור בין פעילויות.",
+      "short": "רגשות ומעברים"
+    },
+    "social": {
+      "title": "משחק ותקשורת עם אחרים",
+      "intro": "תמונה מהירה של איך {name} משחק/ת ומתקשר/ת. בחרו את מה ששמתם לב אליו.",
+      "short": "חברה ותקשורת"
+    },
+    "independence": {
+      "title": "עצמאות ביומיום",
+      "intro": "בחירה אחת בכל שורה: כמה תמיכה {name} צריך/ה בדרך כלל?",
+      "short": "עצמאות ביומיום"
+    },
+    "environment": {
+      "title": "דברים בסביבה שעשויים להשפיע על {name}",
+      "intro": "רשות. בחרו רק את מה שמתאים, והוסיפו מה קורה ומה עוזר.",
+      "short": "סביבה"
+    },
+    "priorities": {
+      "title": "מה הכי חשוב עכשיו",
+      "intro": "המשאלות לשנה הזו, ועד 3 תחומי מיקוד נוכחי.",
+      "short": "עדיפויות ומיקוד"
+    }
+  },
+  "fields": {
+    "strengths": { "label": "במה {name} טוב/ה?", "hint": "בחרו כ־3–5 חוזקות." },
+    "interests": { "label": "ממה {name} נהנה/ית במיוחד?" },
+    "describe_words": { "label": "תארו את {name} ב־3–5 מילים" },
+    "motivators": { "label": "מה במיוחד מושך או מניע את {name}?" },
+    "appreciate": { "label": "מה הכי מעריכים ב{name}?" },
+    "calming_helps": { "label": "מה עוזר ל{name} להירגע?" },
+    "frustration_reactions": { "label": "כש{name} מתוסכל/ת או כועס/ת, מה קורה בדרך כלל?" },
+    "transition_reaction": { "label": "איך {name} מגיב/ה בדרך כלל למעברים?" },
+    "transition_helps": { "label": "מה עוזר למעברים לעבור טוב יותר?" },
+    "helps_when_sad": { "label": "כש{name} עצוב/ה, מה בדרך כלל עוזר?" },
+    "morning_separation": { "label": "איך נראית הפרידה בבוקר?" },
+    "calming_notes": { "label": "עוד משהו על הרגעה?" },
+    "what_does_not_help": { "label": "מה לא עוזר?" },
+    "social": { "label": "משחק עם אחרים" },
+    "communication": { "label": "תקשורת" },
+    "comments": { "label": "הערות" },
+    "levels": { "label": "שגרת היום", "hint": "בחרו את מה שמתאר את המצב בדרך כלל." },
+    "independence_notes": { "label": "איפה {name} עדיין צריך/ה קצת עזרה? אילו שגרות חשוב לשמור?" },
+    "items": { "label": "האם משהו מאלה משפיע על {name}?" },
+    "environment_notes": { "label": "עוד משהו שכדאי שנדע?" },
+    "parent_priorities": { "label": "מה הכי הייתם רוצים ש{name} יפתח/תפתח השנה?" },
+    "hope_child_feels": { "label": "איך הייתם רוצים ש{name} ירגיש/תרגיש בגן?" },
+    "one_thing_to_know": { "label": "דבר אחד שחשוב שהגן יידע על {name}" },
+    "priorities_note": { "label": "משהו להוסיף על העדיפויות האלה?" }
+  },
+  "sensitivity": {
+    "whatHappens": "מה קורה?",
+    "whatHelps": "מה עוזר?"
+  },
+  "focus": {
+    "title": "מיקוד נוכחי",
+    "count": "{count} מתוך {max}",
+    "hint": "בחרו עד 3 תחומים לתמיכה להתמקד בהם עכשיו. אפשר להוסיף לכל אחד תוכנית קצרה.",
+    "none": "עוד לא נבחר מיקוד נוכחי.",
+    "full": "נבחרו 3 תחומי מיקוד. כדי לבחור אחר, הניחו אחד בצד.",
+    "suggestions": "הצעות",
+    "parentPriority": "עדיפות ההורים",
+    "custom": "או כתבו מיקוד משלכם",
+    "category": "תחום",
+    "customTitle": "מיקוד",
+    "addCustom": "הוספת מיקוד",
+    "hasPlan": "נוספה תוכנית",
+    "notNow": "לא עכשיו"
+  },
+  "plan": {
+    "add": "הוספת תוכנית (רשות)",
+    "edit": "עריכת התוכנית",
+    "save": "שמירת התוכנית",
+    "saved": "התוכנית נשמרה",
+    "strength_used": "החוזקה שנשתמש בה",
+    "strength_usedHint": "איזו חוזקה או תחום עניין יכולים לעזור?",
+    "need": "הצורך",
+    "needHint": "תארו את מה שרואים, בלי תוויות.",
+    "adaptation": "התאמה",
+    "adaptationHint": "מה נשנה סביב הילד/ה?",
+    "what_we_will_do": "מה נעשה",
+    "what_we_will_doHint": "הפעילות או הדרך שננסה.",
+    "success_looks_like": "איך נדע שזה עוזר?",
+    "success_looks_likeHint": "תארו במילים מה הייתם רוצים לראות."
+  },
+  "review": {
+    "title": "סיכום ויצירת תמונת פתיחה",
+    "intro": "זו התמונה הראשונית. היא תתפתח עם התצפיות, ותמונת הפתיחה המקורית תמיד נשמרת.",
+    "lists": {
+      "strengths": "חוזקות",
+      "interests": "תחומי עניין",
+      "what_helps": "מה עוזר",
+      "sensitivities": "דברים שעשויים להשפיע"
+    },
+    "empty": "עדיין אין.",
+    "answered": "מי ענה",
+    "answeredHint": "כל השלבים הם רשות. אפשר לחזור לכאן אחר כך.",
+    "step": "שלב",
+    "create": "יצירת תמונת פתיחה",
+    "createNew": "יצירת תמונת פתיחה חדשה",
+    "created": "תמונת הפתיחה נוצרה",
+    "newBaselineHint": "כבר קיימת תמונת פתיחה. יצירה של חדשה שומרת את הקודמת בהיסטוריה."
+  },
+  "parent": {
+    "intro": "כל השאלות הן רשות. התשובות נשמרות תוך כדי, ואפשר להמשיך אחר כך.",
+    "doneTitle": "תודה רבה!",
+    "doneIntro": "התשובות שלכם עוזרות לצוות הגן להכיר את ילדכם ולבנות על מה שהוא אוהב.",
+    "alreadySent": "כבר שותף עם הגן",
+    "send": "שיתוף עם הגן"
+  },
+  "basics": {
+    "title": "הוספת ילד/ה",
+    "editTitle": "פרטים בסיסיים",
+    "intro": "רק הבסיס. זה לוקח בערך דקה.",
+    "name": "שם הילד/ה",
+    "preferredName": "שם מועדף",
+    "preferredNameHint": "איך הילד/ה אוהב/ת שיקראו לו/ה",
+    "birthDate": "תאריך לידה",
+    "age": "גיל: {age}",
+    "futureDate": "תאריך הלידה לא יכול להיות בעתיד.",
+    "class": "קבוצה",
+    "noClasses": "עדיין אין קבוצה זמינה. בקשו ממנהל/ת המערכת לשייך אתכם לקבוצה.",
+    "gender": "מין",
+    "genderHint": "רשות. משמש רק לדקדוק נכון בתוכן בעברית ובערבית.",
+    "mainLanguage": "שפה עיקרית",
+    "additionalLanguages": "שפות נוספות בבית",
+    "parentName": "שם ההורה / האפוטרופוס",
+    "parentContact": "פרטי קשר של ההורה",
+    "parentContactHint": "טלפון או דוא״ל (רשות)",
+    "addPhoto": "הוספת תמונה",
+    "changePhoto": "בחירת תמונה אחרת",
+    "replacePhoto": "החלפת תמונה",
+    "photoInvalid": "יש לבחור תמונת JPEG, PNG או WebP עד 8 MB.",
+    "photoFailed": "לא ניתן לשמור את התמונה. אפשר להוסיף אותה אחר כך.",
+    "required": "שדה חובה"
+  }
+}

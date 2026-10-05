@@ -1,0 +1,171 @@
+{
+  "theChild": "the child",
+  "stepOf": "Step {current} of {total}",
+  "reviewStep": "Review",
+  "progress": "Progress",
+  "saveLater": "Save & finish later",
+  "saved": "Saved",
+  "toReview": "Review",
+  "loadError": "This profile could not be loaded. Please try again.",
+  "moreOptional": "More (optional)",
+  "nothingHere": "Nothing to fill in here.",
+  "choose": "Choose…",
+  "add": "Add",
+  "addOwn": "Add your own",
+  "addOwnPlaceholder": "Add your own…",
+  "chosenOfMax": "{count} of {max} chosen",
+  "enteringForParent": "You are entering the family's answers on their behalf. They are saved as parent answers entered by you.",
+  "perspective": {
+    "label": "Whose answers",
+    "parent": "Parent says",
+    "teacher": "Teacher says"
+  },
+  "entered": {
+    "by": "Last updated by {name} · {date}",
+    "onBehalf": "Entered by {name} for the family · {date}"
+  },
+  "steps": {
+    "who": {
+      "title": "Who is {name}?",
+      "intro": "Start with strengths and what {name} loves.",
+      "short": "Who is the child"
+    },
+    "emotions": {
+      "title": "Feelings and transitions",
+      "intro": "Short and practical: what helps {name} feel calm and move between activities.",
+      "short": "Feelings and transitions"
+    },
+    "social": {
+      "title": "Playing and talking with others",
+      "intro": "A quick snapshot of how {name} plays and communicates. Pick what you have noticed.",
+      "short": "Social and communication"
+    },
+    "independence": {
+      "title": "Everyday independence",
+      "intro": "One tap per row: how much support does {name} usually need?",
+      "short": "Everyday independence"
+    },
+    "environment": {
+      "title": "Things in the environment that may affect {name}",
+      "intro": "Optional. Select only what applies, then add what happens and what helps.",
+      "short": "Environment"
+    },
+    "priorities": {
+      "title": "What matters most now",
+      "intro": "Hopes for this year, and up to 3 Current Focus areas.",
+      "short": "Priorities and focus"
+    }
+  },
+  "fields": {
+    "strengths": { "label": "What is {name} good at?", "hint": "Choose about 3–5 strengths." },
+    "interests": { "label": "What does {name} especially enjoy?" },
+    "describe_words": { "label": "Describe {name} in 3–5 words" },
+    "motivators": { "label": "What especially motivates or attracts {name}?" },
+    "appreciate": { "label": "What do you appreciate most about {name}?" },
+    "calming_helps": { "label": "What helps {name} calm down?" },
+    "frustration_reactions": { "label": "When {name} is frustrated or angry, what usually happens?" },
+    "transition_reaction": { "label": "How does {name} usually react to transitions?" },
+    "transition_helps": { "label": "What helps transitions go better?" },
+    "helps_when_sad": { "label": "When {name} is sad, what usually helps?" },
+    "morning_separation": { "label": "How is the morning goodbye?" },
+    "calming_notes": { "label": "Anything else about calming down?" },
+    "what_does_not_help": { "label": "What does not help?" },
+    "social": { "label": "Playing with others" },
+    "communication": { "label": "Communication" },
+    "comments": { "label": "Comments" },
+    "levels": { "label": "Daily routines", "hint": "Choose what usually describes the situation." },
+    "independence_notes": { "label": "Where does {name} still need a little help? Any routines worth keeping?" },
+    "items": { "label": "Does anything here affect {name}?" },
+    "environment_notes": { "label": "Anything else we should know?" },
+    "parent_priorities": { "label": "What would you most like {name} to develop this year?" },
+    "hope_child_feels": { "label": "How do you hope {name} feels in kindergarten?" },
+    "one_thing_to_know": { "label": "One thing the kindergarten should know about {name}" },
+    "priorities_note": { "label": "Anything to add about these priorities?" }
+  },
+  "sensitivity": {
+    "whatHappens": "What happens?",
+    "whatHelps": "What helps?"
+  },
+  "focus": {
+    "title": "Current Focus",
+    "count": "{count} of {max}",
+    "hint": "Choose up to 3 areas for support to focus on now. You can add a short plan to each.",
+    "none": "No Current Focus chosen yet.",
+    "full": "3 focus areas are chosen. Set one aside to choose another.",
+    "suggestions": "Suggestions",
+    "parentPriority": "Parent priority",
+    "custom": "Or write your own",
+    "category": "Area",
+    "customTitle": "Focus",
+    "addCustom": "Add focus",
+    "hasPlan": "Plan added",
+    "notNow": "Not now"
+  },
+  "plan": {
+    "add": "Add a plan (optional)",
+    "edit": "Edit plan",
+    "save": "Save plan",
+    "saved": "Plan saved",
+    "strength_used": "Strength we will use",
+    "strength_usedHint": "Which strength or interest can help?",
+    "need": "What is needed",
+    "needHint": "Describe what you see, without labels.",
+    "adaptation": "Adaptation",
+    "adaptationHint": "What will we change around the child?",
+    "what_we_will_do": "What we will do",
+    "what_we_will_doHint": "The activity or approach we will try.",
+    "success_looks_like": "How will we know it is helping?",
+    "success_looks_likeHint": "Describe in words what you hope to see."
+  },
+  "review": {
+    "title": "Review and create the baseline",
+    "intro": "This is the starting picture. It grows with observations, and the original baseline is always kept.",
+    "lists": {
+      "strengths": "Strengths",
+      "interests": "Interests",
+      "what_helps": "What helps",
+      "sensitivities": "Things that may affect the child"
+    },
+    "empty": "Nothing yet.",
+    "answered": "Who answered",
+    "answeredHint": "Every step is optional. You can come back later.",
+    "step": "Step",
+    "create": "Create baseline",
+    "createNew": "Create new baseline",
+    "created": "Baseline created",
+    "newBaselineHint": "A baseline already exists. Creating a new one keeps the earlier baseline in the history."
+  },
+  "parent": {
+    "intro": "Every question is optional. Your answers are saved as you go, and you can continue later.",
+    "doneTitle": "Thank you!",
+    "doneIntro": "Your answers help the kindergarten team get to know your child and build on what they love.",
+    "alreadySent": "Already shared with the kindergarten",
+    "send": "Share with the kindergarten"
+  },
+  "basics": {
+    "title": "Add a child",
+    "editTitle": "Basic information",
+    "intro": "Just the basics. It takes about a minute.",
+    "name": "Child's name",
+    "preferredName": "Preferred name",
+    "preferredNameHint": "What the child likes to be called",
+    "birthDate": "Date of birth",
+    "age": "Age: {age}",
+    "futureDate": "The date of birth cannot be in the future.",
+    "class": "Class",
+    "noClasses": "No class is available yet. Ask an administrator to add you to a class.",
+    "gender": "Gender",
+    "genderHint": "Optional. Used only for correct grammar in Arabic and Hebrew content.",
+    "mainLanguage": "Main language",
+    "additionalLanguages": "Other languages at home",
+    "parentName": "Parent / guardian name",
+    "parentContact": "Parent contact",
+    "parentContactHint": "Phone or e-mail (optional)",
+    "addPhoto": "Add a photo",
+    "changePhoto": "Choose another photo",
+    "replacePhoto": "Replace photo",
+    "photoInvalid": "Please choose a JPEG, PNG or WebP image up to 8 MB.",
+    "photoFailed": "The photo could not be saved. You can add it later.",
+    "required": "Required"
+  }
+}
