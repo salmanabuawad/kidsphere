@@ -1,0 +1,170 @@
+{
+  "title": "Development",
+  "intro": "The first picture next to what you understand today. The baseline is always kept; the current understanding grows with each review.",
+  "actions": {
+    "review": "Review development",
+    "newBaseline": "Create new baseline",
+    "firstBaseline": "Create the baseline"
+  },
+  "baseline": {
+    "title": "Initial baseline",
+    "created": "Saved on {date}",
+    "createdBy": "Saved on {date} by {name}",
+    "none": "No baseline yet",
+    "noneHint": "The baseline keeps the first picture from the family and the kindergarten. Create it when the profile is filled in.",
+    "history": "Earlier baselines",
+    "historyHint": "Every baseline is kept. Nothing is overwritten.",
+    "confirmTitle": "Create a new baseline?",
+    "confirmBody": "This saves a new snapshot of the profile as it is today, for example after the family answered more questions. Earlier baselines stay in the history.",
+    "confirm": "Create baseline",
+    "cancel": "Cancel",
+    "createdToast": "New baseline saved"
+  },
+  "current": {
+    "title": "Current understanding",
+    "fromReview": "Approved in a development review on {date}",
+    "fromReviewBy": "Approved by {name} on {date}",
+    "fromBaseline": "The first picture from the baseline. It has not been reviewed yet.",
+    "approved": "Teacher approved",
+    "notReviewed": "Not reviewed yet",
+    "none": "No current understanding yet",
+    "noneHint": "It starts with the baseline and grows with each development review.",
+    "adaptations": "What we adapt",
+    "nextSteps": "Next steps"
+  },
+  "sections": {
+    "summary": "Summary",
+    "strengths": "Strengths",
+    "interests": "Interests",
+    "whatHelps": "What helps",
+    "areasForSupport": "Areas for support",
+    "empty": "Nothing noted yet"
+  },
+  "validation": {
+    "title": "How the first picture holds up",
+    "fromReview": "From the review on {date}",
+    "hint": "One or two observations are not enough to be sure. These are impressions to keep checking, not conclusions.",
+    "status": {
+      "supported": "Supported",
+      "partially_supported": "Partly supported",
+      "needs_more_observation": "Needs more observation",
+      "may_need_refinement": "May need refinement"
+    },
+    "lists": {
+      "strengths": "Strength",
+      "interests": "Interest",
+      "what_helps": "What helps",
+      "support_needs": "Support",
+      "focus": "Focus"
+    }
+  },
+  "status": {
+    "improving": "Improving",
+    "some_improvement": "Some improvement",
+    "no_clear_change": "No clear change",
+    "needs_more_observation": "Needs more observation",
+    "no_longer_needed": "Focus no longer needed"
+  },
+  "decision": {
+    "keep": "Keep",
+    "pause": "Pause",
+    "close": "Close",
+    "edit": "Edit",
+    "create": "New focus"
+  },
+  "evidence": {
+    "none": "No linked observations yet — keep observing",
+    "limited_one": "Based on 1 observation — keep observing",
+    "limited_other": "Based on {count} observations — keep observing",
+    "enough_one": "Based on 1 observation",
+    "enough_other": "Based on {count} observations"
+  },
+  "reviews": {
+    "title": "Past reviews",
+    "none": "No development reviews yet",
+    "noneHint": "Review development when you have a few observations since the baseline.",
+    "by": "by {name}",
+    "aiSuggested": "Started from a suggestion",
+    "showDetails": "Show details",
+    "hideDetails": "Hide details",
+    "focusTitle": "Focus decisions",
+    "validationTitle": "The first picture"
+  },
+  "review": {
+    "title": "Review development",
+    "back": "Back to development",
+    "intro": "Look at what you have seen since the baseline, decide about each focus and approve the current understanding. Nothing changes until you approve.",
+    "observationsSince_one": "1 observation since the baseline of {date}",
+    "observationsSince_other": "{count} observations since the baseline of {date}",
+    "noObservationsSince": "No observations since the baseline of {date} yet",
+    "noBaseline": "There is no baseline yet, so every observation so far is used. You can still review.",
+    "cancel": "Cancel",
+    "start": {
+      "title": "How would you like to start?",
+      "suggest": "Suggest a summary",
+      "again": "Suggest again",
+      "suggestHint": "A draft from the observations since the baseline, in careful, observational words. You check and change everything.",
+      "blank": "Write it myself",
+      "blankHint": "Start with an empty summary. The lists start from the current understanding."
+    },
+    "suggestion": {
+      "template": "Made with templates",
+      "ai": "Suggested by AI",
+      "check": "This is only a suggestion. Keep what matches what you have seen and change the rest."
+    },
+    "steps": {
+      "focus": "1. Current focus",
+      "validation": "2. The first picture",
+      "understanding": "3. Current understanding"
+    },
+    "focus": {
+      "hint": "How has each focus gone since the baseline, and what happens next?",
+      "none": "There is no active focus right now.",
+      "statusLabel": "How is it going?",
+      "decisionLabel": "What next?",
+      "whatWorked": "What worked",
+      "whatToChange": "What to change",
+      "editTitle": "Focus title",
+      "editDescription": "Description",
+      "add": "Add a new focus",
+      "addTitle": "New focus",
+      "full": "Up to {max} focus areas at a time. Pause or close one to add another.",
+      "suggestions": "Suggestions",
+      "orCustom": "Or write your own",
+      "category": "Area",
+      "choose": "Choose…",
+      "customTitle": "Title",
+      "addThis": "Add this focus",
+      "remove": "Remove {title}",
+      "new": "New"
+    },
+    "validation": {
+      "hint": "For each first impression: do the observations so far support it?",
+      "none": "There is nothing from the baseline to check yet.",
+      "statusLabel": "How does “{label}” hold up?"
+    },
+    "understanding": {
+      "hint": "This becomes the current understanding. The strengths, interests and what helps you approve are added to the profile.",
+      "summary": "Summary",
+      "summaryHint": "Describe what you see, for example “appears to enjoy building with one friend”. Avoid labels.",
+      "removeItem": "Remove {label}",
+      "addFrom": "Add to {list}",
+      "choose": "Add from the list…",
+      "customFor": "Your own words for {list}",
+      "custom": "Or type your own",
+      "add": "Add",
+      "areaPlaceholder": "For example: starting shared play",
+      "removeArea": "Remove this area",
+      "addArea": "Add an area"
+    },
+    "limited": "This rests on only a few observations so far. You can still choose it.",
+    "approve": "Approve and save",
+    "approveHint": "Saving keeps the baseline as it is and adds this review to the timeline.",
+    "saved": "Development review saved",
+    "unsafe": "Please describe what you see in everyday, observational words, without labels.",
+    "summaryRequired": "Please write a short summary first.",
+    "warningsTitle": "Saved. Some choices rest on only a few observations",
+    "warningsBody": "That is fine. Keep observing and look again at the next review.",
+    "warningsClose": "OK"
+  }
+}
