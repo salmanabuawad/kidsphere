@@ -5,6 +5,7 @@
   "NOT_FOUND": "We couldn't find that. It may have been removed.",
   "VALIDATION": "Some information is missing or invalid. Please check and try again.",
   "DUPLICATE": "This already exists.",
+  "CONFLICT": "This can't be done right now because something depends on it.",
   "FOCUS_LIMIT": "A child can have up to 3 active focus areas. Pause or close one first.",
   "INVALID_TRANSITION": "This action isn't available in the current status.",
   "UNSAFE_CONTENT": "Some wording isn't suitable for children's content. Please rephrase and try again.",

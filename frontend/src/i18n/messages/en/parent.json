@@ -1,0 +1,27 @@
+{
+  "home": {
+    "title": "My children",
+    "greeting": "Hello, {name}",
+    "subtitle": "Here you can tell us about your child and see the activities the kindergarten shares with you.",
+    "strengths": "What {name} is great at",
+    "interests": "Loves",
+    "more_one": "+{count} more",
+    "more_other": "+{count} more",
+    "noProfileYet": "Tell us what {name} loves and is good at, so the kindergarten can build on it.",
+    "tellUs": "Tell us about your child",
+    "shared": "Shared activities",
+    "noChildren": "No children are connected to your account yet",
+    "noChildrenHint": "The kindergarten will connect your child to your account. Then you will see them here."
+  },
+  "shared": {
+    "title": "Shared activities",
+    "titleFor": "Activities for {name}",
+    "subtitle": "Stories, games and activities the kindergarten shared with you to enjoy at home.",
+    "empty": "Nothing has been shared yet",
+    "emptyHint": "When the teacher shares a story, a game or an activity, you will find it here.",
+    "itemTitle": "Shared activity",
+    "notAvailable": "This activity isn't available",
+    "notAvailableHint": "It may not be shared with you anymore. You can go back to your children.",
+    "itemSoon": "The full activity will open here soon."
+  }
+}
