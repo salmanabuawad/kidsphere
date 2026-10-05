@@ -1,0 +1,12 @@
+{
+  "main": "Main navigation",
+  "menu": "Menu",
+  "more": "More",
+  "home": "Home",
+  "account": "My account",
+  "children": "Children",
+  "observe": "Observation",
+  "users": "Users",
+  "classes": "Classes",
+  "parentHome": "My children"
+}

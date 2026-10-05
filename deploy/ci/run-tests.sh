@@ -34,11 +34,15 @@ if [[ $MODE != backend && -d $RUN/frontend ]]; then
   if [[ -f package-lock.json ]]; then
     H=$(sha256sum package-lock.json | cut -c1-16)
     NM=$CI/cache/nm-$H
-    if [[ ! -d $NM ]]; then
+    # The cache dir keeps the name node_modules so packages resolved through the
+    # symlink's real path still find their hoisted siblings.
+    if [[ ! -f $NM/.ok ]]; then
       echo "==> npm ci (cache $NM)"
-      npm ci --no-audit --no-fund --loglevel=error && mv node_modules "$NM" || { echo "npm ci failed"; exit 1; }
+      rm -rf "$NM"; mkdir -p "$NM"
+      npm ci --no-audit --no-fund --loglevel=error && mv node_modules "$NM/node_modules" && touch "$NM/.ok" \
+        || { rm -rf "$NM"; echo "npm ci failed"; exit 1; }
     fi
-    rm -rf node_modules; ln -s "$NM" node_modules
+    rm -rf node_modules; ln -s "$NM/node_modules" node_modules
   else
     echo "==> no package-lock.json: npm install (lock will be copied back)"
     npm install --no-audit --no-fund --loglevel=error || { echo "npm install failed"; exit 1; }

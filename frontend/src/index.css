@@ -1,0 +1,128 @@
+@import "tailwindcss";
+
+/*
+ * Kidsphere design tokens (ported from the legacy src/app/globals.css).
+ * Warm neutral surfaces, one calm brand colour and soft meaning-coded tints:
+ *   emerald = strengths, sky = interests, violet = what helps,
+ *   amber = needs attention (never red for educational needs), rose = errors only.
+ * Layout uses logical properties only (ms/me/ps/pe/start/end) so RTL is native.
+ */
+:root {
+  --brand: #0f766e;
+  --brand-strong: #115e59;
+  --brand-soft: #e6f2f0;
+  --brand-ink: #ffffff;
+  --surface: #faf8f5;
+  --surface-2: #f3efe9;
+  --card: #ffffff;
+  --ink: #1c1917;
+  --muted: #78716c;
+  --line: #e7e2dc;
+  --strength: #047857;
+  --interest: #0369a1;
+  --helps: #6d28d9;
+  --attention: #b45309;
+  --danger: #be123c;
+}
+
+@theme inline {
+  --color-brand: var(--brand);
+  --color-brand-strong: var(--brand-strong);
+  --color-brand-soft: var(--brand-soft);
+  --color-brand-ink: var(--brand-ink);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-card: var(--card);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-strength: var(--strength);
+  --color-interest: var(--interest);
+  --color-helps: var(--helps);
+  --color-attention: var(--attention);
+  --color-danger: var(--danger);
+  --font-sans:
+    "Rubik Variable", "Rubik", ui-sans-serif, system-ui, "Segoe UI", "Noto Sans Arabic", "Noto Sans Hebrew", "Arial Hebrew", Tahoma,
+    Arial, sans-serif;
+  --radius-card: 1rem;
+  --shadow-card: 0 1px 2px rgb(28 25 23 / 0.04), 0 1px 3px rgb(28 25 23 / 0.03);
+  --shadow-raised: 0 8px 24px -8px rgb(15 118 110 / 0.45);
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  background: var(--surface);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  line-height: 1.5;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Arabic and Hebrew read better with slightly more line height. */
+html[lang="ar"] body,
+html[lang="he"] body {
+  line-height: 1.65;
+}
+
+/* Visible, consistent keyboard focus everywhere. */
+:focus-visible {
+  outline: 3px solid color-mix(in oklab, var(--brand) 55%, white);
+  outline-offset: 2px;
+}
+
+/* Native <dialog> backdrop. */
+dialog::backdrop {
+  background: rgb(28 25 23 / 0.45);
+  backdrop-filter: blur(2px);
+}
+
+/* Keep numbers aligned in tables and stats. */
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+@keyframes ks-pop {
+  0% {
+    transform: scale(0.96);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes ks-rise {
+  0% {
+    transform: translateY(8px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-pop {
+  animation: ks-pop 180ms ease-out;
+}
+
+.animate-rise {
+  animation: ks-rise 220ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

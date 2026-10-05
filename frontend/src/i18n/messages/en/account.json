@@ -1,0 +1,9 @@
+{
+  "title": "My account",
+  "subtitle": "Your name, interface language and password.",
+  "profile": "Your profile",
+  "saved": "Saved",
+  "nameRequired": "Please enter your name.",
+  "languageHint": "Saved to your account, so it follows you on every device.",
+  "currentPasswordWrong": "The current password isn't correct."
+}

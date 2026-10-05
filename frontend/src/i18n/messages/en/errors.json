@@ -1,0 +1,22 @@
+{
+  "UNAUTHENTICATED": "Please sign in again.",
+  "INVALID_CREDENTIALS": "The email/username or password isn't correct.",
+  "FORBIDDEN": "You don't have permission to do that.",
+  "NOT_FOUND": "We couldn't find that. It may have been removed.",
+  "VALIDATION": "Some information is missing or invalid. Please check and try again.",
+  "DUPLICATE": "This already exists.",
+  "FOCUS_LIMIT": "A child can have up to 3 active focus areas. Pause or close one first.",
+  "INVALID_TRANSITION": "This action isn't available in the current status.",
+  "UNSAFE_CONTENT": "Some wording isn't suitable for children's content. Please rephrase and try again.",
+  "UPLOAD_FAILED": "The upload didn't work. Use a JPG, PNG or WebP image up to 8 MB.",
+  "RATE_LIMITED": "Too many attempts. Please wait a moment and try again.",
+  "AI_UNAVAILABLE": "Content creation isn't available right now. Please try again in a moment.",
+  "AI_TIMEOUT": "Creating the content took too long. Please try again.",
+  "NETWORK": "We couldn't reach the server. Check your connection and try again.",
+  "INTERNAL": "Something went wrong. Please try again.",
+  "notFoundTitle": "Page not found",
+  "notFoundBody": "The page you're looking for doesn't exist, or you don't have access to it.",
+  "errorTitle": "Something went wrong",
+  "errorBody": "We couldn't load this page. Please try again.",
+  "goHome": "Go to home"
+}

@@ -1,0 +1,26 @@
+[Unit]
+Description=KidSphere API (FastAPI)
+After=network.target postgresql.service
+Wants=postgresql.service
+
+[Service]
+Type=simple
+User=kidsphere
+Group=kidsphere
+WorkingDirectory=/var/www/kidsphere/backend
+EnvironmentFile=/var/www/kidsphere/backend/.env
+Environment=PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
+ExecStart=/var/www/kidsphere/backend/venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 3071 --workers 1 --proxy-headers --forwarded-allow-ips 127.0.0.1 --no-server-header
+Restart=always
+RestartSec=3
+
+# Hardening: the app only needs to write uploads.
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/www/kidsphere/uploads
+MemoryMax=512M
+
+[Install]
+WantedBy=multi-user.target

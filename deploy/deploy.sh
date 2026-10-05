@@ -1,52 +1,78 @@
 #!/usr/bin/env bash
-# Rebuild and restart Kidsphere from the source currently in $APP_DIR.
-# Normally invoked by deploy/remote-deploy.sh after it uploads `git archive HEAD`.
 #
-#   sudo bash deploy/deploy.sh
+# Server-side deploy of one KidSphere release (run as root from an extracted
+# release directory: `bash deploy/deploy.sh`). Steps:
+#   1. sync backend/ and frontend/ sources into /var/www/kidsphere
+#   2. (re)build the Python venv when requirements.txt changed
+#   3. back up the database, then `alembic upgrade head`
+#   4. npm ci (when the lockfile changed) and build the React app into dist.new,
+#      then swap it in
+#   5. restart kidsphere-api, wait for /api/health, reload nginx
+# Tests are not rerun here; run deploy/ci/remote-test.sh before deploying.
 set -euo pipefail
 
-APP_DIR=${APP_DIR:-/opt/kidsphere}
-APP_USER=${APP_USER:-kidsphere}
-NODE_DIR=${NODE_DIR:-/opt/kidsphere-node}
-SERVICE=${SERVICE:-kidsphere}
-cd "$APP_DIR"
-chown -R "$APP_USER:$APP_USER" "$APP_DIR"
+SRC=$(cd "$(dirname "$0")/.." && pwd)
+APP=/var/www/kidsphere
+NODE_BIN=/opt/kidsphere-node/bin
+as_app() { runuser -u kidsphere -- env -i HOME=/home/kidsphere PATH=$NODE_BIN:/usr/local/bin:/usr/bin:/bin LANG=C.UTF-8 "$@"; }
 
-run() { sudo -u "$APP_USER" -H bash -c "export PATH='$NODE_DIR/bin':$PATH && cd '$APP_DIR' && set -a && . ./.env && set +a && $*"; }
+[[ -f $APP/backend/.env ]] || { echo "not provisioned: run deploy/install.sh first" >&2; exit 1; }
 
-echo "==> Dependencies ..."
-LOCK_HASH=$(md5sum package-lock.json | cut -d' ' -f1)
-if [ ! -d node_modules ] || [ "$(cat node_modules/.lockhash 2>/dev/null)" != "$LOCK_HASH" ]; then
-  run "npm ci --no-audit --no-fund --include=dev"
-  echo "$LOCK_HASH" > node_modules/.lockhash
-else
-  echo "    unchanged — skipping npm ci"
+echo "==> syncing sources"
+rsync -a --delete --exclude venv --exclude .env --exclude '__pycache__' "$SRC/backend/" "$APP/backend/"
+chown -R kidsphere:kidsphere "$APP/backend"
+if [[ -f $SRC/frontend/package.json ]]; then
+  rsync -a --delete --exclude node_modules --exclude dist --exclude dist.new "$SRC/frontend/" "$APP/frontend/"
+  chown -R kidsphere:kidsphere "$APP/frontend"
 fi
 
-echo "==> Database migrations ..."
-run "npx prisma migrate deploy"
-
-if [ -f "$APP_DIR/build.tgz" ]; then
-  echo "==> Using prebuilt bundle ..."
-  rm -rf .next/standalone .next/static
-  run "tar -xzf build.tgz -C '$APP_DIR'" && rm -f build.tgz
-  rm -f .next/standalone/.env*
-  # Use this server's generated Prisma engine for the bundled client.
-  run "cp node_modules/.prisma/client/libquery_engine-*.so.node .next/standalone/node_modules/.prisma/client/"
-else
-  echo "==> Production build ..."
-  run "NODE_OPTIONS=--max-old-space-size=1536 npm run build"
+echo "==> python venv"
+cd "$APP/backend"
+REQ_HASH=$(sha256sum requirements.txt | cut -c1-16)
+if [[ ! -f venv/.ok || $(cat venv/.ok) != "$REQ_HASH" ]]; then
+  rm -rf venv
+  as_app python3 -m venv venv
+  as_app venv/bin/pip install -q --upgrade pip
+  as_app venv/bin/pip install -q -r requirements.txt
+  echo "$REQ_HASH" > venv/.ok
+  chown kidsphere:kidsphere venv/.ok
 fi
-# Standalone server needs the static assets next to it.
-run "rm -rf .next/standalone/.next/static .next/standalone/public && cp -r .next/static .next/standalone/.next/static && cp -r public .next/standalone/public"
 
-echo "==> Restart ..."
-systemctl restart "$SERVICE"
-sleep 3
-PORT=$(grep -E '^PORT=' .env | cut -d= -f2)
-for i in $(seq 1 20); do
-  if curl -fsS "http://127.0.0.1:${PORT:-3070}/api/health" >/dev/null; then echo "    healthy"; exit 0; fi
-  sleep 2
+echo "==> database backup + migrations"
+STAMP=$(date +%Y%m%d-%H%M%S)
+sudo -u postgres pg_dump -Fc kidsphere > "/var/backups/kidsphere/kidsphere-$STAMP.dump"
+ls -1t /var/backups/kidsphere/kidsphere-*.dump | tail -n +11 | xargs -r rm -f
+as_app venv/bin/python -m alembic upgrade head
+
+if [[ -f $APP/frontend/package.json ]]; then
+  echo "==> frontend build"
+  cd "$APP/frontend"
+  export NODE_OPTIONS=--max-old-space-size=768
+  LOCK_HASH=$(sha256sum package-lock.json | cut -c1-16)
+  if [[ ! -f node_modules/.ok || $(cat node_modules/.ok) != "$LOCK_HASH" ]]; then
+    as_app env NODE_OPTIONS=$NODE_OPTIONS npm_config_cache=/home/kidsphere/.npm npm ci --no-audit --no-fund --loglevel=error
+    echo "$LOCK_HASH" > node_modules/.ok
+    chown kidsphere:kidsphere node_modules/.ok
+  fi
+  rm -rf dist.new
+  as_app env NODE_OPTIONS=$NODE_OPTIONS npx vite build --outDir dist.new --emptyOutDir
+  rm -rf dist.old
+  [[ -d dist ]] && mv dist dist.old
+  mv dist.new dist
+  rm -rf dist.old
+fi
+
+echo "==> restarting kidsphere-api"
+systemctl restart kidsphere-api
+for i in $(seq 1 30); do
+  if curl -fsS http://127.0.0.1:3071/api/health >/dev/null 2>&1; then break; fi
+  sleep 1
+  [[ $i == 30 ]] && { journalctl -u kidsphere-api -n 40 --no-pager; echo "API did not become healthy" >&2; exit 1; }
 done
-echo "!! health check failed — see: journalctl -u $SERVICE -n 100"
-exit 1
+nginx -t && systemctl reload nginx
+
+echo "==> smoke test"
+curl -fsS -o /dev/null -w "api health: %{http_code}\n" http://127.0.0.1:3071/api/health
+curl -fsS -o /dev/null -w "public /:   %{http_code}\n" https://kids.kortexd.com/
+curl -fsS -o /dev/null -w "public api: %{http_code}\n" https://kids.kortexd.com/api/health
+echo "==> deployed"
