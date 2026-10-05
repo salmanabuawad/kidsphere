@@ -34,8 +34,9 @@ fi
 echo "==> Uploading $SHA to $TARGET:$APP_DIR ..."
 git archive --format=tar.gz HEAD | ssh "${SSH_OPTS[@]}" "$TARGET" "mkdir -p '$APP_DIR' && tar -xzf - -C '$APP_DIR' && echo '$SHA' > '$APP_DIR/REVISION'"
 
-# Build here by default (small shared servers swap heavily during next build).
-if [ "${BUILD_LOCALLY:-1}" = "1" ]; then
+# Optional local build (BUILD_LOCALLY=1). Only use it from Linux/macOS: Turbopack standalone
+# bundles contain symlinks that Windows cannot reproduce. Default: build on the server.
+if [ "${BUILD_LOCALLY:-0}" = "1" ]; then
   echo "==> Building production bundle locally ..."
   npm run build
   BUNDLE=$(mktemp -t kidsphere-bundle.XXXXXX).tgz
