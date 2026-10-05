@@ -12,6 +12,14 @@ SSH_HOST=${SSH_HOST:?set SSH_HOST}
 SSH_USER=${SSH_USER:-root}
 APP_DIR=${APP_DIR:-/opt/kidsphere}
 DOMAIN=${DOMAIN:-kids.kortexd.com}
+# Names on the server (override to avoid clashing with other apps on the host).
+APP_USER=${APP_USER:-kidsphere}
+SERVICE=${SERVICE:-kidsphere}
+DB_NAME=${DB_NAME:-kidsphere}
+DB_USER=${DB_USER:-kidsphere}
+PORT=${PORT:-3070}
+STORAGE_DIR=${STORAGE_DIR:-/var/lib/$SERVICE/storage}
+REMOTE_ENV="APP_DIR='$APP_DIR' APP_USER='$APP_USER' SERVICE='$SERVICE' DB_NAME='$DB_NAME' DB_USER='$DB_USER' PORT='$PORT' STORAGE_DIR='$STORAGE_DIR' DOMAIN='$DOMAIN'"
 TARGET="$SSH_USER@$SSH_HOST"
 SSH_KEY=${SSH_KEY:-$HOME/.ssh/kidsphere_deploy}
 SSH_OPTS=(-o StrictHostKeyChecking=accept-new)
@@ -26,9 +34,21 @@ fi
 echo "==> Uploading $SHA to $TARGET:$APP_DIR ..."
 git archive --format=tar.gz HEAD | ssh "${SSH_OPTS[@]}" "$TARGET" "mkdir -p '$APP_DIR' && tar -xzf - -C '$APP_DIR' && echo '$SHA' > '$APP_DIR/REVISION'"
 
+# Build here by default (small shared servers swap heavily during next build).
+if [ "${BUILD_LOCALLY:-1}" = "1" ]; then
+  echo "==> Building production bundle locally ..."
+  npm run build
+  BUNDLE=$(mktemp -t kidsphere-bundle.XXXXXX).tgz
+  # Never ship local .env files inside the bundle.
+  tar -czf "$BUNDLE" --exclude=".next/standalone/.env*" .next/standalone .next/static public
+  echo "==> Uploading bundle ($(du -h "$BUNDLE" | cut -f1)) ..."
+  ssh "${SSH_OPTS[@]}" "$TARGET" "cat > '$APP_DIR/build.tgz'" < "$BUNDLE"
+  rm -f "$BUNDLE"
+fi
+
 if [ "${FIRST_INSTALL:-0}" = "1" ]; then
-  ssh "${SSH_OPTS[@]}" "$TARGET" "cd '$APP_DIR' && DOMAIN='$DOMAIN' APP_DIR='$APP_DIR' bash deploy/install.sh"
+  ssh "${SSH_OPTS[@]}" "$TARGET" "cd '$APP_DIR' && $REMOTE_ENV bash deploy/install.sh"
 else
-  ssh "${SSH_OPTS[@]}" "$TARGET" "cd '$APP_DIR' && APP_DIR='$APP_DIR' bash deploy/deploy.sh"
+  ssh "${SSH_OPTS[@]}" "$TARGET" "cd '$APP_DIR' && $REMOTE_ENV bash deploy/deploy.sh"
 fi
 echo "==> Deployed $SHA → https://$DOMAIN"

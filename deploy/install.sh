@@ -17,13 +17,14 @@ PORT=${PORT:-3070}
 STORAGE_DIR=${STORAGE_DIR:-/var/lib/kidsphere/storage}
 SEED_DEMO=${SEED_DEMO:-true}
 NODE_DIR=${NODE_DIR:-/opt/kidsphere-node}
+SERVICE=${SERVICE:-kidsphere}
 
 echo "==> System packages (postgresql, nginx, certbot) ..."
 # --no-upgrade: never upgrade/restart packages other apps on this host depend on.
 apt-get update -y
 apt-get install -y --no-upgrade postgresql postgresql-contrib nginx certbot python3-certbot-nginx curl ca-certificates openssl xz-utils
 
-if ss -ltn "( sport = :$PORT )" | grep -q LISTEN && ! systemctl is-active --quiet kidsphere; then
+if ss -ltn "( sport = :$PORT )" | grep -q LISTEN && ! systemctl is-active --quiet "$SERVICE"; then
   echo "!! Port $PORT is already in use by another service. Re-run with PORT=<free port>."; exit 1
 fi
 
@@ -64,7 +65,7 @@ COOKIE_SECURE=true
 DEFAULT_LOCALE=ar
 
 # AI — add a key and restart to use a real provider:
-#   sudo nano $APP_DIR/.env && sudo systemctl restart kidsphere
+#   sudo nano $APP_DIR/.env && sudo systemctl restart $SERVICE
 ANTHROPIC_API_KEY=
 ANTHROPIC_MODEL=claude-opus-5-5
 OPENAI_API_KEY=
@@ -81,26 +82,39 @@ EOF
   chmod 600 "$APP_DIR/.env"
 fi
 
-echo "==> systemd unit ..."
-sed -e "s#__APP_DIR__#$APP_DIR#g" -e "s#__APP_USER__#$APP_USER#g" -e "s#__NODE_DIR__#$NODE_DIR#g" "$APP_DIR/deploy/systemd/kidsphere.service" > /etc/systemd/system/kidsphere.service
+echo "==> systemd unit $SERVICE ..."
+sed -e "s#__APP_DIR__#$APP_DIR#g" -e "s#__APP_USER__#$APP_USER#g" -e "s#__NODE_DIR__#$NODE_DIR#g" "$APP_DIR/deploy/systemd/kidsphere.service" > "/etc/systemd/system/$SERVICE.service"
 systemctl daemon-reload
-systemctl enable kidsphere
+systemctl enable "$SERVICE"
 
 echo "==> nginx site for $DOMAIN ..."
-sed -e "s#__DOMAIN__#$DOMAIN#g" -e "s#__PORT__#$PORT#g" "$APP_DIR/deploy/nginx/kidsphere.conf" > "/etc/nginx/sites-available/$DOMAIN.conf"
-ln -sf "/etc/nginx/sites-available/$DOMAIN.conf" "/etc/nginx/sites-enabled/$DOMAIN.conf"
+# Other enabled sites claiming the same server_name are backed up and disabled
+# (their sites-available files are left in place so they can be restored).
+BACKUP="/root/nginx-backup-$(date +%Y%m%d%H%M%S)"
+for f in /etc/nginx/sites-enabled/*; do
+  [ -e "$f" ] || continue
+  [ "$(basename "$f")" = "$SERVICE.conf" ] && continue
+  if grep -qE "server_name[^;]*$DOMAIN" "$f"; then
+    mkdir -p "$BACKUP"; cp -L "$f" "$BACKUP/"; rm "$f"
+    echo "    disabled existing site $(basename "$f") (backup: $BACKUP)"
+  fi
+done
+TEMPLATE="$APP_DIR/deploy/nginx/kidsphere.conf"
+[ -d "/etc/letsencrypt/live/$DOMAIN" ] && TEMPLATE="$APP_DIR/deploy/nginx/kidsphere-tls.conf"
+sed -e "s#__DOMAIN__#$DOMAIN#g" -e "s#__PORT__#$PORT#g" "$TEMPLATE" > "/etc/nginx/sites-available/$SERVICE.conf"
+ln -sf "/etc/nginx/sites-available/$SERVICE.conf" "/etc/nginx/sites-enabled/$SERVICE.conf"
 nginx -t && systemctl reload nginx
 
 echo "==> Build, migrate, start ..."
-NODE_DIR="$NODE_DIR" bash "$APP_DIR/deploy/deploy.sh"
+NODE_DIR="$NODE_DIR" SERVICE="$SERVICE" APP_USER="$APP_USER" APP_DIR="$APP_DIR" bash "$APP_DIR/deploy/deploy.sh"
 
-if [ "$SEED_DEMO" = "true" ] && [ ! -f /root/kidsphere-demo-credentials.txt ]; then
+if [ "$SEED_DEMO" = "true" ] && [ ! -f /root/$SERVICE-demo-credentials.txt ]; then
   echo "==> Seeding demo tenant with a random password ..."
   SEED_PW="Ks-$(openssl rand -base64 12 | tr -dc 'A-Za-z0-9' | head -c 14)!"
   (cd "$APP_DIR" && set -a && . ./.env && set +a && sudo -u "$APP_USER" env PATH="$NODE_DIR/bin:$PATH" DATABASE_URL="$DATABASE_URL" NODE_ENV=production SEED_ALLOW_PRODUCTION=true SEED_PASSWORD="$SEED_PW" STORAGE_LOCAL_DIR="$STORAGE_LOCAL_DIR" npx tsx prisma/seed.ts)
-  printf 'Kidsphere demo accounts (%s)\npassword: %s\nadmin@kidsphere.local teacher@kidsphere.local parent@kidsphere.local\n' "$DOMAIN" "$SEED_PW" > /root/kidsphere-demo-credentials.txt
-  chmod 600 /root/kidsphere-demo-credentials.txt
-  echo "    Demo credentials saved to /root/kidsphere-demo-credentials.txt (root only)."
+  printf 'Kidsphere demo accounts (%s)\npassword: %s\nadmin@kidsphere.local teacher@kidsphere.local parent@kidsphere.local\n' "$DOMAIN" "$SEED_PW" > /root/$SERVICE-demo-credentials.txt
+  chmod 600 /root/$SERVICE-demo-credentials.txt
+  echo "    Demo credentials saved to /root/$SERVICE-demo-credentials.txt (root only)."
 fi
 
 echo "==> TLS certificate ..."

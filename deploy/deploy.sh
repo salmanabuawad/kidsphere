@@ -8,6 +8,7 @@ set -euo pipefail
 APP_DIR=${APP_DIR:-/opt/kidsphere}
 APP_USER=${APP_USER:-kidsphere}
 NODE_DIR=${NODE_DIR:-/opt/kidsphere-node}
+SERVICE=${SERVICE:-kidsphere}
 cd "$APP_DIR"
 chown -R "$APP_USER:$APP_USER" "$APP_DIR"
 
@@ -25,18 +26,27 @@ fi
 echo "==> Database migrations ..."
 run "npx prisma migrate deploy"
 
-echo "==> Production build ..."
-run "npm run build"
+if [ -f "$APP_DIR/build.tgz" ]; then
+  echo "==> Using prebuilt bundle ..."
+  rm -rf .next/standalone .next/static
+  run "tar -xzf build.tgz -C '$APP_DIR'" && rm -f build.tgz
+  rm -f .next/standalone/.env*
+  # Use this server's generated Prisma engine for the bundled client.
+  run "cp node_modules/.prisma/client/libquery_engine-*.so.node .next/standalone/node_modules/.prisma/client/"
+else
+  echo "==> Production build ..."
+  run "NODE_OPTIONS=--max-old-space-size=1536 npm run build"
+fi
 # Standalone server needs the static assets next to it.
 run "rm -rf .next/standalone/.next/static .next/standalone/public && cp -r .next/static .next/standalone/.next/static && cp -r public .next/standalone/public"
 
 echo "==> Restart ..."
-systemctl restart kidsphere
+systemctl restart "$SERVICE"
 sleep 3
 PORT=$(grep -E '^PORT=' .env | cut -d= -f2)
 for i in $(seq 1 20); do
   if curl -fsS "http://127.0.0.1:${PORT:-3070}/api/health" >/dev/null; then echo "    healthy"; exit 0; fi
   sleep 2
 done
-echo "!! health check failed — see: journalctl -u kidsphere -n 100"
+echo "!! health check failed — see: journalctl -u $SERVICE -n 100"
 exit 1
