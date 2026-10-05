@@ -6,12 +6,12 @@ import { api, ApiError } from "./api";
 
 /**
  * Shared vocabulary from GET /api/options (single source with backend validation):
- *   {lists: {strengths: [{key, icon?, category?, label: {en, ar, he}}], …}}
+ *   {lists: {strengths: [{key, icon?, category?, label: {en, ar, he}, short?: {en, ar, he}}], …}}
  */
-export type OptionItem = { key: string; icon?: string; category?: string; label: Localized };
+export type OptionItem = { key: string; icon?: string; category?: string; label: Localized; short?: Localized };
 export type OptionLists = Record<string, OptionItem[]>;
 
-type RawItem = { key: string; icon?: string; category?: string; label?: Localized; en?: string; ar?: string; he?: string };
+type RawItem = { key: string; icon?: string; category?: string; label?: Localized; short?: Localized; en?: string; ar?: string; he?: string };
 
 /** Accepts both {label:{en,ar,he}} and flat {en,ar,he} items. */
 export function normalizeOptions(raw: unknown): OptionLists {
@@ -26,6 +26,7 @@ export function normalizeOptions(raw: unknown): OptionLists {
         icon: i.icon,
         category: i.category,
         label: i.label ?? { en: i.en, ar: i.ar, he: i.he },
+        ...(i.short ? { short: i.short } : {}),
       }));
   }
   return out;
