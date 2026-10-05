@@ -91,7 +91,7 @@ echo "==> nginx site for $DOMAIN ..."
 # Other enabled sites claiming the same server_name are backed up and disabled
 # (their sites-available files are left in place so they can be restored).
 BACKUP="/root/nginx-backup-$(date +%Y%m%d%H%M%S)"
-DOMAIN_RE="${DOMAIN//./\.}"
+DOMAIN_RE="${DOMAIN//./\\.}"
 for f in /etc/nginx/sites-enabled/*; do
   [ -e "$f" ] || continue
   [ "$(basename "$f")" = "$SERVICE.conf" ] && continue
