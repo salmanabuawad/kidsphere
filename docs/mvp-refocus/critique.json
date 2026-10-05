@@ -1,0 +1,118 @@
+{
+  "gaps": [
+    {
+      "spec_section": "§2 (framework Strength → Need → Adaptation → Intervention → Follow-up must be preserved); observation-model.md §14–16",
+      "problem": "No work package defines or shows this framework. `focus_areas.plan` is an optional JSONB with no defined shape, no Pydantic model, no UI and no acceptance check. The source model's short intervention plan (goal, way of acting, frequency, who is responsible, follow-up date) and its follow-up questions (what worked, what needs changing) are dropped.",
+      "fix": "Have WP-06 define `FocusPlan {strength_used, need, adaptation, what_we_will_do, frequency?, who?, review_on?, success_looks_like (descriptive text, no counts)}`. Have WP-08 FocusAreasPage edit and display it, and have WP-09 put it into the AI context. Add an acceptance check that a focus area shows all five framework steps."
+    },
+    {
+      "spec_section": "§3, §4, §11, §12 (parent + teacher wizard; parent priorities; who entered each piece)",
+      "problem": "In the access table only a parent account can write `parent_perspective`; teachers and admins can only read it. Parent accounts exist only when an admin creates and links them (WP-07). Parent contact details are optional in step 1. In the common case of a family without an account, the parent perspective and the parent's step-7 priorities can never be recorded, so a baseline is created with half of the §12 data missing.",
+      "fix": "Let staff fill in parent sections on the parent's behalf, stamped `entered:{by: teacher_id, reported_by:'parent', at}`. Add a WP-06 acceptance check: a teacher records parent answers, and the baseline shows them as parent-reported and teacher-entered."
+    },
+    {
+      "spec_section": "§3 (Current Understanding evolves → future content more relevant), §27",
+      "problem": "The loop never closes. Saving a review updates only `child_profiles.current_understanding`. The AI context (architecture §7, WP-09) is built from the wizard's merged strengths, interests and what_helps lists plus focus-area observations; it never reads `current_understanding` or the latest review's adaptations and next steps. The profile screen (WP-05) also shows the wizard lists, so a new strength that a teacher approves in a review never appears on the profile or in later content. The profile item design lists sources `observation` and `review`, but no package writes them. Worse, WP-06 recomputes the merged lists from the two perspectives on every PATCH, which would wipe any review-sourced item.",
+      "fix": "Decide which data is the profile of record. Either (a) the approved review merges its strengths, interests and what_helps into the profile lists with source=review, and the PATCH recompute keeps non-perspective items; or (b) the AI context and the profile screen read `current_understanding` first. Add to `test_loop`: after the review, generated content's `generation_input` reflects the approved understanding."
+    },
+    {
+      "spec_section": "§20, §28 (feedback optional fields; feedback becomes observation history)",
+      "problem": "The schema has `observations.observation text NOT NULL CHECK (length BETWEEN 1 AND 4000)`, but in feedback the observation text is optional, and WP-11 requires the dialog to save with 2 taps (result only). Mirroring a result-only feedback into `observations` would break the CHECK, or force invented text.",
+      "fix": "Make `observations.observation` nullable when `source='content_feedback'` (a CHECK on source), or store a localized result key and render it. Add a WP-11 acceptance check: a result-only feedback succeeds and produces a mirrored observation."
+    },
+    {
+      "spec_section": "§22 (simple chronological timeline)",
+      "problem": "The timeline (WP-08) merges `observations` (both sources) with `content_feedback`, and every feedback is also mirrored as an observation. Each piece of feedback therefore shows up twice.",
+      "fix": "Leave content_feedback out of the timeline query, or skip observations with source=content_feedback. Add a test that one feedback produces exactly one timeline entry."
+    },
+    {
+      "spec_section": "§24, §27 (never claim certainty from 1–2 observations; no high-confidence claims from limited data)",
+      "problem": "The rule 'fewer than 3 observations → needs_more_observation' is written only for the template provider and only for focus areas (architecture §7, WP-09 and WP-12). Claude's suggestions for `focus_review` and `baseline_validation` are not post-checked, and baseline_validation items have no evidence rule at all. What a baseline_validation 'item' (assumption) is, is also undefined.",
+      "fix": "In `service.suggest_understanding`, enforce on the server, for any provider, that a validation or review status other than needs_more_observation requires at least 3 linked observation_ids since the baseline; otherwise downgrade it. Define each item as a reference to a baseline list entry (list + key). Test this with FakeClaude returning 'supported' with only 1 observation."
+    },
+    {
+      "spec_section": "§44 (Adam: 'Build the Garage Together')",
+      "problem": "The spec's example is two children physically building a garage, taking turns and practising a phrase, with observation points (did he initiate? accept the other child's idea? need adult support?). WP-09, WP-11 and `test_loop` generate it as `digital_game` from tap templates. The WP-09 check ('title references cars or building') would pass for any car-themed quiz and does not verify the spec content.",
+      "fix": "Model Adam as `real_world_activity` (cooperative play), or a pack. Assert on the content: `what_to_observe` includes initiation, accepting the other child's idea and the level of adult support; the instructions include the phrase 'Can we build this together?'. Run test_loop on that."
+    },
+    {
+      "spec_section": "§45 (Maya: story-creation game; Maya tells/records the story)",
+      "problem": "None of the 6 templates is a story builder (choose an animal, a setting, a problem and a solution, then tell the story). Recording is removed (`narration-recorder.tsx` is in REMOVE), so 'records' has no path. 'Storytelling' and Mode 1's 'confidence' and 'language' are not §6 strength keys, yet WP-11 returns 400 for any strength_builder target not in the profile.",
+      "fix": "Specify Maya as a `multiple_choice` variant with `correct_or_preferred_answer: null` (every choice is fine) ending on a 'tell your story' screen, with the teacher capturing the story through a quick observation. Or add a `story_builder` template. Either way, say explicitly that audio recording is out of the MVP. Map Maya's strengths to existing keys (imagination, vocabulary, communication) in dev_seed and test it."
+    },
+    {
+      "spec_section": "§19 / content transitions (regenerate/delete; feedback history)",
+      "problem": "Edit and regenerate keep the same id and overwrite `content`. The rules cover 'approved → draft' but never say whether edit or regenerate is allowed on `completed` content, which already has feedback and observations linked to it. Overwriting it rewrites what the child actually experienced. Present is described as 'approved only', so completed content cannot be used again.",
+      "fix": "Block edit and regenerate on completed content (409 INVALID_TRANSITION), or have them create a new draft row. Allow Present and repeat feedback on approved or completed content. Add acceptance checks for both."
+    },
+    {
+      "spec_section": "§35 (uploads behind access control) / WP-14 acceptance",
+      "problem": "WP-14 requires `/uploads/anything` to return 404, but the nginx design has `location / { try_files $uri /index.html; }`, which returns 200 with index.html for /uploads/x. The check fails as written, or invites someone to add an uploads location.",
+      "fix": "Add `location ^~ /uploads/ { return 404; }` to the site config, or change the check to 'never serves a file from UPLOAD_DIR' (for example, a known stored file name returns index.html or 404, never image bytes)."
+    },
+    {
+      "spec_section": "§2 (avoid diagnosis, disorder, deficit, 'weakness')",
+      "problem": "The banned-term check covers options.json (WP-04) and AI output (WP-09) only. The static UI dictionaries (`frontend/src/i18n/messages/*/*.json`, written by WP-03/05/06/07/08/11/12) are never scanned. These are exactly the strings ported from `src/lib/i18n/messages/*.ts`, which contain quantitative and concern wording such as `progressLine` and `indicatorHint` '3 of 5'.",
+      "fix": "Extend WP-03's vitest parity test to scan every message JSON against the shared term list (exported from WP-04's data) and against a /\\d+\\s*%|\\bscore\\b|points/ pattern."
+    },
+    {
+      "spec_section": "§25 (teacher can keep, close, edit, create focus)",
+      "problem": "WP-12 review decisions are keep|pause|close|edit; there is no 'create focus' from the review. Its acceptance check \"a 'keep' that would exceed 3 active is rejected\" cannot happen, because keep leaves an already-active area active.",
+      "fix": "Add a create decision (or an inline add) to the review save, subject to the same row-locked limit of 3. Replace that check with 'create/reactivate in a review that would exceed 3 active returns 409 FOCUS_LIMIT and rolls back the whole review'."
+    },
+    {
+      "spec_section": "§12 (store current challenges/support needs)",
+      "problem": "`baseline_data` is listed as basics, the perspectives, the merged lists and the focus areas. There is no explicit support-needs element; only `current_understanding.areas_for_support` exists, and it is filled after the baseline. 'Who entered' is stamped per section with a single {by, at}, so a later edit overwrites who first entered it.",
+      "fix": "Derive and snapshot `support_needs` in the baseline (independence levels other than independent, sensitivities with what_helps, and the emotions/transition helps). Keep `entered[section]` as an append-only list of {by, role, at}."
+    },
+    {
+      "spec_section": "§34 (parent edits allowed parent info only)",
+      "problem": "The PUT /api/children/{id} per-role allowlist for parents (preferred_name, additional_languages, parent_name, parent_contact) has no acceptance check in WP-05. There is also no test that a parent cannot read the teacher_perspective fields through GET /api/children/{id}.",
+      "fix": "WP-05 acceptance: a parent PUT changing birth_date or class_id returns 403 or 400; a parent PUT changing parent_contact succeeds and is audited; the parent's GET composite has no teacher or merged fields."
+    },
+    {
+      "spec_section": "§35 (log important profile changes)",
+      "problem": "The audit list leaves out content.regenerate, content.delete, content.archive, observation.update, photo.delete and feedback. Audit rows hold field or section names only, and no screen or command shows them, so 'what changed in this child's profile' cannot be answered.",
+      "fix": "Add those actions. Add a small `python -m app.cli audit --child <id>`, or an admin-only GET /api/children/{id}/audit, so the log can be read."
+    },
+    {
+      "spec_section": "§35 (minimal child data leaves the server) / quick-observation dictation",
+      "problem": "Quick-observation dictation is ported from `src/features/observations/shared.tsx`, which uses `webkitSpeechRecognition`. In Chrome this sends audio of observations about named children to Google's servers, outside the Python backend. Nothing in the plan says so.",
+      "fix": "Make dictation opt-in, with a one-line privacy note, or leave it out of the MVP. Record the decision in PRIVACY.md (WP-14)."
+    },
+    {
+      "spec_section": "§15C / §30 ('drag to category')",
+      "problem": "The spec names the template 'drag to category'. The plan deliberately makes categorize tap-only ('no drag library'), but this deviation is not listed among the PO questions.",
+      "fix": "Add it to Risks & open questions (tap-to-place keeps tablets accessible and avoids a dependency), or add native pointer-event dragging with tap as a fallback."
+    }
+  ],
+  "wrong_claims": [
+    {
+      "claim": "\"68 route handlers under src/app/api\"; \"Removed: all 68 Next route handlers\"",
+      "evidence": "`find src/app/api -name route.ts | wc -l` = 65. There are no other files under src/app/api. Pages = 46, models = 36 and enums = 23 are correct."
+    },
+    {
+      "claim": "Domain rule ported from src/features/content/workflow.ts: \"only approved content is visible beyond staff\"",
+      "evidence": "workflow.ts lines 4–7: `DRAFT → TEACHER_REVIEW → APPROVED → PUBLISHED → ARCHIVED`; \"Only PUBLISHED content is ever visible to a child.\" APPROVED is not visible beyond staff in the current code. The new 'approved or completed and shared' rule is new design, not a port."
+    },
+    {
+      "claim": "Content review assets: `src/features/content/{content-review,body-editor,status}.tsx`",
+      "evidence": "The file is `src/features/content/status.ts`; there is no status.tsx."
+    },
+    {
+      "claim": "Name masking to port from `src/server/services/profile.ts` covers what the new context needs (implied by 'Translate')",
+      "evidence": "profile.ts:229 masks only the child's own `[firstName, displayName, lastName]`. Masking classmates' names, which architecture §7 and WP-09 require, does not exist and has to be written, not translated."
+    }
+  ],
+  "overengineering": [
+    "WP-01 CI harness (§41/§49). It adds a dedicated `kidsphere-ci` user and PG role with CREATEDB, flock serialization, venv and node_modules caches keyed by hash with `cp -al`, a throwaway DB per run, retention of the last 10 runs, and a transient `systemd-run` preview unit. That is a small CI platform on a 1.4GB host shared with kortex-messaging. One script that rsyncs to a staging dir and runs pytest against a single `kidsphere_test` DB, plus `vite build`, covers 'no local runtime'.",
+    "Deploy step 2 runs the whole CI suite (pytest, tsc, eslint, vitest and a second vite build) inside every production deploy on that host, on top of WP-01 runs. This doubles memory pressure for no new signal. Gate deploys on the last green remote-test run for the SHA instead.",
+    "Claude provider extras with no API key configured (§49). They include the `server-side-fallback-2026-07-01` beta with `fallbacks='default'`, a repair round-trip, and a hand-written `provider_schema` sanitizer. The Python SDK's `messages.parse()` already strips unsupported constraints (minLength and similar) and validates on the client. While templates are the production path, keep one call, validate, and fall back to the template; the repair loop and the fallback beta can come later. (The API facts cited are accurate: model id, effort default medium, thinking cannot be disabled, httpx2 in anthropic 1.x, the beta header and form.)",
+    "Template provider breadth: phrase tables keyed by 10 focus suggestions × 2 modes × (story, activity, 6 games, video plan, pack) × 3 languages, with a parametrized test over every combination. This is a large content-authoring project. Generic per-type templates keyed by focus *category* with slot filling ({name}, interest, strength, phrase) meet §42 Phase 3.",
+    "Frontend route auto-discovery: `import.meta.glob` over `features/*/routes.tsx` with role and nav metadata, plus a separate `paths.ts`. A single hand-written `routes.tsx` is simpler for ~25 routes (§48: no unnecessary patterns).",
+    "`schema_version` on every JSONB Pydantic model, and cursor pagination for the timeline. These are premature for an MVP with no data; use limit/offset or 'load older'.",
+    "Video-job REST endpoints (POST/GET content/{id}/video-job) with only a placeholder provider. §31 asks only for the `video_service.py` abstraction and the stored statuses; a status badge from the row is enough until a provider exists.",
+    "Two login throttles: audit-row counting plus nginx `limit_req`. With 1 uvicorn worker and nginx in front, the nginx zone alone (keyed on `$remote_addr`) is sufficient for the MVP."
+  ],
+  "verdict": "The assessment is accurate about the existing code. Nearly every claim I checked holds: 46 pages, 36 models and 23 enums; bcrypt cost 12; the 62-character dummy hash; the `ks_session` 7-day cookie; the count-then-insert goal limit; the spoofable X-Forwarded-For limiter; logical-only CSS; the `unsafe-inline` script-src; the untracked `docs/mvp-refocus`. The errors are minor: 65 route handlers, not 68; PUBLISHED, not APPROVED, is child-visible today; `status.ts`. The target stack meets spec §1 and the user's \"deploy on Ubuntu, nothing local\" constraint. It does not yet guarantee the MVP loop the spec centres on. Current understanding never feeds back into the profile or the AI context. Teachers cannot record parent answers. A feedback with no text would violate the observations CHECK and appears twice in the timeline. The 'never certain from 1–2 observations' rule is only enforced for templates. The Strength→Need→Adaptation→Intervention→Follow-up framework has no home. The Adam and Maya examples are mapped onto the wrong content types, and the `/uploads` 404 check contradicts the SPA fallback. Fix these in WP-06/08/09/11/12/14 before wave 2. Also trim the CI harness, the in-deploy CI gate, the Claude fallback and repair extras, and the size of the template tables, per §41/§49. With those changes the plan is sound and buildable."
+}

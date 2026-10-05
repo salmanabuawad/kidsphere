@@ -1,0 +1,624 @@
+[
+  {
+    "id": "WP-01",
+    "wave": 1,
+    "title": "Server CI harness and preview (no local runtime)",
+    "owns_paths": [
+      "deploy/ci/remote-test.sh",
+      "deploy/ci/remote-test.ps1",
+      "deploy/ci/server-run.sh",
+      "deploy/ci/provision-ci.sh",
+      "deploy/ci/README.md"
+    ],
+    "depends_on": [],
+    "spec_sections": [
+      "1",
+      "47",
+      "48"
+    ],
+    "description": "Build the only way code gets run: on the Ubuntu server. The code has no dependencies, but merge this package first in wave 1, because WP-02, WP-03 and WP-04 verify through it.\n\nprovision-ci.sh (root, idempotent):\n- creates system user kidsphere-ci\n- creates PG role kidsphere_ci (LOGIN CREATEDB, random password in /var/lib/kidsphere-ci/ci.env, mode 600)\n- creates /var/lib/kidsphere-ci/{runs,cache}\n- checks that python3.12 -m venv works and that /opt/kidsphere-node/bin/node is 20.19 or newer\n\nremote-test.sh (Git Bash; uses SSH_HOST=185.229.226.37 and key ~/.ssh/kidsphere_deploy, like deploy/remote-deploy.sh):\n- tars `git ls-files -co --exclude-standard -- backend frontend deploy` and uploads it to runs/<timestamp>-<sha>\n- calls server-run.sh, which runs as kidsphere-ci under flock /var/lock/kidsphere-ci.lock\n\nserver-run.sh, backend side:\n- venv cached by sha256 of the requirements files; pip install -r requirements-dev.txt\n- CREATE DATABASE kidsphere_test_<id> (UTF8, template0); export TEST_DATABASE_URL; run pytest with ANTHROPIC_API_KEY empty; DROP the DB in a trap\n\nserver-run.sh, frontend side:\n- node_modules cached by lock hash (cp -al)\n- env -i PATH=/opt/kidsphere-node/bin:/usr/bin:/bin NODE_OPTIONS=--max-old-space-size=768 npm run typecheck && npm run lint && npm run test && npm run build -- --outDir <tmp>\n\nOther behaviour:\n- skips a side when its manifest does not exist yet\n- keeps the last 10 runs\n- --preview: rebuilds kidsphere_preview, runs alembic upgrade head, runs python -m app.dev_seed if present, then starts a transient unit with systemd-run --unit kidsphere-preview as kidsphere-ci (uvicorn on 127.0.0.1:3072, SERVE_STATIC_DIR=<dist>, COOKIE_SECURE=false) and prints the ssh -L tunnel command\n- --stop-preview stops it\n- must never touch kidsphere-app, kidsphere-api, the prod DBs or nginx\n\nremote-test.ps1 wraps it like deploy/deploy-kids.ps1.",
+    "acceptance": [
+      "provision-ci.sh runs twice in a row with exit 0, and the second run changes nothing",
+      "remote-test.sh on the current tree (no backend/ or frontend/ yet) exits 0 and reports nothing to test",
+      "A temporary failing pytest file makes remote-test.sh exit non-zero and prints the failure",
+      "After any run, psql -l shows no kidsphere_test_* databases",
+      "Two concurrent invocations run one after the other (flock), as the logs show",
+      "systemctl status kidsphere-app is unchanged, and no files are written outside /var/lib/kidsphere-ci, /tmp and /var/lock",
+      "--preview serves /api/health on 127.0.0.1:3072 once WP-02 has landed, and --stop-preview removes the unit"
+    ]
+  },
+  {
+    "id": "WP-02",
+    "wave": 1,
+    "title": "Backend core: FastAPI skeleton, full schema (Alembic 0001), auth, access, audit",
+    "owns_paths": [
+      "backend/requirements.txt",
+      "backend/requirements-dev.txt",
+      "backend/.env.example",
+      "backend/.gitignore",
+      "backend/alembic.ini",
+      "backend/pytest.ini",
+      "backend/migrations/",
+      "backend/app/__init__.py",
+      "backend/app/main.py",
+      "backend/app/config.py",
+      "backend/app/db.py",
+      "backend/app/models.py",
+      "backend/app/errors.py",
+      "backend/app/security.py",
+      "backend/app/deps.py",
+      "backend/app/access.py",
+      "backend/app/audit.py",
+      "backend/app/vocab.py",
+      "backend/app/cli.py",
+      "backend/app/routers/__init__.py",
+      "backend/app/routers/auth.py",
+      "backend/app/routers/me.py",
+      "backend/app/routers/health.py",
+      "backend/app/routers/options.py",
+      "backend/app/routers/ (stub files for: users, classes, parents, children, profiles, baselines, focus_areas, observations, timeline, content, feedback, reviews, video)",
+      "backend/app/services/__init__.py",
+      "backend/app/schemas/__init__.py",
+      "backend/app/schemas/common.py",
+      "backend/app/schemas/auth.py",
+      "backend/tests/conftest.py",
+      "backend/tests/test_auth.py",
+      "backend/tests/test_access.py",
+      "backend/tests/test_migrations.py",
+      "backend/tests/test_vocab.py",
+      "backend/tests/fixtures/"
+    ],
+    "depends_on": [],
+    "spec_sections": [
+      "1",
+      "28",
+      "34",
+      "35",
+      "40",
+      "47",
+      "48"
+    ],
+    "description": "Implement architecture sections 2–6 and 12 for the core.\n\nDependencies and config:\n- requirements.txt pins every runtime dependency used later, including anthropic>=1 and Pillow, so later packages never edit it.\n- Settings via pydantic-settings, reading backend/.env.\n\nSchema:\n- models.py contains all 14 tables.\n- Alembic 0001_initial is hand-written DDL with CHECKs, the indexes and the BEFORE UPDATE trigger on baselines.\n- Port the rules from prisma/schema.prisma as described in the report; do not translate the Prisma SQL.\n\nAuth and request handling:\n- security.py: pyca bcrypt, cost 12, 72-byte slice, a real 60-character DUMMY_HASH.\n- Opaque ks_session cookie; port src/lib/auth/session.ts.\n- Endpoints: login (JSON field email, which also accepts a username matching ^[a-z0-9._%+@-]{2,200}$), logout, me (GET/PUT name and language), me/password.\n- Rate limit: counts auth.login_failed rows in audit_log.\n- Origin-check middleware.\n- Error envelope and handlers, porting src/lib/errors.ts codes.\n\nAccess and audit:\n- access.py: child_scope and get_child_or_404, porting src/lib/permissions/index.ts down to 3 roles.\n- audit.py, porting src/lib/audit/index.ts: primitive metadata only.\n\nOther endpoints:\n- vocab.py loads app/data/options.json (path overridable in settings; tests use tests/fixtures/options_min.json).\n- GET /api/options and GET /api/health.\n\nmain.py:\n- includes every router module, with empty `router = APIRouter()` stubs for the modules later packages own.\n- adds StaticFiles plus an SPA fallback only when SERVE_STATIC_DIR is set.\n\ncli.py:\n- create-admin, set-password, import-users --role (reads TSV on stdin; validates bcrypt format $2a$/$2b$ and 60 characters).\n- Passwords are never taken from argv.\n\nconftest:\n- guards the DB name prefix (kidsphere_test_)\n- runs alembic upgrade once\n- truncates per test\n- provides role-client fixtures plus helpers to insert classes and children directly through the ORM",
+    "acceptance": [
+      "test_migrations: alembic upgrade head, downgrade base, upgrade head all succeed; 14 tables exist; an UPDATE on baselines raises",
+      "test_auth: a fixture bcryptjs hash ($2b$12$, 60 characters) verifies; a 100-byte Arabic password hashes and verifies without error",
+      "Login sets ks_session with HttpOnly and SameSite=Lax; sessions.token_hash is the sha256, never the token; logout deletes the row; a deactivated user gets 401 on the next request",
+      "The 9th failed login for the same identifier within 15 minutes returns 429 RATE_LIMITED; an unknown user still runs a bcrypt check against DUMMY_HASH",
+      "A POST with a foreign Origin returns 403; an unknown body field returns 400 VALIDATION with details[].path; a forced exception returns 500 {error:{code:'INTERNAL'}} with no traceback in the body",
+      "test_access: a teacher sees only children of assigned classes; a parent sees only linked children; a foreign child id returns 404; a parent write to teacher data on own child returns 403",
+      "GET /api/health returns {status:'ok'}, and 503 {status:'degraded'} when the DB is mocked down; GET /api/options returns the fixture lists for an authenticated user and 401 otherwise",
+      "python -m app.cli create-admin prompts for the password and creates an active admin; import-users rejects a malformed hash",
+      "All of the above pass via deploy/ci/remote-test.sh --backend"
+    ]
+  },
+  {
+    "id": "WP-03",
+    "wave": 1,
+    "title": "Frontend foundation: Vite React TS, design system, i18n/RTL, auth screens, shell",
+    "owns_paths": [
+      "frontend/package.json",
+      "frontend/package-lock.json",
+      "frontend/vite.config.ts",
+      "frontend/tsconfig.json",
+      "frontend/index.html",
+      "frontend/eslint.config.js",
+      "frontend/.prettierrc",
+      "frontend/.gitignore",
+      "frontend/public/",
+      "frontend/src/main.tsx",
+      "frontend/src/App.tsx",
+      "frontend/src/routes.tsx",
+      "frontend/src/index.css",
+      "frontend/src/lib/",
+      "frontend/src/i18n/config.ts",
+      "frontend/src/i18n/translate.ts",
+      "frontend/src/i18n/I18nProvider.tsx",
+      "frontend/src/i18n/messages/{en,ar,he}/{common,nav,auth,errors,account}.json",
+      "frontend/src/auth/",
+      "frontend/src/components/",
+      "frontend/src/features/auth/",
+      "frontend/src/test/"
+    ],
+    "depends_on": [],
+    "spec_sections": [
+      "1",
+      "13",
+      "36",
+      "37",
+      "38",
+      "40"
+    ],
+    "description": "Scaffold and tooling:\n- Vite + React 19 + TypeScript + react-router v7 (library mode) + Tailwind 4 via @tailwindcss/vite, plus lucide-react, clsx, tailwind-merge and @fontsource-variable/rubik.\n- Dev tools: vitest, jsdom, @testing-library/react, eslint (typescript-eslint, react-hooks), prettier with prettier-plugin-tailwindcss.\n- Scripts: typecheck, lint, test, build.\n- The @/ path alias.\n\nDesign system:\n- index.css copies the tokens from src/app/globals.css.\n- Port src/components/ui/* (next/link becomes react-router; raise touch targets to h-11 / min-h-11) and src/lib/utils.ts (add formatAge).\n\nData layer (src/lib):\n- api.ts: port of src/lib/client/api.ts with an onSuccess callback instead of router.refresh.\n- useFetch, OptionsProvider (GET /api/options) and paths.ts, which defines every route path from the architecture so later features can link to each other.\n\ni18n:\n- Port of src/lib/i18n/{config,translate,format,client}.\n- JSON namespaces loaded with import.meta.glob; t() falls back to en, then to the key.\n- Plural keys via Intl.PluralRules. Locale tags: ar-u-nu-latn, he-IL, en.\n- Convert the common, auth, errors and account strings from src/lib/i18n/messages/*.ts.\n\nRTL and shell:\n- public/boot.js sets lang and dir before paint (external file, CSP-safe).\n- AuthProvider (GET /api/me; 401 redirects to /login?next= after validating next) and RequireRole.\n- AppShell: port of src/components/layout/app-shell.tsx with a desktop sidebar, a phone bottom bar, nav built from route metadata, and LocaleSwitcher calling setLocale and PUT /api/me.\n- routes.tsx gathers features/*/routes.tsx.\n\nAuth feature and errors:\n- features/auth: LoginPage (email or username) and AccountPage (name, language, change password), adapted from src/features/auth/*.\n- Role redirect after login: admin to /admin/users, teacher to /children, parent to /parent.\n- NotFound and error element.\n\nThis package can be built against mocked fetch; the live check happens in preview at the end of the wave.",
+    "acceptance": [
+      "npm run typecheck, lint, test and build pass via deploy/ci/remote-test.sh --frontend",
+      "The built dist/index.html has no inline script, and boot.js is a separate file",
+      "vitest: every key in en/*.json exists in ar/*.json and he/*.json",
+      "vitest grep: no ml-/mr-/pl-/pr-/left-/right-/text-left/text-right classes in src",
+      "vitest: html dir is rtl for ar and he and ltr for en, both on boot and after setLocale",
+      "vitest: api() maps {error:{code:'RATE_LIMITED'}} to the localized errors.RATE_LIMITED message; a 401 navigates to /login with next preserved; next='//evil' is rejected",
+      "The UI primitives render with 44px or larger targets for md buttons and chips",
+      "After WP-02 merges, --preview: login with the admin works, a language switch persists across reload, and the shell is RTL in ar/he at 375px width with no horizontal scroll"
+    ]
+  },
+  {
+    "id": "WP-04",
+    "wave": 1,
+    "title": "Shared vocabulary catalog (options.json) and neutral terminology",
+    "owns_paths": [
+      "backend/app/data/options.json",
+      "backend/tests/test_options_data.py",
+      "docs/terminology.md"
+    ],
+    "depends_on": [],
+    "spec_sections": [
+      "2",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "10",
+      "11",
+      "20",
+      "21",
+      "24",
+      "25",
+      "26"
+    ],
+    "description": "Produce the single source of option keys and en/ar/he labels used by backend validation, the UI and AI prompts.\n\nFormat:\n- {list: [{key, en, ar, he, icon?, category?}]}\n\nLists:\n- gender, languages, contact_preferences\n- strengths (18, spec 6), interests (19, spec 6)\n- frustration_reactions, what_helps, transition_reactions, morning_separation (spec 7)\n- social, communication (spec 8)\n- independence_areas (10), support_levels (independent, some_support, significant_support, not_observed) (spec 9)\n- sensitivities (11, spec 10)\n- focus_categories (11, spec 11), focus_suggestions (10 spec examples plus 6 from the observation model, each with a category)\n- hope_child_feels, contexts (arrival, free_play, group_time, structured_activity, yard, meal, art, transition, end_of_day, other)\n- content_results, review_statuses, validation_statuses, share_next_step, modes, content_types, game_templates\n\nSources:\n- Re-key labels from src/features/child-understanding/vocabulary.ts, src/features/questionnaires/definition.ts and src/features/observations/definition.ts.\n- Apply the renames from the content-plan finding (for example vehicles becomes cars_transportation, hard_to_calm becomes takes_time_to_calm, some_help becomes some_support).\n- Write the new labels.\n\nWording:\n- Apply the neutral wording table: attention is labelled Focus & persistence / ריכוז והתמדה / التركيز والمثابرة; Things in the environment that may affect the child; no deficit wording.\n- docs/terminology.md lists the replacements and the open ar/he review items for the PO.\n- Pure data: no code outside the test.",
+    "acceptance": [
+      "test_options_data.py (standalone json plus pytest): every item has non-empty en, ar and he",
+      "Keys are snake_case and unique within each list",
+      "All option values named in spec sections 6–11 are present (counts asserted per list)",
+      "Every focus_suggestions.category exists in focus_categories",
+      "No label in any language contains a term from the spec 2 avoid list or its ar/he equivalents (term list in the test)",
+      "support_levels has exactly the 4 keys, shared by the wizard, observations and feedback",
+      "The test passes via remote-test.sh --backend; docs/terminology.md lists every renamed key"
+    ]
+  },
+  {
+    "id": "WP-05",
+    "wave": 2,
+    "title": "Children: CRUD, photo upload, child list (teacher home), child profile screen",
+    "owns_paths": [
+      "backend/app/routers/children.py",
+      "backend/app/services/children.py",
+      "backend/app/services/uploads.py",
+      "backend/app/schemas/children.py",
+      "backend/tests/test_children.py",
+      "backend/tests/test_uploads.py",
+      "frontend/src/features/children/",
+      "frontend/src/i18n/messages/{en,ar,he}/children.json"
+    ],
+    "depends_on": [
+      "WP-01",
+      "WP-02",
+      "WP-03",
+      "WP-04"
+    ],
+    "spec_sections": [
+      "5",
+      "13",
+      "29",
+      "32",
+      "34",
+      "35",
+      "36",
+      "37",
+      "38",
+      "42"
+    ],
+    "description": "Backend:\n- GET /api/children (filters class_id and q; sorted by name COLLATE und-x-icu; each row includes last_observed_at and draft_count).\n- POST /api/children: a teacher may only use their own classes; also creates an empty child_profiles row.\n- GET /api/children/{id}: role-shaped composite. Staff get basics, age {years, months} computed from the birth_date DATE, class and kindergarten, merged strengths, interests and what_helps, active focus areas (numbered, at most 3), latest observation {date, excerpt}, wizard_step and baseline flag. Parents get basics only.\n- PUT /api/children/{id} with a per-role field allowlist; POST /api/children/{id}/archive.\n- PUT/GET/DELETE /api/children/{id}/photo via services/uploads.py, porting src/lib/storage/local.ts and the sniff logic in src/server/services/media.ts: 8 MB cap, magic bytes, Pillow re-encode to JPEG at most 1024 px, opaque name under UPLOAD_DIR/children, path never returned, Cache-Control private, no-store.\n- Audit: child.create, child.update (field names only), child.archive, photo.upload.\n\nFrontend (features/children):\n- ChildListPage (/children): card markup from src/app/teacher/classes/[classId]/page.tsx, class filter and search, a Drafts waiting strip and a Not observed recently strip, Add child button linking to paths.newChild.\n- ChildLayout with 4 tabs (Profile, Timeline, Content, Development) using paths.ts.\n- ProfilePage (/children/:id) per spec 13: markup from src/app/teacher/children/[childId]/page.tsx and vocab-chip.tsx (labels via OptionsProvider). Shows ⭐ strengths, interest icons, ✓ what helps, numbered current focus, latest quote and date, and the buttons Add Observation, Create Content, View Development and Edit Profile.\n- ChildAvatar (photo or initials).\n- Contracts used from WP-06 (same wave): wizard routes in paths.ts.",
+    "acceptance": [
+      "A teacher POST into a class they are not assigned to returns 404/403; admin succeeds; parent gets 403",
+      "A teacher list contains only children of assigned classes; a parent sees only linked children with no profile fields",
+      "A child born 2022-08-05, viewed on 2026-10-05, shows age {years:4, months:2}",
+      "Photo upload rejects a .jpg containing PNG-less text bytes (UPLOAD_FAILED) and files over 8 MB (413); a stored file has no EXIF GPS; the JSON never contains photo_path; another teacher's GET photo returns 404; headers include private, no-store and nosniff",
+      "An archived child disappears from the list and returns 404 to non-admins",
+      "Audit rows contain field names but no values",
+      "Frontend: the profile renders strengths, interests, what helps and numbered focus in ar, he and en with the correct dir; the list works at 375px; tsc, test and build pass via remote-test.sh --all"
+    ]
+  },
+  {
+    "id": "WP-06",
+    "wave": 2,
+    "title": "Add Child wizard (7 steps), parent onboarding, profile sections, baseline, focus-area API",
+    "owns_paths": [
+      "backend/app/routers/profiles.py",
+      "backend/app/routers/baselines.py",
+      "backend/app/routers/focus_areas.py",
+      "backend/app/services/profiles.py",
+      "backend/app/services/baselines.py",
+      "backend/app/services/focus_areas.py",
+      "backend/app/schemas/profile.py",
+      "backend/app/schemas/focus.py",
+      "backend/app/dev_seed.py",
+      "backend/tests/test_profile_wizard.py",
+      "backend/tests/test_baseline.py",
+      "backend/tests/test_focus_areas.py",
+      "frontend/src/features/wizard/",
+      "frontend/src/i18n/messages/{en,ar,he}/wizard.json"
+    ],
+    "depends_on": [
+      "WP-01",
+      "WP-02",
+      "WP-03",
+      "WP-04"
+    ],
+    "spec_sections": [
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "10",
+      "11",
+      "12",
+      "24",
+      "29",
+      "34",
+      "42",
+      "43"
+    ],
+    "description": "Backend, profile:\n- GET /api/children/{id}/profile: role-shaped; parents get only parent_perspective.\n- PATCH /api/children/{id}/profile {section, data, wizard_step}: the perspective follows the role; data is validated per section with Pydantic models using option keys from vocab.py, or {custom}.\n- Each PATCH stamps entered[section] {by, at} and recomputes the merged strengths, interests, motivators, what_helps and sensitivities with sources[].\n- The health subtree is parent-only.\n\nBackend, baseline:\n- POST /api/children/{id}/baseline snapshots the profile, both perspectives and the active focus areas into baseline_data, sets wizard_completed_at and, for the first baseline only, initialises current_understanding from it.\n- GET returns all baselines, oldest first. GET /api/children/{id}/current-understanding.\n\nBackend, focus areas:\n- GET/POST /api/children/{id}/focus-areas, PUT /api/focus-areas/{id}, POST /api/focus-areas/{id}/close.\n- The max-3-active rule (port of src/features/goals/rules.ts) uses SELECT ... FOR UPDATE on the child row and also applies on reactivation.\n- Fields: category, suggestion_key, title, description, plan JSONB.\n- Audit: profile.update (sections), baseline.create, focus_area.*.\n\ndev_seed.py:\n- Adam (spec 44) and Maya (spec 45) with admin, teacher and parent users using a random printed password.\n- Refuses unless the DB name ends with _preview or _test.\n\nFrontend (features/wizard):\n- Wizard engine ported from src/features/questionnaires/questionnaire-wizard.tsx and answer-view.tsx: progress bar, Save & continue, Save & exit with resume at wizard_step, and a review step.\n- Declarative step definitions with fields tagged parent|teacher|both.\n- Step 1 is a custom form: POST /api/children then PUT, live age, optional photo via the WP-05 contract.\n- Steps 2–7 follow the content plan, with optional fields collapsed. Step 7 is where the teacher picks up to 3 focus areas from focus_suggestions or custom.\n- Finish runs Create baseline and opens the profile.\n- Routes: /children/new, /children/:id/edit/:step, /parent/children/:id/onboarding.",
+    "acceptance": [
+      "A parent PATCH to a teacher section returns 403; an unknown option key returns 400 VALIDATION; a {custom} entry is accepted; merged lists show sources ['parent','teacher'] when both chose the same key",
+      "GET profile as parent omits teacher_perspective",
+      "POST baseline creates a row whose JSON includes entered_by per section and the active focus areas; a second POST adds a row and leaves the first byte-identical; no PUT or PATCH baseline route exists",
+      "A 4th active focus area returns 409 FOCUS_LIMIT; with 2 active, two concurrent creates leave exactly 3 active (threaded test); reactivating a paused area when 3 are active returns 409",
+      "Wizard: reload in the middle of step 4 resumes at step 4; all 7 steps render RTL in ar/he; the parent route shows only parent fields",
+      "A timed walkthrough of the teacher path with typical answers on preview takes 7 minutes or less (record the time in the PR)",
+      "python -m app.dev_seed on kidsphere_preview creates Adam with strengths imagination, building, vocabulary, interests cars, animals, blocks and focus joining_group_play, and refuses on a DB named kidsphere",
+      "Tests pass via remote-test.sh --all"
+    ]
+  },
+  {
+    "id": "WP-07",
+    "wave": 2,
+    "title": "Admin (users, classes, assignments, parent links) and parent home",
+    "owns_paths": [
+      "backend/app/routers/users.py",
+      "backend/app/routers/classes.py",
+      "backend/app/routers/parents.py",
+      "backend/app/services/users.py",
+      "backend/app/services/classes.py",
+      "backend/app/schemas/admin.py",
+      "backend/tests/test_admin.py",
+      "frontend/src/features/admin/",
+      "frontend/src/features/parent/",
+      "frontend/src/i18n/messages/{en,ar,he}/admin.json",
+      "frontend/src/i18n/messages/{en,ar,he}/parent.json"
+    ],
+    "depends_on": [
+      "WP-01",
+      "WP-02",
+      "WP-03"
+    ],
+    "spec_sections": [
+      "34",
+      "35",
+      "29",
+      "36",
+      "38"
+    ],
+    "description": "Backend:\n- Users: GET/POST /api/users (identifier is an email or username, lower-cased; password at least 10 characters; role; language; is_active), PUT /api/users/{id}, POST /api/users/{id}/password.\n- Role change, deactivation and password set delete the target's sessions. An admin cannot demote or deactivate themselves. Port the rules from src/server/services/admin.ts updateUser.\n- Classes: GET/POST /api/classes (name and kindergarten text), PUT/DELETE /api/classes/{id}, PUT /api/classes/{id}/teachers {user_ids}.\n- Parent links: GET/POST /api/children/{id}/parents, DELETE /api/children/{id}/parents/{user_id}.\n- Audit: user.create, user.update, user.password_set, class.*, access.assign, access.unassign.\n\nFrontend:\n- features/admin: copy src/features/admin/simple-form.tsx (SimpleFormDialog) and the Table pattern from src/app/admin/{users,classes,assignments}/page.tsx.\n- Pages: /admin/users, /admin/classes (with teacher assignment) and /admin/children/:id/parents. Nav has Users, Classes and Account only.\n- features/parent: /parent home, ported from src/app/parent/page.tsx and onboarding/page.tsx markup. Shows linked children cards with two actions: Tell us about your child (wizard route) and Shared activities (WP-11 route).",
+    "acceptance": [
+      "A non-admin calling /api/users or /api/classes gets 403",
+      "A duplicate identifier returns 409 DUPLICATE; a password shorter than 10 characters returns 400",
+      "Changing a user's role, deactivating them or setting their password invalidates that user's existing cookie (next request returns 401)",
+      "An admin trying to deactivate or demote themselves is rejected",
+      "Assigning a teacher to a class makes its children visible at once; unassigning returns 404 for them",
+      "A linked parent sees the child in GET /api/children; an unlinked parent gets 404",
+      "Admin and parent pages work RTL at phone width; tsc, test and build pass via remote-test.sh --all"
+    ]
+  },
+  {
+    "id": "WP-08",
+    "wave": 3,
+    "title": "Quick observations, focus management UI, development timeline",
+    "owns_paths": [
+      "backend/app/routers/observations.py",
+      "backend/app/routers/timeline.py",
+      "backend/app/services/observations.py",
+      "backend/app/services/timeline.py",
+      "backend/app/schemas/observations.py",
+      "backend/tests/test_observations.py",
+      "backend/tests/test_timeline.py",
+      "backend/app/dev_seed.py",
+      "frontend/src/features/observations/",
+      "frontend/src/features/focus/",
+      "frontend/src/features/timeline/",
+      "frontend/src/i18n/messages/{en,ar,he}/{observations,focus,timeline}.json"
+    ],
+    "depends_on": [
+      "WP-05",
+      "WP-06"
+    ],
+    "spec_sections": [
+      "3",
+      "21",
+      "22",
+      "25",
+      "26",
+      "29",
+      "37",
+      "42"
+    ],
+    "description": "Backend, observations:\n- GET/POST /api/children/{id}/observations (filter by focus_area_id; cursor).\n- Only `observation` is required. Optional fields: focus_area_id (must be active and belong to the child), area, context (contexts key), support_level, what_helped {tags, text}, note, details {before, strength_noticed}, observed_at (defaults to now), client_request_id.\n- Idempotent per (created_by, client_request_id): a repeat returns the existing row with 200. Port src/server/services/observations.ts.\n- PUT /api/observations/{id}: author or admin only.\n- Parents get no access.\n\nBackend, timeline:\n- GET /api/children/{id}/timeline: one chronological, cursor-paginated list built from baselines, focus area created/closed, observations (both sources), content approved/completed, feedback and development_reviews.\n- Typed entries; no counts or percentages.\n- Extend dev_seed with a few Adam observations.\n\nFrontend:\n- features/observations: QuickObservation ported from src/features/observations/{quick-observation-form,shared}.tsx. Focus buttons, context emoji tiles, a what-happened textarea with dictation, 3 support buttons (Independent / With support / Needed a lot of support), what-helped chips, and a More section.\n- A /observe child picker and a centre + button in the phone bottom bar (registered via route nav metadata).\n- features/focus: FocusAreasPage with active, paused and completed lists, add from suggestions or custom, edit, pause, close and reactivate, and the 3-limit message.\n- features/timeline: TimelinePage using the ol border-s dot markup from the old child overview, with icons per entry type.",
+    "acceptance": [
+      "A POST with only observation text returns 201; the same client_request_id again returns 200 with the same id",
+      "Another teacher's child returns 404; a parent gets 404 on observations and timeline; an unknown context key returns 400",
+      "Timeline: rows inserted with mixed timestamps from all 6 sources come back in strict reverse chronological order, and cursor pages neither overlap nor skip",
+      "No numeric aggregate or percentage appears in the timeline payload",
+      "Quick observation at 375px: every target is 44px or larger, and saving takes 3 taps or fewer after typing the text",
+      "Timeline and observation screens render RTL; tests, tsc and build pass via remote-test.sh --all"
+    ]
+  },
+  {
+    "id": "WP-09",
+    "wave": 3,
+    "title": "AI core library: Claude provider, template provider, schemas, safety, context",
+    "owns_paths": [
+      "backend/app/ai/",
+      "backend/tests/test_ai_schemas.py",
+      "backend/tests/test_ai_safety.py",
+      "backend/tests/test_ai_service.py",
+      "backend/tests/test_ai_templates.py",
+      "backend/tests/test_ai_context.py"
+    ],
+    "depends_on": [
+      "WP-02",
+      "WP-04"
+    ],
+    "spec_sections": [
+      "2",
+      "14",
+      "15",
+      "17",
+      "18",
+      "23",
+      "24",
+      "27",
+      "30",
+      "31",
+      "33",
+      "35"
+    ],
+    "description": "A pure library with no routes; it runs in wave 3 because it is isolated. Implements architecture section 7.\n\nModules:\n- prompts.py: translate SYSTEM_PROMPT and FORMAT_GUIDE from src/lib/ai/prompts.ts, add the mode sections and the understanding prompt, and remove the blanket ban on the word problem.\n- schemas.py: StoryOut, ActivityOut, GameOut (6 templates with semantic validators), VideoPlanOut, PackOut, UnderstandingSuggestion and provider_schema(), porting toProviderJsonSchema from src/lib/ai/schemas.ts.\n- safety.py: CLINICAL_TERMS for all fields, CHILD_DEFICIT_TERMS for child-facing fields, URL check, allow-list; port of FORBIDDEN_CHILD_TERMS in src/lib/ai/schemas.ts with the ar/he additions.\n- context.py: build_context(child, profile, focus, target_strength, recent_observations, classmate_names, ...) as an allow-list, with name masking ported from src/server/services/profile.ts and caps.\n- claude_provider.py: the anthropic SDK beta.messages.create call exactly as in the architecture, including the error mapping.\n- service.py: generate(kind, ctx) and suggest_understanding(...) with validate, one repair, then template fallback.\n- template_provider.py and templates/*.json: copy the phrase strings from src/lib/ai/providers/demo.ts and extend them to the 10 spec 11 focus examples × 2 modes × story / real_world_activity / 6 games / video plan / pack × ar/he/en. Include the Adam garage game and the Maya story-builder.\n\nTests use a FakeClaude client queue; the real API is never called.",
+    "acceptance": [
+      "With no key, generate() returns valid, safety-clean output for every combination of mode × kind × template × language (parametrised test), with is_template=True",
+      "FakeClaude: valid output is accepted with no repair call; invalid then valid gives exactly one repair; invalid twice falls back to the template with fallback_reason AI_INVALID_OUTPUT; a timeout falls back with AI_TIMEOUT; stop_reason refusal falls back",
+      "The captured request has model claude-opus-5-5 (env override honoured), output_config.effort medium, a json_schema format, no thinking key, and the fallbacks/betas fields only when AI_SERVER_FALLBACK=true",
+      "provider_schema output has additionalProperties false on every object and no minLength/maxLength/minItems/maxItems/pattern keys",
+      "Safety: a clinical term in teacher_note is flagged; difficulty in a child-facing field is flagged but allowed in teacher_note; 'problem solving' passes; URLs are flagged; ar and he cases are covered",
+      "The context dict has exactly the documented keys; birth date, surname, parent contact, health and photo are never present; observation text masks the child's and classmates' names and is 300 characters or less; at most 5 observations and at most 3 items per list",
+      "A focus area with fewer than 3 observations gets status needs_more_observation in the understanding suggestion",
+      "The Adam fixture (growth_support, digital_game, focus joining_group_play) produces a game whose title references cars or building"
+    ]
+  },
+  {
+    "id": "WP-10",
+    "wave": 3,
+    "title": "Content player and the 6 game templates (frontend only)",
+    "owns_paths": [
+      "frontend/src/features/player/",
+      "frontend/src/features/games/",
+      "frontend/src/i18n/messages/{en,ar,he}/player.json"
+    ],
+    "depends_on": [
+      "WP-03"
+    ],
+    "spec_sections": [
+      "15",
+      "18",
+      "30",
+      "31",
+      "36",
+      "38"
+    ],
+    "description": "Types and players:\n- player/types.ts mirrors the JSON shapes in architecture section 7 (story, activity, game union, video plan).\n- Port src/features/player/content-player.tsx: StoryPlayer pages paragraphs with emoji illustrations, Back/Next swap in RTL, and browser speechSynthesis via useNarration when available.\n- ActivityView, ported from GuideView, with what_to_observe and adaptation sections.\n- VideoPlanView: scene cards plus a status badge.\n- PresentFrame: full-screen, press-and-hold exit (idea from src/features/child-mode/adult-exit.tsx, no PIN).\n- Direction always comes from content.language via dirOf.\n\nGames:\n- MultipleChoice, EmotionChoice and WhatHappensNext come from ActivityPlayer's option grid and gentle preferred-answer feedback.\n- Sequence is built from RoutinePlayer cards using tap-in-order.\n- MatchPairs uses tap-left then tap-right.\n- Categorize uses tap-item then tap-basket.\n- GameRenderer switches on template and shows a safe fallback for malformed data.\n- No drag library; no score, points or percentages.\n- Fixtures in player/fixtures/*.json for every type in 3 languages. This package can run in parallel with the backend work.",
+    "acceptance": [
+      "vitest: each of the 6 templates renders from its ar, he and en fixtures with the container dir matching the content language",
+      "vitest: malformed fixtures (an answer not among the choices, missing categories) render the fallback message and do not throw",
+      "vitest: rendered text from every fixture contains no digits-with-% and no score or points strings",
+      "StoryPlayer: in ar/he the Next button sits on the left and arrow icons are flipped",
+      "Sequence, MatchPairs and Categorize can be completed with taps only (testing-library click events)",
+      "tsc, test and build pass via remote-test.sh --frontend"
+    ]
+  },
+  {
+    "id": "WP-11",
+    "wave": 4,
+    "title": "Content generation, review/approve, sharing, Present view, feedback",
+    "owns_paths": [
+      "backend/app/routers/content.py",
+      "backend/app/routers/feedback.py",
+      "backend/app/services/content.py",
+      "backend/app/services/feedback.py",
+      "backend/app/schemas/content.py",
+      "backend/tests/test_content.py",
+      "backend/tests/test_feedback.py",
+      "frontend/src/features/content/",
+      "frontend/src/i18n/messages/{en,ar,he}/content.json"
+    ],
+    "depends_on": [
+      "WP-05",
+      "WP-06",
+      "WP-08",
+      "WP-09",
+      "WP-10"
+    ],
+    "spec_sections": [
+      "14",
+      "15",
+      "16",
+      "17",
+      "18",
+      "19",
+      "20",
+      "29",
+      "30",
+      "34",
+      "42",
+      "43",
+      "44",
+      "45"
+    ],
+    "description": "Backend, generation:\n- POST /api/children/{id}/content/generate {mode, content_type (story | real_world_activity | digital_game), template?, focus_area_id?, target_strength?, language}.\n- growth_support requires an active focus area; strength_builder requires a target strength from the profile.\n- Builds the context via ai.context (loads at most 5 recent observations and classmate names), calls ai.service.generate and stores a draft row with generation_input, ai_provider, ai_model, is_template and variant.\n\nBackend, content lifecycle:\n- GET /api/children/{id}/content: staff see all; parents see only shared rows with status approved or completed.\n- GET/PUT /api/content/{id}: PUT validates against the type schema plus safety, and editing approved content returns it to draft.\n- POST approve, regenerate {instruction?} (bumps variant, sets draft), share {shared} (approved or completed only), archive; DELETE for drafts only.\n- Port the transition table from src/features/content/workflow.ts.\n\nBackend, feedback:\n- POST /api/content/{id}/feedback {result, support_level, observation, what_helped}.\n- In one transaction: insert content_feedback, insert a mirrored observations row (source content_feedback, content_id, focus_area_id), and set status to completed.\n- Audit: content.generate, content.edit, content.approve, content.share.\n\nFrontend (features/content):\n- CreateContentPage (adapt src/features/content/studio-form.tsx): Mode, then focus area or strength, then type, with removable personalization chips.\n- ContentListPage.\n- ContentReviewPage (adapt content-review.tsx and body-editor.tsx): Preview / Edit / Approve / Regenerate / Delete, a 'Why this content' panel, and a Template-generated badge when is_template.\n- PresentPage (/content/:id/present, approved content only) using the WP-10 player.\n- FeedbackDialog (adapt src/features/goals/record-outcome.tsx: 🌟 🌤️ 🌧️ plus optional fields).\n- Parent pages /parent/children/:id/content and /parent/content/:id.",
+    "acceptance": [
+      "growth_support without an active focus returns 400; strength_builder with a strength not in the profile returns 400",
+      "With no key, the generated row is a draft with is_template=true, and generation_input contains no birth_date and no health",
+      "PUT on approved content returns it to draft; a PUT containing a clinical term in child-facing text returns 422 UNSAFE_CONTENT with issues",
+      "Share on a draft returns 409; a parent GET of a draft or of unshared content returns 404; a parent sees shared approved content",
+      "DELETE on approved content returns 409; regenerate keeps the id and increments variant",
+      "Feedback creates content_feedback, a mirrored observation and status completed; with an error forced after the first insert, none of the three persist",
+      "Adam spec-44 API test: growth_support digital_game, approve, feedback partly with the 8-minute note, and the timeline shows the content and the feedback",
+      "UI: the feedback dialog saves with 2 taps; Present is unavailable for drafts; all screens RTL; tsc, test and build pass via remote-test.sh --all"
+    ]
+  },
+  {
+    "id": "WP-12",
+    "wave": 5,
+    "title": "Current understanding, baseline validation, development review",
+    "owns_paths": [
+      "backend/app/routers/reviews.py",
+      "backend/app/services/reviews.py",
+      "backend/app/schemas/reviews.py",
+      "backend/tests/test_reviews.py",
+      "frontend/src/features/development/",
+      "frontend/src/i18n/messages/{en,ar,he}/development.json"
+    ],
+    "depends_on": [
+      "WP-06",
+      "WP-08",
+      "WP-09"
+    ],
+    "spec_sections": [
+      "3",
+      "12",
+      "22",
+      "23",
+      "24",
+      "25",
+      "26",
+      "27",
+      "29",
+      "42",
+      "44"
+    ],
+    "description": "Backend:\n- POST /api/children/{id}/development-reviews/suggest calls ai.service.suggest_understanding with the baseline, the current understanding, active focus areas and observations since the last review. It returns the suggestion and writes nothing.\n- POST /api/children/{id}/development-reviews saves the teacher-approved review: summary, focus_review with decisions, baseline_validation, understanding, ai_suggested.\n- In one transaction it applies the focus decisions (keep, pause, close to completed with closed_at, edit title or description) and sets child_profiles.current_understanding to the understanding with source review, review_id and approved_by/at.\n- It never touches baselines.\n- GET /api/children/{id}/development-reviews lists past reviews.\n- Audit: review.approve.\n\nFrontend (features/development):\n- DevelopmentPage (/children/:id/development): Baseline and Current understanding side by side (stacked on phone), baseline validation chips using Badge tones, the reviews list.\n- ReviewPage (/children/:id/review/new): one card per active focus with 5 status chips and keep / pause / close / edit, a summary textarea, a 'Suggest' button that fills the draft from /suggest, and Save.\n- Observational wording only. No numbers.",
+    "acceptance": [
+      "/suggest leaves the row counts of every table unchanged",
+      "With fewer than 3 observations for a focus, the suggestion status for that focus is needs_more_observation",
+      "Saving a review updates current_understanding; the original baselines row stays byte-identical",
+      "A close decision sets the focus to completed with closed_at; a 'keep' that would exceed 3 active focus areas is rejected",
+      "A parent POST to reviews returns 404",
+      "The review appears in the timeline",
+      "No percentage or score appears in payloads or UI strings (test)",
+      "The UI renders RTL; tsc, test and build pass via remote-test.sh --all"
+    ]
+  },
+  {
+    "id": "WP-13",
+    "wave": 5,
+    "title": "Small/weekly pack, video content plan, video_service abstraction",
+    "owns_paths": [
+      "backend/app/services/packs.py",
+      "backend/app/services/video_service.py",
+      "backend/app/routers/video.py",
+      "backend/app/services/content.py",
+      "backend/tests/test_packs.py",
+      "backend/tests/test_video.py",
+      "frontend/src/features/pack/",
+      "frontend/src/features/content/CreateContentPage.tsx",
+      "frontend/src/i18n/messages/{en,ar,he}/pack.json"
+    ],
+    "depends_on": [
+      "WP-09",
+      "WP-10",
+      "WP-11"
+    ],
+    "spec_sections": [
+      "15",
+      "16",
+      "31",
+      "33",
+      "42"
+    ],
+    "description": "Pack:\n- Extend the generate dispatch in services/content.py (owned here in wave 5) with content_type pack (plus include_video?) and video.\n- services/packs.py takes one child and one active focus area and produces 3 draft rows sharing a pack_id: a story with exactly 3 discussion questions, a real_world_activity and a digital_game. This uses one Claude PackOut call, or 3 template calls without a key.\n\nVideo:\n- A video row is created only when content_type is video, or when a pack has include_video=true.\n- The content holds a VideoPlanOut, and video_status starts at script_ready.\n- services/video_service.py exposes create_video_job, check_video_status and get_video_url, with a placeholder provider selected by VIDEO_PROVIDER=none.\n- routers/video.py: POST/GET /api/content/{id}/video-job. With no provider it returns status script_ready and a provider_not_configured notice, never an error. No external calls.\n\nFrontend:\n- CreateContentPage gains the Small pack and Video options.\n- features/pack PackView (/packs/:packId) stacks the story, activity and game with per-item approve and an Approve all action.\n- The video job status is shown through the WP-10 VideoPlanView.",
+    "acceptance": [
+      "A pack request creates exactly 3 draft rows with the same pack_id; the story has exactly 3 questions; it requires an active focus area",
+      "A pack without include_video creates no video row",
+      "A video row has video_status script_ready and duration_seconds between 30 and 90",
+      "POST video-job with VIDEO_PROVIDER=none returns 200 with status script_ready and provider_not_configured, and no outbound HTTP is attempted (monkeypatched socket test)",
+      "Approve all in PackView approves all 3 rows; editing one returns only that row to draft",
+      "tsc, test and build pass via remote-test.sh --all"
+    ]
+  },
+  {
+    "id": "WP-14",
+    "wave": 6,
+    "title": "Production deploy, cutover, docs rewrite, legacy removal, end-to-end loop test",
+    "owns_paths": [
+      "deploy/install.sh",
+      "deploy/deploy.sh",
+      "deploy/remote-deploy.sh",
+      "deploy/deploy-kids.ps1",
+      "deploy/cutover.sh",
+      "deploy/README.md",
+      "deploy/nginx/",
+      "deploy/systemd/",
+      "backend/tests/test_loop.py",
+      "README.md",
+      "ARCHITECTURE.md",
+      "DECISIONS.md",
+      "ROADMAP.md",
+      "PRIVACY.md",
+      "AGENTS.md",
+      "CLAUDE.md",
+      ".gitignore",
+      "legacy removal: src/, prisma/, tests/, scripts/, public/, package.json, package-lock.json, next.config.ts, next-env.d.ts, tsconfig.json, eslint.config.mjs, postcss.config.mjs, vitest.config.mts, playwright.config.ts, docker-compose.yml, docs/kiosk.md, root .prettierrc"
+    ],
+    "depends_on": [
+      "WP-01",
+      "WP-02",
+      "WP-03",
+      "WP-04",
+      "WP-05",
+      "WP-06",
+      "WP-07",
+      "WP-08",
+      "WP-09",
+      "WP-10",
+      "WP-11",
+      "WP-12",
+      "WP-13"
+    ],
+    "spec_sections": [
+      "1",
+      "35",
+      "39",
+      "42",
+      "43",
+      "44",
+      "47",
+      "48"
+    ],
+    "description": "Implements architecture section 11.\n\ninstall.sh (adapted from the current one):\n- apt --no-upgrade python3.12-venv, python3-pip, rsync\n- user kidsphere; /var/www/kidsphere/{backend,frontend,uploads,releases}; /var/backups/kidsphere\n- role and DB kidsphere (UTF8, template0); backend/.env written on the server with mode 600\n- kidsphere-api.service; nginx site with the takeover loop and ENABLE_SITE flag; headers snippet and rate-limit conf; reuse the existing certificate\n- runs deploy.sh\n\ndeploy.sh: release dir, CI gate via deploy/ci/server-run.sh, rsync --delete, hash-gated pip/npm, pg_dump, alembic upgrade, atomic dist swap, restart, health and smoke curls.\n\nremote-deploy.sh and deploy-kids.ps1: new variables (APP_DIR=/var/www/kidsphere, SERVICE=kidsphere-api, APP_USER=kidsphere, DB_NAME=kidsphere, PORT=3071). Drop BUILD_LOCALLY.\n\ncutover.sh and README: the runbook (dump kidsphere_app, install with ENABLE_SITE=0, import the admin via psql into app.cli import-users, enable the site, disable kidsphere-app, rollback steps, later cleanup). README also covers everything spec 47 lists.\n\ntest_loop.py: the full spec-44 Adam loop through the API:\n1. create child\n2. wizard sections\n3. baseline\n4. focus\n5. generate a game (template)\n6. approve\n7. feedback partly\n8. observation 'asked another child to build with him without prompting'\n9. review suggest and save\n\nIt then asserts that current_understanding differs from the baseline, the baseline is unchanged, and the timeline holds every step.\n\nLegacy removal:\n- Tag legacy-nextjs at the last commit containing the Next app.\n- git rm the legacy tree.\n- Update .gitignore; keep .gitattributes.\n\nDocs: rewrite the 7 docs for the FastAPI/Vite stack, carrying over the security and privacy principles from PRIVACY.md and DECISIONS.md. AGENTS.md and CLAUDE.md must say: never run locally, test with deploy/ci/remote-test.sh.",
+    "acceptance": [
+      "git tag legacy-nextjs exists; the repo root has no next/prisma/vitest/playwright/docker files; grep for next/, prisma and docker-compose in the docs finds nothing",
+      "install.sh runs twice with exit 0 and the second run is a no-op",
+      "A deploy containing a failing test aborts before alembic and leaves the live site unchanged",
+      "A pg_dump file is created before every migration",
+      "During a deploy, https://kids.kortexd.com keeps returning 200 throughout the frontend build (dist swap)",
+      "After deploy, /api/health returns 200 {status:'ok'}; /children/x returns index.html; unauthenticated /api/children returns 401; /uploads/anything returns 404",
+      "Response headers contain a CSP without unsafe-inline in script-src, plus HSTS, nosniff, X-Frame-Options DENY and Referrer-Policy no-referrer",
+      "A burst of logins hits the nginx 429",
+      "The existing admin logs in at kids.kortexd.com with their current password after import",
+      "kidsphere-app is disabled; the rollback runbook was exercised once on the server and restored the old site",
+      "test_loop.py passes via remote-test.sh --backend"
+    ]
+  }
+]
