@@ -7,8 +7,11 @@ demo-parent (Adam) and demo-parent-maya (Maya), all with one fresh random
 password that is printed once. Adds Adam and Maya with completed profiles
 (parent + teacher perspectives), Adam's Current Focus "joining group play"
 with a Strength → Need → Adaptation → What we will do → Follow-up plan, and a
-baseline for each child. Children that already exist in the demo class are
-left untouched, so running it twice is safe.
+baseline for each child dated three weeks ago, followed by a few quick
+observations that show development over time on the timeline (Adam: from
+watching the block corner to inviting a friend; Maya: storytelling).
+Children that already exist in the demo class are left untouched, so running
+it twice is safe.
 
 Refuses to run unless the database name ends with ``_test`` or ``_preview``
 or the environment has ``KIDSPHERE_ALLOW_DEMO=1``.
@@ -16,17 +19,24 @@ or the environment has ``KIDSPHERE_ALLOW_DEMO=1``.
 import os
 import secrets
 import sys
-from datetime import date
+import uuid
+from datetime import date, timedelta
 
-from sqlalchemy import make_url, select
+from sqlalchemy import make_url, select, update
 from sqlalchemy.orm import Session
 
+from app import vocab
 from app.config import settings
-from app.models import Child, ChildParent, ChildProfile, Class, ClassTeacher, User
+from app.models import Baseline, Child, ChildParent, ChildProfile, Class, ClassTeacher, FocusArea, Observation, User
 from app.schemas.focus import FocusCreate
 from app.schemas.profile import ProfilePatch
 from app.security import hash_password
 from app.services import baselines, focus_areas, profiles
+from app.sessions import utcnow
+
+# The demo story starts this many days ago (baseline and focus), so the
+# observations below land after it on the timeline.
+STORY_DAYS = 21
 
 CLASS_NAME = "Butterflies"
 KINDERGARTEN = "Sunflower Kindergarten (demo)"
@@ -156,8 +166,55 @@ MAYA = {
 }
 
 
+# (days ago, context, support_level, what_helped keys, text, did_it_change)
+ADAM_OBSERVATIONS = (
+    (18, "free_play", "significant_support", ["adult_mediation"],
+     "Watched the children at the block corner for a long time and did not join.", None),
+    (12, "free_play", "some_support", ["adult_mediation", "advance_preparation"],
+     "With the teacher next to him, joined Sami building a garage for a few minutes.", "partly"),
+    (6, "structured_activity", "some_support", ["peer_modeling"],
+     "Practised \"Can we build this together?\" with a puppet, then said it to Lina.", "partly"),
+    (2, "free_play", "independent", [],
+     "Went to the block corner and asked Omar: \"Can we build this together?\" They built a long road.", "yes"),
+)
+
+MAYA_OBSERVATIONS = (
+    (15, "group_time", "independent", [], "Told a long story about a lion who lost his way, with a beginning and an end.", None),
+    (8, "art", "independent", [], "Drew three animals and explained what each one was doing.", None),
+    (3, "free_play", "some_support", ["adult_mediation"],
+     "Made up a story with two friends; with a reminder she let them add their own ideas.", "partly"),
+)
+
+
+def _baseline_at(db: Session, teacher: User, child: Child, when) -> None:
+    """Same snapshot as baselines.create_baseline, dated ``when`` (demo only; rows stay immutable)."""
+    profile = profiles.get_profile_row(db, child.id)
+    focus_rows = baselines.active_focus_rows(db, child.id)
+    data = baselines.build_baseline_data(db, teacher, child, profile, focus_rows, when)
+    row = Baseline(child_id=child.id, baseline_data=data, created_by=teacher.id, created_at=when)
+    db.add(row)
+    db.flush()
+    if profile.wizard_completed_at is None:
+        profile.wizard_completed_at = when
+    if not profile.current_understanding:
+        profile.current_understanding = baselines.initial_understanding(child, profile, focus_rows, teacher.language or "en", row.id, when)
+    db.commit()
+
+
+def _observations(db: Session, teacher: User, child: Child, rows, focus_id=None, area=None) -> None:
+    now = utcnow()
+    for days, context, support, helps, text, changed in rows:
+        db.add(Observation(
+            child_id=child.id, focus_area_id=focus_id, source="quick", observed_at=now - timedelta(days=days, hours=3),
+            area=area, context=context, observation=text, support_level=support,
+            what_helped=[{"key": k} for k in helps] or None,
+            details={"did_it_change": changed} if changed else None, created_by=teacher.id,
+        ))
+    db.commit()
+
+
 def _seed_child(db: Session, teacher: User, parent: User, klass: Class, name: str, birth: date, gender: str,
-                answers: dict, focus: dict | None) -> tuple[Child, bool]:
+                answers: dict, focus: dict | None, observations=()) -> tuple[Child, bool]:
     existing = db.scalars(select(Child).where(Child.class_id == klass.id, Child.name == name)).first()
     if existing is not None:
         return existing, False
@@ -173,12 +230,18 @@ def _seed_child(db: Session, teacher: User, parent: User, klass: Class, name: st
         for section, data in sections.items():
             _patch(db, teacher, child, perspective, section, data, step)
             step = min(step + 1, 7)
+    started = utcnow() - timedelta(days=STORY_DAYS)
+    focus_id = None
     if focus:
-        focus_areas.create_focus(db, teacher, child.id, FocusCreate(**focus))
+        focus_id = uuid.UUID(focus_areas.create_focus(db, teacher, child.id, FocusCreate(**focus))["focus_area"]["id"])
+        db.execute(update(FocusArea).where(FocusArea.id == focus_id).values(created_at=started))
+        db.commit()
     profiles.update_profile(db, teacher, child.id, ProfilePatch(wizard_step=7, complete=True))
     parent_db = db.get(User, parent.id)
     profiles.update_profile(db, parent_db, child.id, ProfilePatch(wizard_step=7, complete=True))
-    baselines.create_baseline(db, teacher, child.id)
+    _baseline_at(db, teacher, child, started + timedelta(minutes=5))
+    category = (vocab.item("focus_suggestions", focus["suggestion_key"]) or {}).get("category") if focus and focus.get("suggestion_key") else None
+    _observations(db, teacher, child, observations, focus_id=focus_id, area=category)
     return child, True
 
 
@@ -197,8 +260,10 @@ def seed(db: Session, password: str | None = None) -> dict:
         db.add(ClassTeacher(class_id=klass.id, user_id=teacher.id))
     db.commit()
 
-    adam, adam_new = _seed_child(db, teacher, users["demo-parent"], klass, "Adam", _birth_date(4, 2), "boy", ADAM, ADAM_FOCUS)
-    maya, maya_new = _seed_child(db, teacher, users["demo-parent-maya"], klass, "Maya", _birth_date(5, 1), "girl", MAYA, None)
+    adam, adam_new = _seed_child(db, teacher, users["demo-parent"], klass, "Adam", _birth_date(4, 2), "boy", ADAM, ADAM_FOCUS,
+                                 ADAM_OBSERVATIONS)
+    maya, maya_new = _seed_child(db, teacher, users["demo-parent-maya"], klass, "Maya", _birth_date(5, 1), "girl", MAYA, None,
+                                 MAYA_OBSERVATIONS)
     return {
         "password": password,
         "users": [email for email, _, _ in USERS],

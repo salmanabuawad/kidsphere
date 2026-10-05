@@ -1,0 +1,22 @@
+{
+  "title": "Development timeline",
+  "intro": "What happened, newest first.",
+  "empty": "Nothing on the timeline yet",
+  "emptyHint": "Observations, focus changes and feedback on content will appear here.",
+  "addObservation": "Add observation",
+  "loadOlder": "Load older",
+  "types": {
+    "baseline": "Baseline created",
+    "focus_opened": "New focus",
+    "focus_closed_completed": "Focus completed",
+    "focus_closed_paused": "Focus paused",
+    "observation": "Observation",
+    "content_feedback": "Feedback",
+    "content_approved": "Content approved",
+    "review": "Development review"
+  },
+  "feedbackOn": "After “{title}”",
+  "focusLink": "Focus: {title}",
+  "baselineText": "The starting picture of strengths, interests and what helps was saved.",
+  "openReview": "Open development"
+}

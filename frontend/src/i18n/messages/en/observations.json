@@ -1,0 +1,50 @@
+{
+  "title": "Quick observation",
+  "intro": "Write what you saw. Everything else is optional.",
+  "back": "Back to profile",
+  "context": "Where?",
+  "focus": "Current Focus",
+  "what": "What happened?",
+  "whatPlaceholder": "For example: asked a friend to build together",
+  "required": "Please write what happened.",
+  "support": "How much support was needed?",
+  "supportLevels": {
+    "independent": "Independent",
+    "some_support": "With support",
+    "significant_support": "Difficult",
+    "not_observed": "Not observed"
+  },
+  "helped": "What helped?",
+  "helpedOther": "Something else that helped",
+  "add": "Add",
+  "remove": "Remove {label}",
+  "more": "More details (optional)",
+  "time": "When",
+  "now": "Now",
+  "changeTime": "Change the time",
+  "useNow": "Use now",
+  "note": "Note",
+  "model": {
+    "title": "Observation model (optional)",
+    "what_i_see": "What do I see?",
+    "when": "When and where does it happen?",
+    "what_needed": "What was needed?",
+    "what_we_did": "What did we do?",
+    "did_it_change": "Did something change?",
+    "yes": "Yes",
+    "partly": "Partly",
+    "no": "Not yet"
+  },
+  "save": "Save observation",
+  "saved": "Observation saved",
+  "picker": {
+    "title": "Who did you observe?",
+    "search": "Search for a child",
+    "recent": "Recently observed",
+    "all": "All children",
+    "empty": "No child matches the search.",
+    "noChildren": "There are no children yet.",
+    "lastObserved": "Last observation {when}",
+    "never": "No observations yet"
+  }
+}

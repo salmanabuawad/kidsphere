@@ -1,0 +1,22 @@
+{
+  "title": "مسار التطور",
+  "intro": "ما حدث، من الأحدث إلى الأقدم.",
+  "empty": "لا شيء في المسار بعد",
+  "emptyHint": "ستظهر هنا الملاحظات وتغييرات التركيز والتقييمات بعد استخدام المحتوى.",
+  "addObservation": "إضافة ملاحظة",
+  "loadOlder": "عرض الأقدم",
+  "types": {
+    "baseline": "تم إنشاء نقطة البداية",
+    "focus_opened": "تركيز جديد",
+    "focus_closed_completed": "اكتمل التركيز",
+    "focus_closed_paused": "توقف التركيز مؤقتاً",
+    "observation": "ملاحظة",
+    "content_feedback": "انطباع بعد الاستخدام",
+    "content_approved": "تمت الموافقة على المحتوى",
+    "review": "مراجعة التطور"
+  },
+  "feedbackOn": "بعد «{title}»",
+  "focusLink": "التركيز: {title}",
+  "baselineText": "تم حفظ الصورة الأولى لمواطن القوة والاهتمامات وما يساعد.",
+  "openReview": "فتح صفحة التطور"
+}

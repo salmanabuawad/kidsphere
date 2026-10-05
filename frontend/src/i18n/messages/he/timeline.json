@@ -1,0 +1,22 @@
+{
+  "title": "ציר ההתפתחות",
+  "intro": "מה קרה, מהחדש לישן.",
+  "empty": "עדיין אין כלום בציר הזמן",
+  "emptyHint": "כאן יופיעו תצפיות, שינויים במיקוד ומשוב על תוכן.",
+  "addObservation": "הוספת תצפית",
+  "loadOlder": "הצגת ישנים יותר",
+  "types": {
+    "baseline": "נוצרה תמונת פתיחה",
+    "focus_opened": "מיקוד חדש",
+    "focus_closed_completed": "המיקוד הושלם",
+    "focus_closed_paused": "המיקוד הושהה",
+    "observation": "תצפית",
+    "content_feedback": "משוב",
+    "content_approved": "תוכן אושר",
+    "review": "סקירת התפתחות"
+  },
+  "feedbackOn": "אחרי „{title}”",
+  "focusLink": "מיקוד: {title}",
+  "baselineText": "נשמרה תמונת הפתיחה של החוזקות, תחומי העניין ומה שעוזר.",
+  "openReview": "מעבר להתפתחות"
+}
