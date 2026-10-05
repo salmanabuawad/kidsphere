@@ -6,7 +6,9 @@ observation outside the user's scope is a 404 too.
 
 Idempotency: a POST with a ``client_request_id`` that this user already used
 returns the existing row (HTTP 200 instead of 201). Two concurrent requests
-are resolved by the UNIQUE (created_by, client_request_id) constraint.
+are resolved by the UNIQUE (created_by, client_request_id) constraint. Content
+feedback stores its ids in the same column, so an id used for another child or
+for a feedback is 409 DUPLICATE.
 
 Observation JSON::
 
@@ -131,6 +133,8 @@ def _existing(db: Session, user: User, request_id: str) -> Observation | None:
 def _replay(db: Session, child, existing: Observation) -> tuple[dict, bool]:
     if existing.child_id != child.id:
         raise AppError("DUPLICATE", "This request id was already used for another child.")
+    if existing.source != "quick":  # content feedback shares the (created_by, client_request_id) namespace
+        raise AppError("DUPLICATE", "This request id was already used for content feedback.")
     return {"observation": observation_out(db, existing.id)}, False
 
 

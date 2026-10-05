@@ -5,7 +5,8 @@ Generation
     ACTIVE focus areas; strength_builder → a profile strength key or a
     ``strength_targets`` key), builds the allow-listed AIContext (child, profile,
     focus incl. its plan, at most 5 recent observations for that focus or else the
-    most recent ones, classmate names for masking, the current understanding),
+    most recent ones, the names to mask (other children of the kindergarten,
+    the parents and the teachers), the current understanding),
     calls ``app.ai.generate`` and inserts DRAFT rows. The profile is never changed.
 
 Pack storage (content_type has no 'pack' value)
@@ -46,7 +47,7 @@ Parents get the first line plus ``content`` (detail, without teacher_note).
 import copy
 import uuid
 
-from sqlalchemy import select
+from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
 
 from app import access, vocab
@@ -57,7 +58,10 @@ from app.errors import AppError
 from app.models import (
     LANGUAGE_VALUES,
     Child,
+    ChildParent,
     ChildProfile,
+    Class,
+    ClassTeacher,
     ContentFeedback,
     FocusArea,
     GeneratedContent,
@@ -311,12 +315,34 @@ def _recent_observations(db: Session, child_id, focus_id=None) -> list[str]:
     return query()
 
 
-def _classmate_names(db: Session, child: Child) -> list[str]:
-    if child.class_id is None:
-        return []
-    rows = db.execute(select(Child.name, Child.preferred_name)
-                      .where(Child.class_id == child.class_id, Child.id != child.id)).all()
-    return [n for row in rows for n in row if n]
+def _kindergarten_classes(child: Child):
+    """The ids of every class of the child's kindergarten (shared yard, mixed activities)."""
+    kindergarten = select(Class.kindergarten).where(Class.id == child.class_id).scalar_subquery()
+    return select(Class.id).where(Class.kindergarten == kindergarten)
+
+
+def classmate_names(db: Session, child: Child) -> list[str]:
+    """Names (full and preferred) of the other children, for masking in AI input as [friend]:
+    every child of the same kindergarten and every child without a class; every other child
+    when this one has no class."""
+    stmt = select(Child.name, Child.preferred_name).where(Child.id != child.id)
+    if child.class_id is not None:
+        stmt = stmt.where(or_(Child.class_id.in_(_kindergarten_classes(child)), Child.class_id.is_(None)))
+    return [n for row in db.execute(stmt).all() for n in row if n]
+
+
+def adult_names(db: Session, child: Child) -> list[str]:
+    """Names of the adults around the child, for masking in AI input as [adult]: the parent name on
+    the child, the linked parent accounts and the teachers of the kindergarten's classes (of every
+    class when the child has no class)."""
+    names = [child.parent_name]
+    names += db.scalars(select(User.name).join(ChildParent, ChildParent.user_id == User.id)
+                        .where(ChildParent.child_id == child.id)).all()
+    teachers = select(User.name).join(ClassTeacher, ClassTeacher.user_id == User.id)
+    if child.class_id is not None:
+        teachers = teachers.where(ClassTeacher.class_id.in_(_kindergarten_classes(child)))
+    names += db.scalars(teachers.distinct()).all()
+    return [n for n in names if n]
 
 
 def _context(db: Session, child: Child, profile: ChildProfile | None, *, mode: str, kind: str, language: str,
@@ -331,7 +357,8 @@ def _context(db: Session, child: Child, profile: ChildProfile | None, *, mode: s
         focus=focus,
         target_strength=target,
         recent_observations=_recent_observations(db, child.id, focus.id if focus is not None else None),
-        classmate_names=_classmate_names(db, child),
+        classmate_names=classmate_names(db, child),
+        adult_names=adult_names(db, child),
         current_understanding=profile.current_understanding if profile else None,
         template=template,
         instruction=instruction,

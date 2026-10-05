@@ -6,7 +6,11 @@ Staff only; parents (and anyone out of scope) get 404, like observations.
 - ``suggest`` builds the AI context, the observations since the latest baseline,
   the active focus areas and the key baseline items, and asks
   ``app.ai.suggest_understanding_result`` (Claude or templates; the B6 downgrade
-  is applied there). It writes nothing (the session is rolled back).
+  is applied there). It writes nothing (the session is rolled back). As for
+  content generation, every free text sent to the AI has the child's names
+  masked as [child], other children's names as [friend] and the parents' and
+  teachers' names as [adult], and custom entries that only a parent gave are
+  not sent.
 - ``create_review`` runs in ONE transaction: focus decisions (pause/close first,
   then edits, then keep-reactivations and creates against the 3-active limit;
   409 FOCUS_LIMIT rolls back everything), the ``development_reviews`` row,
@@ -42,6 +46,7 @@ from sqlalchemy.orm import Session
 
 from app import vocab
 from app.ai import build_context, suggest_understanding_result
+from app.ai.context import staff_confirmed
 from app.ai.safety import text_issues
 from app.audit import audit
 from app.errors import AppError
@@ -49,6 +54,7 @@ from app.models import Baseline, Child, ChildProfile, DevelopmentReview, FocusAr
 from app.schemas.profile import ident
 from app.schemas.reviews import NEEDS_MORE, WHAT_HELPS_LISTS, ReviewCreate, ReviewItem, SuggestIn
 from app.services.baselines import initial_understanding, support_needs
+from app.services.content import adult_names, classmate_names
 from app.services.focus_areas import MAX_ACTIVE, active_count, focus_out
 from app.services.observations import staff_child
 from app.services.profiles import get_profile_row, iso, perspective
@@ -102,15 +108,6 @@ def _active_focus(db: Session, child_id) -> list[FocusArea]:
     ))
 
 
-def _classmate_names(db: Session, child: Child) -> list[str]:
-    if child.class_id is None:
-        return []
-    rows = db.execute(
-        select(Child.name, Child.preferred_name).where(Child.class_id == child.class_id, Child.id != child.id)
-    ).all()
-    return [n for row in rows for n in row if n]
-
-
 def _profile(db: Session, child_id) -> ChildProfile | None:
     return db.scalars(select(ChildProfile).where(ChildProfile.child_id == child_id)).first()
 
@@ -141,12 +138,17 @@ def _as_item(raw) -> dict | None:
     return None
 
 
-def _list_items(list_name: str, items, lang: str) -> list[dict]:
+def _sendable(it: dict, for_ai: bool) -> bool:
+    """For the AI, a custom entry needs a staff source: a parent's own wording is never sent."""
+    return not for_ai or bool(it.get("key")) or staff_confirmed(it)
+
+
+def _list_items(list_name: str, items, lang: str, for_ai: bool = False) -> list[dict]:
     lookup = {"strengths": ("strengths",), "interests": ("interests",)}.get(list_name, WHAT_HELPS_LISTS)
     out = []
     for raw in items or []:
         it = _as_item(raw)
-        if it is None:
+        if it is None or not _sendable(it, for_ai):
             continue
         if it.get("key"):
             lists = ((it["list"],) if it.get("list") else ()) + lookup
@@ -161,7 +163,7 @@ def _list_items(list_name: str, items, lang: str) -> list[dict]:
     return out
 
 
-def _support_need_items(needs: dict, lang: str) -> list[dict]:
+def _support_need_items(needs: dict, lang: str, for_ai: bool = False) -> list[dict]:
     out: list[dict] = []
     seen: set[str] = set()
     for entry in needs.get("independence") or []:
@@ -173,7 +175,7 @@ def _support_need_items(needs: dict, lang: str) -> list[dict]:
                 out.append({"list": "support_needs", "key": area, "custom": None, "label": label})
     for raw in needs.get("sensitivities") or []:
         it = _as_item(raw)
-        if it is None:
+        if it is None or not _sendable(it, for_ai):
             continue
         if it.get("key"):
             label = _label(("sensitivities",), it["key"], lang)
@@ -186,11 +188,14 @@ def _support_need_items(needs: dict, lang: str) -> list[dict]:
     return out[:ITEM_LIMITS["support_needs"]]
 
 
-def baseline_items(baseline: Baseline | None, profile: ChildProfile | None, focus_rows, lang: str) -> list[dict]:
+def baseline_items(baseline: Baseline | None, profile: ChildProfile | None, focus_rows, lang: str,
+                   for_ai: bool = False) -> list[dict]:
     """The key initial assumptions to validate: {list, key|custom, label}.
 
     From the latest baseline snapshot; without a baseline, from the current
     profile lists and active focus areas. Focus items use the focus area id as key.
+    ``for_ai=True`` leaves out custom entries that only a parent gave (the copy sent to the AI;
+    the review screen gets every item).
     """
     if baseline is not None:
         data = baseline.baseline_data or {}
@@ -204,8 +209,8 @@ def baseline_items(baseline: Baseline | None, profile: ChildProfile | None, focu
         focus = [{"id": str(f.id), "title": f.title} for f in focus_rows]
     items: list[dict] = []
     for name in PROFILE_LISTS:
-        items += _list_items(name, lists[name], lang)
-    items += _support_need_items(needs, lang)
+        items += _list_items(name, lists[name], lang, for_ai)
+    items += _support_need_items(needs, lang, for_ai)
     for f in focus[:3]:
         items.append({"list": "focus", "key": str(f["id"]), "custom": None, "label": (f.get("title") or "")[:160] or "-"})
     return items
@@ -287,13 +292,20 @@ def suggest(db: Session, user: User, child_id, body: SuggestIn | None) -> dict:
     focus_rows = _active_focus(db, child.id)
     observations = observations_since(db, child.id, since)
     context = draft_context(db, child, lang, profile=profile, baseline=baseline, focus_rows=focus_rows)
-    names = _classmate_names(db, child)
+    # Every free text that may reach the AI is masked right before the call (app.ai.service):
+    # the child's names → [child], other children's → [friend], parents' and teachers' → [adult]
+    # (observations, focus areas, baseline items, custom labels, the current understanding), as
+    # for content generation. The context keeps the teacher's wording for the template provider.
+    # Custom entries only a parent gave are left out of what the AI gets.
     ctx = build_context(
         child=child, profile=profile, mode=None, content_type="understanding", language=lang,
-        classmate_names=names, current_understanding=profile.current_understanding if profile else None,
+        current_understanding=profile.current_understanding if profile else None, mask_free_text=False,
     )
-    result = suggest_understanding_result(ctx, observations, focus_rows, context["baseline_items"],
-                                          classmate_names=names, baseline_at=since)
+    ai_items = baseline_items(baseline, profile, focus_rows, lang, for_ai=True)
+    result = suggest_understanding_result(ctx, observations, focus_rows, ai_items,
+                                          child_names=[child.name, child.preferred_name],
+                                          classmate_names=classmate_names(db, child),
+                                          adult_names=adult_names(db, child), baseline_at=since)
     db.rollback()  # nothing above may persist
     return {
         "suggestion": result.suggestion.model_dump(mode="json"),

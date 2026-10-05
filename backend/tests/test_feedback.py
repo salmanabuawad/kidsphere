@@ -131,3 +131,104 @@ def test_feedback_is_one_transaction(client_for, teacher, approved, db, monkeypa
     assert db.scalars(select(Observation)).all() == []
     assert db.scalars(select(ContentFeedback)).all() == []
     assert db.get(GeneratedContent, c["id"]).status == "approved"
+
+
+# --------------------------------------------------------------------------- idempotency (client_request_id)
+
+
+def counts(db):
+    db.expire_all()
+    return len(db.scalars(select(ContentFeedback)).all()), len(db.scalars(select(Observation)).all())
+
+
+def test_double_submit_with_one_request_id_saves_one_feedback(teacher_client, approved, db):
+    _, _, c = approved
+    body = {"result": "worked_well", "observation": "Asked a friend to join.", "client_request_id": "fb-req-1"}
+    first = teacher_client.post(fb_url(c), json=body)
+    assert first.status_code == 201, first.text
+    again = teacher_client.post(fb_url(c), json=body)
+    assert again.status_code == 200, again.text
+    assert again.json()["feedback"] == first.json()["feedback"]
+    assert set(again.json()) == {"feedback", "content"} and again.json()["content"]["status"] == "completed"
+    assert len(again.json()["content"]["feedback"]) == 1
+
+    assert counts(db) == (1, 1)
+    (obs,) = db.scalars(select(Observation)).all()
+    assert obs.client_request_id == "fb-req-1" and obs.source == "content_feedback"
+    assert len(audit_rows(db, "feedback.create")) == 1
+
+    # A retry is answered from the first save even when the body differs or the content moved on.
+    assert teacher_client.post(f"/api/content/{c['id']}/archive").status_code == 200
+    late = teacher_client.post(fb_url(c), json={**body, "result": "partly"})
+    assert late.status_code == 200, late.text
+    assert late.json()["feedback"]["id"] == first.json()["feedback"]["id"]
+    assert late.json()["feedback"]["result"] == "worked_well" and late.json()["content"]["status"] == "archived"
+    assert counts(db) == (1, 1)
+
+
+def test_new_request_id_is_a_new_feedback(teacher_client, approved, db):
+    _, _, c = approved
+    assert teacher_client.post(fb_url(c), json={"result": "partly", "client_request_id": "a"}).status_code == 201
+    assert teacher_client.post(fb_url(c), json={"result": "partly", "client_request_id": "b"}).status_code == 201
+    assert teacher_client.post(fb_url(c), json={"result": "partly"}).status_code == 201
+    assert counts(db) == (3, 3)
+
+
+def test_request_id_reused_for_other_content_or_an_observation_is_a_duplicate(teacher_client, approved, db):
+    child, focus, c = approved
+    other = generate(teacher_client, child, focus, kind="story")["content"]
+    approve(teacher_client, other["id"])
+    assert teacher_client.post(fb_url(c), json={"result": "partly", "client_request_id": "same"}).status_code == 201
+    r = teacher_client.post(fb_url(other), json={"result": "partly", "client_request_id": "same"})
+    assert r.status_code == 409 and r.json()["error"]["code"] == "DUPLICATE"
+
+    r = teacher_client.post(f"/api/children/{child.id}/observations",
+                            json={"observation": "Built a garage.", "client_request_id": "quick-1"})
+    assert r.status_code == 201, r.text
+    r = teacher_client.post(fb_url(c), json={"result": "partly", "client_request_id": "quick-1"})
+    assert r.status_code == 409 and r.json()["error"]["code"] == "DUPLICATE"
+    # ... and the other way round: a quick observation cannot reuse a feedback's id.
+    r = teacher_client.post(f"/api/children/{child.id}/observations", json={"observation": "x", "client_request_id": "same"})
+    assert r.status_code == 409 and r.json()["error"]["code"] == "DUPLICATE"
+    assert counts(db) == (1, 2)
+    db.expire_all()
+    assert db.get(GeneratedContent, other["id"]).status == "approved"
+
+
+def test_request_ids_are_per_author(teacher_client, admin_client, approved, db):
+    _, _, c = approved
+    assert teacher_client.post(fb_url(c), json={"result": "partly", "client_request_id": "x1"}).status_code == 201
+    assert admin_client.post(fb_url(c), json={"result": "partly", "client_request_id": "x1"}).status_code == 201
+    assert counts(db) == (2, 2)
+
+
+def test_concurrent_double_submit_is_settled_by_the_unique_constraint(teacher_client, approved, db, monkeypatch):
+    """The second request misses the first one's row (as in a race), hits UNIQUE and replays it."""
+    from app.services import feedback as feedback_svc
+
+    _, _, c = approved
+    first = teacher_client.post(fb_url(c), json={"result": "partly", "client_request_id": "race-1"})
+    assert first.status_code == 201
+    real = feedback_svc._existing
+    looks = []
+
+    def late(db_, user, request_id):
+        looks.append(request_id)
+        return None if len(looks) == 1 else real(db_, user, request_id)
+
+    monkeypatch.setattr(feedback_svc, "_existing", late)
+    r = teacher_client.post(fb_url(c), json={"result": "worked_well", "client_request_id": "race-1"})
+    assert r.status_code == 200, r.text
+    assert r.json()["feedback"]["id"] == first.json()["feedback"]["id"] and len(looks) == 2
+    assert counts(db) == (1, 1)
+    assert len(audit_rows(db, "feedback.create")) == 1
+
+
+def test_request_id_validation(teacher_client, approved, db):
+    _, _, c = approved
+    assert teacher_client.post(fb_url(c), json={"result": "partly", "client_request_id": "x" * 101}).status_code == 400
+    assert teacher_client.post(fb_url(c), json={"result": "partly", "client_request_id": 7}).status_code == 400
+    assert teacher_client.post(fb_url(c), json={"result": "partly", "client_request_id": "x" * 100}).status_code == 201
+    assert teacher_client.post(fb_url(c), json={"result": "partly", "client_request_id": ""}).status_code == 201
+    db.expire_all()
+    assert sorted(o.client_request_id or "" for o in db.scalars(select(Observation))) == ["", "x" * 100]

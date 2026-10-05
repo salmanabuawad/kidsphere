@@ -295,3 +295,73 @@ def test_understanding_timeout_falls_back():
     fake = FakeClaude(anthropic.APITimeoutError(request=_request()))
     result = suggest_understanding_result(u_ctx(), [obs(1)], FOCUS_AREAS, BASELINE, client=fake)
     assert result.is_template and result.fallback_reason == "AI_TIMEOUT"
+
+
+def test_understanding_masks_every_free_text_sent_to_claude():
+    """Review suggestions mask like content generation: the child's names → [child], classmates → [friend]."""
+    classmates = ["Noa Levi", "Yusuf"]
+    profile = {**PROFILE, "strengths": [{"key": "building"}, {"custom": "Builds towers with Noa", "sources": ["teacher"]}]}
+    ctx = build_context(child=CHILD, profile=profile, mode=None, content_type="understanding", language="en",
+                        classmate_names=classmates, today=TODAY, mask_free_text=False,
+                        current_understanding={"summary": "Adam Haddad plays with Yusuf.", "next_steps": "Invite Noa."})
+    observations = [{**obs(1), "observation": "Adam built with Noa Levi.", "note": "Yusuf joined Adam Haddad."},
+                    {**obs(2), "observation": "Mum Rana Haddad and teacher Dana watched Adam."}]
+    focus_areas = [{"id": "f-1", "category": "social", "title": "Playing with Yusuf",
+                    "description": "Start next to Noa, then Adam Haddad invites one more friend"}]
+    baseline = [{"list": "strengths", "key": "building", "custom": None, "label": "Building"},
+                {"list": "strengths", "key": None, "custom": "Builds towers with Noa", "label": "Builds towers with Noa"},
+                {"list": "focus", "key": "f-1", "custom": None, "label": "Playing with Yusuf"}]
+    answer = claude_understanding()
+    answer["baseline_validation"] = [
+        {"list": "strengths", "custom": "Builds towers with [friend]", "label": "Builds towers with [friend]",
+         "status": "needs_more_observation", "note": "Seen once.", "observation_ids": ["o1"]},
+        {"list": "focus", "key": "f-1", "label": "Playing with [friend]", "status": "needs_more_observation",
+         "note": "Seen once.", "observation_ids": []},
+    ]
+    fake = FakeClaude(answer)
+    result = suggest_understanding_result(ctx, observations, focus_areas, baseline, client=fake,
+                                          child_names=["Adam Haddad"], classmate_names=classmates,
+                                          adult_names=["Rana Haddad", "Dana Cohen"])
+    assert result.provider == "claude"
+    prompt = fake.calls[0]["messages"][0]["content"]
+    for name in ("Noa", "Levi", "Yusuf", "Haddad", "Rana", "Dana"):
+        assert name not in prompt
+    for masked in ("[child] built with [friend]. [friend] joined [child].",  # observation text + note
+                   "Mum [adult] and teacher [adult] watched [child].",  # adults
+                   '"title": "Playing with [friend]"',  # focus title
+                   "Start next to [friend], then [child] invites one more friend",  # focus description
+                   '"custom": "Builds towers with [friend]"',  # baseline custom item
+                   '"label": "Builds towers with [friend]"',  # custom profile label
+                   "[child] plays with [friend].", "Invite [friend]."):  # current understanding
+        assert masked in prompt, masked
+    assert '"label": "Building"' in prompt  # vocabulary labels are not touched
+
+    # The teacher gets the baseline items back with their own wording, so the review screen can match them.
+    bv = {(b.list, b.key): b for b in result.suggestion.baseline_validation}
+    assert (bv[("strengths", None)].custom, bv[("strengths", None)].label) == ("Builds towers with Noa",) * 2
+    assert bv[("focus", "f-1")].label == "Playing with Yusuf"
+
+
+def test_baseline_items_that_differ_only_in_a_masked_name_get_their_own_text_back():
+    baseline = [{"list": "strengths", "key": None, "custom": "Builds with Noa", "label": "Builds with Noa"},
+                {"list": "strengths", "key": None, "custom": "Builds with Lina", "label": "Builds with Lina"}]
+    answer = claude_understanding()
+    answer["baseline_validation"] = [
+        {"list": "strengths", "custom": "Builds with [friend]", "label": "Builds with [friend]",
+         "status": "needs_more_observation", "note": "Seen once.", "observation_ids": []},
+    ] * 2
+    fake = FakeClaude(answer)
+    result = suggest_understanding_result(u_ctx(), [obs(1)], FOCUS_AREAS, baseline, client=fake,
+                                          classmate_names=["Noa", "Lina"])
+    prompt = fake.calls[0]["messages"][0]["content"]
+    assert "Noa" not in prompt and "Lina" not in prompt
+    assert [b.custom for b in result.suggestion.baseline_validation] == ["Builds with Noa", "Builds with Lina"]
+    assert [b.label for b in result.suggestion.baseline_validation] == ["Builds with Noa", "Builds with Lina"]
+
+
+def test_understanding_masking_does_not_change_the_template_suggestion():
+    """Nothing leaves the server without a key: the template suggestion keeps the teacher's own focus titles."""
+    focus_areas = [{"id": "f-1", "category": "social", "title": "Playing with Yusuf"}]
+    s = suggest_understanding(u_ctx(), [obs(1)], focus_areas, BASELINE, child_names=["Adam Haddad"],
+                              classmate_names=["Yusuf"])
+    assert s.areas_for_support == ["Playing with Yusuf"]

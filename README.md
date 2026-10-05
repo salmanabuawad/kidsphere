@@ -128,7 +128,6 @@ The backend reads `backend/.env` (on the server: `/var/www/kidsphere/backend/.en
 | `LOG_LEVEL` | Default `info`. |
 | `SERVE_STATIC_DIR` | Lets FastAPI serve a built SPA itself. Never set it in production, where nginx serves the SPA. |
 | `OPTIONS_PATH` | Optional override for `app/data/options.json`. |
-| `APP_URL` | The public URL. It is present in the file but not used by the code today. |
 
 **AI providers:**
 

@@ -38,7 +38,7 @@ nginx ── /         → /var/www/kidsphere/frontend/dist   (try_files → ind
 | `routers/` | Thin modules (auth, me, health, options, users, classes, parents, children, profiles, baselines, focus_areas, observations, timeline, content, feedback, reviews). Endpoints are sync `def` functions that each call one service function. |
 | `ai/` | `context.py`, `prompts.py`, `claude_provider.py`, `template_provider.py` + `templates/*.json`, `schemas.py`, `safety.py`, `service.py` (section 6). |
 | `cli.py` | `create-admin`, `set-password`, `import-users`, `audit --child`. |
-| `dev_seed.py` | Demo data for Adam and Maya. Refuses to run unless the DB name ends in `_test` or `_preview`. |
+| `dev_seed.py` | Demo data for Adam and Maya. Refuses to run unless the DB name ends in `_test` or `_preview`, or `KIDSPHERE_ALLOW_DEMO=1` is set. |
 | `migrations/` | Alembic. `0001_initial` is hand-written DDL with the CHECKs, the indexes and the immutable-baseline trigger. |
 
 ## 3. Data model (14 tables)
@@ -140,7 +140,7 @@ An id outside the user's scope returns **404**, because the scope is part of the
 - `GET /children/{id}/content?status&pack_id`, `GET /packs/{pack_id}`
 - `GET /content/{id}`, `PUT /content/{id} {title?, content?}`, `DELETE /content/{id}`
 - `POST /content/{id}/approve`, `/regenerate {instruction?}`, `/duplicate`, `/share {shared}`, `/archive`
-- `POST /content/{id}/feedback {result, support_level?, observation?, what_helped?}`
+- `POST /content/{id}/feedback {result, support_level?, observation?, what_helped?, client_request_id?}`. A repeated `client_request_id` returns the existing feedback with status 200; one used for other content or for a quick observation returns 409 DUPLICATE.
 
 **Development reviews**
 
@@ -176,7 +176,7 @@ An id outside the user's scope returns **404**, because the scope is part of the
   | delete | draft only | the row is removed |
 
   A pack is stored as 3–4 rows (story, activity, game, plus a video plan if requested) that share one `pack_id`.
-- **Feedback** is one transaction. It writes the mirrored `observations` row (`source=content_feedback`, with the text optional, so two taps are enough), the `content_feedback` row linked through `observation_id`, the status change and an audit row.
+- **Feedback** is one transaction. It writes the mirrored `observations` row (`source=content_feedback`, with the text optional, so two taps are enough), the `content_feedback` row linked through `observation_id`, the status change and an audit row. The dialog sends one `client_request_id` per feedback, stored on the mirrored observation, so a retry or double tap saves once. It keeps the id (and the answers) until a save succeeds, also across Cancel and reopening after an error.
 - **Timeline:**
   - It is built from observations, baselines, focus opened and closed events, approved or completed content, and reviews.
   - Feedback appears through its mirrored observation, so each feedback shows up exactly once.
@@ -202,7 +202,9 @@ An id outside the user's scope returns **404**, because the scope is part of the
   - the current understanding (summary, adaptations, next_steps)
   - the regenerate instruction, the variant and `include_video`
 
-  `mask_names` replaces the child's names with `[child]` and every classmate's name with `[friend]` in observation text and in the instruction. The context is stored as `generation_input`.
+  A custom label (a list entry without a key) is included only when staff entered or confirmed it (`staff_confirmed`: sources teacher, observation or review), so a parent's own wording never reaches the AI. The name is the preferred name without a surname typed into it (`first_name`).
+
+  `name_masker` compiles one pattern for all the names and replaces the child's names (including the surname) with `[child]`, the other children of the kindergarten (`services/content.classmate_names`) with `[friend]`, and the parent name, linked parents and the kindergarten's teachers (`adult_names`) with `[adult]`. It tolerates case, accents, Arabic and Hebrew spelling variants, marks and one-letter prefixes, and masks a name particle (bin, בן, عبد) only with the next word. `build_context` masks every free text it keeps (custom labels, focus title, description and plan, observations, current understanding, instruction). The context is stored as `generation_input`. For a development-review suggestion, the context keeps the teacher's wording (`mask_free_text=False`) and `mask_understanding_inputs` masks the same names in every free text sent to the AI (observations, focus titles and descriptions, baseline item texts, custom labels and the current understanding); the baseline items sent leave out parent-only custom entries, and the template provider and the response keep the teacher's own wording.
 - **`claude_provider.py`:**
   - Makes one `messages.create` call to `ANTHROPIC_MODEL` (`claude-opus-5-5`) with `output_config = {effort, format: json_schema}`, where the schema comes from `anthropic.transform_schema(Model)`.
   - Uses `max_tokens` 16000, `timeout` `AI_TIMEOUT_SECONDS` and `max_retries=1`. It sends no thinking or temperature parameters.
@@ -286,7 +288,7 @@ All tests run on the server through `bash deploy/ci/remote-test.sh <label> [back
   - Each session drops the schema and runs `alembic upgrade head`; each test starts with truncated tables.
   - Fixtures give TestClient sessions for every role.
   - The AI key is empty, so the templates are used. Claude is tested with a fake client.
-  - There is one test file per area (access, auth, admin, children, uploads, profile wizard, baseline, focus, observations, timeline, content, feedback, reviews, migrations, CLI, vocabulary, AI context, schemas, safety, templates and service).
+  - There is one test file per area (access, auth, admin, children, uploads, profile wizard, baseline, focus, observations, timeline, content, feedback, reviews, migrations, CLI, vocabulary, AI context, schemas, safety, templates and service), plus `test_deploy_scripts.py` (the nightly backup script run against stub commands, the backup units and `.env.example`).
   - The spec examples are covered by `test_content.py::test_adam_spec_44_loop`, `test_adam_garage_game_loop` and `test_maya_spec_45_story_builder`.
 - **Frontend:**
   - `tsc --noEmit`, eslint, vitest (jsdom) and `vite build`. The build fails if `index.html` contains an inline script.
@@ -300,7 +302,7 @@ All tests run on the server through `bash deploy/ci/remote-test.sh <label> [back
 | Code | `/var/www/kidsphere/backend` (+ `venv/`, `.env` mode 600) and `/var/www/kidsphere/frontend` (+ `dist/` = nginx root) |
 | Uploads | `/var/www/kidsphere/uploads` (750) |
 | Releases | `/var/www/kidsphere/releases/<sha>` (the newest 5 are kept) |
-| DB backups | `/var/backups/kidsphere/kidsphere-<stamp>.dump` (taken before each migration; the newest 10 are kept) |
+| Backups | `/var/backups/kidsphere/` (700, root): `kidsphere-predeploy-<stamp>.dump` before each migration (newest 10 kept), and nightly at about 03:30 (`kidsphere-mvp-backup.timer`) `nightly-<stamp>.dump` plus `uploads-<stamp>.tgz` (newest 14 of each kept) |
 | System user | `kidsphere-mvp` |
 | Database | `kidsphere_mvp` (role `kidsphere_mvp`) |
 | Service | `kidsphere-mvp-api.service`: uvicorn on 127.0.0.1:3071, 1 worker, `MemoryMax=512M`, `ProtectSystem=strict` |

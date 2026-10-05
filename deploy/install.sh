@@ -3,8 +3,9 @@
 # One-time, idempotent provisioning of KidSphere on Ubuntu (run as root from an
 # extracted release: `bash deploy/install.sh`). Creates the system user, the
 # /var/www/kidsphere layout, the PostgreSQL role + database, backend/.env with a
-# generated DB password, the systemd unit and the nginx site. Safe to re-run:
-# existing .env, DB and user are kept.
+# generated DB password, the systemd units (the API, and the nightly backup timer
+# running deploy/backup.sh) and the nginx site. Safe to re-run: existing .env, DB
+# and user are kept.
 #
 # Requires an existing Let's Encrypt certificate for kids.kortexd.com
 # (otherwise run: certbot certonly --webroot -w /var/www/html -d kids.kortexd.com).
@@ -12,7 +13,6 @@ set -euo pipefail
 
 SRC=$(cd "$(dirname "$0")/.." && pwd)
 APP=/var/www/kidsphere
-DOMAIN=kids.kortexd.com
 DB=kidsphere_mvp
 DB_USER=kidsphere_mvp
 
@@ -33,7 +33,6 @@ END \$\$;
 ALTER ROLE $DB_USER PASSWORD '$PW';
 SQL
   sed -e "s|^DATABASE_URL=.*|DATABASE_URL=postgresql+psycopg://$DB_USER:$PW@127.0.0.1:5432/$DB|" \
-      -e "s|^APP_URL=.*|APP_URL=https://$DOMAIN|" \
       "$SRC/backend/.env.example" > "$APP/backend/.env"
   chown kidsphere-mvp:kidsphere-mvp "$APP/backend/.env"
   chmod 600 "$APP/backend/.env"
@@ -44,10 +43,15 @@ if ! sudo -u postgres psql -tAc "SELECT 1 FROM pg_database WHERE datname='$DB'" 
   echo "    created database $DB"
 fi
 
-echo "==> systemd unit"
+echo "==> systemd units"
 install -m 644 "$SRC/deploy/systemd/kidsphere-mvp-api.service" /etc/systemd/system/kidsphere-mvp-api.service
+# Nightly backups: the script lives outside the releases, which are rotated.
+install -m 700 "$SRC/deploy/backup.sh" /usr/local/sbin/kidsphere-mvp-backup
+install -m 644 "$SRC/deploy/systemd/kidsphere-mvp-backup.service" /etc/systemd/system/kidsphere-mvp-backup.service
+install -m 644 "$SRC/deploy/systemd/kidsphere-mvp-backup.timer" /etc/systemd/system/kidsphere-mvp-backup.timer
 systemctl daemon-reload
 systemctl enable kidsphere-mvp-api >/dev/null
+systemctl enable --now kidsphere-mvp-backup.timer >/dev/null
 
 echo "==> nginx"
 install -m 644 "$SRC/deploy/nginx/kidsphere-headers.conf" /etc/nginx/snippets/kidsphere-headers.conf

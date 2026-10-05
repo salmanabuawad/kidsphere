@@ -2,7 +2,8 @@
 
     generate(kind, ctx, *, client=None) -> GenerationResult
     suggest_understanding(ctx, observations, focus_areas, baseline_items, *, client=None,
-                          classmate_names=(), baseline_at=None) -> UnderstandingSuggestion
+                          child_names=(), classmate_names=(), adult_names=(),
+                          baseline_at=None) -> UnderstandingSuggestion
     suggest_understanding_result(...same...) -> UnderstandingResult (adds provider info)
     validate_output(kind, data, template=None, include_video=False) -> (content | None, issues)
 
@@ -27,7 +28,7 @@ from pydantic import BaseModel, ValidationError
 from app import vocab
 from app.ai import template_provider
 from app.ai.claude_provider import AIError, call_claude
-from app.ai.context import WHAT_HELPS_LISTS, AIContext, mask_names
+from app.ai.context import WHAT_HELPS_LISTS, AIContext, mask_understanding_inputs, name_masker
 from app.ai.prompts import SYSTEM_PROMPT, UNDERSTANDING_SYSTEM_PROMPT, understanding_prompt, user_prompt
 from app.ai.safety import check_content, child_facing_fields
 from app.ai.schemas import (
@@ -189,14 +190,14 @@ def _since(observed_at, baseline_at) -> bool:
     return a >= b
 
 
-def _normalise_observations(observations, ctx: AIContext, classmate_names, baseline_at) -> list[dict]:
+def _normalise_observations(observations, mask, baseline_at) -> list[dict]:
     out = []
     for o in observations or []:
         if not _since(_get(o, "observed_at"), baseline_at):
             continue
         text = _get(o, "observation") or _get(o, "text") or ""
         note = _get(o, "note") or ""
-        text = mask_names(f"{text} {note}".strip(), [ctx.name], classmate_names)[:300]
+        text = (mask(f"{text} {note}".strip()) or "")[:300]
         fid = _get(o, "focus_area_id")
         observed = _get(o, "observed_at")
         out.append({
@@ -227,6 +228,28 @@ def _normalise_baseline(items) -> list[dict]:
                     for k, v in {"list": _get(it, "list"), "key": _get(it, "key"), "custom": _get(it, "custom"),
                                  "label": _get(it, "label")}.items()})
     return out
+
+
+def _item_ref(it) -> tuple:
+    key = _get(it, "key")
+    if key:
+        return (_get(it, "list"), "k:" + str(key))
+    return (_get(it, "list"), "c:" + str(_get(it, "custom") or _get(it, "label") or "").strip().lower())
+
+
+def _restore_baseline_texts(s: UnderstandingSuggestion, baseline: list[dict], ai_baseline: list[dict]) -> None:
+    """Claude saw masked baseline texts; give the matching entries their original custom/label back,
+    so the review screen can match them to its baseline items. Items that differ only in a masked
+    name ("Builds with Noa", "Builds with Lina") share one masked text: they are given back in order."""
+    originals: dict[tuple, list[dict]] = {}
+    for o, m in zip(baseline, ai_baseline):
+        originals.setdefault(_item_ref(m), []).append(o)
+    for item in s.baseline_validation:
+        queue = originals.get(_item_ref(item))
+        if queue:
+            original = queue.pop(0)
+            item.custom = original.get("custom")
+            item.label = original.get("label") or item.label
 
 
 def _sanitise_profile_keys(s: UnderstandingSuggestion) -> None:
@@ -266,8 +289,14 @@ def apply_evidence_rule(s: UnderstandingSuggestion, observations: list[dict], fo
 
 
 def suggest_understanding_result(ctx: AIContext, observations, focus_areas, baseline_items, *, client=None,
-                                 classmate_names=(), baseline_at=None) -> UnderstandingResult:
-    obs = _normalise_observations(observations, ctx, classmate_names, baseline_at)
+                                 child_names=(), classmate_names=(), adult_names=(),
+                                 baseline_at=None) -> UnderstandingResult:
+    """``child_names``: the child's full and preferred names (``ctx.name`` is always masked too);
+    ``classmate_names``: the other children; ``adult_names``: the child's parents and the teachers.
+    All are masked in every free text sent to the AI. ``baseline_items`` must already leave out
+    what may not reach the AI (parent-only custom entries)."""
+    mask = name_masker([ctx.name, *(child_names or ())], classmate_names, adult_names)
+    obs = _normalise_observations(observations, mask, baseline_at)
     focus = _normalise_focus(focus_areas)
     baseline = _normalise_baseline(baseline_items)
     fallback_reason = None
@@ -275,8 +304,9 @@ def suggest_understanding_result(ctx: AIContext, observations, focus_areas, base
     provider, model = "template", template_provider.TEMPLATE_MODEL
     if _use_claude(client):
         try:
+            ai_ctx, ai_focus, ai_baseline = mask_understanding_inputs(ctx, focus, baseline, mask)
             data = call_claude("understanding", UNDERSTANDING_SYSTEM_PROMPT,
-                               understanding_prompt(ctx, obs[-MAX_UNDERSTANDING_OBSERVATIONS:], focus, baseline),
+                               understanding_prompt(ai_ctx, obs[-MAX_UNDERSTANDING_OBSERVATIONS:], ai_focus, ai_baseline),
                                UnderstandingSuggestion, client=client)
             suggestion = UnderstandingSuggestion.model_validate(data)
             issues = check_content(suggestion, set())
@@ -284,6 +314,7 @@ def suggest_understanding_result(ctx: AIContext, observations, focus_areas, base
                 fallback_reason, suggestion = "AI_UNSAFE_OUTPUT", None
                 log.warning("understanding rejected: unsafe issues=%d first=%s", len(issues), issues[0])
             else:
+                _restore_baseline_texts(suggestion, baseline, ai_baseline)
                 provider, model = "claude", settings.anthropic_model
         except ValidationError as e:
             fallback_reason, suggestion = "AI_INVALID_OUTPUT", None
@@ -305,6 +336,8 @@ def suggest_understanding_result(ctx: AIContext, observations, focus_areas, base
 
 
 def suggest_understanding(ctx: AIContext, observations, focus_areas, baseline_items, *, client=None,
-                          classmate_names=(), baseline_at=None) -> UnderstandingSuggestion:
+                          child_names=(), classmate_names=(), adult_names=(),
+                          baseline_at=None) -> UnderstandingSuggestion:
     return suggest_understanding_result(ctx, observations, focus_areas, baseline_items, client=client,
-                                        classmate_names=classmate_names, baseline_at=baseline_at).suggestion
+                                        child_names=child_names, classmate_names=classmate_names,
+                                        adult_names=adult_names, baseline_at=baseline_at).suggestion

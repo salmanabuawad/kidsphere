@@ -8,7 +8,7 @@ explain the intent of each field.
 """
 import json
 
-from app.ai.context import CHILD_TOKEN, FRIEND_TOKEN, AIContext
+from app.ai.context import ADULT_TOKEN, CHILD_TOKEN, FRIEND_TOKEN, AIContext
 
 LANGUAGE_NAMES = {"en": "English", "ar": "Arabic", "he": "Hebrew"}
 
@@ -28,7 +28,7 @@ Language and tone:
 - Use the child's name only where it feels natural (for example once in a story or in a question); otherwise use a friendly character inspired by the child's interests.
 - Respect the "avoid" list: do not build content around those things.
 - Never include links, web addresses, brand names, advertisements or references to real media characters.
-- Do not reveal teacher observations or private family information in child-facing text. Observation snippets use {CHILD_TOKEN} for the child and {FRIEND_TOKEN} for other children; never invent real names for them.
+- Do not reveal teacher observations or private family information in child-facing text. The free texts in the context (observations, the focus area, custom labels, the current understanding, the teacher's instruction) use {CHILD_TOKEN} for the child, {FRIEND_TOKEN} for other children and {ADULT_TOKEN} for a parent or teacher; never invent real names for them, and never put these placeholders in the output: use the child's given name, "a friend" or "a grown-up" instead.
 - Write every text field in the requested output language. Use natural, idiomatic phrasing for that language (Arabic: Modern Standard Arabic suitable for young children; Hebrew: simple modern Hebrew). Follow the child's grammatical gender when it is given; otherwise use neutral wording where possible.
 - Return only the structured JSON object requested."""
 
@@ -77,7 +77,7 @@ Rules:
 - Strengths and interests first. Describe change descriptively; never use scores, points, percentages or counts of success.
 - Never claim certainty from limited data. A focus area or baseline item may only get a status other than needs_more_observation when at least 3 linked observations since the latest baseline support it; otherwise use needs_more_observation.
 - Use only the vocabulary keys provided for strengths, interests and what_helps (use "custom" for anything else) and only the given focus_area_id values and observation ids.
-- Observation texts use {CHILD_TOKEN} for the child and {FRIEND_TOKEN} for other children. Refer to the child by the given name; never invent names.
+- Free texts (observations, focus areas, baseline items, custom labels, the current understanding) use {CHILD_TOKEN} for the child, {FRIEND_TOKEN} for other children and {ADULT_TOKEN} for a parent or teacher. Refer to the child by the given name; never invent names.
 - Write in the requested output language. Return only the structured JSON object requested."""
 
 

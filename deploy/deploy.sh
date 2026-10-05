@@ -2,9 +2,11 @@
 #
 # Server-side deploy of one KidSphere release (run as root from an extracted
 # release directory: `bash deploy/deploy.sh`). Steps:
-#   1. sync backend/ and frontend/ sources into /var/www/kidsphere
+#   1. sync backend/ and frontend/ sources into /var/www/kidsphere, and install
+#      the nightly backup script + timer (deploy/backup.sh, systemd/kidsphere-mvp-backup.*)
 #   2. (re)build the Python venv when requirements.txt changed
-#   3. back up the database, then `alembic upgrade head`
+#   3. back up the database (kidsphere-predeploy-<stamp>.dump, newest 10 kept),
+#      then `alembic upgrade head`
 #   4. npm ci (when the lockfile changed) and build the React app into dist.new,
 #      then swap it in
 #   5. restart kidsphere-mvp-api, wait for /api/health, reload nginx
@@ -26,6 +28,15 @@ if [[ -f $SRC/frontend/package.json ]]; then
   chown -R kidsphere-mvp:kidsphere-mvp "$APP/frontend"
 fi
 
+echo "==> nightly backup timer"
+# Same as install.sh: keeps the installed backup script and units current, and
+# turns the timer on for servers provisioned before it existed.
+install -m 700 "$SRC/deploy/backup.sh" /usr/local/sbin/kidsphere-mvp-backup
+install -m 644 "$SRC/deploy/systemd/kidsphere-mvp-backup.service" /etc/systemd/system/kidsphere-mvp-backup.service
+install -m 644 "$SRC/deploy/systemd/kidsphere-mvp-backup.timer" /etc/systemd/system/kidsphere-mvp-backup.timer
+systemctl daemon-reload
+systemctl enable --now kidsphere-mvp-backup.timer >/dev/null
+
 echo "==> python venv"
 cd "$APP/backend"
 REQ_HASH=$(sha256sum requirements.txt | cut -c1-16)
@@ -39,9 +50,19 @@ if [[ ! -f venv/.ok || $(cat venv/.ok) != "$REQ_HASH" ]]; then
 fi
 
 echo "==> database backup + migrations"
-STAMP=$(date +%Y%m%d-%H%M%S)
-sudo -u postgres pg_dump -Fc kidsphere_mvp > "/var/backups/kidsphere/kidsphere-$STAMP.dump"
-ls -1t /var/backups/kidsphere/kidsphere-*.dump | tail -n +11 | xargs -r rm -f
+# Pre-deploy dumps are kidsphere-predeploy-<stamp>.dump; the newest 10 are kept
+# (dumps named kidsphere-<stamp>.dump by older deploys count as pre-deploy dumps).
+# The nightly nightly-*.dump and uploads-*.tgz have their own rotation in
+# deploy/backup.sh. A failed dump leaves no *.partial behind (the EXIT trap).
+BACKUPS=/var/backups/kidsphere
+DUMP=$BACKUPS/kidsphere-predeploy-$(date +%Y%m%d-%H%M%S).dump
+trap 'rm -f -- "$DUMP.partial"' EXIT
+(umask 077; sudo -u postgres pg_dump -Fc kidsphere_mvp > "$DUMP.partial")
+mv "$DUMP.partial" "$DUMP"
+shopt -s nullglob
+PREDEPLOY=("$BACKUPS"/kidsphere-predeploy-*.dump "$BACKUPS"/kidsphere-[0-9]*.dump)
+shopt -u nullglob
+ls -1t "${PREDEPLOY[@]}" | tail -n +11 | xargs -r rm -f
 as_app venv/bin/python -m alembic upgrade head
 
 if [[ -f $APP/frontend/package.json ]]; then

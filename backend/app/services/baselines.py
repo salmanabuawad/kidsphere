@@ -30,6 +30,7 @@ from sqlalchemy.orm import Session
 
 from app import vocab
 from app.access import get_child_or_404
+from app.ai.context import first_name, staff_confirmed
 from app.audit import audit
 from app.models import Baseline, Child, Class, FocusArea, User
 from app.services.focus_areas import focus_out
@@ -172,21 +173,36 @@ def _strip_item(item: dict) -> dict:
     return out
 
 
+def _text_labels(items: list[dict], lists: tuple[str, ...], lang: str) -> list[str]:
+    """Labels for the summary texts, which are later sent to the AI as the current understanding:
+    a custom entry only a parent gave (their own wording) is left out."""
+    labels = []
+    for item in items:
+        if item.get("key") or staff_confirmed(item):
+            label = _label(item, lists, lang)
+            if label:
+                labels.append(label)
+    return labels
+
+
 def initial_understanding(child: Child, profile, focus_rows: list[FocusArea], lang: str, baseline_id, now) -> dict:
     words = _SUMMARY.get(lang) or _SUMMARY["en"]
-    name = (child.preferred_name or "").strip() or (child.name or "").split(" ")[0]
+    name = first_name(child)
     strengths = [i for i in (profile.strengths or []) if isinstance(i, dict)][:5]
     interests = [i for i in (profile.interests or []) if isinstance(i, dict)][:5]
     helps = [i for i in (profile.what_helps or []) if isinstance(i, dict)][:5]
     help_lists = ("what_helps", "calming_helps", "transition_helps", "sensitivity_helps", "sad_helps")
 
     parts = []
-    if interests:
-        parts.append(words["interests"].format(name=name, items=_join([_label(i, ("interests",), lang) for i in interests], words)))
-    if strengths:
-        parts.append(words["strengths"].format(items=_join([_label(i, ("strengths",), lang) for i in strengths], words)))
+    interest_labels = _text_labels(interests, ("interests",), lang)
+    if interest_labels:
+        parts.append(words["interests"].format(name=name, items=_join(interest_labels, words)))
+    strength_labels = _text_labels(strengths, ("strengths",), lang)
+    if strength_labels:
+        parts.append(words["strengths"].format(items=_join(strength_labels, words)))
     parts.append(words["closing"])
-    adaptations = words["helps"].format(items=_join([_label(i, help_lists, lang) for i in helps], words)) if helps else None
+    help_labels = _text_labels(helps, help_lists, lang)
+    adaptations = words["helps"].format(items=_join(help_labels, words)) if help_labels else None
     titles = [f.title for f in focus_rows]
     next_steps = (words["next_focus"].format(name=name, items=_join(titles, words)) if titles
                   else words["next_none"].format(name=name))

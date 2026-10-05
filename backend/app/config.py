@@ -20,8 +20,7 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    database_url: str = "postgresql+psycopg://kidsphere@127.0.0.1:5432/kidsphere"
-    app_url: str = "http://127.0.0.1:3071"
+    database_url: str = "postgresql+psycopg://kidsphere_mvp@127.0.0.1:5432/kidsphere_mvp"
     cookie_secure: bool = True
     session_days: int = 7
     upload_dir: Path = Path("/var/www/kidsphere/uploads")

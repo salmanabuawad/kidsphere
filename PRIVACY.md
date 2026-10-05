@@ -37,7 +37,7 @@ KidSphere stores sensitive information about young children. It is an educationa
 - **With a key, only the backend calls the AI.** It calls Anthropic's API (model `claude-opus-5-5`). The browser never talks to an AI service, and the key exists only in `backend/.env` (mode 600). The allow-list lives in `backend/app/ai/context.py`.
 
 **For content generation:**
-- the child's first or preferred name, and their age in whole years
+- the child's first or preferred name (a surname typed into the preferred name is dropped), and their age in whole years
 - gender, only when it is girl or boy (for Arabic and Hebrew grammar)
 - the language, mode, content type and game template
 - at most 3 strength labels, 3 interest labels and 3 what-helps labels
@@ -47,14 +47,23 @@ KidSphere stores sensitive information about young children. It is an educationa
 - the approved current understanding (summary, adaptations, next steps)
 - the teacher's regenerate instruction
 
-In the observation texts and the instruction, the child's names become `[child]` and every classmate's name becomes `[friend]`.
-
 **For a development-review suggestion:**
 - the child's first or preferred name and age
 - the same profile labels and the current understanding
 - the active focus areas (category, title, description)
 - the labels of the baseline items
-- up to 40 observations since the latest baseline: their ids, dates, context and support level, plus the text and note masked and cut to 300 characters
+- up to 40 observations since the latest baseline: their ids, dates, context and support level, plus the text and note cut to 300 characters
+
+**Custom labels:** a label is a vocabulary label, or a custom entry (a short text typed instead of an option). A custom entry is sent only when staff entered or confirmed it (a teacher, an observation or a saved review). A custom entry only a parent gave is never sent, and the first summary written when the baseline is made leaves it out too.
+
+**Names are masked in every free text on both paths:** the observation texts and notes, the focus title, description and plan, the custom labels and baseline items, the current understanding and the regenerate instruction.
+- The child's names, including the surname, become `[child]`.
+- The names of the other children of the kindergarten and of children not yet in a class (of every other child when the child has no class) become `[friend]`.
+- The parent name on the child, the linked parent accounts and the teachers of the kindergarten become `[adult]`.
+- Matching tolerates the usual spelling variants: case and accents, Arabic hamza and alef forms, ta marbuta, alef maqsura, tashkeel and tatweel, Hebrew niqqud and geresh, and Hebrew and Arabic one-letter prefixes.
+- Only names KidSphere knows can be masked. A relative, a sibling or anyone else who is not in KidSphere (for example "Grandma Huda") is sent as written, so teachers should not write such names.
+- A given name that is also a common word (Will, May, אור, نور) is masked wherever that word appears. A name particle (bin, בן, عبد, de) is masked only together with the next word.
+- Vocabulary labels are not changed.
 
 **Never sent:** the birth date, the surname, the photo, the parent's name or contact, free-text parent answers, whole perspectives, user accounts and other children's data.
 
@@ -64,8 +73,6 @@ In the observation texts and the instruction, the child's names become `[child]`
 - The input used for each content item is stored with it as `generation_input`.
 
 **Before setting a key,** review the provider's data-handling and retention terms; they apply to what is sent.
-
-**Known gap.** The review suggestion masks only the child's first or preferred name, and it does not mask classmate names in focus titles or descriptions. Content generation masks both. This is listed in [ROADMAP.md](ROADMAP.md).
 
 ## Uploads
 
@@ -113,10 +120,12 @@ The metadata contains only ids, keys and field names. Read a child's history on 
 
 ## Backups and deletion
 
-- **When backups are made:** before every migration, the deploy script writes a full database dump to `/var/backups/kidsphere/` (root only, mode 700). The newest 10 are kept.
-  - **The dumps contain all child data**, so treat them like the live database.
-  - **Missing:** there are no scheduled backups yet, and the scripts do not back up the uploads directory.
+- **When backups are made:** all backups go to `/var/backups/kidsphere/` (root only: the directory is mode 700 and the files 600).
+  - Before every migration, the deploy script writes a full database dump (`kidsphere-predeploy-<stamp>.dump`). The newest 10 are kept.
+  - Every night at about 03:30, `kidsphere-mvp-backup.timer` writes a full database dump (`nightly-<stamp>.dump`) and an archive of the uploads directory, that is the child photos (`uploads-<stamp>.tgz`). The newest 14 of each are kept.
+  - **The backups contain all child data and photos**, so treat them like the live database. They stay on the same server; nothing copies them elsewhere yet.
 - **Deletion:**
   - Children are archived (hidden from everyone except admins), not deleted. Users are deactivated.
   - There is no export or hard-delete feature yet.
   - Deleting a child row directly in the database removes all of its data by cascade, including baselines. The photo file has to be removed separately.
+  - Deleted data stays in the backups until they rotate out: 14 nights for the nightly backups, and the last 10 deploys for the pre-deploy dumps.

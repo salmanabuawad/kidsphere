@@ -4,10 +4,12 @@ B12 review decisions incl. create + FOCUS_LIMIT rollback)."""
 import json
 import re
 from datetime import datetime, timedelta, timezone
+from types import SimpleNamespace
 
 from sqlalchemy import select, text
 
-from app.ai import build_context
+from app.ai import build_context, claude_provider
+from app.config import settings
 from app.models import AuditLog, Baseline, Child, ChildProfile, DevelopmentReview, FocusArea, GeneratedContent
 
 SCORING = re.compile(r"\d+\s*%|\bscore\b|\bpoints\b", re.IGNORECASE)
@@ -151,6 +153,104 @@ def test_template_suggestion_downgrades_statuses_with_few_observations(teacher_c
     assert statuses[focus_id] in ("some_improvement", "no_clear_change")
     focus_item = next(b for b in data["suggestion"]["baseline_validation"] if b["list"] == "focus")
     assert focus_item["key"] == focus_id and len(focus_item["observation_ids"]) == 3
+
+
+class SpyClaude:
+    """Stands in for anthropic.Anthropic: records each request and answers with ``answer``."""
+
+    def __init__(self, answer: dict):
+        self.answer = answer
+        self.calls: list[dict] = []
+        self.messages = self
+
+    def create(self, **kwargs):
+        self.calls.append(kwargs)
+        return SimpleNamespace(stop_reason="end_turn", model=kwargs.get("model"),
+                               content=[SimpleNamespace(type="text", text=json.dumps(self.answer))],
+                               usage=SimpleNamespace(input_tokens=1, output_tokens=1))
+
+
+def test_suggest_masks_the_child_and_classmates_in_everything_sent_to_the_ai(teacher_client, make_child, klass,
+                                                                               monkeypatch):
+    kid = make_child(klass, name="Adam Nasser")
+    make_child(klass, name="Omar Haddad", preferred_name="Omi")
+    make_child(klass, name="Lina")
+    r = teacher_client.patch(f"/api/children/{kid.id}/profile", json={"section": "who", "data": {
+        "strengths": ["building", {"custom": "Builds towers with Lina"}], "interests": ["cars_transportation"]}})
+    assert r.status_code == 200, r.text
+    focus_id = add_focus(teacher_client, kid, suggestion_key="joining_group_play",
+                         description="Start next to Omar, then Adam Nasser invites Lina")
+    assert teacher_client.post(f"/api/children/{kid.id}/baseline").status_code == 201
+    observe(teacher_client, kid, focus_id, note="Adam Nasser asked Omi and Lina to build a road")
+
+    answer = {
+        "summary": "Adam appears to enjoy building with a friend.",
+        "strengths": [{"key": "building", "label": "Building"}],
+        "interests": [{"key": "cars_transportation", "label": "Cars"}],
+        "what_helps": [],
+        "areas_for_support": ["Starting shared play"],
+        "adaptations": "Start with one friend.",
+        "next_steps": "Keep inviting one friend.",
+        "baseline_validation": [{"list": "strengths", "custom": "Builds towers with [friend]",
+                                 "label": "Builds towers with [friend]", "status": "needs_more_observation",
+                                 "note": "Seen once so far.", "observation_ids": []}],
+        "focus_review": [{"focus_area_id": focus_id, "status": "needs_more_observation", "note": "Seen once so far."}],
+    }
+    spy = SpyClaude(answer)
+    monkeypatch.setattr(settings, "anthropic_api_key", "test-key")
+    monkeypatch.setattr(claude_provider, "make_client", lambda: spy)
+
+    r = teacher_client.post(suggest_url(kid), json={"language": "en"})
+    assert r.status_code == 200, r.text
+    data = r.json()
+    assert data["provider"] == "claude" and len(spy.calls) == 1
+    prompt = spy.calls[0]["messages"][0]["content"]
+    for name in ("Omar", "Omi", "Haddad", "Lina", "Nasser"):
+        assert name not in prompt, name
+    assert "[child] asked [friend] and [friend] to build a road" in prompt  # observation
+    assert "Start next to [friend], then [child] invites [friend]" in prompt  # focus description
+    assert "Builds towers with [friend]" in prompt  # custom baseline item / profile label
+    # The review screen still gets the teacher's own wording back.
+    custom = next(b for b in data["suggestion"]["baseline_validation"] if b["list"] == "strengths" and not b["key"])
+    assert custom["custom"] == "Builds towers with Lina"
+    assert {"list": "strengths", "key": None, "custom": "Builds towers with Lina",
+            "label": "Builds towers with Lina"} in data["baseline_items"]
+
+
+def test_parent_only_custom_entries_never_reach_the_ai(teacher_client, parent_client, child, db, monkeypatch):
+    """A custom entry only a parent gave is their own free text: staff see it, the AI never gets it."""
+    r = parent_client.patch(f"/api/children/{child.id}/profile", json={"section": "who", "data": {
+        "strengths": ["building", {"custom": "Kind to babies"}], "interests": [{"custom": "Grandpa's tractor"}]}})
+    assert r.status_code == 200, r.text
+    r = parent_client.patch(f"/api/children/{child.id}/profile", json={"section": "environment", "data": {
+        "items": [{"custom": "The blue bathroom", "what_happens": "Cries at the door"}]}})
+    assert r.status_code == 200, r.text
+    # The teacher confirms one of them in the teacher perspective.
+    r = teacher_client.patch(f"/api/children/{child.id}/profile", json={"section": "who", "data": {
+        "interests": [{"custom": "Grandpa's tractor"}]}})
+    assert r.status_code == 200, r.text
+    focus_id = add_focus(teacher_client, child)
+    assert teacher_client.post(f"/api/children/{child.id}/baseline").status_code == 201
+    cu = profile_row(db, child).current_understanding  # the first summary, later sent as the understanding
+    assert "Grandpa's tractor" in cu["summary"] and "Kind to babies" not in cu["summary"] + (cu["adaptations"] or "")
+    observe(teacher_client, child, focus_id)
+
+    answer = {
+        "summary": "Adam appears to enjoy building.", "strengths": [], "interests": [], "what_helps": [],
+        "areas_for_support": [], "adaptations": "Start with one friend.", "next_steps": "Keep observing.",
+        "baseline_validation": [],
+        "focus_review": [{"focus_area_id": focus_id, "status": "needs_more_observation", "note": "Seen once."}],
+    }
+    spy = SpyClaude(answer)
+    monkeypatch.setattr(settings, "anthropic_api_key", "test-key")
+    monkeypatch.setattr(claude_provider, "make_client", lambda: spy)
+    data = teacher_client.post(suggest_url(child), json={"language": "en"}).json()
+    prompt = spy.calls[0]["messages"][0]["content"]
+    assert "Kind to babies" not in prompt and "blue bathroom" not in prompt
+    assert "Grandpa's tractor" in prompt  # confirmed by the teacher
+    # The review screen still lists every baseline item.
+    customs = {b["custom"] for b in data["baseline_items"] if b["custom"]}
+    assert {"Kind to babies", "The blue bathroom", "Grandpa's tractor"} <= customs
 
 
 # --------------------------------------------------------------------------- save
@@ -341,7 +441,8 @@ def test_new_content_uses_the_approved_understanding(teacher_client, child, db):
             child=db.get(Child, child.id), profile=profile, mode="growth_support", content_type="real_world_activity",
             language="en", focus=db.get(FocusArea, focus_id), current_understanding=profile.current_understanding,
         ).model_dump(mode="json")
-    assert generation_input["current_understanding"]["summary"] == summary
+    # The child's own names are masked in every free text sent to the AI.
+    assert generation_input["current_understanding"]["summary"] == summary.replace("Adam", "[child]")
     assert generation_input["current_understanding"]["adaptations"] == "Offer a building role first."
 
 

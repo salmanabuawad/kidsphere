@@ -23,7 +23,7 @@ This file tracks progress against the phases in spec §42 ([docs/mvp-refocus/SPE
 - Claude when a key is set, otherwise deterministic templates in ar, he and en. Every result is validated and safety-checked.
 - Teacher review: preview, edit, approve, regenerate (with an instruction), duplicate, archive, delete drafts and share with the parent.
 - A full-screen Present view, a story player with read-aloud, an activity card and a video plan view.
-- One-tap feedback, mirrored into the observations.
+- One-tap feedback, mirrored into the observations, that can be retried safely (`client_request_id`).
 
 **Phase 4: Learn and adapt**
 - A development review with an AI or template suggestion, the no-certainty rule and five descriptive statuses per focus area.
@@ -41,6 +41,7 @@ This file tracks progress against the phases in spec §42 ([docs/mvp-refocus/SPE
 - An audit log with a CLI reader.
 - Server-side CI (`deploy/ci/remote-test.sh`).
 - The deploy scripts (`remote-deploy.sh`, `deploy-kids.ps1`).
+- Nightly backups of the database and the uploads (`kidsphere-mvp-backup.timer`, the newest 14 kept), plus a dump before every migration.
 
 ## Remaining
 
@@ -48,13 +49,10 @@ This file tracks progress against the phases in spec §42 ([docs/mvp-refocus/SPE
 - **A real video provider.** Add a branch to `services/video_service.py` once credentials exist, and poll or show `generating/ready/failed` status. Nothing may block on it.
 - **Native-speaker review of the Arabic and Hebrew wording.** This covers the new option labels and the template phrase tables. Also decide on one Hebrew convention for UI strings (slash forms or not). See [docs/terminology.md](docs/terminology.md) §6.
 - **Personalised characters.** Generic characters, animals and interest-based heroes are used today. Characters made from the child or family would need consent (spec §32).
-- **An idempotency key for feedback.** `POST /content/{id}/feedback` has no `client_request_id`, so a double submit can record two feedback rows. Observations already have one.
 
 **Server**
 - **Remove the legacy apps.** The owner removes the legacy apps from the server after checking the backups (see [deploy/README.md](deploy/README.md#legacy-installs-still-on-the-server)). After that, the side-by-side names (`kidsphere-mvp`, `kidsphere_mvp`) may stay as they are.
-- **Scheduled backups.** Today the database is dumped only before each deploy, and the uploads directory is not backed up by the scripts.
+- **Off-site backups.** The nightly backups and the pre-deploy dumps stay on the same server (`/var/backups/kidsphere`). Copy them to another host if the data must survive losing the server.
 
 **Privacy**
 - **Data lifecycle.** There is no export, retention or hard-delete for a child (children are only archived). Add these when a real retention policy exists.
-- **Masking in review suggestions.** The development-review suggestion masks only the child's first or preferred name in observation text, and sends the focus title and description without masking classmate names. Content generation masks both. Align the two.
-- **`backend/.env.example`.** It still shows the DB user and name `kidsphere`, while `install.sh` writes `kidsphere_mvp`. `APP_URL` is unused.

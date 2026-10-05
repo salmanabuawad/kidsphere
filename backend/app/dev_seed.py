@@ -1,4 +1,4 @@
-"""Demo data for previews and tests: Adam (spec §44) and Maya (spec §45).
+"""Demo data for tests and demo databases: Adam (spec §44) and Maya (spec §45).
 
     cd backend && venv/bin/python -m app.dev_seed
 
@@ -13,8 +13,12 @@ watching the block corner to inviting a friend; Maya: storytelling).
 Children that already exist in the demo class are left untouched, so running
 it twice is safe.
 
-Refuses to run unless the database name ends with ``_test`` or ``_preview``
-or the environment has ``KIDSPHERE_ALLOW_DEMO=1``.
+``main`` (``python -m app.dev_seed``) refuses to run, and exits with status 2,
+unless ``allowed()`` holds: the database name in ``DATABASE_URL`` ends with
+``_test`` or ``_preview``, or the environment has ``KIDSPHERE_ALLOW_DEMO=1``.
+The production database ``kidsphere_mvp`` matches neither suffix. There are no
+preview databases today; ``_preview`` is only an accepted name. ``seed(db)``
+itself does not check (the tests call it on ``kidsphere_test``).
 """
 import os
 import secrets

@@ -241,6 +241,32 @@ def test_context_uses_focus_observations_and_masks_classmates(teacher_client, ad
     assert len(gi["recent_observations"]) == 2
 
 
+def test_context_masks_the_kindergarten_and_the_adults(teacher_client, adam, db, teacher, make_child, make_class,
+                                                       make_user):
+    from app.services.content import adult_names, classmate_names
+
+    child, focus = adam
+    child.name, child.parent_name = "Adam Haddad", "Rana Haddad"
+    db.commit()
+    dana = make_user("teacher", name="Dana Cohen")
+    yard = make_class("Class C", teachers=[dana])  # another class of the same kindergarten
+    make_child(yard, name="Lina Saleh")
+    make_child(None, name="Sami")  # not in a class yet
+    elsewhere = make_class("Class D", kindergarten="Other KG", teachers=[make_user("teacher", name="Yara Kassem")])
+    make_child(elsewhere, name="Huda")
+    db.add(Observation(child_id=child.id, focus_area_id=focus.id, created_by=teacher.id,
+                       observation="Adam Haddad played with Lina and Sami while Rana and Dana watched."))
+    db.commit()
+    gi = generate(teacher_client, child, focus, kind="story")["content"]["generation_input"]
+    assert gi["recent_observations"] == ["[child] played with [friend] and [friend] while [adult] and [adult] watched."]
+
+    assert {"Lina Saleh", "Sami"} <= set(classmate_names(db, child)) and "Huda" not in classmate_names(db, child)
+    assert set(adult_names(db, child)) == {"Rana Haddad", "Parent", "Teacher", "Dana Cohen"}
+    loner = make_child(None, name="Omar")  # without a class: every other child and every teacher
+    assert {"Adam Haddad", "Lina Saleh", "Sami", "Huda"} <= set(classmate_names(db, loner))
+    assert {"Teacher", "Dana Cohen", "Yara Kassem"} <= set(adult_names(db, loner))
+
+
 def test_scope_and_roles_for_generation(other_teacher_client, parent_client, adam):
     child, focus = adam
     body = {"mode": "growth_support", "content_type": "story", "focus_area_id": str(focus.id)}

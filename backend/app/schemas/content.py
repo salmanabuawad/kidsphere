@@ -7,7 +7,7 @@
 - ``RegenerateIn``  POST /api/content/{id}/regenerate
 - ``ShareIn``  POST /api/content/{id}/share
 - ``FeedbackIn``  POST /api/content/{id}/feedback  (only ``result`` is required:
-  a 2-tap feedback is valid)
+  a 2-tap feedback is valid; the optional ``client_request_id`` makes a retry safe)
 """
 import uuid
 from typing import Annotated, Literal
@@ -15,7 +15,7 @@ from typing import Annotated, Literal
 from pydantic import AfterValidator, BeforeValidator, Field
 
 from app.schemas.common import FeedbackResult, Language, Mode, StrictModel, SupportLevel
-from app.schemas.observations import HelpItem, _check_helps
+from app.schemas.observations import HelpItem, RequestId, _check_helps
 
 GenerateType = Literal["story", "video", "digital_game", "real_world_activity", "pack"]
 GameTemplate = Literal[
@@ -67,3 +67,6 @@ class FeedbackIn(StrictModel):
     support_level: SupportLevel | None = None
     observation: FeedbackText = None
     what_helped: Annotated[list[HelpItem] | None, Field(max_length=20), AfterValidator(_check_helps)] = None
+    # Idempotency key (1-100 characters), stored on the mirrored observation: a retry with the
+    # same id returns the feedback saved the first time (200) instead of saving a second one.
+    client_request_id: RequestId = None

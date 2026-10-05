@@ -6,9 +6,11 @@ The app runs on one Ubuntu server: nginx, systemd, PostgreSQL and a Python venv.
 |---|---|
 | `remote-deploy.sh` | Sends `git archive HEAD` (backend, frontend, deploy) to the server and runs `deploy.sh` there. With `--install`, it runs `install.sh` first. |
 | `deploy-kids.ps1` | A PowerShell wrapper for `remote-deploy.sh` (`-Install`). |
-| `install.sh` | One-time, idempotent provisioning: user, directories, DB role and DB, `.env`, systemd unit, nginx site. |
-| `deploy.sh` | Deploys one release: sync, venv, DB backup, migrate, frontend build, restart, health check, smoke test. |
+| `install.sh` | One-time, idempotent provisioning: user, directories, DB role and DB, `.env`, systemd units (the API and the backup timer), nginx site. |
+| `deploy.sh` | Deploys one release: sync, backup timer refresh, venv, pre-deploy DB dump, migrate, frontend build, restart, health check, smoke test. |
+| `backup.sh` | The nightly backup: a database dump and an archive of the uploads, the newest 14 of each kept. Installed as `/usr/local/sbin/kidsphere-mvp-backup`. |
 | `systemd/kidsphere-mvp-api.service` | The uvicorn service. |
+| `systemd/kidsphere-mvp-backup.service`, `kidsphere-mvp-backup.timer` | Runs `backup.sh` as root every night at about 03:30 (`RandomizedDelaySec=15min`, `Persistent=true`). |
 | `nginx/kidsphere-mvp.conf`, `kidsphere-headers.conf`, `kidsphere-ratelimit.conf` | The site, the CSP and security headers, and the login rate limit. |
 | `ci/` | The server-side test runner (see [CI runner](#ci-runner)). |
 
@@ -20,7 +22,7 @@ The app runs on one Ubuntu server: nginx, systemd, PostgreSQL and a Python venv.
 | Frontend | `/var/www/kidsphere/frontend` (sources, `node_modules/`, `dist/` = the nginx root) |
 | Uploads | `/var/www/kidsphere/uploads` (750, `kidsphere-mvp`; never served by nginx) |
 | Releases | `/var/www/kidsphere/releases/<short-sha>` (the 5 newest are kept) |
-| DB backups | `/var/backups/kidsphere/kidsphere-<YYYYmmdd-HHMMSS>.dump` (700, root; the 10 newest are kept) |
+| Backups | `/var/backups/kidsphere/` (700, root; files 600). See [Backups](#backups). |
 | System user | `kidsphere-mvp` |
 | Database | `kidsphere_mvp`, owned by the role `kidsphere_mvp`. Its password is generated into `.env`. |
 | Service | `kidsphere-mvp-api.service`: uvicorn on `127.0.0.1:3071`, 1 worker |
@@ -47,7 +49,7 @@ The app runs on one Ubuntu server: nginx, systemd, PostgreSQL and a Python venv.
    - creates the `kidsphere-mvp` user and the directories
    - creates the `kidsphere_mvp` role (with a random password) and the database (UTF8, from `template0`)
    - writes `backend/.env` from `backend/.env.example`
-   - installs and enables the systemd unit
+   - installs and enables the systemd unit, and the nightly backup timer (`backup.sh` as `/usr/local/sbin/kidsphere-mvp-backup`)
    - installs the nginx site and snippets
 
    It also disables any other enabled nginx site that claims `kids.kortexd.com`, and copies it to `/root/backups/nginx/` first. `deploy.sh` then installs the code.
@@ -68,16 +70,16 @@ bash deploy/remote-deploy.sh                # or: powershell -ExecutionPolicy By
 
 `deploy.sh` runs from `/var/www/kidsphere/releases/<sha>`:
 
-1. `rsync --delete` of the backend (it keeps `venv` and `.env`) and the frontend sources.
+1. `rsync --delete` of the backend (it keeps `venv` and `.env`) and the frontend sources. It also reinstalls `backup.sh` and the backup units and enables the timer, so a deploy keeps them current and turns on nightly backups on servers provisioned before they existed.
 2. A rebuild of the venv, only if the hash of `requirements.txt` changed.
-3. `pg_dump -Fc kidsphere_mvp` into `/var/backups/kidsphere/`, then `alembic upgrade head` as `kidsphere-mvp`.
+3. `pg_dump -Fc kidsphere_mvp` into `/var/backups/kidsphere/kidsphere-predeploy-<stamp>.dump` (the newest 10 are kept), then `alembic upgrade head` as `kidsphere-mvp`.
 4. `npm ci` (only if the lock-file hash changed), then `vite build` into `dist.new`, which is swapped into place as `dist`.
 5. `systemctl restart kidsphere-mvp-api`. It waits up to 30 s for `/api/health` and prints the service log if the API does not come up. Then `nginx -t && systemctl reload nginx`.
 6. A smoke test: the local `/api/health`, `https://kids.kortexd.com/` and `https://kids.kortexd.com/api/health`.
 
 ## Rollback
 
-List the kept releases with `ls -1t /var/www/kidsphere/releases`, and the backups with `ls -1t /var/backups/kidsphere`.
+List the kept releases with `ls -1t /var/www/kidsphere/releases`, and the backups with `ls -lt /var/backups/kidsphere`.
 
 **When the bad release had no new migration,** redeploy the previous release:
 
@@ -85,16 +87,67 @@ List the kept releases with `ls -1t /var/www/kidsphere/releases`, and the backup
 bash /var/www/kidsphere/releases/<previous-sha>/deploy/deploy.sh
 ```
 
-**When the bad release ran a migration,** first restore the dump that its deploy wrote just before migrating: the dump timestamped at that deploy. This loses everything written after the dump.
+**When the bad release ran a migration,** first restore the dump that its deploy wrote just before migrating: the `kidsphere-predeploy-<stamp>.dump` timestamped at that deploy. This loses everything written after the dump.
 
 ```bash
 systemctl stop kidsphere-mvp-api
+# root reads the file and pipes it in: the postgres user cannot read /var/backups/kidsphere
 sudo -u postgres pg_restore --clean --if-exists --single-transaction -d kidsphere_mvp \
-  /var/backups/kidsphere/kidsphere-<YYYYmmdd-HHMMSS>.dump
+  < /var/backups/kidsphere/kidsphere-predeploy-<YYYYmmdd-HHMMSS>.dump
 bash /var/www/kidsphere/releases/<previous-sha>/deploy/deploy.sh
 ```
 
 A rollback never touches uploads.
+
+## Backups
+
+Everything is in `/var/backups/kidsphere/` (700, root; the files are 600):
+
+| File | Written by | Kept |
+|---|---|---|
+| `kidsphere-predeploy-<YYYYmmdd-HHMMSS>.dump` | `deploy.sh`, just before `alembic upgrade head` | the newest 10 (dumps named `kidsphere-<stamp>.dump` by older deploys are counted with them) |
+| `nightly-<YYYYmmdd-HHMMSS>.dump` | `kidsphere-mvp-backup.timer`, every night at about 03:30 | the newest 14 |
+| `uploads-<YYYYmmdd-HHMMSS>.tgz` | the same nightly run: all of `/var/www/kidsphere/uploads` (the child photos) | the newest 14 |
+
+- **Format:** the dumps are `pg_dump -Fc`. Each nightly dump is checked with `pg_restore --list` before it is kept, and a file appears only once it is complete (it is written as `*.partial` first).
+- **Names:** the nightly dumps are deliberately not called `kidsphere-*.dump`. The `deploy.sh` of every release older than the nightly backup keeps only the newest 10 files matching that glob, and a [rollback](#rollback) runs an older `deploy.sh`.
+- **Same server:** the backups stay on this host. Copy them elsewhere if you need to survive losing the server itself.
+- **The timer** is installed and enabled by `install.sh`, and refreshed by every `deploy.sh`. A run that was missed while the server was off happens at the next boot (`Persistent=true`).
+
+```bash
+systemctl list-timers kidsphere-mvp-backup.timer      # the next and the last run
+systemctl start kidsphere-mvp-backup                  # take a backup now (waits until it is done)
+journalctl -u kidsphere-mvp-backup -n 20 --no-pager   # the log of the last runs
+```
+
+### Restore
+
+Restore the database and the uploads from the **same night**, so the photo paths stored in the database match the files. A restore replaces the current data and loses everything written after the backup.
+
+**The database** (from a nightly or a pre-deploy dump):
+
+```bash
+systemctl stop kidsphere-mvp-api
+# root reads the file and pipes it in: the postgres user cannot read /var/backups/kidsphere
+sudo -u postgres pg_restore --clean --if-exists --single-transaction -d kidsphere_mvp \
+  < /var/backups/kidsphere/nightly-<YYYYmmdd-HHMMSS>.dump
+# only when the dump is older than the deployed code's newest migration:
+cd /var/www/kidsphere/backend && sudo -u kidsphere-mvp venv/bin/python -m alembic upgrade head
+systemctl start kidsphere-mvp-api
+```
+
+**The uploads:**
+
+```bash
+systemctl stop kidsphere-mvp-api
+mv /var/www/kidsphere/uploads /var/www/kidsphere/uploads.old
+tar -xzf /var/backups/kidsphere/uploads-<YYYYmmdd-HHMMSS>.tgz -C /var/www/kidsphere
+chown -R kidsphere-mvp:kidsphere-mvp /var/www/kidsphere/uploads && chmod 750 /var/www/kidsphere/uploads
+systemctl start kidsphere-mvp-api
+rm -rf /var/www/kidsphere/uploads.old   # once the app looks right
+```
+
+To look inside a backup without restoring it, use `pg_restore --list < <dump>` or `tar -tzf <archive>`.
 
 ## Logs and checks
 

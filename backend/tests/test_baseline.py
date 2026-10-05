@@ -164,6 +164,16 @@ def test_dev_seed_guard():
     assert dev_seed.allowed("postgresql+psycopg://u@h/kidsphere_preview", environ={})
     assert not dev_seed.allowed("postgresql+psycopg://u@h/kidsphere", environ={})
     assert dev_seed.allowed("postgresql+psycopg://u@h/kidsphere", environ={"KIDSPHERE_ALLOW_DEMO": "1"})
+    # The production database name is refused; only KIDSPHERE_ALLOW_DEMO=1 (exactly) overrides.
+    assert not dev_seed.allowed("postgresql+psycopg://kidsphere_mvp@127.0.0.1:5432/kidsphere_mvp", environ={})
+    assert not dev_seed.allowed("postgresql+psycopg://u@h/kidsphere_mvp", environ={"KIDSPHERE_ALLOW_DEMO": "true"})
+
+
+def test_dev_seed_main_refuses_the_production_database(monkeypatch, capsys):
+    monkeypatch.setattr(dev_seed.settings, "database_url", "postgresql+psycopg://kidsphere_mvp@127.0.0.1:5432/kidsphere_mvp")
+    monkeypatch.delenv("KIDSPHERE_ALLOW_DEMO", raising=False)
+    assert dev_seed.main([]) == 2
+    assert "kidsphere_mvp" in capsys.readouterr().err
 
 
 def test_dev_seed_creates_adam_and_maya(db):

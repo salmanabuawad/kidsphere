@@ -3,7 +3,8 @@ import json
 from datetime import date
 from types import SimpleNamespace
 
-from app.ai.context import AIContext, build_context, mask_names
+from app.ai.context import AIContext, build_context, first_name, mask_names, name_masker
+from app.ai.prompts import user_prompt
 
 TODAY = date(2026, 10, 5)
 
@@ -76,11 +77,30 @@ def test_name_age_gender():
 
 def test_lists_capped_and_labelled_in_language():
     ctx = make(language="he")
-    assert [s.label for s in ctx.strengths] == ["דמיון", "בנייה והרכבה", "Kind to babies"]
-    assert ctx.strengths[2].key is None
+    # "Kind to babies" is a parent's own wording (sources: parent only): never sent.
+    assert [s.label for s in ctx.strengths] == ["דמיון", "בנייה והרכבה", "אוצר מילים עשיר"]
+    assert all(s.key for s in ctx.strengths)
     assert [i.key for i in ctx.interests] == ["cars_transportation", "animals", "blocks"]
     assert len(ctx.what_helps) == 3 and ctx.what_helps[1].label == "פינה שקטה"
     assert ctx.avoid == ["noise", "touch", "bright_lights"]
+
+
+def test_custom_labels_only_when_staff_confirmed_and_masked():
+    profile = {**PROFILE, "strengths": [
+        {"custom": "Kind to babies", "sources": ["parent"]},  # the parent's own wording
+        {"custom": "Sings with Rana", "sources": []},
+        {"custom": "Builds towers with Noa", "sources": ["parent", "teacher"]},  # confirmed by the teacher
+        {"custom": "Shares with Adam Haddad's sister", "sources": ["review"]},
+        {"custom": "Draws maps", "sources": ["observation"]},
+    ], "what_helps": [{"custom": "Mum Rana's song", "sources": ["teacher"], "list": "what_helps"}]}
+    ctx = make(profile=profile, adult_names=["Dana Cohen"])
+    assert [s.label for s in ctx.strengths] == ["Builds towers with [friend]", "Shares with [child]'s sister",
+                                                "Draws maps"]
+    assert all(s.key is None for s in ctx.strengths)
+    assert [h.label for h in ctx.what_helps] == ["Mum [adult]'s song"]  # the child's parent_name is masked too
+    text = json.dumps(ctx.model_dump(mode="json"), ensure_ascii=False)
+    for leaked in ("Kind to babies", "Noa", "Haddad", "Rana"):
+        assert leaked not in text, leaked
 
 
 def test_focus_plan_and_target_strength():
@@ -104,11 +124,82 @@ def test_observations_masked_capped_and_truncated():
         assert name not in joined
 
 
+# Marks are built from code points so the test source shows no invisible characters.
+FATHA, DAMMA, KASRA, SUKUN, TATWEEL = (chr(c) for c in (0x064E, 0x064F, 0x0650, 0x0652, 0x0640))
+SHEVA, QAMATS, GERESH = chr(0x05B0), chr(0x05B8), chr(0x05F3)
+
+
 def test_masking_with_hebrew_and_arabic_prefixes():
     assert mask_names("ראיתי שאדם שיחק עם נועה ולאדם היה כיף", ["אדם"], ["נועה"]) == \
         "ראיתי ש[child] שיחק עם [friend] ול[child] היה כיף"
     assert mask_names("لعب آدم مع يوسف ولآدم صديق", ["آدم"], ["يوسف"]) == "لعب [child] مع [friend] ول[child] صديق"
     assert mask_names("Adamant Adam", ["Adam"], []) == "Adamant [child]"
+    # Arabic spelling variants: hamza/alef, ta marbuta/ha, alef maqsura/ya, tashkeel, tatweel.
+    assert mask_names("لعب احمد", ["أحمد"]) == "لعب [child]"
+    assert mask_names("لعب أحمد وإحمد", ["احمد"]) == "لعب [child] و[child]"
+    assert mask_names("فاطمه ضحكت", [], ["فاطمة"]) == "[friend] ضحكت"
+    assert mask_names("مع مصطفي", [], ["مصطفى"]) == "مع [friend]"
+    assert mask_names(f"قال أ{FATHA}ح{SUKUN}م{FATHA}د{DAMMA}", ["أحمد"]) == "قال [child]"
+    assert mask_names(f"قال أح{TATWEEL}مد", ["أحمد"]) == "قال [child]"
+    assert mask_names("هدية للعباس والعباس", [], ["العباس"]) == "هدية ل[friend] و[friend]"
+    assert mask_names("لعباس", [], ["العباس"]) == "لعباس"  # not al-Abbas
+    # Hebrew geresh vs apostrophe, niqqud (also on a prefix).
+    assert mask_names(f"ג{GERESH}ורג{GERESH} בנה", [], ["ג'ורג'"]) == "[friend] בנה"
+    assert mask_names(f"נתתי ל{SHEVA}א{QAMATS}ד{QAMATS}ם", ["אדם"]) == f"נתתי ל{SHEVA}[child]"
+    # Latin accents and case.
+    assert mask_names("zoe and ZOË and Zoë", ["Zoë"]) == "[child] and [child] and [child]"
+    assert mask_names("Zoë came", ["Zoe"]) == "[child] came"
+    assert mask_names("O’Neil and o'neil", [], ["O'Neil"]) == "[friend] and [friend]"
+
+
+def test_masking_name_particles():
+    # A particle is masked only with the next word: "בן ארבע" (four years old) and "לבן" stay.
+    assert mask_names("הוא בן ארבע, לבן ונועה ובן דוד", [], ["נועה בן דוד"]) == "הוא בן ארבע, לבן ו[friend] ו[friend]"
+    assert mask_names("إن شاء الله، عبد الله وحداد", [], ["عبد الله حداد"]) == "إن شاء الله، [friend] و[friend]"
+    assert mask_names("Ana, de Souza and the de facto rule", [], ["Ana de Souza"]) == \
+        "[friend], [friend] and the de facto rule"
+    # A particle that starts a Latin name is the given name itself.
+    assert mask_names("Ben came", [], ["Ben Levi"]) == "[friend] came"
+
+
+def test_masking_adults():
+    text = "Mum Rana Haddad said Adam Haddad and teacher Dana helped; the Haddad family came"
+    assert mask_names(text, ["Adam Haddad"], [], ["Rana Haddad", "Dana Cohen"]) == \
+        "Mum [adult] said [child] and teacher [adult] helped; the [child] family came"  # shared surname: [child]
+    # A classmate wins over an adult with the same name.
+    assert mask_names("Dana built", [], ["Dana Levi"], ["Dana Cohen"]) == "[friend] built"
+
+
+def test_masker_handles_a_whole_kindergarten():
+    names = [f"Child{i} Family{i}" for i in range(400)]
+    mask = name_masker(["Adam Haddad"], names, ["Rana Haddad"])
+    text = "Adam played with Child7 and Family399; Rana came. " * 6
+    assert mask(text) == "[child] played with [friend] and [friend]; [adult] came. " * 6
+
+
+def test_first_name_drops_a_surname_in_the_preferred_name():
+    child = SimpleNamespace(**{**vars(CHILD), "preferred_name": "Adam Haddad"})
+    assert make(child=child).name == "Adam"
+    assert first_name({"name": "Adam Haddad", "preferred_name": "haddad"}) == "Adam"
+    assert first_name({"name": "Adam Haddad", "preferred_name": "Adi"}) == "Adi"
+    assert first_name({"name": "Adam", "preferred_name": None}) == "Adam"
+
+
+def test_focus_and_current_understanding_mask_the_childs_own_names():
+    focus = {**FOCUS, "title": "Adam Haddad joins Noa", "description": "Adam Haddad starts next to Yusuf",
+             "plan": {"who": "Mum Rana and teacher Dana with Adam"}}
+    ctx = make(focus=focus, adult_names=["Dana Cohen"],
+               current_understanding={"summary": "Adam Haddad enjoys building with Noa."})
+    assert ctx.focus.title == "[child] joins [friend]"
+    assert ctx.focus.description == "[child] starts next to [friend]"
+    assert ctx.focus.plan["who"] == "Mum [adult] and teacher [adult] with [child]"
+    assert ctx.current_understanding.summary == "[child] enjoys building with [friend]."
+    prompt = user_prompt("real_world_activity", ctx)
+    for name in ("Haddad", "Rana", "Dana", "Noa", "Yusuf"):
+        assert name not in prompt, name
+    # The development-review suggestion masks later itself (mask_understanding_inputs).
+    raw = make(focus=focus, mask_free_text=False, current_understanding={"summary": "Adam Haddad plays."})
+    assert raw.current_understanding.summary == "Adam Haddad plays." and raw.focus.title == "Adam Haddad joins Noa"
 
 
 def test_current_understanding_and_instruction():

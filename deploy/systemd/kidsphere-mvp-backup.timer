@@ -1,0 +1,12 @@
+[Unit]
+Description=Nightly KidSphere MVP backup (about 03:30)
+
+[Timer]
+OnCalendar=*-*-* 03:30:00
+RandomizedDelaySec=15min
+# Run at the next boot when the server was off at 03:30.
+Persistent=true
+Unit=kidsphere-mvp-backup.service
+
+[Install]
+WantedBy=timers.target
