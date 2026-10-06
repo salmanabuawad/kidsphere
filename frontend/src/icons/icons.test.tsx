@@ -6,7 +6,6 @@ import type { NavMeta } from "@/lib/routing";
 import {
   ArrowNextIcon,
   BlockIcon,
-  BrandMarkIcon,
   ChildrenIcon,
   ObserveAddIcon,
   StoryIcon,
@@ -21,7 +20,7 @@ import {
 const asLucide: LucideIcon = ChildrenIcon;
 const navMeta: NavMeta = { labelKey: "nav.observe", icon: ObserveAddIcon, order: 50, action: true };
 
-/** Spec 5.4: 27 icons plus the brand mark. */
+/** Spec 5.4: the 27 UI icons. The logo is artwork (components/brand/Logo), not a block icon. */
 const SPEC_NAMES: KidIconName[] = [
   "children",
   "observe-add",
@@ -50,7 +49,6 @@ const SPEC_NAMES: KidIconName[] = [
   "did-not-work",
   "present",
   "arrow-next",
-  "brand-mark",
 ];
 
 /** Spec 5.3: these flip under RTL; the star, heart, check, play triangle and lens never do. */
@@ -126,12 +124,10 @@ describe("KidSphere icon set", () => {
     expect(svg.hasAttribute("aria-hidden")).toBe(false);
   });
 
-  it("renders the brand mark as three flat fills without an outline", () => {
-    const svg = svgOf(<BrandMarkIcon />);
-    const shapes = [...svg.querySelectorAll("path, circle, rect")] as SVGElement[];
-    expect(shapes).toHaveLength(3);
-    expect(shapes.map((s) => s.getAttribute("stroke"))).toEqual(["none", "none", "none"]);
-    expect(shapes.map((s) => s.style.fill)).toEqual(["var(--brand, #005DBD)", "var(--paint-sun, #FDC010)", "var(--paint-berry, #EE4E89)"]);
+  it("holds UI icons only: the retired block-tower brand mark is gone (the logo is components/brand/Logo)", () => {
+    expect("brand-mark" in iconDefs).toBe(false);
+    expect("brand-mark" in kidIcons).toBe(false);
+    for (const def of Object.values(iconDefs)) expect("flat" in def).toBe(false);
   });
 
   it("BlockIcon renders an icon by name", () => {

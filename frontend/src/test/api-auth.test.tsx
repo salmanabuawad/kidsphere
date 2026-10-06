@@ -97,6 +97,20 @@ describe("auth redirects", () => {
     expect(await screen.findByRole("button", { name: /sign in/i })).toBeTruthy();
   });
 
+  it("the sign-in page leads with the KidSphere logo lockup above the card", async () => {
+    mockFetch({ "GET /api/me": { status: 401, body: { error: { code: "UNAUTHENTICATED", message: "x" } } } });
+    renderApp({ routes: testRoutes, url: "/login" });
+    const heading = await screen.findByRole("heading", { level: 1 });
+    const mark = screen.getByAltText("KidSphere");
+    const lockup = mark.closest<HTMLElement>("[data-logo]")!;
+    expect(lockup.dataset.logo).toBe("stacked");
+    // A 72px mark: above the 64px stacked minimum, small enough to keep Sign in above a phone's fold.
+    expect(mark.getAttribute("height")).toBe("72");
+    expect(lockup.querySelectorAll("img.ks-logo-light, img.ks-logo-dark")).toHaveLength(2);
+    expect(lockup.compareDocumentPosition(heading) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(document.querySelector('[data-icon="brand-mark"]')).toBeNull();
+  });
+
   it("a 401 mid-session signs out and redirects with next", async () => {
     mockFetch({ "GET /api/children": { status: 401, body: { error: { code: "UNAUTHENTICATED", message: "x" } } } });
     const { router } = renderApp({ routes: testRoutes, url: "/children", user: teacher });

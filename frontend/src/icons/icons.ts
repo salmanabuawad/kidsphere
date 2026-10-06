@@ -41,10 +41,9 @@ export const WorkedWellIcon = createKidIcon("worked-well");
 export const PartlyIcon = createKidIcon("partly");
 export const DidNotWorkIcon = createKidIcon("did-not-work");
 
-// Present mode and brand
+// Present mode
 export const PresentIcon = createKidIcon("present");
 export const ArrowNextIcon = createKidIcon("arrow-next");
-export const BrandMarkIcon = createKidIcon("brand-mark");
 
 /** Every icon by its spec name, e.g. `kidIcons["what-helps"]`. */
 export const kidIcons: Record<KidIconName, KidIcon> = {
@@ -75,5 +74,4 @@ export const kidIcons: Record<KidIconName, KidIcon> = {
   "did-not-work": DidNotWorkIcon,
   present: PresentIcon,
   "arrow-next": ArrowNextIcon,
-  "brand-mark": BrandMarkIcon,
 };

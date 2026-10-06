@@ -2,6 +2,7 @@ import { useState, type FormEvent } from "react";
 import { Navigate, useNavigate, useSearchParams } from "react-router";
 import { Eye, EyeOff, LogIn } from "lucide-react";
 import { useAuth } from "@/auth/AuthProvider";
+import { Logo } from "@/components/brand/Logo";
 import { LocaleSwitcher } from "@/components/layout/LocaleSwitcher";
 import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
@@ -9,7 +10,7 @@ import { Field, Input } from "@/components/ui/Field";
 import { Chip } from "@/components/ui/Chip";
 import { BlockCluster } from "@/components/ui/EmptyState";
 import { FullPageSpinner } from "@/components/ui/Spinner";
-import { BrandMarkIcon, GrowthSupportIcon, InterestsIcon, StrengthsIcon } from "@/icons";
+import { GrowthSupportIcon, InterestsIcon, StrengthsIcon } from "@/icons";
 import { useI18n } from "@/i18n/I18nProvider";
 import { homeFor, safeNext } from "@/lib/paths";
 import { useErrorMessage } from "@/lib/useAction";
@@ -57,7 +58,7 @@ export function LoginPage() {
       <main className="relative flex flex-1 items-center justify-center px-4 pb-12">
         <div className="w-full max-w-md">
           <div className="mb-6 flex flex-col items-center text-center">
-            <BrandMarkIcon className="mb-3 size-16" aria-hidden />
+            <Logo variant="lockup" size={72} className="mb-5" />
             <h1 className="font-display text-display-lg font-semibold text-ink">{t("auth.welcome")}</h1>
             <p className="mt-1.5 text-sm text-ink-muted">{t("auth.welcomeSub")}</p>
           </div>

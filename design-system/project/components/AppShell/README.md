@@ -14,7 +14,7 @@ The frame around every teacher, admin and parent screen: phone-first, with a top
 
 ## Below lg: top bar and bottom bar
 
-- **Top bar**: sticky, 56px plus the top safe area, solid `ground` with a 1px `line` bottom edge and no blur. The Brand link at the start (a 36px `brand-mark` and "KidSphere" in `title` `ink`, at least 44px tall); the compact language switch and a 44px avatar-menu IconButton at the end.
+- **Top bar**: sticky, 56px plus the top safe area, solid `ground` with a 1px `line` bottom edge and no blur. The Brand link at the start: the logo as an inline lockup (the 36px round mark, then the wordmark image 22px tall, 8px apart, `assets/Logos`), at least 44px tall and named by the mark's alt text "KidSphere"; the compact language switch and a 44px avatar-menu IconButton at the end.
 - **Bottom bar**: fixed, 64px plus the bottom safe area, `surface` with a 1px `line` top edge. Up to four items split around the centre action, in a row at most 576 wide; overflow goes under More (Menu), which opens a bottom sheet with the same items.
 - **Items**: a 24px icon in a 48 by 28 pill (`radius-md`) over a `caption` 500 label at 13/16 (14/18 in Arabic), one line with an ellipsis.
 
@@ -28,11 +28,12 @@ The frame around every teacher, admin and parent screen: phone-first, with a top
 ## lg and up: side nav
 
 - A 256px panel, sticky and full height, on `ground` with a 1px `line` inline-end edge, padding 12, gap 16.
-- In order: the Brand; a full-width lg primary "Add observation" button; the nav list (44px rows, `radius-md`, a 24px icon and a `label`; hover `tray`; active `brand-soft` with a `brand` 600 label and the painted icon); a footer with a `line` top edge holding the user block, the language switch and a ghost Sign out with a mirrored LogOut glyph.
+- In order: the Brand (the same inline lockup with a 40px mark); a full-width lg primary "Add observation" button; the nav list (44px rows, `radius-md`, a 24px icon and a `label`; hover `tray`; active `brand-soft` with a `brand` 600 label and the painted icon); a footer with a `line` top edge holding the user block, the language switch and a ghost Sign out with a mirrored LogOut glyph.
 
 ## Do and don't
 
 - Do keep the Observe block reachable with one thumb on every teacher screen.
-- Do mirror the whole shell under RTL with logical properties; the brand wordmark stays "KidSphere" in Latin.
+- Do mirror the whole shell under RTL with logical properties, but never the logo: the Brand sits at the inline start and keeps the mark before the wordmark, left to right, in every language.
+- Do place both wordmark inks (`kidsphere-wordmark.png`, `kidsphere-wordmark-dark.png`) and let the theme show one.
 - Don't blur or tint the top bar, or put more than four items beside Observe.
 - Don't use lucide icons for nav; use the custom set (`children`, `observe-add`, `users`, `classes`, `account`, `parent-home`, `timeline`, `development`, `content`).

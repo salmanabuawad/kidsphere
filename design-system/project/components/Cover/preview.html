@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8">
 <title>KidSphere</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600&family=Rubik:wght@400&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400&display=swap">
 <style>
   html, body { margin:0; height:100%; }
   body { background:var(--ground); color:var(--ink); font-family:var(--font-body); overflow:hidden; }
@@ -26,10 +26,11 @@
   .r-lg { rx:var(--radius-lg); }
   .ball-96 { rx:var(--space-12); }
   .ball-24 { rx:var(--space-3); }
-  /* name and tagline, bottom-left on the ground */
+  /* the logo (the stacked lockup, both inks: .ks-ico--l / .ks-ico--d show one) and the tagline, bottom-left on the ground */
   .words { position:absolute; inset-inline-start:var(--space-8); inset-block-end:var(--space-8); max-width:440px; }
-  .wordmark { margin:0; font-family:var(--font-display); font-size:80px; line-height:.92; font-weight:600; color:var(--ink); }
-  .tagline { margin:var(--space-3) 0 0; font-family:var(--font-body); font-size:14px; line-height:20px; font-weight:400; color:var(--ink-muted); }
+  .logo { margin:0; line-height:0; }
+  /* space-6 keeps the logo's clear space (a quarter of the 109px mark) free of the tagline */
+  .tagline { margin:var(--space-6) 0 0; font-family:var(--font-body); font-size:14px; line-height:20px; font-weight:400; color:var(--ink-muted); }
 </style>
 </head>
 <body>
@@ -37,9 +38,9 @@
 <div class="art" aria-hidden="true">
 <svg viewBox="0 0 480 288" width="480" height="288">
 <!--
-  blocks       brand 240×144 arch block with a 96 half-round opening (the identity blue, the largest saturated field) · brand-soft 160×280 board bled off the top and right (the one tint, for relief) · paint-sun 96 ball · paint-berry 80 cube · ink 48 cube tilted −6° like the cube in the brand mark; about 26% of 960×288
+  blocks       brand 240×144 arch block with a 96 half-round opening (the identity blue, the largest saturated field) · brand-soft 160×280 board bled off the top and right (the one tint, for relief) · paint-sun 96 ball · paint-berry 80 cube · ink 48 cube tilted −6° like the cube in the old block-tower mark; about 26% of 960×288
   arrangement  the block corner as a staggered stack: every block stands on one floor space-8 above the bottom edge, level with the foot of the tagline; the arch with the sun ball on it, a berry-and-ink tower, then the tall board, rising left to right
-  pattern      discs, from the soft and friendly row: the README builds every screen from block, ball, roof and arch, and the ball is the brand mark's second shape, so twenty 24px balls are cut in ground from the brand-soft board on a staggered pegboard lattice
+  pattern      discs, from the soft and friendly row: the README builds every screen from block, ball, roof and arch, and the ball is the block set's second shape, so twenty 24px balls are cut in ground from the brand-soft board on a staggered pegboard lattice
   scales       floor and text inset space-8; gutters space-2; lattice space-12 across, space-8 up, alternate rows offset space-6, board inset space-4; arch block 5 × space-12 by 3 × space-12; corners radius-lg (arch block, board), radius-md (cube), radius-sm (small cube); ball and opening rx space-12, pegs rx space-3
 -->
 <rect class="tint r-lg" x="352" y="-24" width="160" height="280" rx="20"/>
@@ -71,7 +72,7 @@
 </svg>
 </div>
 <div class="words">
-<h1 class="wordmark">KidSphere</h1>
+<h1 class="logo"><img class="ks-ico--l" src="../../assets/Logos/kidsphere-logo.png" alt="KidSphere" width="178" height="160"><img class="ks-ico--d" src="../../assets/Logos/kidsphere-logo-dark.png" alt="KidSphere" width="178" height="160"></h1>
 <p class="tagline">The block corner, painted.</p>
 </div>
 </div>

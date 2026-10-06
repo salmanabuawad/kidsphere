@@ -2,9 +2,10 @@ import { useEffect, useState, type ReactNode } from "react";
 import { Link, NavLink, useLocation, useNavigate } from "react-router";
 import { LogOut, Menu, type LucideIcon } from "lucide-react";
 import { useAuth } from "@/auth/AuthProvider";
+import { Logo } from "@/components/brand/Logo";
 import { Avatar } from "@/components/ui/Avatar";
 import { Dialog } from "@/components/ui/Dialog";
-import { AccountIcon, BrandMarkIcon, ObserveAddIcon } from "@/icons";
+import { AccountIcon, ObserveAddIcon } from "@/icons";
 import { useI18n } from "@/i18n/I18nProvider";
 import { paths } from "@/lib/paths";
 import { navFor, type NavItem } from "@/lib/routing";
@@ -32,13 +33,15 @@ function isActivePath(pathname: string, to: string) {
   return pathname === to || pathname.startsWith(`${to}/`);
 }
 
-/** The brand mark (a child's first tower) and the wordmark in the display face. */
-export function Brand({ to = "/", className }: { to?: string; className?: string }) {
-  const { t } = useI18n();
+/**
+ * The KidSphere logo linking home: the round mark with the wordmark beside it (the inline
+ * lockup). The mark's alt text names the link. `size` is the mark's diameter: 36 in the
+ * 56px top bar, 40 in the side nav.
+ */
+export function Brand({ to = "/", size = 36, className }: { to?: string; size?: number; className?: string }) {
   return (
-    <Link to={to} className={cn("inline-flex min-h-11 items-center gap-2.5 rounded-md px-1", className)}>
-      <BrandMarkIcon className="size-9 shrink-0" />
-      <span className="font-display text-title font-semibold text-ink">{t("common.appName")}</span>
+    <Link to={to} className={cn("inline-flex min-h-11 items-center rounded-md px-1", className)}>
+      <Logo variant="lockup" layout="inline" size={size} />
     </Link>
   );
 }
@@ -172,7 +175,7 @@ export function AppShell({ nav, children }: { nav: NavItem[]; children: ReactNod
       {/* Desktop side nav */}
       <aside className="sticky top-0 hidden h-dvh w-64 shrink-0 flex-col gap-4 border-e border-line bg-ground p-3 lg:flex">
         <div className="pt-1">
-          <Brand />
+          <Brand size={40} />
         </div>
         {action && (
           <Link

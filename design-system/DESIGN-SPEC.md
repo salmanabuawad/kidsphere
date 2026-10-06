@@ -19,7 +19,7 @@ Colour works on three layers, and each layer has one job:
    - What helps: leaf ticked block ✓
    - Current focus: grape flag, numbered 1–3
    - Worth a look: tangerine eye, never red
-3. **Paint (kid layer).** A family of saturated `paint-*` colours appears only as the fill of one primitive inside an ink-outlined icon, on the painted picture blocks of the child's game board, in the brand mark, on stickers and in empty-state scenes. This is what makes KidSphere read as a kids' app, and it is small and bounded enough that a busy teacher never sees a toy store.
+3. **Paint (kid layer).** A family of saturated `paint-*` colours appears only as the fill of one primitive inside an ink-outlined icon, on the painted picture blocks of the child's game board, in the present-mode finish tower, on stickers and in empty-state scenes. This is what makes KidSphere read as a kids' app, and it is small and bounded enough that a busy teacher never sees a toy store.
 
 **Brand.** `brand` is toy-block blue: hue 256 in light, a greener primary blue than the SaaS indigo, set beside a red-leaning grape for focus at hue 318–322. No saturated colour (OKLCH chroma above 0.05) sits in the AI-violet band (hue 280–305), and nothing uses a gradient.
 
@@ -47,7 +47,7 @@ Colour works on three layers, and each layer has one job:
 9. Feedback is drawn as block towers: a finished tower, a half-built one, and blocks that tumbled. Every option gets the same paint and the same selection, so none of them reads as a grade.
 10. **Present-mode game board.** A tray of painted picture blocks in a colouring-book outline, a sun round arrow, sticker stamps, and a finish tower that builds itself. The copy for a missed pick is "Let's try another one", never an X.
 11. **Empty states as block scenes.** An empty toy box, an unthreaded bead string, a lens resting by a ball. The copy is kind and a little playful.
-12. The brand mark is a child's first tower: a blue arch with a sunflower ball and a berry cube on it.
+12. The brand mark is a child's first tower: a blue arch with a sunflower ball and a berry cube on it. (Superseded: the logo is now the globe-and-child artwork in `project/assets/Logos`, see the Logo section of `project/README.md`; the tower survives only as the present-mode finish motif.)
 
 ---
 
@@ -87,8 +87,8 @@ The CSS variable is `--<name>`. Tailwind maps each one as `--color-<name>`, so `
 | `warning` | `{attention-ink}` | `{attention-ink}` | System warnings: unsaved changes, offline, video still processing. Always with an alert glyph. Reads on `ground`, `surface`, `surface-raised`, `attention-soft`. |
 | `danger` | `#BE2323` | `#F47C6B` | Errors and destructive confirms only: field error text and the 2px field border, error-alert border and glyph, the Delete confirm fill (with `on-brand`). Never used for anything about a child. Reads on `ground`, `surface`, `surface-raised`, `tray`. There is deliberately no `danger-soft`: error alerts are `surface` with a `danger` border. |
 | `ring` | `#004FB1` | `#98C7FF` | Keyboard focus: a solid 3px outline with a 2px offset on every interactive element. Named `ring`, not `focus-ring`, so it never collides with the Current-focus tone. At least 6.19:1 on every ground. |
-| `paint-sun` | `#FDC010` | `#F9C635` | Sunflower paint: the Strengths and Strength Builder stars, the ball in the feedback towers, the brand-mark ball, the kid RoundButton fill, stickers, the finish-tower ball, the baseline timeline bead, kid picture blocks. Fill only; any glyph on it uses `on-paint`. |
-| `paint-berry` | `#EE4E89` | `#F56696` | Berry paint: the Interests heart, the brand-mark and finish-tower cube, kid picture blocks. Fill only. |
+| `paint-sun` | `#FDC010` | `#F9C635` | Sunflower paint: the Strengths and Strength Builder stars, the ball in the feedback towers, the kid RoundButton fill, stickers, the finish-tower ball, the baseline timeline bead, kid picture blocks. Fill only; any glyph on it uses `on-paint`. |
+| `paint-berry` | `#EE4E89` | `#F56696` | Berry paint: the Interests heart, the finish-tower cube, kid picture blocks. Fill only. |
 | `paint-leaf` | `#4DB956` | `#61C568` | Leaf paint: the What-helps ticked block, the activity-result bead, the success toast block, kid picture blocks. Fill only. |
 | `paint-grape` | `#BC6ECE` | `#C77DD8` | Grape paint: the Current-focus pennant, the Growth Support pot, the focus-change bead, kid picture blocks. Fill only. |
 | `paint-tangerine` | `#FA8927` | `#FA9947` | Tangerine paint: the attention eye iris, the warning toast block, kid picture blocks. Fill only. |
@@ -362,7 +362,6 @@ html:lang(ar) body, html:lang(he) body { line-height: 1.65; }
 - child-facing text: `kid-label`, `kid-story`
 - numeral blocks
 - avatar initials
-- the wordmark
 
 Never use it for buttons, form fields, tables, chips, nav labels or child names in lists. Teacher buttons use Rubik, so Baloo's tall box never sits inside a 44px control.
 
@@ -378,7 +377,7 @@ Never use it for buttons, form fields, tables, chips, nav labels or child names 
 |---|---|---|---|---|---|
 | `display-xl` | display | 40/48 (32/40 below 600px) | 600 | 42/60 (34/48) | Present-mode titles, FinishScreen title |
 | `display-lg` | display | 28/36 | 600 | 30/44 | Page titles, the child's name in the profile hero |
-| `title` | display | 20/28 | 600 | 22/32 | Card and section heads, dialog titles, empty-state headings, the brand wordmark |
+| `title` | display | 20/28 | 600 | 22/32 | Card and section heads, dialog titles, empty-state headings |
 | `kid-label` | display | 24/32 | 500 (600 on KidButton and bubble titles) | 26/38 | ChoiceCard labels, KidButton text, kid bubble titles |
 | `kid-story` | display | 28/42 | 500 | 30/46 | Story page text in present mode (lines of 30ch at most) |
 | `name` | body | 18/26 | 600 | 18/30 | Child names in lists and cards, the user name in the shell |
@@ -486,7 +485,7 @@ No loops, no idle bobbing, no confetti.
 - **Primitives only.** Rounded square or rect (corner 1.5–3), circle, rounded-join triangle, arch (half-round top or half-round cut-out) and capsule. No freehand curves, no faces, no characters.
 - **Outline.** stroke-width 2 in viewBox units at every size, with round caps and round joins and `fill="none"`. A few strokes are heavier: the plus in `observe-add` (2.5), the check in `what-helps` (2.5), the handle in `observe-add` (3) and `arrow-next` (3).
 - **Overlaps.** Author overlaps as open paths, so no line passes behind another primitive. The outline-only state therefore never shows crossing lines.
-- **Paint.** Exactly one primitive per icon is painted; only the brand mark has three flat fills, and it has no outline. The paint is a separate shape drawn under the outline, with the same geometry and `stroke="none"`. It covers at most about 40% of the glyph.
+- **Paint.** Exactly one primitive per icon is painted; the retired block-tower mark was the only exception. The paint is a separate shape drawn under the outline, with the same geometry and `stroke="none"`. It covers at most about 40% of the glyph.
 - **Paint slip.** At 20px and up, the paint shape is translated (0, 1.5) in viewBox units: 1.5px down at 24px, 3px at 48px. This is the "hand-painted block" signal. It is vertical only, so it never needs its own RTL handling. At 16px there is no offset.
 - **Sizes:**
 
@@ -542,7 +541,7 @@ No loops, no idle bobbing, no confetti.
 
 **Never mirror** these. The star, heart, check, play triangle and lens are conventions, not directions:
 
-`children`, `observe-add`, `content`, `account`, `users`, `classes`, `parent-home`, `video`, `game`, `activity`, `pack`, `strength-builder`, `growth-support`, `strengths`, `interests`, `what-helps`, `attention`, `worked-well`, `present`, `brand-mark`
+`children`, `observe-add`, `content`, `account`, `users`, `classes`, `parent-home`, `video`, `game`, `activity`, `pack`, `strength-builder`, `growth-support`, `strengths`, `interests`, `what-helps`, `attention`, `worked-well`, `present`
 
 **Present-mode arrows.** In present mode, direction comes from the content language, not the UI. `NextArrow` and `BackArrow` keep their API and the `data-arrow` attribute, which `player.test.tsx` asserts.
 
@@ -555,7 +554,7 @@ No loops, no idle bobbing, no confetti.
 
 Lucide utility glyphs that carry direction (back and forward chevrons, `LogOut`) also get `rtl:-scale-x-100`.
 
-### 5.4 The set: 27 icons plus the brand mark
+### 5.4 The set: 27 icons
 
 Coordinates are in viewBox units. "Painted" names the primitive that takes the paint.
 
@@ -588,7 +587,7 @@ Coordinates are in viewBox units. "Painted" names the primitive that takes the p
 | `did-not-work` | Feedback: Did not work (about the activity, never the child) | Tumbled, with no blame. A ground line at y21 from x2 to x22. A 9×5 rounded rect lies tilted −12° with its left foot at (3,21). A 6×6 rounded square, rotated 25°, leans against it around x11–16. The ball, r2.75, has rolled away to (19,18.25). Never an X, never red. | Ball (`paint-sun`) | mirror |
 | `present` | Action: Present to the child | Tablet on a stand. Tablet: rounded rect x3–21, y4–17, corner 3. Stand: rounded triangle (9,21), (12,17), (15,21). A rounded play triangle (10,7.5), (15,10.5), (10,13.5) centred on the screen. | Play triangle (`paint-sky`) | no |
 | `arrow-next` | Present mode: Next (Back is the mirror) | A chunky arrow at stroke 3 with round caps and joins: shaft (4.5,12)–(18,12); head (12,5.5), (18.5,12), (12,18.5). | None. Drawn in `on-paint` on the sun RoundButton and in `on-brand` on brand. | via the `dir` prop |
-| `brand-mark` | KidSphere logo (replaces the Sprout tile) | A first tower, flat fills with no outline. Arch block: rect x2–22, y12–22, corner 2, with a half-round cut-out r4 centred at (12,22), filled `brand`. Ball: circle r4.5 at (8,7.5), filled `paint-sun`. Cube: rounded square x13–20, y5–12, corner 1.5, rotated −6° about its centre, filled `paint-berry`. The ball and the cube just touch. The wordmark "KidSphere" sits beside it in display 600 (`title` size in the shell). | Three flat fills | no |
+| `brand-mark` | (Retired: the logo is `project/assets/Logos`; kept only as the legacy `assets/Icons/brand-mark.svg`, not part of the 27.) Formerly the KidSphere logo (replaced the Sprout tile) | A first tower, flat fills with no outline. Arch block: rect x2–22, y12–22, corner 2, with a half-round cut-out r4 centred at (12,22), filled `brand`. Ball: circle r4.5 at (8,7.5), filled `paint-sun`. Cube: rounded square x13–20, y5–12, corner 1.5, rotated −6° about its centre, filled `paint-berry`. The ball and the cube just touch. | Three flat fills | no |
 
 **Designated paint primitive for nav icons:**
 
@@ -952,7 +951,7 @@ Then a 56px star sticker stamps beside the tower at the inline-end (320ms).
 #### Top bar (below lg)
 
 - **Bar.** Sticky; 56px tall plus `safe-area-inset-top`. Solid `ground` with a 1px `line` bottom border and no blur.
-- **Start.** The Brand link: a 36px `brand-mark` plus "KidSphere" in `title` style and `ink`, at least 44px tall.
+- **Start.** The Brand link: the KidSphere logo as an inline lockup (a 36px round mark, then the wordmark image 22px tall, 8px apart; `project/assets/Logos`), at least 44px tall, named by the mark's alt text.
 - **End.** The compact LocaleSwitcher, plus a 44px avatar-menu IconButton (a 32px `tray` avatar block).
 
 #### Side nav (lg and up)
@@ -1141,7 +1140,7 @@ At most 1152 wide. Padding-inline is 16 on phone and 32 from md up. Padding-bott
 | Keep labels on tints in `ink` | Put tone-coloured text on tints (the only exception is `brand` on `brand-soft`, documented above) |
 | Use attention (tangerine) for "keep an eye on", needs and sensitivities | Use red, or an X, for anything about a child |
 | Keep the support scale and feedback neutral (same selection for every option) | Colour-code levels or outcomes like a traffic light |
-| Keep paint inside outlined icons, picture blocks, stickers, the brand mark and empty-state scenes | Use paint as text, as a large background, or as a chip fill on teacher screens |
+| Keep paint inside outlined icons, picture blocks, stickers, the finish tower and empty-state scenes | Use paint as text, as a large background, or as a chip fill on teacher screens |
 | Use one primary button per view and Rubik inside every teacher button | Use the display face in buttons, forms, tables, chips or nav labels |
 | Put option emoji in a `surface` pod | Use emoji in nav, headings, buttons, statuses, feedback, the finish screen or the brand book |
 | Use logical properties and `rtl:-scale-x-100` for mirrored icons | Use physical margins, padding or radii, or `rotate-180` for mirroring |
@@ -1237,7 +1236,7 @@ These notes are for the lead and the app agent.
   | `nav.users` | UsersRound | `users` |
   | `nav.classes` | School | `classes` |
 - The observe route lives in `features/observations/routes.tsx`. If that file is off-limits right now, wire the icon through the routing metadata later, or leave it for the concurrent agent. Do not edit the folder.
-- Replace the Sprout tile in `Brand` with `brand-mark`.
+- Replace the Sprout tile in `Brand` with `brand-mark` (superseded: Brand now renders `components/brand/Logo`).
 - `NavItem.icon` is typed as `LucideIcon`. Widen it to `ComponentType<{ className?: string }>`, or add an `iconName`.
 
 **Kid UI.** Keep the exported API, the `CardState` union, `data-state`, `data-arrow`, `aria-pressed` and every `data-testid`.

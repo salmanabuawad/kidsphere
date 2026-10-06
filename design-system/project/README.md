@@ -2,6 +2,51 @@ KidSphere is the kindergarten app where teachers get to know each child aged 3 t
 
 It must feel like a kids' app and still work for a teacher in the middle of a busy morning: playful, never chaotic; a toy box, not a toy store. Arabic is the default language, Hebrew is fully right-to-left, and English is left-to-right.
 
+## Logo
+
+The KidSphere logo is a round globe with a child reaching up for an orange star, and the wordmark "KidSphere" in navy "Kid" and teal "Sphere". It is the brand mark everywhere the brand appears: the top bar and side nav, the sign-in page, the favicon and the installed-app icon. It is artwork with its own inks, not a block icon, so the paint and no-gradient rules below govern the interface around it, not the logo itself.
+
+### The files
+
+The Logos asset group (`assets/Logos/README.md`) holds five transparent PNGs:
+
+| File | Use it for |
+|---|---|
+| `kidsphere-mark.png` | The round mark alone: app icons, the favicon, small square slots, and the start of the inline lockup |
+| `kidsphere-logo.png` | The full lockup, the mark above the wordmark, on light grounds: the sign-in page, covers, documents |
+| `kidsphere-logo-dark.png` | The same lockup with "Kid" in chalk, on dark grounds |
+| `kidsphere-wordmark.png` | The wordmark alone, for the inline lockup (mark at the start, wordmark beside it) on light grounds |
+| `kidsphere-wordmark-dark.png` | The wordmark with "Kid" in chalk, on dark grounds |
+
+### Light and dark
+
+- The mark is the same in both themes: its white sea reads as a light disc on birch and on walnut.
+- The wordmark has two versions. Navy "Kid" falls to about 1.6:1 on the walnut ground, so the `-dark` files repaint it in chalk (`#F3EEE6`, the dark `ink`); teal "Sphere" stays.
+- Place both versions and let the theme show one, by the same rule as the tokens (`prefers-color-scheme`, unless `data-theme` overrides it). Never filter, invert or tint one version to make the other.
+
+### Arrangements
+
+- **Stacked** (as drawn): the mark centred above the wordmark, the wordmark 1.64 times the mark's width, a gap of about a sixteenth of the mark. Use it where the logo leads a page: the sign-in page (a 72px mark), covers and documents.
+- **Inline**, for bars: the mark at the start and the wordmark beside it, the wordmark image 0.6 of the mark's height and about a fifth of the mark away (8px beside a 36px mark). The top bar uses a 36px mark and the side nav a 40px mark.
+- **Mark alone**: app icons, the favicon, and anywhere narrower than the minimum lockup.
+
+### Clear space and minimum sizes
+
+- Keep clear space of about half the mark's radius (a quarter of its diameter) on every side of the logo, measured from the circle or the wordmark's letters: 9px around a 36px mark, 20px around the sign-in lockup. No text, icon, border or edge of a control enters it.
+- Minimum sizes on screen: the mark alone 24px (the favicon's 16 and 32px files are the only smaller use); the inline lockup a 32px mark; the stacked lockup a 64px mark. Below these, use the mark alone. In print, keep the mark at least 10mm across.
+
+### Never
+
+- Never recolour any part of it, tint it with `brand` or a paint, or make a one-colour version by filtering.
+- Never stretch, squash, crop, rotate or skew it: scale it only in proportion, with both width and height set from the file.
+- Never mirror it. Under right-to-left the bar places the whole lockup at the inline start, but inside the lockup the mark stays before the wordmark, left to right, in every language.
+- Never put the mark on busy paint: photos, paint fills, picture blocks, block clusters, the cover's pegboard or another gradient. Place it on plain `ground`, `surface` or `surface-raised`.
+- Never add an outline, lip, shadow, glow or tile behind it, never animate it, and never set "KidSphere" in live text styled to look like the wordmark.
+
+### The block tower is not the logo
+
+The block tower (a blue arch with a sunflower ball and a berry cube) was the first brand mark. It is retired as the logo and survives only as play: the present-mode finish motif that the FinishScreen builds for a child at the end of a game. Never use it as the logo, an app icon or a favicon. `assets/Icons/brand-mark.svg` is kept as a legacy record of it and is not part of the icon set.
+
 ## Content fundamentals
 
 ### Who we are talking to
@@ -87,7 +132,7 @@ Each profile meaning has a pastel `-soft` fill and a dark `-ink`, and is always 
 
 `paint-sun`, `paint-berry`, `paint-leaf`, `paint-grape`, `paint-tangerine` and `paint-sky` are what make KidSphere read as a kids' app, and they are fills only.
 
-- Use paint only as the one painted primitive inside an `ink`-outlined icon, the picture blocks of the child's game board, stickers, the brand mark and empty-state scenes.
+- Use paint only as the one painted primitive inside an `ink`-outlined icon, the picture blocks of the child's game board, stickers, the present-mode finish tower and empty-state scenes. The logo is artwork with its own inks and is not painted from these tokens.
 - Put any glyph or label on paint in `on-paint` (graphite in both themes, 4.56:1 or better on every paint).
 - Never use paint as text, as a large background, or as a chip fill on teacher screens.
 - `paint-sky` is the non-meaning paint for everyday things: content types, the observation bead, the info toast.
@@ -104,7 +149,7 @@ Each profile meaning has a pastel `-soft` fill and a dark `-ink`, and is always 
 
 The dark theme is a warm walnut night playroom, not a navy-grey. The token names are the same; the tints darken, the inks lighten, and the paints stay saturated (5.42 to 9.87:1 against dark `surface`), so the kid colour survives at night. Depth comes from the 1px `line` border (2.05:1 on `ground`) and the surface steps, not from shadows.
 
-Fills are flat in both themes: no gradients, glows, glassmorphism or backdrop blur. The top bar is solid `ground`.
+Fills are flat in both themes: no gradients, glows, glassmorphism or backdrop blur. The top bar is solid `ground`. The only blend in the system is the globe inside the logo, which is artwork, never a fill to copy.
 
 ## Type
 
@@ -115,7 +160,7 @@ Three families, all on Google Fonts and as `@fontsource-variable` packages:
 - `body`: Rubik, for every script and every teacher control.
 
 ```css
-/* The nearest lang decides, so an English wordmark inside an Arabic subtree gets Fredoka back. */
+/* The nearest lang decides, so an English title inside an Arabic subtree gets Fredoka back. */
 :root, :lang(en), :lang(he) { --ks-display: var(--font-display); }
 :lang(ar) { --ks-display: var(--font-display-ar); }
 html:lang(ar) body, html:lang(he) body { line-height: 1.65; }
@@ -127,7 +172,7 @@ Set display text with `font-family: var(--ks-display)`. Never override `--font-d
 |---|---|---|---|---|
 | `display-xl` | display | 40/48, 32/40 below 600px | `display-xl-ar` 42/60 | Present-mode titles, the FinishScreen title |
 | `display-lg` | display | 28/36 | `display-lg-ar` 30/44 | Page titles, the child's name in the profile hero |
-| `title` | display | 20/28 | `title-ar` 22/32 | Card and section heads, dialog titles, empty-state headings, the wordmark |
+| `title` | display | 20/28 | `title-ar` 22/32 | Card and section heads, dialog titles, empty-state headings |
 | `kid-label` | display | 24/32 | `kid-label-ar` 26/38 | ChoiceCard labels (500), KidButton and bubble titles (600) |
 | `kid-story` | display | 28/42 | `kid-story-ar` 30/46 | Story pages in present mode, at most 30ch a line |
 | `name` | body | 18/26 | `name-ar` 18/30 | Child names in lists and cards |
@@ -136,7 +181,7 @@ Set display text with `font-family: var(--ks-display)`. Never override `--font-d
 | `label` | body | 14/20 | `label-ar` 14/22 | Chips, field labels, side-nav items, tabs and segments |
 | `caption` | body | 13/18 | `caption-ar` 14/22 | Dates, ages, helper text, badges, bottom-bar labels |
 
-- Use the display face only on titles, child-facing text, numeral blocks, avatar initials and the wordmark. Never in buttons, form fields, tables, chips, nav labels, or child names in lists: Baloo's tall box must never sit inside a 44px control.
+- Use the display face only on titles, child-facing text, numeral blocks and avatar initials (the logo's wordmark is artwork, never live text). Never in buttons, form fields, tables, chips, nav labels, or child names in lists: Baloo's tall box must never sit inside a 44px control.
 - `caption` is the floor. Nothing is smaller than 13px, or 14px in Arabic.
 - Headings are always `ink`, never tone-coloured.
 - Links inside running text are always underlined (`text-decoration: underline; text-underline-offset: 3px`, the `.ks-link` class): `brand` is too close to `ink` and `ink-muted` to mark a link by colour alone. Standalone links with an icon or a button shape do not need it.
@@ -212,11 +257,12 @@ Under `prefers-reduced-motion: reduce`, remove every translate, scale and rotate
 - Give user content (names, chips, observation text, kid labels) `dir="auto"`.
 - Mirror these icons under RTL with `scaleX(-1)`, never `rotate(180deg)`: `timeline`, `development`, `story`, `current-focus`, `note-quote`, `partly`, `did-not-work`, `arrow-next`. Never mirror the others: the star, heart, check, play triangle and lens are conventions, not directions.
 - Mirror lucide back and forward chevrons and LogOut too. The ChevronDown of a select is never mirrored.
+- Never mirror the logo. The bar places it at the inline start, but inside the inline lockup the mark stays before the wordmark, left to right, in every language.
 - Present-mode Next and Back take their direction from the content's `dir`.
 
 ## Iconography
 
-KidSphere draws its own icons: 27 painted block glyphs plus the brand mark, made only from blocks, balls, roofs and arches on a 24px grid. Each has a 2px `ink` outline with round caps and joins, and exactly one primitive painted in its meaning paint. The paint slips 1.5 units downward (1.5px at 24px, none at 16px), like a hand-painted block. The full set, its construction and per-icon notes are in the Iconography section and the Icons asset group (`assets/Icons/README.md`).
+KidSphere draws its own icons: 27 painted block glyphs, made only from blocks, balls, roofs and arches on a 24px grid. Each has a 2px `ink` outline with round caps and joins, and exactly one primitive painted in its meaning paint. The paint slips 1.5 units downward (1.5px at 24px, none at 16px), like a hand-painted block. The full set, its construction and per-icon notes are in the Iconography section and the Icons asset group (`assets/Icons/README.md`). The logo is artwork, not one of these icons: see Logo.
 
 - **Meaning icons** (`strengths`, `interests`, `what-helps`, `current-focus`, `attention`, `strength-builder`, `growth-support`) always carry their meaning paint. Content and play icons carry `paint-sky`. The three feedback towers share one `paint-sun` ball.
 - **Nav icons** are outline-only in `ink-muted` when inactive, and get their `brand` paint when active. At 48px and up (empty states) they take `paint-sky`.
@@ -230,9 +276,9 @@ KidSphere draws its own icons: 27 painted block glyphs plus the brand mark, made
 
 KidSphere is phone-first: teachers carry it around the room.
 
-- **Below lg:** a 56px top bar (`ground`, a 1px `line` bottom edge, the brand mark and wordmark at the start, the language switch and avatar menu at the end) and a 64px bottom bar on `surface` with up to four items split around the raised Observe block. Overflow goes under More.
+- **Below lg:** a 56px top bar (`ground`, a 1px `line` bottom edge, the logo at the start as an inline lockup with a 36px mark, the language switch and avatar menu at the end) and a 64px bottom bar on `surface` with up to four items split around the raised Observe block. Overflow goes under More.
 - **The Observe block** is a 56px `brand` block, not a circle, raised half out of the bar by a 4px `ground` ring and `shadow-lip-brand`, labelled "Observe" in `brand` underneath. It is the one thing a teacher reaches for all day.
-- **From lg:** a 256px side nav on `ground` with a `line` inline-end edge: the brand, a full-width "Add observation" primary button, the nav list, and a footer with the user, the language switch and Sign out.
+- **From lg:** a 256px side nav on `ground` with a `line` inline-end edge: the logo (inline lockup, 40px mark), a full-width "Add observation" primary button, the nav list, and a footer with the user, the language switch and Sign out.
 - **Main content** is at most 1152px wide, padded 16px on phone and 32px from md, with 128px at the bottom while the bottom bar is visible.
 - **Grids:** child cards run one column on phone, two at md and three at xl.
 - **Dialogs** are centred from md and become bottom sheets below md. Toasts sit centred above the bottom bar on phone and at the bottom inline-end from lg.
@@ -256,7 +302,7 @@ KidSphere is phone-first: teachers carry it around the room.
 | Keep labels on tints in `ink` | Put tone-coloured text on tints (only `brand` on `brand-soft` is allowed) |
 | Use attention (tangerine) for needs and sensitivities | Use red, or an X, for anything about a child |
 | Keep the support scale and feedback neutral | Colour-code levels or outcomes like a traffic light |
-| Keep paint inside outlined icons, picture blocks, stickers, the brand mark and empty-state scenes | Use paint as text, as a large background, or as a chip fill on teacher screens |
+| Keep paint inside outlined icons, picture blocks, stickers, the finish tower and empty-state scenes | Use paint as text, as a large background, or as a chip fill on teacher screens |
 | Use one primary button per view, with Rubik inside every teacher button | Use the display face in buttons, forms, tables, chips or nav labels |
 | Put option emoji in a `surface` pod | Use emoji in nav, headings, buttons, statuses, feedback or the finish screen |
 | Use logical properties and `scaleX(-1)` for mirrored icons | Use physical margins, padding or radii, or `rotate(180deg)` to mirror |
@@ -265,3 +311,4 @@ KidSphere is phone-first: teachers carry it around the room.
 | Use one decorative block cluster per screen at most | Use gradients, glows, glassmorphism, backdrop blur, accent side borders, or Inter or Roboto |
 | Keep motion short, once-only, and static under reduced motion | Use idle, looping or bouncing animation on teacher screens |
 | Celebrate the child with a tower and a sticker | Show points, counts of stars, scores, percentages or progress bars |
+| Use the logo files as drawn, with clear space, on plain `ground` or `surface` | Recolour, stretch, rotate, mirror or rebuild the logo, put it on busy paint, or use the block tower as the logo |

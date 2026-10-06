@@ -15,7 +15,7 @@ The last screen of a present-mode game: a three-piece block tower stacks itself,
 ## Anatomy
 
 - A centred column, gap 24, padding-block 40.
-- The tower, 160px tall, built from the brand mark's primitives, each with a 3px `ink` outline:
+- The tower, 160px tall, built from three block primitives, each with a 3px `ink` outline. This block tower was the first brand mark; it is retired as the logo and lives on only here, as play:
   1. an arch block, 120 by 56, corner 14, with a half-round cut-out, in `brand`;
   2. a cube, 56 by 56, corner 10, in `paint-berry`;
   3. a ball, 48px, in `paint-sun`.

@@ -7,7 +7,7 @@
 
 /* ---------- Base ---------- */
 body { margin: 0; background: var(--ground); color: var(--ink); font-family: var(--font-body); font-size: 16px; line-height: 24px; -webkit-font-smoothing: antialiased; }
-/* Display face by script, through --ks-display so the nearest lang decides: an English wordmark inside an Arabic subtree gets Fredoka back. */
+/* Display face by script, through --ks-display so the nearest lang decides: an English title inside an Arabic subtree gets Fredoka back. */
 :root, :lang(en), :lang(he) { --ks-display: var(--font-display); }
 :lang(ar) { --ks-display: var(--font-display-ar); }
 :focus-visible, .is-focus { outline: 3px solid var(--ring); outline-offset: 2px; }
@@ -442,9 +442,12 @@ button { font: inherit; }
 .ks-shell-phone { display: flex; flex: none; flex-direction: column; box-sizing: border-box; overflow: hidden; width: 360px; max-width: 100%; height: 640px; border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--ground); }
 .ks-topbar { display: flex; align-items: center; gap: var(--space-3); box-sizing: border-box; height: 56px; flex: none; padding-inline: var(--space-4); border-block-end: 1px solid var(--line); background: var(--ground); }
 .ks-topbar__end { display: flex; align-items: center; gap: var(--space-1); margin-inline-start: auto; }
-.ks-brand { display: inline-flex; align-items: center; gap: var(--space-2); min-height: 44px; color: var(--ink); text-decoration: none; }
-.ks-brand__mark { width: 36px; height: 36px; flex: none; }
-.ks-brand__word { font-family: var(--ks-display); font-size: 20px; line-height: 28px; font-weight: 600; color: var(--ink); }
+/* The logo, as an inline lockup (assets/Logos): the round mark, then one of the two wordmark inks (.ks-ico--l / .ks-ico--d). Never mirrored. */
+.ks-brand { display: inline-flex; align-items: center; gap: var(--space-2); min-height: 44px; direction: ltr; text-decoration: none; }
+.ks-brand__mark { display: block; width: 36px; height: 36px; flex: none; }
+.ks-brand__word { width: 88px; height: 22px; flex: none; object-fit: contain; }
+.ks-brand--side .ks-brand__mark { width: 40px; height: 40px; }
+.ks-brand--side .ks-brand__word { width: 97px; height: 24px; }
 .ks-main { flex: 1; overflow: hidden; box-sizing: border-box; width: 100%; max-width: 1152px; margin-inline: auto; padding: var(--space-4); }
 @media (min-width: 768px) { .ks-main--page { padding-inline: var(--space-8); } }
 .ks-bbar { display: flex; flex: none; justify-content: center; box-sizing: border-box; height: 64px; border-block-start: 1px solid var(--line); background: var(--surface); }

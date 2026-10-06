@@ -96,6 +96,24 @@ describe("nav metadata", () => {
 });
 
 describe("AppShell", () => {
+  it("brands the top bar and side nav with the KidSphere logo linking home", async () => {
+    const { container } = renderApp({ routes: navRoutes, url: "/children", user: teacher });
+    await screen.findAllByText("page body");
+    // One Brand in the side nav (lg) and one in the top bar (below lg); CSS shows one.
+    const brands = screen.getAllByRole("link", { name: "KidSphere" });
+    expect(brands).toHaveLength(2);
+    for (const link of brands) {
+      expect(link.getAttribute("href")).toBe("/");
+      expect(within(link).getAllByAltText("KidSphere")).toHaveLength(1);
+      expect(link.querySelector('[data-logo="inline"]')?.getAttribute("dir")).toBe("ltr");
+      expect(link.querySelector("img.ks-logo-dark")).not.toBeNull();
+    }
+    const [side, top] = brands.map((l) => l.querySelector('[data-logo-part="mark"]')!.getAttribute("width"));
+    expect([side, top]).toEqual(["40", "36"]);
+    // The retired block-tower mark is not the brand any more.
+    expect(container.ownerDocument.querySelector('[data-icon="brand-mark"]')).toBeNull();
+  });
+
   it("is RTL-ready: Arabic labels and the document dir", async () => {
     renderApp({ routes: navRoutes, url: "/children", user: { ...teacher, language: "ar" }, locale: "ar" });
     await screen.findAllByText("page body");

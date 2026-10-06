@@ -28,9 +28,12 @@ Every icon has two inks: the outline, and one paint on one primitive.
 | Nav icon at 48px or more (empty states) | `ink` | `paint-sky` |
 | On a solid fill: the Observe block, a primary button, a single-select chip, a danger confirm | `on-brand` | None |
 | On a paint fill: the sun RoundButton, a toast glyph block | `on-paint` | None |
-| The brand mark | None | Three flat fills: a `brand` arch, a `paint-sun` ball, a `paint-berry` cube |
 
 In the dark theme the outline becomes chalk (`ink` `#F3EEE6`) and the paints stay saturated, so the kid colour survives at night. Paint against dark `surface` holds 5.42:1 or better; the outline holds 10:1 or better on every ground in both themes.
+
+## The logo and the block tower
+
+The KidSphere logo (the globe with a child reaching for a star) is artwork with its own inks, not a block icon, so none of the rules on this page apply to it: it lives in the Logos asset group (`assets/Logos`) and its rules are in the Logo section of the brand book. The block tower (a `brand` arch, a `paint-sun` ball and a `paint-berry` cube) was the first brand mark. It is retired as the logo and survives only as play, the finish tower the FinishScreen builds in present mode. `assets/Icons/brand-mark.svg` is a legacy record of it, not part of the set: the app has no `brand-mark` icon, and it is never used as the logo, an app icon or a favicon.
 
 ## Sizes
 
@@ -39,7 +42,7 @@ Use 16px in chips, badges and inline text; 20px in buttons, 32px section tiles a
 ## Emoji are content, icons are KidSphere's voice
 
 - Keep the option emoji (the child's own world: cars, elephants, blocks, rainbows) for option items only. Put them in a `surface` pod: 24px with a 16px emoji on chips and toggle chips, 64 to 88px with a 44 to 64px emoji on kid ChoiceCards. The pod keeps full-colour emoji from clashing with a chip tint and contains their per-platform look.
-- Use a custom icon for everything KidSphere itself says: nav, section headers, actions, content types, statuses, feedback and the brand.
+- Use a custom icon for everything KidSphere itself says: nav, section headers, actions, content types, statuses and feedback. The brand is the logo (`assets/Logos`), never an icon.
 - Give each slot one glyph. An Interests chip shows its option emoji when it has one, otherwise the `interests` heart, never both.
 - Never use emoji in nav, headings, buttons, badges, statuses, feedback, empty states, the finish screen or this brand book.
 - Keep utility glyphs in lucide-react at stroke 2 with round caps and joins, which matches the custom set: chevrons, X, Search, More, Pencil, Trash, Check, Calendar, Mic, Menu, LogOut, RotateCcw, CircleAlert, Info, Languages and the loading spinner. Never use lucide for a concept the custom set covers.

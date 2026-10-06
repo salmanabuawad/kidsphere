@@ -9,11 +9,12 @@
  *  - `fill`: the ONE painted primitive, drawn under the outline (fill only).
  *  - `line`: the outline (stroke only). A third tuple item is a stroke-weight multiplier.
  *  - `ink`: small solid details in the outline colour (pupil, antenna balls).
- *  - `flat`: flat fills without an outline (brand mark only).
  *  - `paint`: which paint token the `fill` uses by default.
  *  - `mirror`: flips under RTL (spec 5.3).
  *
- * The design-system SVGs (assets/Icons/*.svg) are exported from this same geometry.
+ * The design-system SVGs (assets/Icons/*.svg) are exported from this same geometry. The set
+ * holds UI icons only: the KidSphere logo is artwork (components/brand/Logo.tsx), and the old
+ * block-tower mark survives only as the present-mode finish tower (features/games/FinishScreen).
  */
 
 export type IconTag = "path" | "circle" | "rect" | "polygon";
@@ -26,7 +27,6 @@ export interface KidIconDef {
   readonly fill?: readonly IconElement[];
   readonly line?: readonly IconElement[];
   readonly ink?: readonly IconElement[];
-  readonly flat?: readonly (readonly [IconElement, PaintKey])[];
 }
 
 export const iconDefs = {
@@ -365,14 +365,6 @@ export const iconDefs = {
     mirror: true,
     line: [
       ["path", { d: "M4.5 12H18M12 5.5L18.5 12L12 18.5" }, 1.5],
-    ],
-  },
-  /** KidSphere logo: a child's first tower. Three flat fills, no outline. */
-  "brand-mark": {
-    flat: [
-      [["path", { d: "M2 22V14A2 2 0 0 1 4 12H20A2 2 0 0 1 22 14V22H16A4 4 0 0 0 8 22Z" }], "brand"],
-      [["circle", { cx: 8, cy: 7.5, r: 4.5 }], "sun"],
-      [["rect", { x: 12.65, y: 5, width: 7, height: 7, rx: 1.5, transform: "rotate(-6 16.15 8.5)" }], "berry"],
     ],
   },
 } as const satisfies Record<string, KidIconDef>;

@@ -84,11 +84,6 @@ export function createKidIcon(name: KidIconName): KidIcon {
       );
 
     const body: ReactNode[] = [];
-    if (def.flat) {
-      def.flat.forEach(([[tag, attrs], key], i) =>
-        body.push(createElement(tag, { key: `flat${i}`, ...attrs, stroke: "none", style: { fill: paint === false ? color : PAINTS[key] } })),
-      );
-    }
     const fill = paint === false ? null : typeof paint === "string" ? paint : def.paint ? `var(--icon-paint, ${PAINTS[def.paint]})` : null;
     if (def.fill && fill) {
       body.push(

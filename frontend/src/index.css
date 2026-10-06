@@ -16,7 +16,8 @@
  *        strength = sunflower, interest = berry, helps = leaf, focus = grape,
  *        attention = tangerine ("worth a look", never red). `danger` is for system errors only.
  *   3. paint (kid layer): saturated `paint-*`, only inside ink-outlined icons, picture
- *      blocks, stickers, the brand mark and empty-state scenes. Never text, never a big fill.
+ *      blocks, stickers, the present-mode finish tower and empty-state scenes. Never text,
+ *      never a big fill. (The logo is artwork with its own inks: components/brand/Logo.tsx.)
  *
  * Light values on :root; dark values ("walnut night playroom") under prefers-color-scheme
  * unless <html data-theme="light">, and under <html data-theme="dark">.
@@ -422,7 +423,7 @@
   }
 }
 
-/* The display face: titles, child-facing text, numeral blocks, avatar initials, the wordmark. Never in controls. */
+/* The display face: titles, child-facing text, numeral blocks, avatar initials. Never in controls. (The logo's wordmark is artwork: components/brand/Logo.tsx.) */
 @utility font-display {
   font-family: var(--font-display);
 }
@@ -472,6 +473,29 @@
 /* Dates, ages, times and counts. */
 .tabular {
   font-variant-numeric: tabular-nums;
+}
+
+/*
+ * The logo's wordmark in two inks (components/brand/Logo.tsx): both images are placed and the
+ * theme shows one, by the same rule as the tokens above (prefers-color-scheme, unless
+ * <html data-theme="light|dark"> overrides it). Never filter one ink to fake the other.
+ */
+.ks-logo-dark {
+  display: none;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .ks-logo-light {
+    display: none;
+  }
+  :root:not([data-theme="light"]) .ks-logo-dark {
+    display: block;
+  }
+}
+:root[data-theme="dark"] .ks-logo-light {
+  display: none;
+}
+:root[data-theme="dark"] .ks-logo-dark {
+  display: block;
 }
 
 /* Motion (spec 4.4). Teacher screens: 180ms or less, no overshoot, nothing idle or looping. */
