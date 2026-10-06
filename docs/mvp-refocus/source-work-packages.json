@@ -1,0 +1,263 @@
+[
+  {
+    "id": "WP1-DB",
+    "wave": 1,
+    "title": "Foundation: migration 0002, models, history writer, vocabulary fragments, provenance, terminology",
+    "owns_paths": [
+      "backend/migrations/versions/0002_source_documents.py",
+      "backend/app/models.py",
+      "backend/app/services/history.py",
+      "backend/app/provenance.py",
+      "backend/app/vocab.py",
+      "backend/app/errors.py",
+      "backend/app/routers/source_model.py",
+      "backend/app/data/options.json",
+      "backend/app/data/lists/common.json",
+      "backend/tests/conftest.py",
+      "backend/tests/test_migrations.py",
+      "backend/tests/test_history.py",
+      "backend/tests/test_vocab.py",
+      "backend/tests/test_options_data.py",
+      "backend/tests/test_source_model.py",
+      "docs/terminology.md"
+    ],
+    "description": "Implement COVERAGE-MATRIX.md §3 exactly.\n\nMigration 0002 is hand-written DDL like 0001. It adds:\n- the shared trigger function kidsphere_append_only;\n- 6 tables, each with its guard trigger: ai_suggestions, record_versions, teacher_assessments (one open cycle and one initial cycle per child), teacher_assessment_entries (13-domain CHECK; inserts only into an open cycle), functional_summaries (only the draft→approved update is allowed), report_exports;\n- focus_areas.follow_up_on, assessment_id and source_need, plus a DEFERRABLE INITIALLY DEFERRED constraint trigger that allows at most 3 active focus areas;\n- observations.domains (text[] with a CHECK against the 12 AI domains, GIN index) and observations.attributes;\n- development_reviews.follow_up and ai_suggestion_id;\n- generated_content.deleted_at and deleted_by, with a CHECK that only drafts can be soft-deleted.\n\nData steps inside the migration (§3.4), all idempotent:\n- record_versions seq-1 backfill rows for every existing profile section (via jsonb_each), observation, focus area and non-archived content row;\n- observations.domains backfilled from area;\n- focus_areas.follow_up_on parsed from plan.review_on;\n- a Python step that adds only the parent_perspective.questionnaire and per-perspective section_status keys when they are absent.\n\nThe downgrade drops only new objects.\n\nApplication code:\n- models.py mirrors the migration with 6 new classes and the new columns.\n- services/history.py: record(db, *, child_id, entity_type, entity_id=None, key='', data, user, reported_by=None, via, review_id=None, ai_suggestion_id=None) with seq = max+1, and versions(db, ...).\n- app/provenance.py: a pure derive() returning parent_said, teacher_observed, ai_suggested or teacher_approved (§3.3.4).\n- vocab.py merges list fragments from app/data/lists/*.json into the options lists, so wave-2 packages never edit options.json. common.json holds section_statuses, provenance, ai_domains (12), observation_domains (13 assessment sections), yes_no and yes_no_sometimes, all labelled en/ar/he.\n\nEdits to options.json:\n- contact_preferences gains 'other'; the he label of 'meeting' becomes 'פגישה מסודרת';\n- independence_areas gains organizing_belongings; dressing is relabelled 'Dressing / undressing';\n- the he label of hope_child_feels.safe becomes 'בטוח/ה';\n- new banned_terms.ai_only group (referral wording, en/he/ar);\n- allow_phrases gains the exact 3 PDF disclaimer sentences.\n\nAlso:\n- errors.py gains ASSESSMENT_OPEN, ASSESSMENT_CLOSED, SUMMARY_APPROVED, REPORT_BUSY and REPORT_FAILED.\n- routers/source_model.py serves GET /api/source-model from app/data/source/*.json, tolerating missing files until wave 2 adds them.\n- docs/terminology.md records the OQ-3 label decisions.\n\nRun tests only on the Ubuntu server with deploy/ci/remote-test.sh.",
+    "acceptance": [
+      "alembic upgrade → downgrade → upgrade passes on the server test DB; TABLES in test_migrations.py includes the 6 new tables; the models mirror every column",
+      "UPDATE on record_versions, teacher_assessment_entries and report_exports raises; DELETE raises unless the child row is gone; deleting a child cascades cleanly",
+      "teacher_assessments: a second open cycle per child violates the unique index; UPDATE of a closed cycle raises; inserting an entry into a closed cycle raises",
+      "functional_summaries: draft→approved with approved_by/at succeeds; any content change or re-approval raises",
+      "ai_suggestions: only pending→accepted/edited/discarded is allowed, and input/output are immutable",
+      "the deferred focus trigger rejects a 4th active focus area at COMMIT but allows close-then-create inside one transaction",
+      "backfill: every pre-existing profile section, observation, focus area and content row has exactly one record_versions row with seq=1 and via='backfill'; existing parent_perspective JSON gains only the questionnaire and section_status keys, and every pre-existing key is byte-identical",
+      "GET /api/options returns the merged lists from options.json and the lists/*.json fragments; test_options_data validates all fragments (allowed fields, en/ar/he labels, banned and numeric terms)",
+      "history.record assigns consecutive seq per entity under concurrency (row lock) and provenance.derive covers all 4 labels in unit tests",
+      "GET /api/source-model requires authentication and returns {} for registries that do not exist yet"
+    ]
+  },
+  {
+    "id": "WP1-FE",
+    "wave": 1,
+    "title": "Frontend plumbing: path builders, apiBlob, shared status/provenance components, source-model hook",
+    "owns_paths": [
+      "frontend/src/lib/paths.ts",
+      "frontend/src/lib/api.ts",
+      "frontend/src/lib/sourceModel.ts",
+      "frontend/src/components/source/**",
+      "frontend/src/i18n/messages/en/common.json",
+      "frontend/src/i18n/messages/ar/common.json",
+      "frontend/src/i18n/messages/he/common.json",
+      "frontend/src/test/api-blob.test.ts"
+    ],
+    "description": "Add the plumbing that every wave-2 frontend package needs, so none of them edit shared files.\n\nPath builders and route patterns: childParentView, childQuickBaseline, childTeacherObservation, childPlan, childObservations, childReports, plus a parent-wizard step route if needed.\n\nlib/api.ts gains apiBlob(path, body) for the PDF download. The existing api() reads responses as text or JSON. apiBlob must keep the same-origin, CSRF and error-envelope handling.\n\nlib/sourceModel.ts is a cached hook for GET /api/source-model.\n\ncomponents/source/** holds three components:\n- StatusPill (not_started / in_progress / sufficient / review_later; never a percentage);\n- ProvenanceBadge (a visible text chip, not tooltip-only; PARENT SAID / TEACHER OBSERVED / AI SUGGESTED / TEACHER APPROVED; optional \"entered by {name}\" line);\n- NotAnswered / NotObserved muted markers.\n\nAll of them use logical CSS properties for RTL and carry en/ar/he strings in common.json.\n\nThe working tree has uncommitted branding changes (AppShell.tsx, index.css, icons, favicon, components/brand, api-auth and ui-shell tests). Do not touch them; ask the lead to commit or stash them first.",
+    "acceptance": [
+      "vitest passes, including the banned-terms scan over the new common.json strings",
+      "apiBlob returns a Blob for application/pdf, surfaces the JSON error envelope on 4xx/5xx, and the caller can revoke the object URL (test)",
+      "the components render correctly in he/ar (dir=rtl) and en with snapshot or role tests; ProvenanceBadge text is visible without hover",
+      "paths.ts builders and routePatterns exist for all 6 new child routes, and the existing routes are unchanged"
+    ]
+  },
+  {
+    "id": "WP2-PQ",
+    "wave": 2,
+    "title": "Complete parent questionnaire (backend + 9-step wizard), Teacher Quick Baseline (bridge), Parent View",
+    "owns_paths": [
+      "backend/app/schemas/profile.py",
+      "backend/app/services/profiles.py",
+      "backend/app/services/questionnaire_projection.py",
+      "backend/app/routers/profiles.py",
+      "backend/app/data/source/parent_questionnaire.json",
+      "backend/app/data/lists/parent_questionnaire.json",
+      "backend/tests/test_profile_wizard.py",
+      "backend/tests/test_parent_questionnaire.py",
+      "backend/tests/test_quick_baseline.py",
+      "frontend/src/features/wizard/**",
+      "frontend/src/features/parent-view/**",
+      "frontend/src/features/quick-baseline/**",
+      "frontend/src/features/parent/**",
+      "frontend/src/i18n/messages/*/wizard.json",
+      "frontend/src/i18n/messages/*/parentView.json",
+      "frontend/src/i18n/messages/*/quickBaseline.json",
+      "frontend/src/i18n/messages/*/parent.json"
+    ],
+    "description": "Implement every PQ-* row of the matrix (§2.1) plus X-02, X-03, X-05 (profile part), X-06, X-07 and X-10.\n\nRegistry: create backend/app/data/source/parent_questionnaire.json, containing every PQ-* and PQ-SEC-* id. Each entry has section, order, kind, storage path, option list, sensitivity (none/third_party/family/health/medical), ai_policy (never/label/domain), PDF section, labels in en/ar/he and the verbatim source_he. It also holds the maps_to data for the legacy projection. The list fragment lists/parent_questionnaire.json adds pq_interests, pq_frustration_reactions, pq_morning_separation, pq_social_contact, pq_express_needs, pq_degree, pq_stop_activity and health_food_flags.\n\nBackend:\n- Extend schemas/profile.py with the new sections and keys (§3.3.1): joy, separation, communication, health, behaviour, transitions, expectations, partnership, heart, plus bridge on the teacher perspective; not_answered validated against the section fields; text answers up to 4000.\n- Extend services/profiles.update_profile:\n  - section status;\n  - questionnaire metadata and submit;\n  - entered stamps with mode;\n  - the legacy projection in questionnaire_projection.py (§3.3.2), including the union into children.additional_languages;\n  - one history.record() per changed section;\n  - compute_lists reads bridge.main_strengths (main:true) and calms_helps;\n  - profile_out exposes provenance[] from app.provenance.\n- Rules: exactly 3 main strengths when the bridge status is sufficient. Parents never see the teacher perspective or bridge, and get 403 when writing it.\n- New endpoint GET /api/children/{id}/profile/history (staff only).\n\nFrontend:\n- The parent wizard becomes PW1–PW9 in source order (§5.2), with skip links, conditional follow-ups, privacy notices on PW6 and PW8, and Send on PW9.\n- Staff use the same flow in on_behalf and meeting modes from the Parent View. Replace the per-step Parent/Teacher toggle in the staff wizard.\n- The Parent View tab (features/parent-view) renders the registry in source order, with statuses, Not answered markers, Private badges on health and family, a history drawer, an Initial/Latest toggle and a 'From the earlier form' block.\n- The Quick Baseline page (features/quick-baseline) is one screen (§5.4) with a Create baseline call to action.\n- The parent home (features/parent) shows the questionnaire status and a continue link.",
+    "acceptance": [
+      "for every PQ-* registry item, a backend test writes a value through PATCH /profile and reads it back unchanged; skipped fields appear in not_answered",
+      "projection tests cover every row of §3.3.2: e.g. interests_pq drawing_crafts → who.interests drawing+crafts; separation.morning very_difficult → emotions.morning_separation needs_a_lot_of_support; the heart message never lands in priorities.one_thing_to_know",
+      "every section save inserts exactly one record_versions row (entity_key parent:<section> or teacher:bridge) with the right reported_by and via (self/on_behalf/meeting); history returns the full sequence; the initial answers survive later edits",
+      "bridge with status=sufficient and anything other than 3 main_strengths returns 400; a draft with fewer is accepted; bridge strengths reach CPL.strengths with main:true and source teacher",
+      "a parent cannot read or write teacher_perspective or bridge (403/absent) and can read their own health answers; another parent gets 404",
+      "vitest: the wizard renders 9 steps in he, ar and en; follow-up questions appear only after yes/other; meeting mode records date and attendees; the Parent View shows the heart message, Private badges and Not answered; banned-terms scan passes"
+    ]
+  },
+  {
+    "id": "WP2-TO",
+    "wave": 2,
+    "title": "Teacher full observation (13 domains, cycles, statuses) + structured observations (Domain 14) + D13 needs to focus",
+    "owns_paths": [
+      "backend/app/schemas/assessments.py",
+      "backend/app/services/assessments.py",
+      "backend/app/routers/assessments.py",
+      "backend/app/schemas/observations.py",
+      "backend/app/services/observations.py",
+      "backend/app/routers/observations.py",
+      "backend/app/data/source/observation_model.json",
+      "backend/app/data/lists/observation_model.json",
+      "backend/tests/test_assessments.py",
+      "backend/tests/test_observations.py",
+      "frontend/src/features/assessment/**",
+      "frontend/src/features/observations/**",
+      "frontend/src/i18n/messages/*/assessment.json",
+      "frontend/src/i18n/messages/*/observations.json"
+    ],
+    "description": "Implement every OM-D00..D14 row and OM-LEVEL of the matrix (§2.2), plus X-04, X-08, X-11, X-13, X-36 and X-37.\n\nRegistry: create backend/app/data/source/observation_model.json, containing every OM-* id. Each entry has domain key, subgroup, item key, kind, storage path, ai_domain (D03-11..14 → communication), sensitivity, ai_policy, PDF section, labels in en/ar/he (KidSphere wording per terminology.md and OQ-3) and the verbatim source_he, which is never rendered. The list fragment lists/observation_model.json adds observation_principles (7), observation_frequency, sensory_effects and need_areas (11, with maps_to priority_categories).\n\nBackend:\n- schemas/assessments.py defines one StrictModel per domain (§3.3.5).\n- services and routers implement §4.2:\n  - cycles: create, header patch, close, and reassessment with copy_forward;\n  - PUT /domains/{d} appends an entry, refreshes the teacher_assessments.domains cache and returns warnings, including a soft warning when strengths are below 3;\n  - per-domain history;\n  - apply, which merges into CPL with source observation and a via field;\n  - needs/{i}/focus, which creates a focus_areas row with plan.need and source_need and respects the 409 FOCUS_LIMIT;\n  - child_snapshot refresh.\n- Observations:\n  - add domains[] and attributes;\n  - add the details keys when_detail, needs, what_changed, documentation and plan_ref;\n  - record_versions on create and PUT;\n  - GET filters: date_from, date_to, focus_area_id, domain, context, source;\n  - GET /api/observations/{oid}/versions.\n- Staff only (staff_child); parents get 404. Audit actions: assessment.create/update/domain_update/close/apply/need_focus.\n\nFrontend:\n- features/assessment is the Teacher Observation tab (§5.5): header card, How-to-observe card, 13 domain cards with status pills and 4-tap levels plus notes, Parent-said hints from the profile, D8 binary first, D9 effect chips, D10 play-not-test line, D11 day map, D12 slots, D13 need cards with 'Make it a Current Focus', cycle switcher.\n- features/observations turns QuickObservationForm into the A–E stepper, with domain and attribute chips and helper texts.",
+    "acceptance": [
+      "for every item, field and stage in the observation-model registry, a test PUTs the domain document and reads it back from GET /teacher-assessments; every PUT inserts a new entry and history returns all earlier versions",
+      "domain validation rejects unknown item keys, levels outside the support scale and more than 3 priority needs; D9 rejects a level field (no sensory score)",
+      "a closed cycle returns 409 ASSESSMENT_CLOSED on header patch and domain PUT; starting a second open cycle returns 409 ASSESSMENT_OPEN; copy_forward reassessments carry earlier data tagged carried_from",
+      "needs/{i}/focus creates a focus area with plan.need = seeing and source_need, and returns 409 FOCUS_LIMIT when 3 focus areas are already active; apply merges items into the profile lists with source observation, and recompute_lists keeps them",
+      "observation PUT writes record_versions; the domain, date and context filters return correct subsets; parents get 404 on every new endpoint",
+      "vitest: the domain cards render in he/ar/en with no banned or age-norm labels; the 4-tap level control works; the QO stepper saves when_detail, needs and what_changed; no percentage or score strings appear"
+    ]
+  },
+  {
+    "id": "WP2-PLAN",
+    "wave": 2,
+    "title": "Plan tab (goals = focus_areas with all 6 fields, periods, history), review follow-up (Domain 16), functional summaries (Domain 17), baseline viewer",
+    "owns_paths": [
+      "backend/app/schemas/focus.py",
+      "backend/app/services/focus_areas.py",
+      "backend/app/routers/focus_areas.py",
+      "backend/app/schemas/reviews.py",
+      "backend/app/services/reviews.py",
+      "backend/app/routers/reviews.py",
+      "backend/app/schemas/functional_summaries.py",
+      "backend/app/services/functional_summaries.py",
+      "backend/app/routers/functional_summaries.py",
+      "backend/app/services/baselines.py",
+      "backend/app/routers/baselines.py",
+      "backend/app/data/lists/plan.json",
+      "backend/tests/test_focus_areas.py",
+      "backend/tests/test_reviews.py",
+      "backend/tests/test_functional_summaries.py",
+      "backend/tests/test_baseline.py",
+      "frontend/src/features/focus/**",
+      "frontend/src/features/development/**",
+      "frontend/src/i18n/messages/*/focus.json",
+      "frontend/src/i18n/messages/*/development.json"
+    ],
+    "description": "Implement OM-D15..D17 and D99 plus X-12, X-14, X-17, X-18, X-21, X-23, X-24 and X-25 (§4.3, §5.7, §5.8).\n\nFocus areas:\n- add follow_up_on and assessment_id;\n- new review_on values must be ISO dates;\n- every create, update and status change, including review decisions, writes a record_versions row with via manual or review and review_id, so reopening a goal no longer loses the earlier closure;\n- GET ?assessment_id;\n- GET /api/focus-areas/{fid}/versions.\n\nReviews:\n- follow_up uses FollowUpIn with improvement_levels and involvement_steps from lists/plan.json, including referral_as_needed labelled per OQ-2;\n- the involvement note gets a warning only;\n- /suggest now persists an ai_suggestions row through app.ai.service (contract in §7.7; mock it in tests until WP2-AI lands) and returns suggestion_id, possible_patterns and next_observation_questions;\n- saving a review records ai_suggestion_id and sets the suggestion outcome.\n\nFunctional summaries:\n- list, create draft (append-only rows with supersedes_id), suggest (via app.ai.service.draft_functional_summary; inserts an AIS row only) and approve;\n- teacher text gets the wording check.\n\nBaselines: GET /api/children/{id}/baselines/{bid} returns the full data, with the first baseline flagged original.\n\nFrontend:\n- features/focus becomes the Plan tab (§5.7): 6 editable plan columns plus strength/need/adaptation, the 2–3 goals guidance banner, the Family hopes panel, D13 candidates, closed goals with history, and Export plan via a link to the Reports dialog.\n- features/development gains the understanding sequence, the Follow-up review step, the Functional summary card (Write / Draft with AI / Approve, compare with the AI draft, history) and an original-vs-latest baseline viewer.",
+    "acceptance": [
+      "focus edits and status changes each add a record_versions row; close → reopen → close keeps both closures in the version history; frequency, who and follow_up_on round-trip through the API and the UI",
+      "the 2–3 goals guidance appears for fewer than 2 or when adding the 3rd; a 4th active goal still returns 409 FOCUS_LIMIT (service) and the DB trigger backs it up",
+      "a review with follow_up stores and returns every Domain 16 field; involvement can be set only by the teacher; AI suggest never fills involvement or reassessment_on",
+      "functional summaries: every save inserts a row; approve succeeds once and a second approve returns 409 SUMMARY_APPROVED; an ai_draft row requires ai_suggestion_id; GET returns latest_approved, drafts and history",
+      "/suggest inserts exactly one ai_suggestions row with the de-identified input; saving the review marks it accepted or edited",
+      "GET /baselines/{bid} returns the full baseline_data for staff and 404 for parents",
+      "vitest: Plan and Development pages render in he/ar/en; no banned terms (no 'מדד הצלחה' or 'תוכנית התערבות' in UI strings)"
+    ]
+  },
+  {
+    "id": "WP2-PDF",
+    "wave": 2,
+    "title": "PDF export: WeasyPrint pipeline, 6 report types, RTL-correct templates, export log, Reports tab",
+    "owns_paths": [
+      "backend/app/reports/**",
+      "backend/app/routers/reports.py",
+      "backend/app/schemas/reports.py",
+      "backend/tests/test_reports_api.py",
+      "backend/tests/test_reports_rtl.py",
+      "backend/tests/test_reports_builders.py",
+      "backend/tests/fixtures/reports/**",
+      "backend/requirements.txt",
+      "backend/requirements-dev.txt",
+      "deploy/systemd/kidsphere-mvp-api.service",
+      "frontend/src/features/reports/**",
+      "frontend/src/i18n/messages/*/reports.json"
+    ],
+    "description": "Implement §6 and X-40..X-57.\n\nDependencies: add weasyprint (latest stable, pinned) and Jinja2 to requirements.txt, and pdfminer.six, pypdf and python-bidi to requirements-dev.txt.\n\nFonts: bundle Rubik, NotoSansHebrew and NotoSansArabic TTFs plus OFL.txt in backend/app/reports/fonts. Download them on the server from the official Google Fonts or Noto repositories. The server already has Pango 1.52, HarfBuzz 8.3 and fonts-noto-core.\n\nPackage layout (§6.2): service.py, builders/<6 types>.py, i18n.py with messages/{en,ar,he}.json, render.py, templates/, static/report.css and page-{ltr,rtl}.css.\n- Builders read only the DB and the registries (data/source/*.json) and must never import app.ai.\n- Use a local-only url_fetcher.\n- Render to bytes in memory, under a BoundedSemaphore(1) with a timeout that returns REPORT_BUSY.\n\nAPI:\n- POST /api/children/{id}/reports/pdf with ReportRequest (§4.4), using staff_child. On success insert a report_exports row and an audit 'report.export' row, then return an attachment with no-store and nosniff headers.\n- GET /api/children/{id}/reports returns the export log.\n\nLayout and RTL rules are in §6.3: running header and footer with the disclaimer and page x/y; logical CSS; bdi isolation; Western digits; source attribution labels; approved AI text only.\n\nDeploy: the systemd unit gets XDG_CACHE_HOME plus a ReadWritePaths entry for it.\n\nFrontend: features/reports holds the Reports tab and export dialog (§5.9), using apiBlob from WP1-FE.\n\nUntil WP2-PQ and WP2-TO land, build R2 and R3 against fixture registries in tests/fixtures/reports. WP3 switches them to the real ones.",
+    "acceptance": [
+      "test_reports_rtl.py on the server renders real he, ar and en PDFs for every report type and checks: (1) the glyphs sorted by x match bidi.get_display(expected) for mixed Hebrew/Arabic lines with numbers, dates and Latin words; (2) 'ببب' uses 3 pairwise-different glyph cids, all different from an isolated 'ب', and all map to U+0628; (3) the first header cell of every he/ar table has the largest x0; (4) RTL paragraph lines end within 1pt of the right content edge; (5) every page has the disclaimer and 'x / y', and page 1 has the child name, age and kindergarten; (6) only the bundled fonts are embedded",
+      "content rules: no '%', 'score' or 'points'; unapproved AI drafts are absent; the health section and Q41 appear only with include_health / include_family; R2 lists every registry question in source order with 'Not answered' for empty ones",
+      "API: 401 without a session; 404 for a parent and for an out-of-scope teacher; exactly one report_exports row and one audit row per successful export and none on failure; Content-Disposition attachment and Cache-Control private, no-store; no new files under /tmp",
+      "rendering R1 for the seeded child keeps peak RSS under 250 MB; a concurrent second request waits or returns 503 REPORT_BUSY",
+      "vitest: the export dialog defaults the language to the UI locale, sends the include flags, downloads a blob and revokes the object URL; banned-terms scan passes for reports.json; backend messages pass key parity and the banned-terms check with the disclaimer allow_phrases"
+    ]
+  },
+  {
+    "id": "WP2-NAV",
+    "wave": 2,
+    "title": "Child profile tabs, Overview (heart card, good-to-know, provenance badges), Observations history tab, timeline filters",
+    "owns_paths": [
+      "frontend/src/features/children/**",
+      "frontend/src/features/timeline/**",
+      "frontend/src/features/observation-history/**",
+      "backend/app/services/timeline.py",
+      "backend/app/routers/timeline.py",
+      "backend/tests/test_timeline.py",
+      "frontend/src/i18n/messages/*/children.json",
+      "frontend/src/i18n/messages/*/timeline.json",
+      "frontend/src/i18n/messages/*/history.json"
+    ],
+    "description": "Implement X-20 (timeline part), X-22 (UI), X-33, X-34 and OM-D99-01 (§5.1, §4.5).\n\nChildLayout: TabNav with 8 tabs in logical order (Overview · Parent View · Teacher Observation · Plan · Activities · Observations · Development · Reports), using the WP1 path builders. It scrolls on phones and works in RTL. The child header shows the kindergarten and an Export PDF action that links to the Reports tab.\n\nChildProfilePage becomes the Overview, in the OM-D99-01 order:\n- 'From the heart' card: prominent, staff only, PARENT SAID;\n- 'Good to know': most important thing, routines, overwhelm, food/medical indicators linking to the Parent View, how to reach the family;\n- main strengths ⭐, interests, what helps, current focus with the next review date, recent development;\n- prompts: quick baseline, the open question for the family, review-later domains;\n- ProvenanceBadge on every chip.\n\nfeatures/observation-history is the Observations tab: a list and detail view over GET /observations with URL-kept filters (date range, focus, domain, context, source) and an edited marker with versions. No charts, counts or percentages.\n\nTimeline: filters in the backend (date_from, date_to, focus_area_id, domain, content_type, result, type[]), with each source filtered before the merge. New entry types: questionnaire_submitted, plan_changed (record_versions focus_area), summary_approved, assessment_closed. focus_closed entries are built from record_versions so reopened goals keep their closures. The Timeline UI becomes a filterable section reachable from the Development tab; the old route redirects.",
+    "acceptance": [
+      "the 8 tabs render for staff with correct active states in he/ar/en; parents never see them",
+      "the Overview shows the heart message only to staff and only when present; Good-to-know indicators link to the Parent View without showing health text on the Overview",
+      "provenance badges are visible text (testing-library finds them without hover) and match the API provenance[]",
+      "timeline filters return correct subsets per source; 1 feedback still produces exactly 1 timeline entry (B5); close → reopen → close shows two focus_closed entries; the new entry types appear",
+      "Observations tab filters persist in the URL; no '%', score or count wording appears; banned-terms scan passes"
+    ]
+  },
+  {
+    "id": "WP2-AI",
+    "wave": 2,
+    "title": "AI policy: category exclusions, domain-structured minimised context, de-identified analysis, functional-summary draft, referral ban, suggestion persistence, content history",
+    "owns_paths": [
+      "backend/app/ai/**",
+      "backend/app/services/content.py",
+      "backend/app/routers/content.py",
+      "backend/app/schemas/content.py",
+      "backend/app/routers/ai_suggestions.py",
+      "backend/tests/test_ai_context.py",
+      "backend/tests/test_ai_safety.py",
+      "backend/tests/test_ai_schemas.py",
+      "backend/tests/test_ai_service.py",
+      "backend/tests/test_ai_templates.py",
+      "backend/tests/test_ai_payload_policy.py",
+      "backend/tests/test_content.py",
+      "frontend/src/features/content/**",
+      "frontend/src/i18n/messages/*/content.json"
+    ],
+    "description": "Implement §7 and X-15, X-19, X-26..X-31 and X-60 (future types documented only).\n\nContext (ai/context.py):\n- registry-driven deny-list: health, medical, family and third_party sensitivity, parent free text and identity fields never enter a payload;\n- 'avoid' comes only from teacher-observed TA.sensory items whose effect is affects or sometimes;\n- baseline_items(for_ai) drops sensitivity support needs;\n- plan.who is dropped and observations.note is no longer appended;\n- name_masker also scrubs phone numbers and e-mail addresses;\n- analysis payloads use the [child] token and the response is restored locally; content generation keeps the first or preferred name (OQ-4).\n\nDomains: new app/ai/domains.py with the relevance map (focus category, strength target or analysis → the 12 AI domains). AIContext.domains is filled only for relevant domains, with caps, from the latest teacher assessment, observations.domains and help keys. The domains used are stored in generation_input or ai_suggestions.domains.\n\nOutputs:\n- UnderstandingSuggestion gains possible_patterns and next_observation_questions;\n- new FunctionalSummaryDraft schema, prompt and template fallback, with no follow-up-with-parents, involvement, focus-decision or closing fields;\n- service functions draft_functional_summary(db, child, lang, user) and suggest_understanding(...) both persist an ai_suggestions row (the contract with WP2-PLAN).\n\nSafety: banned_terms.ai_only is applied to every AI output field; child_deficit terms are also checked on teacher-facing AI text; on violation, fall back to the template provider.\n\nContent:\n- record_versions on generate, regenerate and edit;\n- DELETE soft-deletes (deleted_at, deleted_by) per OQ-5, and lists hide soft-deleted rows;\n- GET /api/content/{cid}/versions;\n- the frontend content review shows earlier versions (AI draft vs edits) and the domains used.\n\nNew router GET /api/children/{id}/ai-suggestions (staff only).",
+    "acceptance": [
+      "test_ai_payload_policy: for every registry item with ai_policy=never, a unique marker written into that field is absent from generation_input, ai_suggestions.input and the captured provider request, for both content generation and analysis",
+      "no child surname, parent name, classmate name, phone or e-mail appears in any payload; analysis payloads contain '[child]' and never the first name; displayed outputs have the name restored",
+      "domain minimisation: a content request for a focus in category independence sends only the independence-related domain blocks; the domains are recorded",
+      "the avoid list never contains parent-only sensitivities (e.g. certain_foods); a teacher-observed noise item with effect=affects yields avoid=['noise']",
+      "a fake provider output containing 'referral' or 'הפניה' is rejected and the template output is used instead; FunctionalSummaryDraft has no involvement or follow-up-with-parents field",
+      "content edit and regenerate each add a version; DELETE on a draft sets deleted_at and the draft disappears from lists; approved content still returns 409 on delete",
+      "existing AI tests (templates per type × mode × language, B3 generation_input contains the approved understanding) still pass"
+    ]
+  },
+  {
+    "id": "WP3-INT",
+    "wave": 3,
+    "title": "Integration, end-to-end source-document flow, and the coverage-matrix verification test",
+    "owns_paths": [
+      "backend/tests/test_coverage_matrix.py",
+      "backend/tests/test_source_docs_e2e.py",
+      "frontend/src/test/source-docs.test.tsx",
+      "docs/mvp-refocus/COVERAGE-MATRIX.md",
+      "ARCHITECTURE.md",
+      "docs/mvp-refocus/ARCHITECTURE.md"
+    ],
+    "description": "This is the only package in wave 3, so it may make integration fixes in any file.\n\nWiring:\n- connect WP2-PLAN's suggest and functional-summary calls to the real WP2-AI service functions and remove the mocks;\n- point the WP2-PDF builders at the real registries produced by WP2-PQ and WP2-TO;\n- check the WP2-NAV links into the WP2-PQ, WP2-TO, WP2-PLAN and WP2-PDF routes.\n\ntest_coverage_matrix.py parses every '| PQ-', '| OM-' and '| X-' row of docs/mvp-refocus/COVERAGE-MATRIX.md and checks:\n- the IDs equal exactly the union of the registry ids in backend/app/data/source/*.json, plus the X-01..X-64 list;\n- each status is one of covered, partial or missing;\n- each registry item's storage path resolves to a real Pydantic field (profile section model, assessment domain model, observation details, FollowUpIn, FunctionalSummary) or a real column in app.models;\n- the AI column matches the registry ai_policy;\n- every registry item with a PDF entry is emitted by its report builder;\n- every UI label key exists in en, ar and he.\n\ntest_source_docs_e2e.py runs a full flow:\n1. A parent fills all 9 steps, including health, and a heart message.\n2. A teacher saves the quick baseline (3 strengths) and creates a baseline.\n3. The teacher fills 13 domains, marks 2 needs and promotes one to a focus.\n4. The teacher plans with all 6 fields, generates content (the payload policy holds) and records feedback.\n5. The teacher reviews with follow-up and approves a functional summary.\n6. All 6 PDFs are exported in he and ar.\n7. History shows the initial versions intact.\n\nAfter the run:\n- update COVERAGE-MATRIX.md statuses to the implemented state and record the OQ answers;\n- update ARCHITECTURE.md;\n- run the full server CI;\n- deploy per deploy/README.md (pg_dump, migrate, restart, smoke test).",
+    "acceptance": [
+      "test_coverage_matrix passes: 0 unmapped registry IDs, 0 matrix IDs without a registry or X entry, 0 unresolved storage paths, 0 AI policy mismatches, 0 registry items missing from their PDF builder",
+      "the e2e flow passes on the server; after it, record_versions holds the initial parent answers, the initial teacher assessment, plan versions, content versions and the AI suggestions, and none was overwritten",
+      "all 6 report types render in he, ar and en through the real registries, and the RTL tests pass",
+      "the full backend pytest and frontend vitest suites pass via deploy/ci/remote-test.sh; the production migration runs after pg_dump with no data loss (row counts before and after are equal for every 0001 table)",
+      "COVERAGE-MATRIX.md is updated with the final statuses and the decisions taken on OQ-1..OQ-8"
+    ]
+  }
+]
