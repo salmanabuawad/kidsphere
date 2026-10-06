@@ -9,7 +9,6 @@ import { useFormat } from "@/lib/format";
 import { paths } from "@/lib/paths";
 import { useAction } from "@/lib/useAction";
 import { useFetch } from "@/lib/useFetch";
-import { cn } from "@/lib/utils";
 import {
   asItems,
   asKeys,
@@ -28,7 +27,7 @@ import {
 import { fieldsFor, stepDef, storedName, type FieldDef, type StepDef } from "./definition";
 import { ItemsField, KeysField, LevelsGrid, Question, SensitivitiesField, SingleField, TextField } from "./fields";
 import { FocusPicker } from "./FocusPicker";
-import { WizardActions, WizardProgress } from "./WizardFrame";
+import { WizardActions, SaveLaterLabel, WizardHeader, WizardProgress } from "./WizardFrame";
 
 export type WizardMode = "staff" | "parent";
 
@@ -126,31 +125,31 @@ export function WizardStep({
   const Icon = def.icon;
 
   return (
-    <div className="mx-auto max-w-3xl space-y-5">
-      <WizardProgress {...progress} />
-      <div className="flex items-start gap-3">
-        <span className={cn("flex size-12 shrink-0 items-center justify-center rounded-md", def.tile ?? "bg-tray")} aria-hidden>
-          <Icon className="size-7" />
-        </span>
-        <div className="min-w-0">
-          <h1 className="font-display text-display-lg font-semibold text-ink">{t(`wizard.steps.${def.key}.title`, { name })}</h1>
-          <p className="mt-1 text-base text-ink-muted">{t(`wizard.steps.${def.key}.intro`, { name })}</p>
-        </div>
-      </div>
+    <div className="mx-auto max-w-6xl space-y-4">
+      <WizardHeader
+        icon={Icon}
+        tile={def.tile}
+        title={t(`wizard.steps.${def.key}.title`, { name })}
+        intro={t(`wizard.steps.${def.key}.intro`, { name })}
+        progress={<WizardProgress {...progress} />}
+      />
 
       {mode === "staff" && <FamilyAnswersNote childId={childId} />}
       <EnteredNote stamps={(perspective === "parent" ? wiz.data.parent_perspective : wiz.data.teacher_perspective)?.entered?.[def.section]} perspective={perspective} />
 
       <Card>
-        <CardBody className="space-y-8 py-6">
-          <StepFields def={def} fields={fields.filter((f) => !f.collapsed)} perspective={perspective} wiz={wiz} name={name} />
+        <CardBody className="space-y-6 py-5">
+          {/* Questions sit side by side on wide screens, one under another on phones. */}
+          <div className="grid gap-x-8 gap-y-6 xl:grid-cols-2">
+            <StepFields def={def} fields={fields.filter((f) => !f.collapsed)} perspective={perspective} wiz={wiz} name={name} />
+          </div>
           {fields.some((f) => f.collapsed) && (
             <details className="group rounded-md border border-line">
               <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between rounded-md px-4 text-sm font-semibold text-brand hover:bg-tray">
                 {t("wizard.moreOptional")}
                 <ChevronDown className="size-5 transition-transform group-open:rotate-180" aria-hidden />
               </summary>
-              <div className="space-y-8 border-t border-line p-4">
+              <div className="grid gap-x-8 gap-y-6 border-t border-line p-4 xl:grid-cols-2">
                 <StepFields def={def} fields={fields.filter((f) => f.collapsed)} perspective={perspective} wiz={wiz} name={name} />
               </div>
             </details>
@@ -164,9 +163,9 @@ export function WizardStep({
         <Button variant="ghost" icon={<ArrowLeft className="rtl:-scale-x-100" aria-hidden />} disabled={wiz.saving} onClick={onBack}>
           {t("common.back")}
         </Button>
-        <div className="flex flex-wrap gap-2">
-          <Button variant="secondary" icon={<Save aria-hidden />} disabled={wiz.saving} onClick={onSaveExit}>
-            {t("wizard.saveLater")}
+        <div className="flex gap-2">
+          <Button variant="secondary" icon={<Save aria-hidden />} disabled={wiz.saving} onClick={onSaveExit} aria-label={t("wizard.saveLater")} title={t("wizard.saveLater")}>
+            <SaveLaterLabel label={t("wizard.saveLater")} />
           </Button>
           <Button loading={wiz.saving} onClick={onNext} data-testid="wizard-next">
             {nextLabel ?? t("common.next")}

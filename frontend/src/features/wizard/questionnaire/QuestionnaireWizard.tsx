@@ -20,7 +20,7 @@ import { cn } from "@/lib/utils";
 import { childUrl, type ChildBasics } from "../api";
 import { Question } from "../fields";
 import { childFirstName } from "../WizardEngine";
-import { WizardActions, WizardProgress } from "../WizardFrame";
+import { SaveLaterLabel, WizardActions, WizardProgress } from "../WizardFrame";
 import { QuestionControl } from "./controls";
 import {
   DONE_STEP,
@@ -99,15 +99,19 @@ export function QuestionnaireWizard({
   const sectionKeys = [...new Set(meta.sections)];
 
   return (
-    <div className="mx-auto max-w-3xl space-y-5" data-step={current}>
-      <WizardProgress current={current} total={total} labels={allSteps.map((s) => sm.label(s))} onPick={(n) => void go(n)} />
-      <div>
-        <h1 className="font-display text-display-lg font-semibold text-ink">{sm.label(meta)}</h1>
-        {current === 1 && (
-          <p className="mt-1 text-base text-ink-muted" dir="auto">
-            {sm.label({ label: localized(reg.meta.purpose) })}
-          </p>
-        )}
+    <div className="mx-auto max-w-5xl space-y-4" data-step={current}>
+      <div className="flex flex-col gap-3 lg:flex-row-reverse lg:items-end lg:justify-between lg:gap-8">
+        <div className="lg:w-80 lg:shrink-0">
+          <WizardProgress current={current} total={total} labels={allSteps.map((s) => sm.label(s))} onPick={(n) => void go(n)} />
+        </div>
+        <div className="min-w-0">
+          <h1 className="font-display text-title md:text-display-lg font-semibold text-ink">{sm.label(meta)}</h1>
+          {current === 1 && (
+            <p className="text-sm text-ink-muted md:text-base" dir="auto">
+              {sm.label({ label: localized(reg.meta.purpose) })}
+            </p>
+          )}
+        </div>
       </div>
 
       {mode === "on_behalf" && <Alert tone="info">{t("wizard.questionnaire.onBehalfBanner", { name })}</Alert>}
@@ -141,16 +145,18 @@ export function QuestionnaireWizard({
         >
           {t("common.back")}
         </Button>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex gap-2">
           <Button
             variant="secondary"
             icon={<Save aria-hidden />}
+            aria-label={t("wizard.saveLater")}
+            title={t("wizard.saveLater")}
             disabled={q.saving}
             onClick={async () => {
               if (await q.persist({ wizard_step: current, questionnaire: meetingPatch })) navigate(exitTo);
             }}
           >
-            {t("wizard.saveLater")}
+            <SaveLaterLabel label={t("wizard.saveLater")} />
           </Button>
           {current < LAST_STEP ? (
             <Button loading={q.saving} onClick={() => void go(current + 1)} data-testid="questionnaire-next">

@@ -15,7 +15,7 @@ import { useFetch } from "@/lib/useFetch";
 import { createBaseline, focusListUrl, type FocusArea, type MergedItem } from "./api";
 import { STEPS, TOTAL_STEPS } from "./definition";
 import type { WizardProfile } from "./WizardEngine";
-import { DoneMark, WizardActions, WizardProgress } from "./WizardFrame";
+import { DoneMark, WizardActions, WizardHeader, WizardProgress } from "./WizardFrame";
 
 const LISTS: { name: "strengths" | "interests" | "what_helps" | "sensitivities"; tone: Tone; list: string }[] = [
   { name: "strengths", tone: "strength", list: "strengths" },
@@ -63,27 +63,26 @@ export function ReviewStep({ childId, wiz, onPick }: { childId: string; wiz: Wiz
   }
 
   return (
-    <div className="mx-auto max-w-3xl space-y-5">
-      <WizardProgress current={TOTAL_STEPS + 1} total={TOTAL_STEPS} onPick={(n) => onPick(n)} />
-      <div className="flex items-start gap-3">
-        <span className="flex size-12 shrink-0 items-center justify-center rounded-md bg-tray text-ink" aria-hidden>
-          <ClipboardCheck className="size-7" />
-        </span>
-        <div>
-          <h1 className="font-display text-display-lg font-semibold text-ink">{t("wizard.review.title")}</h1>
-          <p className="mt-1 text-base text-ink-muted">{t("wizard.review.intro")}</p>
-        </div>
+    <div className="mx-auto max-w-6xl space-y-4">
+      <WizardHeader
+        icon={ClipboardCheck}
+        title={t("wizard.review.title")}
+        intro={t("wizard.review.intro")}
+        progress={<WizardProgress current={TOTAL_STEPS + 1} total={TOTAL_STEPS} onPick={(n) => onPick(n)} />}
+      />
+
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        {LISTS.map((l) => (
+          <Card key={l.name}>
+            <CardHeader title={t(`wizard.review.lists.${l.name}`)} />
+            <CardBody>
+              <MergedChips items={profile[l.name] ?? []} tone={l.tone} list={l.list} />
+            </CardBody>
+          </Card>
+        ))}
       </div>
 
-      {LISTS.map((l) => (
-        <Card key={l.name}>
-          <CardHeader title={t(`wizard.review.lists.${l.name}`)} />
-          <CardBody>
-            <MergedChips items={profile[l.name] ?? []} tone={l.tone} list={l.list} />
-          </CardBody>
-        </Card>
-      ))}
-
+      <div className="grid items-start gap-4 lg:grid-cols-2">
       <Card>
         <CardHeader icon={<CurrentFocusIcon />} title={t("wizard.focus.title")} />
         <CardBody>
@@ -138,6 +137,7 @@ export function ReviewStep({ childId, wiz, onPick }: { childId: string; wiz: Wiz
           </table>
         </CardBody>
       </Card>
+      </div>
 
       {profile.has_baseline && <Alert tone="info">{t("wizard.review.newBaselineHint")}</Alert>}
 

@@ -26,7 +26,7 @@ import {
   type ClassOption,
 } from "./api";
 import { KeysField, Question, SingleField } from "./fields";
-import { WizardActions, WizardProgress } from "./WizardFrame";
+import { SaveLaterLabel, WizardActions, WizardHeader, WizardProgress } from "./WizardFrame";
 import { TOTAL_STEPS } from "./definition";
 
 const PHOTO_TYPES = ["image/jpeg", "image/png", "image/webp"];
@@ -177,96 +177,89 @@ function BasicsForm({ childId, initial }: { childId?: string; initial?: ChildBas
   const languages = list("languages");
 
   return (
-    <form onSubmit={onSubmit} noValidate className="mx-auto max-w-3xl space-y-5">
-      <WizardProgress
-        current={1}
-        total={TOTAL_STEPS}
-        onPick={childId ? (n) => n > 1 && navigate(paths.childEdit(childId, n)) : undefined}
+    <form onSubmit={onSubmit} noValidate className="mx-auto max-w-6xl space-y-4">
+      <WizardHeader
+        icon={AccountIcon}
+        title={childId ? t("wizard.basics.editTitle") : t("wizard.basics.title")}
+        intro={t("wizard.basics.intro")}
+        progress={
+          <WizardProgress
+            current={1}
+            total={TOTAL_STEPS}
+            onPick={childId ? (n) => n > 1 && navigate(paths.childEdit(childId, n)) : undefined}
+          />
+        }
       />
-      <div className="flex items-start gap-3">
-        <span className="flex size-12 shrink-0 items-center justify-center rounded-md bg-tray" aria-hidden>
-          <AccountIcon className="size-7" />
-        </span>
-        <div>
-          <h1 className="font-display text-display-lg font-semibold text-ink">{childId ? t("wizard.basics.editTitle") : t("wizard.basics.title")}</h1>
-          <p className="mt-1 text-base text-ink-muted">{t("wizard.basics.intro")}</p>
-        </div>
-      </div>
 
       <Card>
-        <CardBody className="space-y-5 py-6">
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Field label={t("wizard.basics.name")} error={errors.name} required>
-              {(p) => <Input {...p} dir="auto" autoComplete="off" maxLength={120} value={form.name} onChange={(e) => set("name", e.target.value)} />}
-            </Field>
-            <Field label={t("wizard.basics.preferredName")} hint={t("wizard.basics.preferredNameHint")} error={errors.preferred_name}>
-              {(p) => <Input {...p} dir="auto" maxLength={60} value={form.preferred_name} onChange={(e) => set("preferred_name", e.target.value)} />}
-            </Field>
-            <Field label={t("wizard.basics.birthDate")} error={errors.birth_date} required>
-              {(p) => <Input {...p} type="date" dir="ltr" max={todayIso()} value={form.birth_date} onChange={(e) => set("birth_date", e.target.value)} />}
-            </Field>
-            <Field
-              label={t("wizard.basics.class")}
-              error={errors.class_id}
-              hint={!classesLoading && classes.length === 0 ? t("wizard.basics.noClasses") : undefined}
-              required={classes.length > 0}
-            >
-              {(p) => (
-                <Select {...p} value={classId} disabled={classes.length === 0} onChange={(e) => set("class_id", e.target.value)}>
-                  <option value="">{classes.length === 0 ? "" : t("wizard.choose")}</option>
-                  {classes.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.kindergarten ? `${c.name} · ${c.kindergarten}` : c.name}
-                    </option>
-                  ))}
-                </Select>
-              )}
-            </Field>
-          </div>
+        {/* One column on phones, two on tablets, three from lg: the whole step fits one screen on a laptop. */}
+        <CardBody className="grid gap-x-5 gap-y-4 py-5 sm:grid-cols-2 lg:grid-cols-3">
+          <Field label={t("wizard.basics.name")} error={errors.name} required>
+            {(p) => <Input {...p} dir="auto" autoComplete="off" maxLength={120} value={form.name} onChange={(e) => set("name", e.target.value)} />}
+          </Field>
+          <Field label={t("wizard.basics.preferredName")} hint={t("wizard.basics.preferredNameHint")} error={errors.preferred_name}>
+            {(p) => <Input {...p} dir="auto" maxLength={60} value={form.preferred_name} onChange={(e) => set("preferred_name", e.target.value)} />}
+          </Field>
+          <Field
+            label={t("wizard.basics.birthDate")}
+            error={errors.birth_date}
+            hint={age ? <span className="tabular font-semibold text-brand" aria-live="polite">{t("wizard.basics.age", { age })}</span> : undefined}
+            required
+          >
+            {(p) => <Input {...p} type="date" dir="ltr" max={todayIso()} value={form.birth_date} onChange={(e) => set("birth_date", e.target.value)} />}
+          </Field>
 
-          {age && (
-            <p className="tabular rounded-md bg-brand-soft px-4 py-2.5 text-sm font-semibold text-brand" aria-live="polite">
-              {t("wizard.basics.age", { age })}
-            </p>
-          )}
-
+          <Field
+            label={t("wizard.basics.class")}
+            error={errors.class_id}
+            hint={!classesLoading && classes.length === 0 ? t("wizard.basics.noClasses") : undefined}
+            required={classes.length > 0}
+          >
+            {(p) => (
+              <Select {...p} value={classId} disabled={classes.length === 0} onChange={(e) => set("class_id", e.target.value)}>
+                <option value="">{classes.length === 0 ? "" : t("wizard.choose")}</option>
+                {classes.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.kindergarten && c.kindergarten !== c.name ? `${c.name} · ${c.kindergarten}` : c.name}
+                  </option>
+                ))}
+              </Select>
+            )}
+          </Field>
+          <Field label={t("wizard.basics.mainLanguage")} error={errors.main_language} required>
+            {(p) => (
+              <Select {...p} value={form.main_language} onChange={(e) => set("main_language", e.target.value)}>
+                <option value="">{t("wizard.choose")}</option>
+                {languages.map((l) => (
+                  <option key={l.key} value={l.key}>
+                    {labelOf(l)}
+                  </option>
+                ))}
+              </Select>
+            )}
+          </Field>
           <Question label={t("wizard.basics.gender")} hint={t("wizard.basics.genderHint")}>
             <SingleField list="genders" value={form.gender || undefined} onChange={(v) => set("gender", v ?? "")} />
           </Question>
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Field label={t("wizard.basics.mainLanguage")} error={errors.main_language} required>
-              {(p) => (
-                <Select {...p} value={form.main_language} onChange={(e) => set("main_language", e.target.value)}>
-                  <option value="">{t("wizard.choose")}</option>
-                  {languages.map((l) => (
-                    <option key={l.key} value={l.key}>
-                      {labelOf(l)}
-                    </option>
-                  ))}
-                </Select>
-              )}
-            </Field>
-          </div>
-          <Question label={t("wizard.basics.additionalLanguages")}>
-            <KeysField
-              list="languages"
-              value={form.additional_languages.filter((l) => l !== form.main_language)}
-              onChange={(v) => set("additional_languages", v.filter((l) => l !== form.main_language))}
-            />
-          </Question>
-
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Field label={t("wizard.basics.parentName")} error={errors.parent_name}>
-              {(p) => <Input {...p} dir="auto" maxLength={120} value={form.parent_name} onChange={(e) => set("parent_name", e.target.value)} />}
-            </Field>
-            <Field label={t("wizard.basics.parentContact")} hint={t("wizard.basics.parentContactHint")} error={errors.parent_contact}>
-              {(p) => <Input {...p} dir="ltr" maxLength={200} value={form.parent_contact} onChange={(e) => set("parent_contact", e.target.value)} />}
-            </Field>
+          <div className="sm:col-span-2 lg:col-span-3">
+            <Question label={t("wizard.basics.additionalLanguages")}>
+              <KeysField
+                list="languages"
+                value={form.additional_languages.filter((l) => l !== form.main_language)}
+                onChange={(v) => set("additional_languages", v.filter((l) => l !== form.main_language))}
+              />
+            </Question>
           </div>
 
-          <div className="flex flex-wrap items-center gap-4">
-            {preview && <img src={preview} alt="" className="size-16 rounded-md border border-line object-cover" />}
+          <Field label={t("wizard.basics.parentName")} error={errors.parent_name}>
+            {(p) => <Input {...p} dir="auto" maxLength={120} value={form.parent_name} onChange={(e) => set("parent_name", e.target.value)} />}
+          </Field>
+          <Field label={t("wizard.basics.parentContact")} hint={t("wizard.basics.parentContactHint")} error={errors.parent_contact}>
+            {(p) => <Input {...p} dir="ltr" maxLength={200} value={form.parent_contact} onChange={(e) => set("parent_contact", e.target.value)} />}
+          </Field>
+          <div className="flex flex-wrap items-center gap-3 sm:col-span-2 lg:col-span-1 lg:self-end lg:pb-1">
+            {preview && <img src={preview} alt="" className="size-12 rounded-md border border-line object-cover" />}
             <label className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-md border-[1.5px] border-line-strong bg-surface px-4 text-sm font-semibold text-ink shadow-lip transition-colors hover:bg-tray focus-within:outline-3 focus-within:outline-offset-2 focus-within:outline-ring">
               <Camera className="size-5" aria-hidden />
               {photo ? t("wizard.basics.changePhoto") : initial?.has_photo ? t("wizard.basics.replacePhoto") : t("wizard.basics.addPhoto")}
@@ -293,9 +286,9 @@ function BasicsForm({ childId, initial }: { childId?: string; initial?: ChildBas
         <Button variant="ghost" disabled={pending} onClick={() => navigate(childId ? paths.child(childId) : paths.children())}>
           {t("common.cancel")}
         </Button>
-        <div className="flex flex-wrap gap-2">
-          <Button variant="secondary" icon={<Save aria-hidden />} disabled={pending} onClick={() => void submit(true)}>
-            {t("wizard.saveLater")}
+        <div className="flex gap-2">
+          <Button variant="secondary" icon={<Save aria-hidden />} disabled={pending} onClick={() => void submit(true)} aria-label={t("wizard.saveLater")} title={t("wizard.saveLater")}>
+            <SaveLaterLabel label={t("wizard.saveLater")} />
           </Button>
           <Button type="submit" loading={pending} data-testid="wizard-next">
             {t("common.next")}

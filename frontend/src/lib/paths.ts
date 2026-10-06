@@ -51,6 +51,7 @@ export const routePatterns = {
   adminUsers: "/admin/users",
   adminClasses: "/admin/classes",
   adminSettings: "/admin/settings",
+  adminAi: "/admin/ai",
   adminChildParents: "/admin/children/:id/parents",
   parentHome: "/parent",
   parentOnboarding: "/parent/children/:id/onboarding",
@@ -99,6 +100,7 @@ export const paths = {
   adminUsers: () => "/admin/users",
   adminClasses: () => "/admin/classes",
   adminSettings: () => "/admin/settings",
+  adminAi: () => "/admin/ai",
   adminChildParents: (id: Id) => `/admin/children/${seg(id)}/parents`,
 
   parentHome: () => "/parent",

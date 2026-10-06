@@ -81,6 +81,12 @@ KidSphere stores sensitive information about young children. It is an educationa
 
 **Before setting a key,** review the provider's data-handling and retention terms; they apply to what is sent.
 
+**AI engines (docs/ai-engines.md).** The provider-agnostic engines (Story, Image generation, Video animator, Voice, ...) are not connected to any provider yet: until one is configured, nothing is sent anywhere and every engine answers ENGINE_NOT_CONFIGURED. Once one is, it receives only:
+- the request's own input (for example the story goal and topic, a scene description)
+- the child context from `app.ai.context.engine_child_context`: a pseudonymous `child_ref` (a one-way hash, never the internal id), age in whole years, gender only when girl or boy, the vocabulary labels of strengths, interests and what helps, the teacher-observed avoid keys, the focus, the approved current understanding and the domain blocks. Every text is masked (`[child]`, `[friend]`, `[adult]`); there is no name at all.
+- the language (code, locale, direction)
+It never receives the name, the internal id, the birth date, the surname, photos, contacts, health answers or free-text parent answers. Secrets are read only from `AI_CRED_*` environment variables at call time, never stored in the database, returned or logged. Each request is kept in `ai_requests` (the minimised input, output, provider, model, usage, errors; deleted with the child), and produced files in `UPLOAD_DIR/ai`, served only after the access check.
+
 ## Uploads
 
 - **Who can upload:** child photos and photos of the people in the child's life are optional and only staff can upload them.

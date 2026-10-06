@@ -30,6 +30,9 @@ class Settings(BaseSettings):
     ai_effort: str = "medium"
     ai_timeout_seconds: int = 60
     video_provider: str = "none"
+    # AI engines (app/ai/engines): run every engine that has no provider on the built-in mock
+    # provider. For development and tests only; per-engine settings are AI_<ENGINE>_* variables.
+    ai_mock_mode: bool = False
     serve_static_dir: str = ""
     log_level: str = "info"
     # Shown on the admin System card; else backend/VERSION (written by deploy.sh), else "unknown".

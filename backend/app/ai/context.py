@@ -63,6 +63,7 @@ together with the next word. Given names that are also common words (Will, May,
 אור, نور) are masked wherever the word appears: an accepted trade-off.
 """
 import functools
+import hashlib
 import re
 import unicodedata
 from datetime import date
@@ -679,3 +680,25 @@ def build_context(
         include_video=bool(include_video),
         cast=[CastMember(**c) for c in cast or ()][:MAX_CAST],
     )
+
+
+# --------------------------------------------------------------------------- AI engines (app/ai/engines)
+
+ENGINE_CONTEXT_FIELDS = ("age_years", "gender", "strengths", "interests", "what_helps", "avoid", "focus",
+                         "target_strength", "current_understanding", "domains", "cast")
+
+
+def child_ref(child_id) -> str:
+    """A stable pseudonymous reference for a child (never the internal id or a name)."""
+    return "c-" + hashlib.sha256(f"kidsphere-child:{child_id}".encode()).hexdigest()[:16]
+
+
+def engine_child_context(ctx: AIContext, child_id) -> dict:
+    """What an AI engine may know about a child: the allow-listed, masked AIContext WITHOUT
+    the name (``[child]`` stands for the child in every text), plus a pseudonymous
+    ``child_ref``. Never the id, birth date, surname, photo, contacts or parent free text."""
+    data = ctx.model_dump(mode="json", exclude_none=True, include=set(ENGINE_CONTEXT_FIELDS))
+    data = {k: v for k, v in data.items() if v not in ([], {}, "")}
+    data["child_ref"] = child_ref(child_id)
+    data["child"] = CHILD_TOKEN
+    return data

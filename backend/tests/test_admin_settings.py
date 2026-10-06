@@ -285,7 +285,7 @@ def test_system_shape(admin_client, admin, teacher, klass, child, monkeypatch):
     data = r.json()
     assert set(data) == {"app_version", "alembic_revision", "last_backup_at", "ai", "counts"}
     assert data["app_version"] == "abc1234"
-    assert data["alembic_revision"] == "0005"
+    assert data["alembic_revision"] == "0006"
     assert data["last_backup_at"] is None or isinstance(data["last_backup_at"], str)
     assert data["ai"] == {"effective_mode": "template", "provider_mode": "claude", "model": settings.anthropic_model,
                           "key_source": None}
@@ -371,4 +371,4 @@ def test_migration_0003_up_and_down():
     assert set(cols) == {"key", "value", "updated_by", "updated_at"}
     assert cols["value"]["nullable"] is False and cols["updated_by"]["nullable"] is True
     with engine.connect() as conn:
-        assert conn.execute(text("SELECT version_num FROM alembic_version")).scalar() == "0005"
+        assert conn.execute(text("SELECT version_num FROM alembic_version")).scalar() == "0006"

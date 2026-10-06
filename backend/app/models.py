@@ -1,7 +1,7 @@
-"""All 23 tables as SQLAlchemy 2 models.
+"""All 29 tables as SQLAlchemy 2 models.
 
 The schema itself is created by the hand-written Alembic revisions in
-``migrations/versions/`` (``0001_initial.py`` … ``0005_kindergarten_themes.py``); these
+``migrations/versions/`` (``0001_initial.py`` … ``0006_ai_engines.py``); these
 models must mirror them (tests/test_migrations.py checks that every column
 exists in both).
 
@@ -35,6 +35,7 @@ from sqlalchemy import (
     ForeignKey,
     Identity,
     Integer,
+    Numeric,
     SmallInteger,
     Text,
     func,
@@ -281,6 +282,9 @@ class GeneratedContent(Base):
     # 0004: the people of the child's life in this content, [{token, person_id, relation}]
     # (services/people.py). Never their names: the client puts those in for each token.
     people: Mapped[list] = _jsonb_list()
+    # 0006: the AI engine request that produced this content (the trace: request, engine, provider,
+    # model, validation, teacher approval, published). NULL for content made before the engines.
+    ai_request_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("ai_requests.id", ondelete="SET NULL"))
 
 
 class Observation(Base):
@@ -550,3 +554,140 @@ class KindergartenTheme(Base):
     theme: Mapped[str] = mapped_column(Text, nullable=False)
     updated_by: Mapped[uuid.UUID | None] = _user_fk()
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())
+
+
+# --------------------------------------------------------------------------- 0006: AI engines (app/ai/engines)
+
+AI_REQUEST_STATUS_VALUES = ("succeeded", "failed", "not_configured", "rejected", "pending")
+AI_ASSET_KIND_VALUES = ("image", "audio", "video", "document")
+
+
+class AiEngineConfig(Base):
+    """An admin's override of one engine's configuration (environment AI_<ENGINE>_* is the
+    base). A NULL field keeps the environment value. Never holds a secret: only the NAME of
+    the environment variable that does (``credentials_ref``, AI_CRED_*)."""
+
+    __tablename__ = "ai_engine_configs"
+
+    engine: Mapped[str] = mapped_column(Text, primary_key=True)
+    enabled: Mapped[bool | None] = mapped_column(Boolean)
+    provider: Mapped[str | None] = mapped_column(Text)
+    model: Mapped[str | None] = mapped_column(Text)
+    endpoint: Mapped[str | None] = mapped_column(Text)
+    credentials_ref: Mapped[str | None] = mapped_column(Text)
+    timeout_seconds: Mapped[int | None] = mapped_column(Integer)
+    max_retries: Mapped[int | None] = mapped_column(Integer)
+    max_output: Mapped[int | None] = mapped_column(Integer)
+    daily_cost_limit: Mapped[float | None] = mapped_column(Numeric(12, 4, asdecimal=False))
+    unit_cost: Mapped[float | None] = mapped_column(Numeric(14, 8, asdecimal=False))
+    safety_level: Mapped[str | None] = mapped_column(Text)
+    fallback_provider: Mapped[str | None] = mapped_column(Text)
+    fallback_model: Mapped[str | None] = mapped_column(Text)
+    updated_by: Mapped[uuid.UUID | None] = _user_fk()
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())
+
+
+class AiRequest(Base):
+    """One engine execution, start to end: what was asked (the minimised input only), which
+    provider and model answered, the validated output, usage and cost, and the error code.
+    Never a name, a secret or a prompt with child identity."""
+
+    __tablename__ = "ai_requests"
+
+    id: Mapped[uuid.UUID] = _pk()
+    pipeline_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
+    parent_request_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("ai_requests.id", ondelete="SET NULL"))
+    engine: Mapped[str] = mapped_column(Text, nullable=False)
+    task: Mapped[str] = mapped_column(Text, nullable=False)
+    status: Mapped[str] = mapped_column(Text, nullable=False)
+    provider: Mapped[str | None] = mapped_column(Text)
+    model: Mapped[str | None] = mapped_column(Text)
+    fallback_used: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default=text("false"))
+    child_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("children.id", ondelete="CASCADE"))
+    user_id: Mapped[uuid.UUID | None] = _user_fk()
+    language: Mapped[str] = mapped_column(Text, nullable=False)
+    input: Mapped[dict] = _jsonb_dict()
+    input_hash: Mapped[str] = mapped_column(Text, nullable=False)
+    context_version: Mapped[str | None] = mapped_column(Text)
+    template_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
+    output: Mapped[dict | None] = mapped_column(JSONB)
+    validation: Mapped[dict | None] = mapped_column(JSONB)
+    error_code: Mapped[str | None] = mapped_column(Text)
+    error_message: Mapped[str | None] = mapped_column(Text)
+    retryable: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default=text("false"))
+    usage: Mapped[dict] = _jsonb_dict()
+    cost_estimate: Mapped[float] = mapped_column(Numeric(14, 6, asdecimal=False), nullable=False, default=0, server_default=text("0"))
+    attempts: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default=text("0"))
+    duration_ms: Mapped[int | None] = mapped_column(Integer)
+    job_id: Mapped[str | None] = mapped_column(Text)
+    provider_request_id: Mapped[str | None] = mapped_column(Text)
+    created_at: Mapped[datetime] = _created()
+    finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class AiRequestEvent(Base):
+    """The execution log of a request (append-only): started, attempt, retry, fallback,
+    validated, rejected, failed, succeeded, polled. ``detail`` holds codes and numbers only."""
+
+    __tablename__ = "ai_request_events"
+
+    id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
+    request_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("ai_requests.id", ondelete="CASCADE"), nullable=False)
+    at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())
+    kind: Mapped[str] = mapped_column(Text, nullable=False)
+    detail: Mapped[dict] = _jsonb_dict()
+
+
+class AiAsset(Base):
+    """A file an engine produced (image, audio, video), stored like the photos under
+    UPLOAD_DIR/ai and served only through GET /api/ai/assets/{id} after the access check."""
+
+    __tablename__ = "ai_assets"
+
+    id: Mapped[uuid.UUID] = _pk()
+    request_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("ai_requests.id", ondelete="CASCADE"), nullable=False)
+    child_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("children.id", ondelete="CASCADE"))
+    kind: Mapped[str] = mapped_column(Text, nullable=False)
+    mime: Mapped[str] = mapped_column(Text, nullable=False)
+    path: Mapped[str] = mapped_column(Text, nullable=False)
+    size_bytes: Mapped[int] = mapped_column(Integer, nullable=False)
+    sha256: Mapped[str] = mapped_column(Text, nullable=False)
+    meta: Mapped[dict] = _jsonb_dict()
+    created_at: Mapped[datetime] = _created()
+
+
+class AiPromptTemplate(Base):
+    """Versioned instructions for an engine task in one language. The newest active version
+    is passed to the adapter as ``instructions``; the request keeps its id."""
+
+    __tablename__ = "ai_prompt_templates"
+
+    id: Mapped[uuid.UUID] = _pk()
+    engine: Mapped[str] = mapped_column(Text, nullable=False)
+    task: Mapped[str] = mapped_column(Text, nullable=False)
+    language: Mapped[str] = mapped_column(Text, nullable=False)
+    version: Mapped[int] = mapped_column(Integer, nullable=False)
+    body: Mapped[str] = mapped_column(Text, nullable=False)
+    active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, server_default=text("true"))
+    created_by: Mapped[uuid.UUID | None] = _user_fk()
+    created_at: Mapped[datetime] = _created()
+
+
+class AiCharacter(Base):
+    """A reusable character specification (Character engine output), so stories, pictures
+    and videos keep one identity. ``name_token`` is a placeholder, never a person's name."""
+
+    __tablename__ = "ai_characters"
+
+    id: Mapped[uuid.UUID] = _pk()
+    child_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("children.id", ondelete="CASCADE"))
+    name_token: Mapped[str] = mapped_column(Text, nullable=False)
+    spec: Mapped[dict] = _jsonb_dict()
+    request_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("ai_requests.id", ondelete="SET NULL"))
+    created_by: Mapped[uuid.UUID | None] = _user_fk()
+    created_at: Mapped[datetime] = _created()
+    updated_at: Mapped[datetime] = _updated()
