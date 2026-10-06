@@ -84,7 +84,10 @@ function QuickBaseline({ childId }: { childId: string }) {
       return next;
     });
   };
+  const rememberCount = (Array.isArray(data.remember) ? data.remember : []).filter((l) => isObj(l) && str(l.text).trim()).length;
+  // The bridge is exactly 3 + 3 (PQ-TCH-03): three main strengths and three things to remember.
   const needsThree = currentStatus === "sufficient" && strengths.length !== 3;
+  const needsThreeRemember = currentStatus === "sufficient" && rememberCount !== 3;
 
   async function save() {
     setError(null);
@@ -97,7 +100,14 @@ function QuickBaseline({ childId }: { childId: string }) {
       setSaved(true);
     } else {
       const e = r.error;
-      setError(e instanceof ApiError && e.code === "VALIDATION" ? t("quickBaseline.exactlyThree") : e instanceof ApiError ? e.message : String(e));
+      const onRemember = e instanceof ApiError && Array.isArray(e.details) && e.details.some((d) => isObj(d) && d.path === "data.remember");
+      setError(
+        e instanceof ApiError && e.code === "VALIDATION"
+          ? t(onRemember ? "quickBaseline.exactlyThreeRemember" : "quickBaseline.exactlyThree")
+          : e instanceof ApiError
+            ? e.message
+            : String(e),
+      );
     }
   }
 
@@ -180,9 +190,10 @@ function QuickBaseline({ childId }: { childId: string }) {
               <StatusPicker value={currentStatus} options={STATUS_CHOICES} wording="answers" onChange={(s) => setStatus(s)} />
             </Question>
             {needsThree && <Alert tone="warning">{t("quickBaseline.exactlyThree")}</Alert>}
+            {needsThreeRemember && <Alert tone="warning">{t("quickBaseline.exactlyThreeRemember")}</Alert>}
             {error && <Alert tone="error">{error}</Alert>}
             <div className="flex flex-wrap items-center gap-2">
-              <Button loading={pending} disabled={needsThree} icon={<Save aria-hidden />} onClick={() => void save()} data-testid="qb-save">
+              <Button loading={pending} disabled={needsThree || needsThreeRemember} icon={<Save aria-hidden />} onClick={() => void save()} data-testid="qb-save">
                 {t("common.save")}
               </Button>
             </div>
@@ -304,10 +315,15 @@ function StrengthSlots({ value, onChange, profile }: { value: Slot[]; onChange: 
 
 function RememberLines({ value, onChange }: { value: unknown; onChange: (v: unknown) => void }) {
   const { t } = useI18n();
-  const lines = (Array.isArray(value) ? value : []).map((l) => (isObj(l) ? str(l.text) : ""));
-  const shown = [0, 1, 2].map((i) => lines[i] ?? "");
+  // The three inputs keep what the teacher typed, blanks included, so a line never jumps to
+  // another input while she is typing; only the saved value drops the blank lines.
+  const [shown, setShown] = useState<string[]>(() => {
+    const lines = (Array.isArray(value) ? value : []).map((l) => (isObj(l) ? str(l.text) : ""));
+    return [0, 1, 2].map((i) => lines[i] ?? "");
+  });
   const emit = (next: string[]) => {
-    const clean = next.map((x) => x.trim() ? { text: x } : null).filter(Boolean);
+    setShown(next);
+    const clean = next.filter((x) => x.trim()).map((text) => ({ text }));
     onChange(clean.length ? clean : undefined);
   };
   return (

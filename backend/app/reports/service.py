@@ -30,6 +30,7 @@ from app.reports.context import ReportContext
 from app.reports.i18n import LANGS, LOCAL_TZ, direction
 from app.reports.render import ReportBusy, render_pdf
 from app.schemas.reports import ReportRequest
+from app.services import settings as app_settings
 
 log = logging.getLogger("app.reports")
 
@@ -72,6 +73,12 @@ def labels(ctx) -> dict:
     }
 
 
+def org_meta(db) -> dict:
+    """The admin branding for the header and footer (app_settings general + reports sections)."""
+    general, rep = app_settings.general(db), app_settings.reports(db)
+    return {"name": general.organization_name, "header_title": rep.header_title, "footer_note": rep.footer_note or ""}
+
+
 def build_model(ctx: ReportContext) -> dict:
     report_type = ctx.request.report_type
     built = BUILDERS[report_type](ctx)
@@ -102,6 +109,7 @@ def build_model(ctx: ReportContext) -> dict:
         "labels": labels(ctx),
         "child_id": str(child.id),
     }
+    meta["org"] = org_meta(ctx.db)
     return {"meta": meta, "sections": built["sections"]}
 
 

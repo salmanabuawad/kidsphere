@@ -32,6 +32,8 @@ class Settings(BaseSettings):
     video_provider: str = "none"
     serve_static_dir: str = ""
     log_level: str = "info"
+    # Shown on the admin System card; else backend/VERSION (written by deploy.sh), else "unknown".
+    app_version: str = ""
     options_path: Path = APP_DIR / "data" / "options.json"
 
     @field_validator("database_url")

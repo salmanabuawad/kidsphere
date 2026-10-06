@@ -132,7 +132,10 @@ export type ObservationInput = {
   client_request_id?: string;
 };
 
-export type ObservationUpdate = Partial<Omit<ObservationInput, "client_request_id">>;
+/** PUT /api/observations/{id}: only the fields sent change; null clears a field (never the text). */
+export type ObservationUpdate = { [K in keyof Omit<ObservationInput, "client_request_id" | "observation">]?: ObservationInput[K] | null } & {
+  observation?: string;
+};
 
 /** The URL filters of the Observations tab and GET /api/children/{id}/observations. */
 export type ObservationFilters = Partial<{
@@ -142,6 +145,10 @@ export type ObservationFilters = Partial<{
   domain: AiDomain;
   context: string;
   source: "quick" | "content_feedback";
+  /** Stage E of a quick observation. */
+  did_it_change: "yes" | "partly" | "no";
+  /** content_results key of activity feedback. */
+  result: string;
   limit: number;
   offset: number;
 }>;

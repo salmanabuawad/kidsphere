@@ -495,3 +495,19 @@ class ReportExport(Base):
     date_range: Mapped[Range[date] | None] = mapped_column(DATERANGE)
     # include_* flags, assessment_id; never content
     options: Mapped[dict] = _jsonb_dict()
+
+
+# --------------------------------------------------------------------------- 0003: admin settings
+
+
+class AppSetting(Base):
+    """One admin settings section (general, ai, reports) as JSON. Read and written only
+    through ``app.services.settings`` (typed defaults fill anything missing). The ai
+    section may hold the Anthropic API key, which no API ever returns."""
+
+    __tablename__ = "app_settings"
+
+    key: Mapped[str] = mapped_column(Text, primary_key=True)
+    value: Mapped[dict] = mapped_column(JSONB, nullable=False)
+    updated_by: Mapped[uuid.UUID | None] = _user_fk()
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())

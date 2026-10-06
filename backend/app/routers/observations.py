@@ -2,10 +2,12 @@
 
 Paths are relative to /api (no router prefix); main.py includes this module.
 
-- GET  /children/{id}/observations?date_from&date_to&focus_area_id&domain&context&source&limit=30&offset=0
+- GET  /children/{id}/observations?date_from&date_to&focus_area_id&domain&context&source&did_it_change&result&limit=30&offset=0
        → {"observations": [observation], "limit", "offset", "has_more"}   newest first
        date_from/date_to are inclusive days (YYYY-MM-DD); domain is an AI domain (ai_domains);
        context an observation_contexts key; source quick | content_feedback.
+       did_it_change yes|partly|no filters quick observations by stage E (details.did_it_change);
+       result a content_results key filters activity feedback by its result.
 - POST /children/{id}/observations  ObservationCreate
        → 201 {"observation"}; a repeated client_request_id → 200 with the existing row
 - PUT  /observations/{id}  ObservationUpdate (author or admin) → {"observation"}
@@ -37,11 +39,14 @@ def list_observations(
     domain: AiDomain | None = None,
     context: Annotated[str | None, Query(max_length=40)] = None,
     source: Literal["quick", "content_feedback"] | None = None,
+    did_it_change: Literal["yes", "partly", "no"] | None = None,
+    result: Annotated[str | None, Query(max_length=40)] = None,
     limit: Annotated[int, Query(ge=1, le=svc.MAX_LIMIT)] = svc.DEFAULT_LIMIT,
     offset: Annotated[int, Query(ge=0, le=10000)] = 0,
 ) -> dict:
     return svc.list_observations(db, user, child_id, focus_area_id=focus_area_id, limit=limit, offset=offset,
-                                 date_from=date_from, date_to=date_to, domain=domain, context=context, source=source)
+                                 date_from=date_from, date_to=date_to, domain=domain, context=context, source=source,
+                                 did_it_change=did_it_change, result=result)
 
 
 @router.post("/children/{child_id}/observations", status_code=201)

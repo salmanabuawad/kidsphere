@@ -48,7 +48,13 @@ export type DraftFocus = {
   status: string;
   created_at: string | null;
   observation_count: number;
+  /** Stage E ("did anything change") of the observations linked to the focus or applying its plan,
+   *  since the last review: dated items per result, never a count to compare. */
+  changes?: StageEChanges;
 };
+
+export type StageEResult = "yes" | "partly" | "no";
+export type StageEChanges = Record<StageEResult, { id: string; observed_at: string }[]>;
 
 export type DraftContext = {
   /** `summary`: the first-picture wording of the baseline (not stored in the snapshot itself). */
@@ -217,6 +223,9 @@ export type BaselinesResponse = {
 
 const child = (id: string) => `/api/children/${encodeURIComponent(id)}`;
 export const reviewsUrl = (childId: string) => `${child(childId)}/development-reviews`;
+/** GET → {suggestions: [{id, kind, output, …}]}: the stored AI suggestions (staff only, newest first). */
+export const aiSuggestionsUrl = (childId: string, kind?: "understanding" | "functional_summary") =>
+  `${child(childId)}/ai-suggestions${kind ? `?kind=${kind}` : ""}`;
 export const currentUnderstandingUrl = (childId: string) => `${child(childId)}/current-understanding`;
 export const baselinesUrl = (childId: string) => `${child(childId)}/baseline`;
 

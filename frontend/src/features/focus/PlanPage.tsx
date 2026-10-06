@@ -246,7 +246,14 @@ function PlanManager({ childId, strengths }: { childId: string; strengths: Stren
             <div className="grid items-start gap-4 md:grid-cols-2">
               {data?.family_hopes && <FamilyHopesPanel hopes={data.family_hopes} full={full} onUse={(category) => setAdding({ category })} />}
               {(data?.need_candidates ?? []).length > 0 && (
-                <NeedsPanel childId={childId} candidates={data?.need_candidates ?? []} full={full} busy={pending} onPromote={promote} />
+                <NeedsPanel
+                  childId={childId}
+                  candidates={data?.need_candidates ?? []}
+                  full={full}
+                  busy={pending}
+                  onPromote={promote}
+                  thirdGoal={activeAll.length === MIN_SUGGESTED}
+                />
               )}
             </div>
           )}

@@ -1,5 +1,5 @@
 /** Public surface of the observations feature for other features (Observations tab, timeline, teacher observation). */
-export { QuickObservationForm } from "./QuickObservationForm";
+export { QuickObservationForm, type EditableObservation } from "./QuickObservationForm";
 export { ObservationDetailsView } from "./ObservationDetailsView";
 export { SupportScale, type ScaleOption } from "./SupportScale";
 export {

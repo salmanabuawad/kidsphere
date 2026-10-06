@@ -25,6 +25,7 @@ import {
   profileUrl,
   questions,
   sectionStatus,
+  SectionStatusControl,
   type PerspectiveDoc,
   type ProfileHistory,
   type ProfileVersion,
@@ -117,6 +118,7 @@ export function ParentView({ childId }: { childId: string }) {
           doc={doc}
           child={child.data?.child}
           onHistory={() => setHistoryFor(section)}
+          status={showingInitial ? undefined : { childId, onSaved: profile.setData }}
         />
       ))}
 
@@ -211,6 +213,7 @@ function SectionView({
   doc,
   child,
   onHistory,
+  status,
 }: {
   section: RegistrySection;
   data: SectionData;
@@ -218,6 +221,8 @@ function SectionView({
   doc: PerspectiveDoc;
   child: ChildBasics | undefined;
   onHistory: () => void;
+  /** Staff set the section's status (Review later, …); absent while the first-sent answers are shown. */
+  status?: { childId: string; onSaved: (p: QProfile) => void };
 }) {
   const { t } = useI18n();
   const sm = useSourceModel();
@@ -297,6 +302,7 @@ function SectionView({
         ) : (
           list
         )}
+        {status && <SectionStatusControl childId={status.childId} section={ds} value={sectionStatus(doc, ds)} onSaved={status.onSaved} />}
         {earlier.length > 0 && (
           <div className="space-y-3 rounded-md bg-tray p-3" data-testid="earlier-form">
             <p className="text-sm font-semibold text-ink">{t("parentView.earlierForm")}</p>

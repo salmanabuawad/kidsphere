@@ -28,6 +28,7 @@
   "status": "Status",
   "statusHint": "Mark it as enough for now once the 3 main strengths are chosen.",
   "exactlyThree": "Choose exactly 3 main strengths to mark the quick baseline as enough for now.",
+  "exactlyThreeRemember": "Write exactly 3 things to remember to mark the quick baseline as enough for now.",
   "saved": "Quick baseline saved",
   "savedHint": "Saved. You can now create the baseline: it keeps this first picture.",
   "createBaseline": "Create baseline",

@@ -60,6 +60,7 @@ export function DomainCard({
   onSaved,
   onFocusCreated,
   firstArea = false,
+  activeFocusCount = 0,
 }: {
   domain: Domain;
   cycle: Assessment;
@@ -71,6 +72,8 @@ export function DomainCard({
   onFocusCreated: () => void;
   /** The quick baseline names this section as the first area to observe (PQ-TCH-06). */
   firstArea?: boolean;
+  /** Active goals right now (a need made a focus with 2 already shows the third-goal hint). */
+  activeFocusCount?: number;
 }) {
   const { t } = useI18n();
   const sm = useSourceModel();
@@ -191,6 +194,7 @@ function DomainEditor({
     applying: applying.pending,
     promote: (index, need) => void promote(index, need),
     promoting: promoting.pending,
+    thirdGoal: activeFocusCount === 2,
     promoted: new Map(
       cycle.need_focus_areas.filter((n) => n.status === "active" || n.status === "paused").map((n) => [n.index, n.title] as [number, string]),
     ),

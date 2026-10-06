@@ -26,7 +26,7 @@ import { useFetch } from "@/lib/useFetch";
 import { cn } from "@/lib/utils";
 import { assessmentsUrl, childUrl, displayName, isStaffView, profileUrl, WIZARD_REVIEW_STEP } from "./api";
 import { ChildLayout } from "./ChildLayout";
-import { mainFirst, nextReviewOn, overviewData, type GoodToKnowRow, type OverviewData, type ReviewLater } from "./overview";
+import { mainFirst, nextReviewOn, overviewData, type GoodToKnowRow, type OverviewData, type ParentHelpRow, type ReviewLater } from "./overview";
 import { ProfileItemChips, SECTION_CHIP_CAP, useProfileItem } from "./ProfileItems";
 import { parentSaid } from "./provenance";
 import type { AssessmentsSummary, ChildDetail, ChildStaffView, FocusAreaSummary, FocusPlan, ProfileItem, ProfileResponse } from "./types";
@@ -122,7 +122,11 @@ function StaffOverview({ child }: { child: ChildStaffView }) {
           list="interests"
           items={lists.interests}
           editTo={paths.childEdit(child.id, 2)}
-        />
+        >
+          {data.attracts && (
+            <QuoteBlock label={t("children.overview.attracts")} text={data.attracts.text} provenance={[parentSaid(data.attracts.stamp)]} />
+          )}
+        </Section>
         <Section
           title={t("children.profile.whatHelps")}
           tone="helps"
@@ -130,7 +134,9 @@ function StaffOverview({ child }: { child: ChildStaffView }) {
           list="what_helps"
           items={lists.what_helps}
           editTo={paths.childEdit(child.id, 3)}
-        />
+        >
+          {data.parentHelps.length > 0 && <ParentHelps rows={data.parentHelps} />}
+        </Section>
       </div>
 
       <FocusCard child={child} />
@@ -191,6 +197,27 @@ function ActionBar({ childId }: { childId: string }) {
         {t("children.profile.actions.edit")}
       </ButtonLink>
     </nav>
+  );
+}
+
+const PARENT_HELPS_SHOWN = 2;
+
+/** What helps, in the family's own words (PARENT SAID; Q4, Q19, Q31, Q33): the first two, then the rest on demand. */
+function ParentHelps({ rows }: { rows: ParentHelpRow[] }) {
+  const { t } = useI18n();
+  const [all, setAll] = useState(false);
+  const shown = all ? rows : rows.slice(0, PARENT_HELPS_SHOWN);
+  return (
+    <div className="space-y-2" data-testid="parent-helps">
+      {shown.map((r) => (
+        <QuoteBlock key={r.key} label={t(`children.overview.parentHelps.${r.key}`)} text={r.text} provenance={[parentSaid(r.stamp)]} />
+      ))}
+      {rows.length > PARENT_HELPS_SHOWN && (
+        <Button size="sm" variant="ghost" aria-expanded={all} onClick={() => setAll((a) => !a)}>
+          {all ? t("children.overview.showLess") : t("children.overview.showMore")}
+        </Button>
+      )}
+    </div>
   );
 }
 

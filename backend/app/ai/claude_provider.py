@@ -3,8 +3,11 @@
     call_claude(op, system, prompt, output_model, *, client=None) -> dict
 
 - Client: ``anthropic.Anthropic(api_key, timeout=settings.ai_timeout_seconds, max_retries=1)``.
-- Request: ``messages.create(model=settings.anthropic_model, max_tokens=16000,
-  system=..., messages=[user], output_config={"effort": settings.ai_effort,
+- Key, model and effort are the effective ones from ``app.services.settings.effective_ai()``
+  (a key saved by an admin overrides .env ANTHROPIC_API_KEY; model and effort fall back to
+  ANTHROPIC_MODEL and AI_EFFORT). The key is never logged.
+- Request: ``messages.create(model=<effective model>, max_tokens=16000,
+  system=..., messages=[user], output_config={"effort": <effective effort>,
   "format": {"type": "json_schema", "schema": anthropic.transform_schema(Model)}})``.
   No ``thinking`` (Opus 5.5 always thinks adaptively; effort controls depth),
   no temperature. ``messages.parse`` is not used because it validates inside
@@ -25,6 +28,7 @@ import time
 import anthropic
 
 from app.config import settings
+from app.services.settings import EffectiveAI, effective_ai
 
 log = logging.getLogger("app.ai")
 
@@ -38,22 +42,24 @@ class AIError(Exception):
         super().__init__(f"{code}: {self.message}")
 
 
-def make_client():
+def make_client(api_key: str | None = None):
+    """A client for ``api_key`` (default: the effective key)."""
     return anthropic.Anthropic(
-        api_key=settings.anthropic_api_key,
+        api_key=effective_ai().api_key if api_key is None else api_key,
         timeout=settings.ai_timeout_seconds,
         max_retries=1,
     )
 
 
-def request_params(system: str, prompt: str, output_model) -> dict:
+def request_params(system: str, prompt: str, output_model, config: EffectiveAI | None = None) -> dict:
+    cfg = config or effective_ai()
     return {
-        "model": settings.anthropic_model,
+        "model": cfg.model,
         "max_tokens": MAX_TOKENS,
         "system": system,
         "messages": [{"role": "user", "content": prompt}],
         "output_config": {
-            "effort": settings.ai_effort,
+            "effort": cfg.effort,
             "format": {"type": "json_schema", "schema": anthropic.transform_schema(output_model)},
         },
     }
@@ -67,10 +73,13 @@ def _usage(response) -> dict:
             if getattr(usage, k, None) is not None}
 
 
-def call_claude(op: str, system: str, prompt: str, output_model, *, client=None) -> dict:
-    """Return the parsed JSON object, or raise AIError."""
+def call_claude(op: str, system: str, prompt: str, output_model, *, client=None,
+                config: EffectiveAI | None = None) -> dict:
+    """Return the parsed JSON object, or raise AIError. ``config``: the effective AI settings
+    (read when not given)."""
+    cfg = config or effective_ai()
     client = client or make_client()
-    params = request_params(system, prompt, output_model)
+    params = request_params(system, prompt, output_model, cfg)
     started = time.monotonic()
     response = None
     error: AIError | None = None

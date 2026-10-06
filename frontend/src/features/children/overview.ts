@@ -48,10 +48,18 @@ export type GoodToKnowRow = {
 
 export type ReviewLater = { perspective: "parent" | "teacher"; section: string };
 
+/** The family's own words about what helps (PARENT SAID): Q4, Q19, Q31, Q33. */
+export type ParentHelpKey = "happySafe" | "socially" | "whatWorks" | "cooperation";
+export type ParentHelpRow = { key: ParentHelpKey; text: string; stamp: EnteredStamp | null };
+
 export type OverviewData = {
   heart: { message: string; stamp: EnteredStamp | null } | null;
   describeWords: ProfileItem[];
   appreciate: { text: string; stamp: EnteredStamp | null } | null;
+  /** What helps, in the family's words (Q4 joy, Q19 social, Q31 and Q33 behaviour). */
+  parentHelps: ParentHelpRow[];
+  /** What especially draws the child (Q3), in the family's words. */
+  attracts: { text: string; stamp: EnteredStamp | null } | null;
   goodToKnow: GoodToKnowRow[];
   /** Health indicators only: the Overview never shows the health text itself. */
   foodNote: boolean;
@@ -98,6 +106,19 @@ export function overviewData(profile: ProfileResponse | undefined, assessments?:
   const health = section(pp, "health");
   const partnership = section(pp, "partnership");
   const bridge = section(tp, "bridge");
+  const joy = section(pp, "joy");
+  const social = section(pp, "social");
+  const behaviour = section(pp, "behaviour");
+  const parentHelps: ParentHelpRow[] = [];
+  const help = (key: ParentHelpKey, value: unknown, sec: string) => {
+    const text = textOf(value);
+    if (text) parentHelps.push({ key, text, stamp: stampOf(pp, sec) });
+  };
+  help("happySafe", joy.happy_safe_successful, "joy");
+  help("socially", social.what_helps_socially, "social");
+  help("whatWorks", behaviour.what_works, "behaviour");
+  help("cooperation", behaviour.helps_cooperation, "behaviour");
+  const attracts = textOf(who.what_attracts);
 
   const rows: GoodToKnowRow[] = [];
   const add = (key: GoodToKnowKey, text: string | null, from: GoodToKnowRow["from"], sec: string, p: PerspectiveData | undefined) => {
@@ -147,6 +168,8 @@ export function overviewData(profile: ProfileResponse | undefined, assessments?:
     heart: heartText ? { message: heartText, stamp: stampOf(pp, "heart") } : null,
     describeWords: items(who.describe_words),
     appreciate: appreciate ? { text: appreciate, stamp: stampOf(pp, "who") } : null,
+    parentHelps,
+    attracts: attracts ? { text: attracts, stamp: stampOf(pp, "who") } : null,
     goodToKnow: rows,
     foodNote: hasData(food.text) || hasData(food.flags),
     medicalNote: medical.value === "yes" || hasData(medical.text),

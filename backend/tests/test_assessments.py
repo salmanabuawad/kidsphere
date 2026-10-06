@@ -73,9 +73,14 @@ def test_registry_shape_and_ids():
     assert all(orders == list(range(1, len(orders) + 1)) for orders in by_section.values())
 
 
+# Teacher-only rows (OQ-2): their labels are checked without the AI-only referral terms.
+TEACHER_ONLY_IDS = {"OM-D16-07d"}
+
+
 def test_registry_labels_are_kidsphere_wording():
     banned = vocab.banned_terms()
     terms = [t.lower() for group in ("clinical", "child_deficit", "ai_only") for lang in LANGS for t in banned[group][lang]]
+    ai_only = {t.lower() for lang in LANGS for t in banned["ai_only"][lang]}
     allow = [p.lower() for lang in LANGS for p in banned["allow_phrases"][lang]]
     problems = []
     entries = [(i["id"], i["label"]) for i in ITEMS] + [(s["id"], s["label"]) for s in REGISTRY["sections"]]
@@ -95,6 +100,8 @@ def test_registry_labels_are_kidsphere_wording():
             for phrase in allow:
                 cleaned = cleaned.replace(phrase, " ")
             hits = [t for t in terms if t in cleaned]
+            if where in TEACHER_ONLY_IDS:  # OQ-2: a teacher-only option may name a specialist; AI output never
+                hits = [t for t in hits if t not in ai_only]
             if hits:
                 problems.append(f"{where} ({lang}): {hits}")
             if NUMERIC_RE.search(text) or any(a in text.lower() for a in AGE_NORM):

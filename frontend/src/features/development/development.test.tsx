@@ -5,7 +5,7 @@ import { adam, options } from "@/features/observations/testData";
 import { planOptions } from "@/features/focus/testData";
 import arDevelopment from "@/i18n/messages/ar/development.json";
 import type { CurrentUnderstandingResponse, DraftContext, FunctionalSummary, Review, ReviewInput, ReviewsResponse, SuggestResponse, SummariesResponse, SummaryInput } from "./api";
-import { blankDraft, buildPayload, projectedActive } from "./ReviewPage";
+import { blankDraft, buildPayload, projectedActive, suggestedDraft } from "./ReviewPage";
 import { routes } from "./routes";
 
 const SCORING = /\d+\s*%|\bscore\b|\bpoints\b/i;
@@ -584,5 +584,97 @@ describe("Development tab: understanding over time, summary, original baseline",
     expect(await screen.findByText("4. المتابعة")).toBeTruthy();
     expect(screen.getByText("إشراك مختص عند الحاجة")).toBeTruthy();
     expect(document.documentElement.dir).toBe("rtl");
+  });
+});
+
+describe("Past reviews: follow-up and the AI draft", () => {
+  const followUpReview: Review = {
+    ...review,
+    focus_review: [],
+    baseline_validation: [],
+    ai_suggested: true,
+    ai_suggestion_id: "ais-9",
+    understanding: { ...review.understanding, adaptations: "One friend at a time.", next_steps: "Build together twice a week." },
+    follow_up: {
+      reassessment_on: "2026-12-15",
+      improvement: { level: "partial", note: "Joins one friend now" },
+      areas: { domains: ["social", "play"], focus_area_ids: ["f1"], text: "Mostly in free play" },
+      what_worked: "Starting with blocks",
+      what_to_change: "Shorter group time",
+      involvement: { key: "joint_plan", note: "Talk at the next meeting" },
+    },
+  };
+  const withTitle: Review = { ...review, id: "r0", focus_review: review.focus_review };
+
+  it("shows every saved Domain 16 field after saving (and a details button for a follow-up only review)", async () => {
+    mockFetch(developmentHandlers({
+      "GET /api/children/c1/development-reviews": { body: { reviews: [followUpReview, withTitle], context } satisfies ReviewsResponse },
+    }));
+    renderApp({ routes, url: "/children/c1/development", user: teacher, options: planOptions });
+    const item = (await screen.findAllByTestId("review-item"))[0]!;
+    fireEvent.click(within(item).getByRole("button", { name: "Show details" }));
+    const fu = within(item).getByTestId("review-follow-up");
+    expect(within(item).getByText("Follow-up")).toBeTruthy();
+    expect(within(fu).getByTestId("fu-reassessment").textContent).toMatch(/2026|15/);
+    expect(within(fu).getByText("Partial improvement")).toBeTruthy();
+    expect(within(fu).getByText("Joins one friend now")).toBeTruthy();
+    expect(within(fu).getByText("Social")).toBeTruthy();
+    expect(within(fu).getByText("Play")).toBeTruthy();
+    expect(within(fu).getByText("Joining group play")).toBeTruthy(); // the goal's title
+    expect(within(fu).getByText("Mostly in free play").getAttribute("dir")).toBe("auto");
+    expect(within(fu).getByText("Starting with blocks")).toBeTruthy();
+    expect(within(fu).getByText("Shorter group time")).toBeTruthy();
+    expect(within(fu).getByText("Shared plan")).toBeTruthy();
+    expect(within(fu).getByText("Talk at the next meeting")).toBeTruthy();
+    expect(document.body.textContent).not.toMatch(SCORING);
+  });
+
+  it("compares a saved review with the stored AI draft, marked AI suggested", async () => {
+    mockFetch(developmentHandlers({
+      "GET /api/children/c1/development-reviews": { body: { reviews: [followUpReview], context } satisfies ReviewsResponse },
+      "GET /api/children/c1/ai-suggestions": {
+        body: { suggestions: [{ id: "ais-9", kind: "understanding", output: { summary: "AI said Adam enjoys cars.", adaptations: "AI: start small.", next_steps: null } }] },
+      },
+    }));
+    renderApp({ routes, url: "/children/c1/development", user: teacher, options: planOptions });
+    const item = await screen.findByTestId("review-item");
+    fireEvent.click(within(item).getByRole("button", { name: "Compare with the AI draft" }));
+    const compare = await within(item).findByTestId("ai-draft-compare");
+    expect(within(compare).getByText("AI said Adam enjoys cars.")).toBeTruthy();
+    expect(within(compare).getByText("AI: start small.")).toBeTruthy();
+    expect(within(compare).getByText("One friend at a time.")).toBeTruthy();
+    expect(within(compare).getByText("AI suggested")).toBeTruthy();
+    fireEvent.click(within(item).getByRole("button", { name: "Hide the AI draft" }));
+    expect(within(item).queryByTestId("ai-draft-compare")).toBeNull();
+  });
+});
+
+describe("Review: the AI never closes a goal; stage E per focus", () => {
+  it("keeps the decision 'keep' when the suggestion says the focus is no longer needed", () => {
+    const res: SuggestResponse = {
+      ...suggestion,
+      suggestion_id: "ais-2",
+      suggestion: { ...suggestion.suggestion, focus_review: [{ focus_area_id: "f1", status: "no_longer_needed", note: "x" }] },
+    };
+    const d = suggestedDraft(res);
+    expect(d.focus[0]!.status).toBe("no_longer_needed"); // shown as a suggestion
+    expect(d.focus[0]!.decision).toBe("keep"); // only the teacher closes a goal
+    expect(buildPayload({ ...d, understanding: { ...d.understanding, summary: "x" } }).focus_review[0]!.decision).toBe("keep");
+  });
+
+  it("lists the dated 'did anything change' results of each focus next to the evidence", async () => {
+    const changes = { yes: [{ id: "o1", observed_at: "2026-10-02T09:00:00Z" }], partly: [{ id: "o2", observed_at: "2026-10-03T09:00:00Z" }], no: [] };
+    const ctxWithChanges: DraftContext = { ...context, focus_areas: [{ ...focus("f1", "Joining group play"), changes }] };
+    mockFetch(developmentHandlers({
+      "GET /api/children/c1/development-reviews": { body: { reviews: [], context: ctxWithChanges } satisfies ReviewsResponse },
+    }));
+    renderApp({ routes, url: "/children/c1/review/new", user: teacher, options });
+    fireEvent.click(await screen.findByRole("button", { name: "Write it myself" }));
+    const stage = await screen.findByTestId("stage-e");
+    expect(within(stage).getByText("Did anything change?")).toBeTruthy();
+    expect(within(stage).getByText(/^Yes · /)).toBeTruthy();
+    expect(within(stage).getByText(/^Partly · /)).toBeTruthy();
+    expect(within(stage).queryByText(/^Not yet/)).toBeNull();
+    expect(document.body.textContent).not.toMatch(SCORING);
   });
 });

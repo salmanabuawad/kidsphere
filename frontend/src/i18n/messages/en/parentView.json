@@ -4,6 +4,8 @@
   "private": "Private",
   "showPrivate": "Show the private answers",
   "earlierForm": "From the earlier form",
+  "statusLabel": "Status of this section",
+  "statusSaved": "Status saved",
   "header": {
     "description": "The family's own answers, in the order of the questionnaire. Only the kindergarten team sees them.",
     "sent": "Sent on {date}",

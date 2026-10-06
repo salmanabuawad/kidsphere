@@ -89,7 +89,12 @@
     "showDetails": "Show details",
     "hideDetails": "Hide details",
     "focusTitle": "Focus decisions",
-    "validationTitle": "The first picture"
+    "validationTitle": "The first picture",
+    "compareAi": "Compare with the AI draft",
+    "hideCompareAi": "Hide the AI draft",
+    "aiDraft": "AI draft",
+    "saved": "Saved by the teacher",
+    "aiDraftMissing": "The AI draft is no longer available."
   },
   "review": {
     "title": "Review development",
@@ -120,6 +125,7 @@
       "followUp": "4. Follow-up"
     },
     "followUp": {
+      "title": "Follow-up",
       "hint": "When we will look again, what changed and the next step. Only you fill this in: a suggestion never does.",
       "reassessment": "When we will look again",
       "reassessmentHint": "The date of the next look at the plan.",

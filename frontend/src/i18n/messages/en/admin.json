@@ -99,5 +99,79 @@
     "unlinkTitle": "Unlink {name}?",
     "unlinkBody": "They will no longer see this child. Their account stays active.",
     "unlinked": "{name} was unlinked."
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Organization, AI and report settings for everyone.",
+    "required": "Required.",
+    "general": {
+      "title": "General",
+      "subtitle": "Your organization and the default languages.",
+      "organizationName": "Organization name",
+      "uiLanguage": "Default interface language",
+      "uiLanguageHint": "Used for new users when no language is chosen.",
+      "contentLanguage": "Default content language",
+      "contentLanguageHint": "The language of new activities, unless the teacher picks another.",
+      "childLanguage": "The child’s main language",
+      "saved": "General settings saved."
+    },
+    "ai": {
+      "title": "AI",
+      "subtitle": "How activities and suggestions are drafted. Teachers always review the drafts.",
+      "mode": "Provider",
+      "modeClaude": "Claude",
+      "modeTemplate": "Templates",
+      "modeClaudeHint": "Uses Claude when an API key is available; otherwise the built-in templates.",
+      "modeTemplateHint": "Always uses the built-in templates. Nothing is sent to an AI service.",
+      "model": "Model",
+      "effort": "Effort",
+      "effortHint": "Higher effort takes longer.",
+      "efforts": {
+        "low": "Low",
+        "medium": "Medium",
+        "high": "High"
+      },
+      "key": "Anthropic API key",
+      "keySaved": "Saved key ends with …{last4}",
+      "keyFromServer": "No key saved here. The server key is used.",
+      "keyNone": "No key saved. The built-in templates are used.",
+      "keyReplacePlaceholder": "Enter a new key to replace it",
+      "keyInvalid": "The key should start with sk-ant-.",
+      "clearKey": "Clear key",
+      "keyCleared": "The saved key was removed.",
+      "saved": "AI settings saved.",
+      "test": "Test connection",
+      "testOk": "The connection works ({model}).",
+      "testErrors": {
+        "AI_NO_KEY": "There is no key to test. Save a key first.",
+        "AI_AUTH": "The key was not accepted. Check it and try again.",
+        "AI_MODEL_NOT_FOUND": "This model is not available for the key.",
+        "AI_TIMEOUT": "The service took too long to answer. Try again.",
+        "AI_BAD_REQUEST": "The service could not handle the request. Check the model.",
+        "AI_UNAVAILABLE": "The service cannot be reached right now. Try again later."
+      }
+    },
+    "reports": {
+      "title": "Reports",
+      "subtitle": "What PDF reports show in the header and footer.",
+      "headerTitle": "Header title",
+      "footerNote": "Footer note",
+      "footerNoteHint": "Optional, up to 300 characters. Printed on every page.",
+      "disclaimerNote": "The standard disclaimer is always printed at the bottom of every page, whatever you write here.",
+      "saved": "Report settings saved."
+    },
+    "system": {
+      "title": "System",
+      "subtitle": "Read-only status of this installation.",
+      "version": "App version",
+      "migration": "Database version",
+      "lastBackup": "Last nightly backup",
+      "ai": "AI",
+      "users": "Active users",
+      "classes": "Classes",
+      "children": "Children",
+      "unknown": "Unknown",
+      "notAvailable": "Not available"
+    }
   }
 }

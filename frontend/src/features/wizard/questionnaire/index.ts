@@ -8,3 +8,4 @@ export { QuestionControl } from "./controls";
 export * from "./model";
 export { QuestionnaireWizard } from "./QuestionnaireWizard";
 export { patchProfile, useQuestionnaire, type QuestionnaireState } from "./useQuestionnaire";
+export { SectionStatusControl } from "./SectionStatusControl";

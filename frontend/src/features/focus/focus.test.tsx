@@ -105,6 +105,18 @@ describe("Plan tab", () => {
     expect(await screen.findByTestId("third-goal-guidance")).toBeTruthy();
   });
 
+  it("shows the third-goal hint next to promoting a Domain 13 need with 2 active goals", async () => {
+    setup(
+      list([active, goal({ id: "f4", title: "B", suggestion_key: null })], {
+        need_candidates: [
+          { assessment_id: "a1", index: 0, area: "social", seeing: "Watches play", how_often: null, focus_area_id: null, provenance: [{ label: "teacher_observed" }] },
+        ],
+      }),
+    );
+    const needs = await screen.findByTestId("need-candidates");
+    expect(within(needs).getByTestId("third-goal-guidance").textContent).toBeTruthy();
+  });
+
   it("disables adding at 3 active goals and explains why", async () => {
     setup(list([active, goal({ id: "f4", title: "B" }), goal({ id: "f5", title: "C" })]));
     expect((await screen.findByTestId("focus-count")).textContent).toBe("3 of 3 active");

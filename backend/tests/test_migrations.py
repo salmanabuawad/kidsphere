@@ -43,7 +43,8 @@ NEW_TABLES = {
     "ai_suggestions", "record_versions", "teacher_assessments", "teacher_assessment_entries",
     "functional_summaries", "report_exports",
 }
-TABLES = TABLES_0001 | NEW_TABLES
+TABLES_0003 = {"app_settings"}  # tests/test_admin_settings.py covers 0003 up/down
+TABLES = TABLES_0001 | NEW_TABLES | TABLES_0003
 NOW = datetime(2026, 10, 6, 9, 0, tzinfo=timezone.utc)
 
 

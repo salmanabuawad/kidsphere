@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { useLocation, useNavigate, useParams } from "react-router";
 import { ClipboardCheck, Flag, History, Lightbulb, ListChecks, Plus, Sparkles } from "lucide-react";
 import { CurrentFocusIcon, DevelopmentIcon, TimelineIcon } from "@/icons";
 import { Alert, Badge, Button, ButtonLink, Card, CardBody, CardHeader, Chip, Dialog, EmptyState, Skeleton } from "@/components/ui";
+import { ProvenanceBadges } from "@/components/source";
 import { pick } from "@/i18n/config";
 import { useI18n } from "@/i18n/I18nProvider";
+import { api } from "@/lib/api";
 import { useFormat } from "@/lib/format";
 import { useOptions } from "@/lib/options";
 import { paths } from "@/lib/paths";
@@ -12,6 +14,7 @@ import { useAction, useErrorMessage } from "@/lib/useAction";
 import { useFetch } from "@/lib/useFetch";
 import { ChildLayout, ProfileItemChips, type ProfileItem } from "@/features/children";
 import {
+  aiSuggestionsUrl,
   baselinesUrl,
   baselineUrl,
   createBaseline,
@@ -23,9 +26,11 @@ import {
   type BaselinesResponse,
   type CurrentUnderstanding,
   type CurrentUnderstandingResponse,
+  type FollowUp,
   type Review,
   type ReviewsResponse,
   type ReviewWarning,
+  type Understanding,
 } from "./api";
 import { BaselineCompare } from "./BaselineCompare";
 import { EvidenceText, ReviewStatusBadge, Section, useEvidence, ValidationBadge } from "./parts";
@@ -413,6 +418,9 @@ function ValidationCard({ review }: { review: Review }) {
 
 function ReviewsList({ reviews, childId }: { reviews: Review[] | undefined; childId: string }) {
   const { t } = useI18n();
+  // Goal titles by id, for the follow-up areas of every review.
+  const focusTitles: Record<string, string> = {};
+  for (const r of reviews ?? []) for (const f of r.focus_review) if (f.title) focusTitles[f.focus_area_id] = f.title;
   return (
     <section aria-labelledby="past-reviews" className="space-y-3">
       <h2 id="past-reviews" className="flex items-center gap-2 text-lg font-semibold text-ink">
@@ -435,7 +443,7 @@ function ReviewsList({ reviews, childId }: { reviews: Review[] | undefined; chil
         <ol className="space-y-3">
           {reviews.map((r) => (
             <li key={r.id}>
-              <ReviewItemCard review={r} />
+              <ReviewItemCard review={r} childId={childId} focusTitles={focusTitles} />
             </li>
           ))}
         </ol>
@@ -444,11 +452,23 @@ function ReviewsList({ reviews, childId }: { reviews: Review[] | undefined; chil
   );
 }
 
-function ReviewItemCard({ review }: { review: Review }) {
+const filled = (v: unknown): boolean => {
+  if (v == null) return false;
+  if (typeof v === "string") return v.trim() !== "";
+  if (Array.isArray(v)) return v.length > 0;
+  if (typeof v === "object") return Object.values(v as Record<string, unknown>).some(filled);
+  return true;
+};
+
+/** Any Domain 16 value in a saved review's follow-up block. */
+const hasFollowUp = (f: FollowUp | null | undefined): f is FollowUp => filled(f);
+
+function ReviewItemCard({ review, childId, focusTitles }: { review: Review; childId: string; focusTitles: Record<string, string> }) {
   const { t } = useI18n();
   const { formatDate } = useFormat();
   const [open, setOpen] = useState(false);
-  const hasDetails = review.focus_review.length > 0 || review.baseline_validation.length > 0;
+  const followUp = hasFollowUp(review.follow_up) ? review.follow_up : null;
+  const hasDetails = review.focus_review.length > 0 || review.baseline_validation.length > 0 || followUp !== null;
   return (
     <Card data-testid="review-item" className="p-4 sm:p-5">
       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -461,6 +481,7 @@ function ReviewItemCard({ review }: { review: Review }) {
       <p className="mt-2 text-sm leading-relaxed text-ink" dir="auto">
         {review.summary}
       </p>
+      {review.ai_suggestion_id && <AiDraftCompare childId={childId} review={review} />}
       {hasDetails && (
         <div className="mt-2">
           <Button variant="ghost" size="sm" aria-expanded={open} onClick={() => setOpen((o) => !o)}>
@@ -505,10 +526,147 @@ function ReviewItemCard({ review }: { review: Review }) {
                   </ul>
                 </Section>
               )}
+              {followUp && <FollowUpView followUp={followUp} focusTitles={focusTitles} />}
             </div>
           )}
         </div>
       )}
     </Card>
+  );
+}
+
+/** A saved review's Domain 16 block, read-only (reviews cannot be changed after saving). */
+function FollowUpView({ followUp, focusTitles }: { followUp: FollowUp; focusTitles: Record<string, string> }) {
+  const { t } = useI18n();
+  const { formatDate } = useFormat();
+  const { optionLabel } = useOptions();
+  const f = followUp;
+  const areas = f.areas ?? { domains: [], focus_area_ids: [], text: null };
+  const areaChips = [
+    ...(areas.domains ?? []).map((d) => ({ key: `d-${d}`, label: optionLabel("observation_domains", d) })),
+    ...(areas.focus_area_ids ?? []).filter((id) => focusTitles[id]).map((id) => ({ key: `f-${id}`, label: focusTitles[id] })),
+  ];
+  const row = (label: string, body: ReactNode, testId: string) => (
+    <div data-testid={testId}>
+      <dt className="text-caption font-semibold text-ink-muted">{label}</dt>
+      <dd className="mt-0.5 text-sm text-ink">{body}</dd>
+    </div>
+  );
+  const text = (v: string | null | undefined) =>
+    v && v.trim() ? (
+      <span className="block whitespace-pre-line" dir="auto">
+        {v}
+      </span>
+    ) : null;
+  return (
+    <Section title={t("development.review.followUp.title")} icon={<Flag className="size-4" aria-hidden />}>
+      <dl className="space-y-2" data-testid="review-follow-up">
+        {f.reassessment_on && row(t("development.review.followUp.reassessment"), formatDate(f.reassessment_on), "fu-reassessment")}
+        {(f.improvement?.level || f.improvement?.note) &&
+          row(
+            t("development.review.followUp.improvement"),
+            <>
+              {f.improvement.level && <Chip>{optionLabel("improvement_levels", f.improvement.level)}</Chip>}
+              {text(f.improvement.note)}
+            </>,
+            "fu-improvement",
+          )}
+        {(areaChips.length > 0 || filled(areas.text)) &&
+          row(
+            t("development.review.followUp.areas"),
+            <>
+              {areaChips.length > 0 && (
+                <span className="flex flex-wrap gap-1.5">
+                  {areaChips.map((c) => (
+                    <Chip key={c.key}>
+                      <span dir="auto">{c.label}</span>
+                    </Chip>
+                  ))}
+                </span>
+              )}
+              {text(areas.text)}
+            </>,
+            "fu-areas",
+          )}
+        {filled(f.what_worked) && row(t("development.review.followUp.whatWorked"), text(f.what_worked), "fu-what-worked")}
+        {filled(f.what_to_change) && row(t("development.review.followUp.whatToChange"), text(f.what_to_change), "fu-what-to-change")}
+        {(f.involvement?.key || f.involvement?.note) &&
+          row(
+            t("development.review.followUp.involvement"),
+            <>
+              {f.involvement.key && <Chip>{optionLabel("involvement_steps", f.involvement.key)}</Chip>}
+              {text(f.involvement.note)}
+            </>,
+            "fu-involvement",
+          )}
+      </dl>
+    </Section>
+  );
+}
+
+type StoredSuggestion = { id: string; output: Understanding | null };
+
+/**
+ * "Compare with the AI draft" (X-19): the stored suggestion the review started from, next to
+ * what the teacher saved. The AI draft is kept and always marked as AI SUGGESTED.
+ */
+function AiDraftCompare({ childId, review }: { childId: string; review: Review }) {
+  const { t } = useI18n();
+  const [open, setOpen] = useState(false);
+  const [draft, setDraft] = useState<StoredSuggestion | null | undefined>(undefined);
+  const { pending, run } = useAction();
+
+  async function toggle() {
+    const next = !open;
+    setOpen(next);
+    if (next && draft === undefined) {
+      const r = await run(() => api<{ suggestions: StoredSuggestion[] }>(aiSuggestionsUrl(childId, "understanding")));
+      if (r.ok) setDraft(r.data.suggestions.find((s) => s.id === review.ai_suggestion_id) ?? null);
+    }
+  }
+
+  const pair = (label: string, saved: string | null | undefined, ai: string | null | undefined) =>
+    saved || ai ? (
+      <div className="grid gap-2 sm:grid-cols-2">
+        <div className="rounded-sm border border-line p-2">
+          <p className="text-caption font-semibold text-ink-muted">
+            {label} · {t("development.reviews.saved")}
+          </p>
+          <p className="text-sm whitespace-pre-line text-ink" dir="auto">
+            {saved || t("development.sections.empty")}
+          </p>
+        </div>
+        <div className="rounded-sm bg-tray/60 p-2" data-testid="ai-draft-text">
+          <p className="flex flex-wrap items-center gap-1.5 text-caption font-semibold text-ink-muted">
+            {label} · {t("development.reviews.aiDraft")}
+          </p>
+          <p className="text-sm whitespace-pre-line text-ink-muted" dir="auto">
+            {ai || t("development.sections.empty")}
+          </p>
+        </div>
+      </div>
+    ) : null;
+
+  const out = draft?.output ?? null;
+  return (
+    <div className="mt-2 space-y-2">
+      <Button size="sm" variant="ghost" aria-pressed={open} onClick={toggle} disabled={pending}>
+        {open ? t("development.reviews.hideCompareAi") : t("development.reviews.compareAi")}
+      </Button>
+      {open && draft !== undefined && (
+        <div className="space-y-2" data-testid="ai-draft-compare">
+          <ProvenanceBadges kinds={["ai_suggested"]} />
+          {draft === null || out === null ? (
+            <p className="text-sm text-ink-muted">{t("development.reviews.aiDraftMissing")}</p>
+          ) : (
+            <>
+              {pair(t("development.sections.summary"), review.understanding?.summary ?? review.summary, out.summary)}
+              {pair(t("development.current.adaptations"), review.understanding?.adaptations, out.adaptations)}
+              {pair(t("development.current.nextSteps"), review.understanding?.next_steps, out.next_steps)}
+            </>
+          )}
+        </div>
+      )}
+    </div>
   );
 }

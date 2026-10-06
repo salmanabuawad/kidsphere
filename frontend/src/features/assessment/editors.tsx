@@ -41,6 +41,8 @@ export type EditorContext = {
   promoted: Map<number, string>;
   /** Unsaved changes in this card (promotion needs a saved document). */
   dirty: boolean;
+  /** Two goals are already active: making a need a focus adds the third (OM-D15-06 hint). */
+  thirdGoal?: boolean;
 };
 
 type EditorProps = { domain: Domain; data: DomainData; onChange: (d: DomainData) => void; ctx: EditorContext };
@@ -736,6 +738,11 @@ export function NeedCards({ domain, data, onChange, ctx }: EditorProps) {
                     {t("assessment.needs.makeFocus")}
                   </Button>
                   {ctx.dirty && <span className="text-caption text-ink-muted">{t("assessment.needs.saveFirst")}</span>}
+                  {ctx.thirdGoal && (
+                    <span className="basis-full text-caption text-ink-muted" data-testid="third-goal-guidance">
+                      {t("focus.guidance.third")}
+                    </span>
+                  )}
                 </>
               )}
             </div>

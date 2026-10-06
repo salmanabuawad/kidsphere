@@ -4,6 +4,8 @@
   "private": "פרטי",
   "showPrivate": "להציג את התשובות הפרטיות",
   "earlierForm": "מהטופס הקודם",
+  "statusLabel": "מצב החלק הזה",
+  "statusSaved": "המצב נשמר",
   "header": {
     "description": "התשובות של המשפחה, לפי סדר השאלון. רק צוות הגן רואה אותן.",
     "sent": "נשלח ב־{date}",

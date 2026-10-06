@@ -1,14 +1,15 @@
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { useLocation, useParams } from "react-router";
-import { History } from "lucide-react";
+import { History, Pencil } from "lucide-react";
 import { ProvenanceBadge } from "@/components/source";
-import { Alert, BackLink, Badge, Card, CardBody, CardHeader, Skeleton } from "@/components/ui";
+import { Alert, BackLink, Badge, Button, Card, CardBody, CardHeader, Dialog, Skeleton } from "@/components/ui";
 import { useI18n } from "@/i18n/I18nProvider";
 import { useFormat } from "@/lib/format";
 import { useOptions } from "@/lib/options";
 import { paths } from "@/lib/paths";
 import { useFetch } from "@/lib/useFetch";
-import { ChildLayout } from "@/features/children";
+import { ChildLayout, childUrl, isStaffView, type ChildDetail } from "@/features/children";
+import { QuickObservationForm } from "@/features/observations";
 import { isEdited, normalizeVersions, rowFromVersion, versionsUrl, type HelpItem, type ObservationRow, type ObservationVersion } from "./api";
 import { ObservationChips, ObservationKind } from "./ObservationsPage";
 
@@ -33,26 +34,59 @@ export function ObservationDetailPage() {
   return (
     <ChildLayout childId={id}>
       <BackLink to={back} label={t("history.detail.back")} className="mb-2" />
-      <ObservationDetail observationId={observationId} fromList={state?.observation ?? null} />
+      <ObservationDetail childId={id} observationId={observationId} fromList={state?.observation ?? null} />
     </ChildLayout>
   );
 }
 
-function ObservationDetail({ observationId, fromList }: { observationId: string; fromList: ObservationRow | null }) {
+function ObservationDetail({ childId, observationId, fromList }: { childId: string; observationId: string; fromList: ObservationRow | null }) {
   const { t } = useI18n();
   const history = useFetch<unknown>(versionsUrl(observationId));
+  const child = useFetch<{ child: ChildDetail }>(childUrl(childId));
+  const [saved, setSaved] = useState<ObservationRow | null>(null);
+  const [editing, setEditing] = useState(false);
   const versions = normalizeVersions(history.data);
   const latest = versions[versions.length - 1];
-  const current = fromList ?? (latest ? rowFromVersion(observationId, latest) : null);
+  const current = saved ?? fromList ?? (latest ? rowFromVersion(observationId, latest) : null);
 
   if (!current) {
     if (history.loading) return <Skeleton className="h-40" />;
     return <Alert tone="error">{t("history.detail.notFound")}</Alert>;
   }
+  // Domain 14 runs over time: stages D and E (and the documentation) are often added later.
+  // Activity feedback is edited from its activity (the server answers 409).
+  const editable = current.source === "quick";
+  const focusAreas = child.data && isStaffView(child.data.child) ? child.data.child.focus_areas : [];
   return (
     <div className="space-y-5">
-      <CurrentObservation o={current} edited={versions.length > 1 || isEdited(current)} />
+      <CurrentObservation
+        o={current}
+        edited={versions.length > 1 || isEdited(current)}
+        action={
+          editable ? (
+            <Button size="sm" variant="outline" icon={<Pencil className="size-4" aria-hidden />} onClick={() => setEditing(true)}>
+              {t("history.detail.edit")}
+            </Button>
+          ) : null
+        }
+      />
       {history.data !== undefined && <Versions id={observationId} versions={versions} base={current} />}
+      {editable && (
+        <Dialog open={editing} onClose={() => setEditing(false)} title={t("history.detail.editTitle")} description={t("history.detail.editHint")} size="lg">
+          {editing && (
+            <QuickObservationForm
+              childId={childId}
+              focusAreas={focusAreas}
+              initial={current}
+              onSaved={(o) => {
+                setSaved({ ...current, ...(o as unknown as ObservationRow) });
+                setEditing(false);
+                history.reload();
+              }}
+            />
+          )}
+        </Dialog>
+      )}
     </div>
   );
 }
@@ -68,7 +102,7 @@ function Labelled({ label, children }: { label: ReactNode; children: ReactNode }
   );
 }
 
-function CurrentObservation({ o, edited }: { o: ObservationRow; edited: boolean }) {
+function CurrentObservation({ o, edited, action }: { o: ObservationRow; edited: boolean; action?: ReactNode }) {
   const { t } = useI18n();
   const { formatDate } = useFormat();
   const { optionLabel } = useOptions();
@@ -112,6 +146,7 @@ function CurrentObservation({ o, edited }: { o: ObservationRow; edited: boolean 
                 <span data-testid="edited-marker">{t("history.observations.edited")}</span>
               </Badge>
             )}
+            {action}
           </div>
         }
       />

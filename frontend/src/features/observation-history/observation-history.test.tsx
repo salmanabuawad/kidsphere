@@ -181,6 +181,29 @@ describe("Observations tab", () => {
     expect(router.state.location.search).toContain("context=yard");
   });
 
+  it("filters by result: stage E of quick observations and how an activity went", async () => {
+    const urls: string[] = [];
+    mockFetch({
+      "GET /api/children/c1": { body: { child: adam } },
+      [`GET ${LIST}`]: (_init, url) => {
+        urls.push(url);
+        return page([edited]);
+      },
+    });
+    const { router } = renderApp({ routes, url: "/children/c1/observations?did_it_change=partly", user: teacher, options });
+    await screen.findAllByTestId("observation-row");
+    const last = () => new URL(urls[urls.length - 1]!, "http://x").searchParams;
+    expect(last().get("did_it_change")).toBe("partly");
+    expect(screen.getByRole("button", { name: "Remove filter: Did anything change?: Partly" })).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Filter" }));
+    fireEvent.change(screen.getByLabelText("How it went"), { target: { value: "worked_well" } });
+    await waitFor(() => expect(last().get("result")).toBe("worked_well"));
+    expect(router.state.location.search).toContain("did_it_change=partly");
+    // A hand-edited value is ignored, never sent.
+    await router.navigate("/children/c1/observations?did_it_change=maybe");
+    await waitFor(() => expect(last().get("did_it_change")).toBeNull());
+  });
+
   it("shows a filtered empty state and pages with Load older", async () => {
     const offsets: string[] = [];
     mockFetch({
@@ -255,6 +278,74 @@ describe("Observation detail", () => {
     const detail = await screen.findByTestId("observation-detail");
     expect(within(detail).getByText("Asked Omar to build the tower together")).toBeTruthy();
     expect(within(detail).getByText("With support")).toBeTruthy();
+  });
+
+  it("adds what changed later: the form opens filled in, saves with PUT and a second version appears", async () => {
+    const first = {
+      id: 7,
+      seq: 1,
+      data: {
+        observation: "Waited at the edge of play",
+        source: "quick",
+        context: "free_play",
+        domains: ["social"],
+        attributes: { duration_minutes: 5 },
+        details: { what_i_see: "Watched for a minute", what_we_did: "Invited one friend", plan_ref: { focus_area_id: "f1" } },
+      },
+      changed_by_name: "Rana Haddad",
+      via: "manual",
+      created_at: "2026-10-04T09:00:00Z",
+    };
+    let sent: Record<string, unknown> | null = null;
+    let saves = 0;
+    mockFetch({
+      "GET /api/children/c1": { body: { child: { ...adam, focus_areas: [{ id: "f1", title: "Joining group play", category: "social", status: "active" }] } } },
+      "GET /api/observations/o9/versions": () =>
+        saves === 0
+          ? { body: { versions: [first] } }
+          : { body: { versions: [first, { ...first, id: 8, seq: 2, data: { ...first.data, details: { ...first.data.details, did_it_change: "yes", what_changed: "Joined after one minute" } }, created_at: "2026-10-06T09:00:00Z" }] } },
+      "PUT /api/observations/o9": (init) => {
+        saves += 1;
+        sent = JSON.parse(String(init?.body)) as Record<string, unknown>;
+        return { body: { observation: { ...row({ id: "o9" }), ...first.data, details: (sent as { details: unknown }).details, edited: true, version_count: 2 } } };
+      },
+    });
+    renderApp({ routes, url: "/children/c1/observations/o9", user: teacher, options });
+    const detail = await screen.findByTestId("observation-detail");
+    fireEvent.click(within(detail).getByRole("button", { name: "Add what changed / Edit" }));
+    const form = await screen.findByRole("form", { name: "Quick observation" });
+    expect((within(form).getByDisplayValue("Waited at the edge of play") as HTMLTextAreaElement).value).toBe("Waited at the edge of play");
+    // Stage D is filled in, so the stepper opens on stage E.
+    fireEvent.click(within(form).getByRole("radio", { name: "Yes" }));
+    fireEvent.change(within(form).getByLabelText("What changed?"), { target: { value: "Joined after one minute" } });
+    fireEvent.click(within(form).getByRole("button", { name: "Save changes" }));
+    await waitFor(() => expect(sent).not.toBeNull());
+    const body = sent as unknown as { observation: string; context: string; domains: string[]; attributes: unknown; details: Record<string, unknown> };
+    expect(body.observation).toBe("Waited at the edge of play");
+    expect(body.context).toBe("free_play");
+    expect(body.domains).toEqual(["social"]);
+    expect(body.attributes).toEqual({ duration_minutes: 5 });
+    expect(body.details).toEqual({
+      what_i_see: "Watched for a minute",
+      what_we_did: "Invited one friend",
+      plan_ref: { focus_area_id: "f1" },
+      did_it_change: "yes",
+      what_changed: "Joined after one minute",
+    });
+    const history = await screen.findByTestId("observation-versions");
+    await waitFor(() => expect(within(history).getAllByTestId("observation-version")).toHaveLength(2));
+    expect(within(history).getByText("First version")).toBeTruthy();
+    expect(within(screen.getByTestId("observation-detail")).getByTestId("edited-marker")).toBeTruthy();
+  });
+
+  it("offers no edit for activity feedback", async () => {
+    mockFetch({
+      "GET /api/children/c1": { body: { child: adam } },
+      "GET /api/observations/o2/versions": { body: { versions: [{ id: 1, seq: 1, data: { observation: null, source: "content_feedback" }, created_at: "2026-10-04T09:00:00Z" }] } },
+    });
+    renderApp({ routes, url: "/children/c1/observations/o2", user: teacher, options });
+    await screen.findByTestId("observation-detail");
+    expect(screen.queryByRole("button", { name: "Add what changed / Edit" })).toBeNull();
   });
 
   it("says so when the observation cannot be found", async () => {

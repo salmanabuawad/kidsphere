@@ -170,12 +170,15 @@ def _day_start(day: date) -> datetime:
 
 def list_observations(db: Session, user: User, child_id, focus_area_id=None, limit: int = DEFAULT_LIMIT,
                       offset: int = 0, date_from: date | None = None, date_to: date | None = None,
-                      domain: str | None = None, context: str | None = None, source: str | None = None) -> dict:
+                      domain: str | None = None, context: str | None = None, source: str | None = None,
+                      did_it_change: str | None = None, result: str | None = None) -> dict:
     child = staff_child(db, user, child_id)
     if date_from is not None and date_to is not None and date_from > date_to:
         raise AppError("VALIDATION", details=[{"path": "date_to", "message": "The end date is before the start date."}])
     if context is not None and not vocab.is_valid("observation_contexts", context):
         raise AppError("VALIDATION", details=[{"path": "context", "message": f"unknown observation_contexts key {context!r}"}])
+    if result is not None and not vocab.is_valid("content_results", result):
+        raise AppError("VALIDATION", details=[{"path": "result", "message": f"unknown content_results key {result!r}"}])
     stmt = _query().where(Observation.child_id == child.id)
     if focus_area_id is not None:
         stmt = stmt.where(Observation.focus_area_id == focus_area_id)
@@ -189,6 +192,11 @@ def list_observations(db: Session, user: User, child_id, focus_area_id=None, lim
         stmt = stmt.where(Observation.context == context)
     if source is not None:
         stmt = stmt.where(Observation.source == source)
+    if did_it_change is not None:  # stage E of a quick observation
+        stmt = stmt.where(Observation.details["did_it_change"].astext == did_it_change)
+    if result is not None:  # the result of an activity's feedback
+        stmt = stmt.where(select(ContentFeedback.id).where(ContentFeedback.observation_id == Observation.id,
+                                                           ContentFeedback.result == result).exists())
     stmt = stmt.order_by(Observation.observed_at.desc(), Observation.created_at.desc(), Observation.id.desc())
     rows = db.execute(stmt.limit(limit + 1).offset(offset)).all()
     return {

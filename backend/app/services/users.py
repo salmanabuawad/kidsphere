@@ -15,6 +15,7 @@ from app.errors import AppError
 from app.models import ChildParent, ClassTeacher, User
 from app.schemas.admin import PasswordSetIn, UserCreateIn, UserUpdateIn
 from app.security import hash_password
+from app.services import settings as app_settings
 from app.sessions import revoke_user_sessions
 
 
@@ -55,7 +56,7 @@ def create_user(db: Session, actor: User, body: UserCreateIn) -> User:
         email=body.email,
         password_hash=hash_password(body.password),
         role=body.role,
-        language=body.language,
+        language=body.language or app_settings.default_ui_language(db),
         is_active=True,
     )
     db.add(user)

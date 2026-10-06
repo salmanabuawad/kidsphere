@@ -15,7 +15,7 @@ nginx ── /         → /var/www/kidsphere/frontend/dist   (try_files → ind
                          ▼
                      PostgreSQL (DB kidsphere_mvp)
                      uploads: /var/www/kidsphere/uploads (read only through the API)
-                     AI: Claude when ANTHROPIC_API_KEY is set, else built-in templates
+                     AI: Claude when a key is set (admin settings, else ANTHROPIC_API_KEY), else built-in templates
 ```
 
 ## 2. Backend (`backend/app`)
@@ -70,6 +70,7 @@ Every table has a UUID primary key (except `audit_log`) and `timestamptz` timest
 | `ai_suggestions` | Every AI analysis call: `kind` understanding\|functional_summary\|observation_questions, the de-identified `input` that was sent, `output`, `domains`, provider/model, `outcome` pending\|accepted\|edited\|discarded and what used it. |
 | `report_exports` | One row per PDF export: `report_type`, `language`, `date_range`, `options` (flags only), `generated_by`, `generated_at`. Never the content; append-only. |
 | `audit_log` | `actor_id`, `action`, `object_type`, `object_id`, `child_id`, `metadata` (primitives only). It has no foreign keys, so rows outlive what they describe. |
+| `app_settings` | 0003. `key` (general, ai, reports), `value` JSONB, `updated_by`, `updated_at`. Read and written only through `services/settings.py` (typed defaults, no cache). The ai section may hold the Anthropic API key: a saved key overrides .env `ANTHROPIC_API_KEY`, and `provider_mode` template forces the templates. |
 
 There is one support scale everywhere: `independent | some_support | significant_support | not_observed`.
 
@@ -122,6 +123,7 @@ An id outside the user's scope returns **404**, because the scope is part of the
 - `GET /users?role&q&active`, `POST /users`, `PUT /users/{id}`, `POST /users/{id}/password`
 - `GET /classes` (teachers get their own classes), `POST /classes`, `PUT /classes/{id}`, `DELETE /classes/{id}`, `PUT /classes/{id}/teachers`
 - `GET /children/{id}/parents`, `POST /children/{id}/parents`, `DELETE /children/{id}/parents/{user_id}`
+- `GET /admin/settings` (general, ai, reports; the AI key is never returned, only `key_set` and `key_last4`), `PUT /admin/settings/{general|ai|reports}` (partial; ai also takes `anthropic_api_key` or `{clear: true}`; audited as `settings.update` with the section and field names only), `POST /admin/settings/ai/test` (one minimal Claude call with the effective key, no child data: `{ok, model, error_code}`), `GET /admin/system` (read-only: app version, alembic revision, last nightly backup, effective AI mode, counts)
 
 **Children and profile**
 

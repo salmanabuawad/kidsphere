@@ -82,14 +82,14 @@ def test_disclaimer_is_verbatim_and_allowed():
         assert any(phrase in text.lower() for phrase in allow[lang])
 
 
-def _banned_hits(text: str) -> list:
+def _banned_hits(text: str, ai_only: bool = True) -> list:
     groups = vocab.banned_terms()
     cleaned = text.lower()
     for phrases in groups["allow_phrases"].values():
         for phrase in phrases:
             cleaned = cleaned.replace(phrase.lower(), " ")
     hits = []
-    for group in ("clinical", "child_deficit", "ai_only"):
+    for group in ("clinical", "child_deficit", "ai_only") if ai_only else ("clinical", "child_deficit"):
         for terms in groups.get(group, {}).values():
             hits += [t for t in terms if t.lower() in cleaned]
     if SCORING.search(text):
@@ -102,8 +102,10 @@ def test_messages_pass_the_banned_terms_check():
     for lang in i18n.LANGS:
         for key, value in flatten(messages(lang)).items():
             for text in value if isinstance(value, list) else [value]:
-                if _banned_hits(text):
-                    bad.append(f"{lang}:{key}: {_banned_hits(text)}")
+                # The teacher-only follow-up option (OQ-2) may name a specialist; AI output may not.
+                teacher_only = key == "options.involvement_steps.referral_as_needed"
+                if _banned_hits(text, ai_only=not teacher_only):
+                    bad.append(f"{lang}:{key}: {_banned_hits(text, ai_only=not teacher_only)}")
     assert bad == []
 
 

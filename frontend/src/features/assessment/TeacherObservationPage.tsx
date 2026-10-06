@@ -40,6 +40,9 @@ export function TeacherObservationPage() {
   const picked = useFetch<{ assessment: Assessment }>(pickedId ? assessmentUrl(pickedId) : null);
   const cycle = pickedId ? picked.data?.assessment : current;
   const profile = useFetch<ProfileResponse>(`/api/children/${encodeURIComponent(id)}/profile`);
+  // The active goals: with 2 already, making a need a focus shows the "third goal" hint (OM-D15-06).
+  const childDetail = useFetch<{ child: { focus_areas?: unknown[] } }>(`/api/children/${encodeURIComponent(id)}`);
+  const activeFocusCount = childDetail.data?.child?.focus_areas?.length ?? 0;
   const parentSections = profile.data?.parent_perspective?.sections ?? {};
   const firstArea = profile.data?.teacher_perspective?.sections?.bridge?.first_area_to_observe?.domain ?? null;
   const [startOpen, setStartOpen] = useState(false);
@@ -174,7 +177,12 @@ export function TeacherObservationPage() {
                   parentSections={parentSections}
                   firstArea={firstArea === d}
                   onSaved={domainSaved}
-                  onFocusCreated={() => (pickedId ? picked.reload() : cycles.reload())}
+                  onFocusCreated={() => {
+                    childDetail.reload();
+                    if (pickedId) picked.reload();
+                    else cycles.reload();
+                  }}
+                  activeFocusCount={activeFocusCount}
                 />
               ))}
             </section>

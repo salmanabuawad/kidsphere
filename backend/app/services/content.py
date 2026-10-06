@@ -85,6 +85,7 @@ from app.models import (
 )
 from app.schemas.content import ContentUpdate, GenerateIn, RegenerateIn, ShareIn
 from app.services import history, video_service
+from app.services import settings as app_settings
 from app.sessions import utcnow
 
 MAX_CONTEXT_OBSERVATIONS = 5
@@ -400,7 +401,8 @@ def generate_content(db: Session, user: User, child_id, body: GenerateIn) -> dic
         raise _invalid("template", "A game template is used with digital_game or pack only.")
     if body.include_video and body.content_type != "pack":
         raise _invalid("include_video", "include_video is used with pack only.")
-    language = body.language or default_language(child, user)
+    # Admin setting general.default_content_language ("child" = the child's main language).
+    language = body.language or app_settings.default_content_language(db) or default_language(child, user)
     ctx = _context(db, child, profile, mode=body.mode, kind=body.content_type, language=language, focus=focus,
                    target=target, template=body.template, include_video=body.include_video)
     # Nothing is written yet: end the read transaction so no connection is held while the AI works.

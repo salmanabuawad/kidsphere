@@ -10,14 +10,14 @@ import { useFetch } from "@/lib/useFetch";
 
 /**
  * History filters (X-34; COVERAGE-MATRIX §5.1): date range, focus, domain, situation,
- * kind, activity type and result, kept in the URL so a filtered view can be shared,
+ * kind, activity type, result and stage E ("did anything change?"), kept in the URL so a filtered view can be shared,
  * reloaded and navigated back to. Used by the Observations tab and Development › Timeline.
  * No charts, counts or percentages: filters only narrow the list.
  */
 
-export type FilterKey = "date_from" | "date_to" | "focus_area_id" | "domain" | "context" | "source" | "content_type" | "result";
+export type FilterKey = "date_from" | "date_to" | "focus_area_id" | "domain" | "context" | "source" | "content_type" | "result" | "did_it_change";
 export type FilterValues = Partial<Record<FilterKey, string>>;
-export type FilterField = "dates" | "focus" | "domain" | "context" | "source" | "content_type" | "result";
+export type FilterField = "dates" | "focus" | "domain" | "context" | "source" | "content_type" | "result" | "change";
 
 const FIELD_KEYS: Record<FilterField, FilterKey[]> = {
   dates: ["date_from", "date_to"],
@@ -27,7 +27,11 @@ const FIELD_KEYS: Record<FilterField, FilterKey[]> = {
   source: ["source"],
   content_type: ["content_type"],
   result: ["result"],
+  change: ["did_it_change"],
 };
+
+/** Stage E of the observation model ("did anything change?"; observations.details.did_it_change). */
+export const CHANGE_RESULTS = ["yes", "partly", "no"] as const;
 
 /** Observation sources (observations.source). */
 export const OBSERVATION_SOURCES = ["quick", "content_feedback"] as const;
@@ -38,6 +42,7 @@ const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 function clean(key: FilterKey, value: string | null): string | undefined {
   if (!value) return undefined;
   if ((key === "date_from" || key === "date_to") && !ISO_DATE.test(value)) return undefined;
+  if (key === "did_it_change" && !(CHANGE_RESULTS as readonly string[]).includes(value)) return undefined;
   return value;
 }
 
@@ -156,6 +161,8 @@ export function HistoryFilterBar({
         return optionLabel("content_types", v);
       case "result":
         return optionLabel("content_results", v);
+      case "did_it_change":
+        return `${t("history.filters.change")}: ${t(`history.detail.changeValues.${v}`)}`;
     }
   };
 
@@ -248,6 +255,16 @@ export function HistoryFilterBar({
               )),
             )}
           {has("content_type") && select("content_type", t("history.filters.contentType"), optionsOf("content_types"))}
+          {has("change") &&
+            select(
+              "did_it_change",
+              t("history.filters.change"),
+              CHANGE_RESULTS.map((v) => (
+                <option key={v} value={v}>
+                  {t(`history.detail.changeValues.${v}`)}
+                </option>
+              )),
+            )}
           {has("result") && select("result", t("history.filters.result"), optionsOf("content_results"))}
         </div>
       )}

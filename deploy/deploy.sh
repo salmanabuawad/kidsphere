@@ -22,6 +22,8 @@ as_app() { runuser -u kidsphere-mvp -- env -i HOME=/home/kidsphere-mvp PATH=$NOD
 
 echo "==> syncing sources"
 rsync -a --delete --exclude venv --exclude .env --exclude '__pycache__' "$SRC/backend/" "$APP/backend/"
+# The release directory is named after the commit (remote-deploy.sh); the admin System card shows it.
+basename "$SRC" > "$APP/backend/VERSION"
 chown -R kidsphere-mvp:kidsphere-mvp "$APP/backend"
 if [[ -f $SRC/frontend/package.json ]]; then
   rsync -a --delete --exclude node_modules --exclude dist --exclude dist.new "$SRC/frontend/" "$APP/frontend/"

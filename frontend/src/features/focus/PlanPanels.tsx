@@ -1,5 +1,5 @@
 import { ArrowUpRight, Plus } from "lucide-react";
-import { Badge, Button, ButtonLink, Card, CardBody, CardHeader, Chip } from "@/components/ui";
+import { Alert, Badge, Button, ButtonLink, Card, CardBody, CardHeader, Chip } from "@/components/ui";
 import { ProvenanceBadges } from "@/components/source";
 import { useI18n } from "@/i18n/I18nProvider";
 import { useOptions } from "@/lib/options";
@@ -108,12 +108,15 @@ export function NeedsPanel({
   full,
   busy,
   onPromote,
+  thirdGoal = false,
 }: {
   childId: string;
   candidates: NeedCandidate[];
   full: boolean;
   busy: boolean;
   onPromote: (c: NeedCandidate) => void;
+  /** Two goals are already active: promoting a need adds the third (OM-D15-06 hint). */
+  thirdGoal?: boolean;
 }) {
   const { t } = useI18n();
   const { optionLabel } = useOptions();
@@ -125,6 +128,11 @@ export function NeedsPanel({
         action={<ProvenanceBadges kinds={candidates[0]?.provenance ?? ["teacher_observed"]} />}
       />
       <CardBody className="space-y-3">
+        {thirdGoal && !full && (
+          <Alert tone="tip">
+            <span data-testid="third-goal-guidance">{t("focus.guidance.third")}</span>
+          </Alert>
+        )}
         <ul className="space-y-2">
           {candidates.map((c) => (
             <li key={`${c.assessment_id}-${c.index}`} data-testid="need-candidate" className="flex flex-wrap items-start justify-between gap-2 rounded-sm bg-tray/50 p-3">

@@ -25,7 +25,8 @@ class UserCreateIn(BaseModel):
     # An e-mail address or a plain username; stored lower-case.
     email: str = Field(min_length=2, max_length=200, pattern=IDENTIFIER_PATTERN)
     role: Role
-    language: Language = "ar"
+    # Omitted: the admin setting general.default_ui_language (app.services.settings).
+    language: Language | None = None
     password: str = Field(min_length=MIN_PASSWORD, max_length=200)
 
     @field_validator("name", mode="before")

@@ -10,6 +10,7 @@ import {
   Card,
   CardBody,
   CardHeader,
+  Chip,
   EmptyState,
   Field,
   IconButton,
@@ -52,6 +53,8 @@ import {
   type ReviewInput,
   type ReviewsResponse,
   type ReviewStatus,
+  type StageEChanges,
+  type StageEResult,
   type SuggestResponse,
   type UnderstandingList,
   type ValidationStatus,
@@ -66,6 +69,7 @@ export type FocusDraft = {
   title: string;
   description: string | null;
   observation_count: number;
+  changes?: StageEChanges;
   status: ReviewStatus;
   decision: KeptDecision;
   note: string;
@@ -119,8 +123,10 @@ const focusDraft = (f: DraftFocus, status: ReviewStatus, note: string): FocusDra
   title: f.title,
   description: f.description,
   observation_count: f.observation_count,
+  changes: f.changes,
   status,
-  decision: status === "no_longer_needed" ? "close" : "keep",
+  // Always "keep": a suggested "no longer needed" is only a suggestion; the teacher closes a goal herself.
+  decision: "keep",
   note,
   what_worked: "",
   what_to_change: "",
@@ -506,6 +512,30 @@ function FocusStep({ draft, update }: { draft: Draft; update: (fn: (d: Draft) =>
   );
 }
 
+const STAGE_E: StageEResult[] = ["yes", "partly", "no"];
+
+/** "Did anything change?" (Domain 14 stage E) for this focus since the last review: one dated chip per observation. */
+function StageEList({ changes }: { changes: StageEChanges }) {
+  const { t } = useI18n();
+  const { formatDate } = useFormat();
+  const items = STAGE_E.flatMap((result) => (changes[result] ?? []).map((o) => ({ ...o, result })));
+  if (items.length === 0) return null;
+  return (
+    <div className="space-y-1" data-testid="stage-e">
+      <p className="text-caption font-semibold text-ink-muted">{t("observations.stepper.steps.e")}</p>
+      <ul className="flex flex-wrap gap-1.5">
+        {items.map((o) => (
+          <li key={`${o.result}-${o.id}`}>
+            <Chip tone={o.result === "yes" ? "success" : o.result === "partly" ? "amber" : "neutral"}>
+              {t(`observations.model.${o.result}`)} · {formatDate(o.observed_at)}
+            </Chip>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 function FocusReviewCard({ focus, onChange }: { focus: FocusDraft; onChange: (patch: Partial<FocusDraft>) => void }) {
   const { t } = useI18n();
   const limited = isLimited(focus.status, focus.observation_count);
@@ -516,6 +546,7 @@ function FocusReviewCard({ focus, onChange }: { focus: FocusDraft; onChange: (pa
           {focus.title}
         </h3>
         <EvidenceText count={focus.observation_count} className="text-sm text-ink-muted" />
+        {focus.changes && <StageEList changes={focus.changes} />}
         {focus.note && (
           <p className="text-sm text-ink-muted" dir="auto">
             {focus.note}

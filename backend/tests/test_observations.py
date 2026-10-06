@@ -332,3 +332,34 @@ def test_list_filters(teacher_client, child, make_observation, teacher, db):
         r = teacher_client.get(url(child), params=params)
         assert r.status_code == 400, params
         assert r.json()["error"]["code"] == "VALIDATION"
+
+
+def test_list_filters_by_result(teacher_client, child, make_observation, teacher, db):
+    """X-34: the history filters by result: stage E of quick observations, the result of feedback."""
+    from app.models import ContentFeedback, GeneratedContent
+
+    make_observation(child, "Y", teacher, details={"did_it_change": "yes"})
+    make_observation(child, "P", teacher, details={"did_it_change": "partly"})
+    make_observation(child, "N", teacher)
+    content = GeneratedContent(child_id=child.id, mode="growth_support", content_type="story", language="en",
+                               title="A story", content={"title": "x"}, status="completed", generation_input={},
+                               ai_provider="template", is_template=True, created_by=teacher.id)
+    db.add(content)
+    db.flush()
+    feedback = make_observation(child, "F", teacher, source="content_feedback", content_id=content.id)
+    db.add(ContentFeedback(content_id=content.id, child_id=child.id, result="worked_well", support_level="independent",
+                           observation_id=feedback.id, created_by=teacher.id))
+    db.commit()
+
+    def ids(**params):
+        r = teacher_client.get(url(child), params=params)
+        assert r.status_code == 200, r.text
+        return {o["observation"] for o in r.json()["observations"]}
+
+    assert ids(did_it_change="yes") == {"Y"}
+    assert ids(did_it_change="partly") == {"P"}
+    assert ids(did_it_change="no") == set()
+    assert ids(result="worked_well") == {"F"}
+    assert ids(result="did_not_work") == set()
+    for params in ({"did_it_change": "maybe"}, {"result": "great"}):
+        assert teacher_client.get(url(child), params=params).status_code == 400, params

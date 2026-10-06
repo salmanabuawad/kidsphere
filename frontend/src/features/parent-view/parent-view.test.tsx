@@ -8,6 +8,8 @@ import type { AppLocale } from "@/i18n/config";
 import { normalizeOptions } from "@/lib/options";
 import { clearSourceModelCache, primeSourceModel } from "@/lib/sourceModel";
 import { mockFetch, parent, renderApp, teacher } from "@/test/utils";
+import { overviewData } from "@/features/children/overview";
+import type { ProfileResponse } from "@/features/children/types";
 import { routes } from "./routes";
 
 /** WP2-PQ: the Parent View tab (the family's complete questionnaire, read-only, PV §5.3). */
@@ -107,7 +109,7 @@ describe("Parent View", () => {
 
     expect(within(section("heart")).getByText(HEART)).toBeTruthy();
     expect(section("intro").querySelector('[data-status="sufficient"]')).toBeTruthy();
-    expect(within(section("intro")).getByText("Enough for now")).toBeTruthy();
+    expect(within(section("intro")).getAllByText("Enough for now").length).toBeGreaterThan(0);
     expect(section("behaviour").querySelector('[data-status="not_started"]')).toBeTruthy();
 
     // Skipped and empty questions are marked, never left blank.
@@ -151,6 +153,28 @@ describe("Parent View", () => {
     await waitFor(() => expect(dialog.querySelectorAll("[data-version]").length).toBe(2));
     expect(within(dialog).getByText("First sent")).toBeTruthy();
     expect(fetch.mock.calls.some(([url]) => String(url).includes("/profile/history") && String(url).includes("section=heart"))).toBe(true);
+  });
+
+  it("lets staff set a section to Review later (status only), which the Overview then lists", async () => {
+    let sent: Record<string, unknown> | null = null;
+    mockFetch({
+      "GET /api/children/c1": { body: { child: adam } },
+      "GET /api/children/c1/profile": { body: profile },
+      "PATCH /api/children/c1/profile": (init) => {
+        sent = JSON.parse(String(init?.body)) as Record<string, unknown>;
+        const status = { ...profile.section_status!.parent, [String(sent.section)]: { status: sent.status } };
+        return { body: { ...profile, parent_perspective: { ...profile.parent_perspective, section_status: status }, section_status: { parent: status, teacher: {} } } };
+      },
+    });
+    renderApp({ routes, url: "/children/c1/parent-view", user: teacher, options });
+    await screen.findByTestId("parent-view");
+    const joy = section("joy");
+    fireEvent.click(within(within(joy).getByTestId("section-status")).getByRole("radio", { name: "Review later" }));
+    await waitFor(() => expect(sent).not.toBeNull());
+    expect(sent).toEqual({ perspective: "parent", section: "joy", status: "review_later" });
+    await waitFor(() => expect(joy.querySelector('[data-status="review_later"]')).toBeTruthy());
+    const saved = { ...profile, section_status: { parent: { ...profile.section_status!.parent, joy: { status: "review_later" } }, teacher: {} } };
+    expect(overviewData(saved as unknown as ProfileResponse).reviewLater).toContainEqual({ perspective: "parent", section: "joy" });
   });
 
   it("is staff only", async () => {

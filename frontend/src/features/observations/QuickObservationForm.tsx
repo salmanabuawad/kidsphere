@@ -17,12 +17,14 @@ import {
   rememberChild,
   STAGE_C_HELPS,
   toLocalInput,
+  updateObservation,
   type AiDomain,
   type DidItChange,
   type Intensity,
   type LookFor,
   type Observation,
   type ObservationInput,
+  type ObservationUpdate,
   type SupportLevel,
   type WhenDetail,
 } from "./api";
@@ -50,6 +52,59 @@ function clean<T extends Record<string, unknown>>(obj: T): Partial<T> | undefine
   return Object.keys(out).length ? (out as Partial<T>) : undefined;
 }
 
+/** A saved quick observation as the history returns it (ObservationRow), for edit mode. */
+export type EditableObservation = {
+  id: string;
+  observation: string | null;
+  context?: string | null;
+  focus_area_id?: string | null;
+  support_level?: string | null;
+  what_helped?: ({ key?: string | null; custom?: string | null } | string)[] | null;
+  domains?: string[] | null;
+  attributes?: Record<string, unknown> | null;
+  details?: Record<string, unknown> | null;
+};
+
+const str = (v: unknown): string => (typeof v === "string" ? v : "");
+const keyOf = (v: unknown): string | null =>
+  typeof v === "string" ? v : v && typeof v === "object" && typeof (v as { key?: unknown }).key === "string" ? (v as { key: string }).key : null;
+
+/** The form's state from a saved observation (every A–E field, the attributes and the plan link). */
+function fromSaved(o: EditableObservation) {
+  const d = o.details ?? {};
+  const a = o.attributes ?? {};
+  const whenRaw = d.when_detail && typeof d.when_detail === "object" ? (d.when_detail as Record<string, unknown>) : {};
+  const when: WhenDetail = {};
+  for (const k of ["time", "activity", "activity_text", "with_whom", "before_event", "after_event"] as const) if (str(whenRaw[k])) when[k] = str(whenRaw[k]);
+  const needsRaw = d.needs && typeof d.needs === "object" ? (d.needs as { helps?: unknown[]; text?: unknown }) : {};
+  const helped = o.what_helped ?? [];
+  const change = str(d.did_it_change);
+  const planRef = d.plan_ref && typeof d.plan_ref === "object" ? (d.plan_ref as { focus_area_id?: unknown }) : {};
+  const minutes = a.duration_minutes;
+  const level = str(o.support_level);
+  return {
+    text: o.observation ?? "",
+    context: o.context ?? null,
+    focusId: o.focus_area_id ?? null,
+    support: (QUICK_SUPPORT as string[]).includes(level) ? (level as SupportLevel) : null,
+    helps: helped.map(keyOf).filter((k): k is string => !!k),
+    customHelps: helped.map((h) => (typeof h === "object" && h && typeof h.custom === "string" ? h.custom : null)).filter((c): c is string => !!c),
+    whatISee: str(d.what_i_see),
+    domains: (o.domains ?? []).filter(isAiDomain),
+    frequency: str(a.frequency) || null,
+    duration: typeof minutes === "number" ? String(minutes) : "",
+    intensity: (INTENSITIES as readonly string[]).includes(str(a.intensity)) ? (str(a.intensity) as Intensity) : null,
+    when,
+    needs: (Array.isArray(needsRaw.helps) ? needsRaw.helps : []).map(keyOf).filter((k): k is string => !!k),
+    needsText: str(needsRaw.text),
+    whatWeDid: str(d.what_we_did),
+    planFocus: typeof planRef.focus_area_id === "string" ? planRef.focus_area_id : null,
+    didItChange: change === "yes" || change === "partly" || change === "no" ? (change as DidItChange) : null,
+    whatChanged: str(d.what_changed),
+    documentation: str(d.documentation),
+  };
+}
+
 /**
  * Quick observation (spec §21, < 30 seconds, phone first). Only "What happened?" is
  * required; context, focus, support and what helped are one tap each. "More details"
@@ -62,12 +117,16 @@ export function QuickObservationForm({
   focusAreas,
   onSaved,
   lookFor,
+  initial,
 }: {
   childId: string;
   focusAreas: FocusAreaSummary[];
   onSaved: (o: Observation) => void;
   /** An AI SUGGESTED "what to look for next" question: shown as a reminder; its area is pre-selected. */
   lookFor?: LookFor | null;
+  /** Edit mode: a saved quick observation (every A–E field, the attributes and the plan link are
+   *  filled in); saving sends PUT /api/observations/{id}, which keeps the earlier version (X-13). */
+  initial?: EditableObservation | null;
 }) {
   const { t } = useI18n();
   const { list, labelOf, optionLabel } = useOptions();
@@ -75,34 +134,35 @@ export function QuickObservationForm({
   const { pending, run } = useAction();
   const [requestId] = useState(newRequestId);
   const textRef = useRef<HTMLTextAreaElement>(null);
+  const editing = initial ? fromSaved(initial) : null;
 
-  const [context, setContext] = useState<string | null>(null);
-  const [focusId, setFocusId] = useState<string | null>(null);
-  const [text, setText] = useState("");
+  const [context, setContext] = useState<string | null>(editing?.context ?? null);
+  const [focusId, setFocusId] = useState<string | null>(editing?.focusId ?? null);
+  const [text, setText] = useState(editing?.text ?? "");
   const [textError, setTextError] = useState<string | null>(null);
-  const [support, setSupport] = useState<SupportLevel | null>(null);
-  const [helps, setHelps] = useState<string[]>([]);
-  const [customHelps, setCustomHelps] = useState<string[]>([]);
+  const [support, setSupport] = useState<SupportLevel | null>(editing?.support ?? null);
+  const [helps, setHelps] = useState<string[]>(editing?.helps ?? []);
+  const [customHelps, setCustomHelps] = useState<string[]>(editing?.customHelps ?? []);
   const [customDraft, setCustomDraft] = useState("");
   const lookForDomain = isAiDomain(lookFor?.domain) ? lookFor.domain : null;
-  const [moreOpen, setMoreOpen] = useState(lookForDomain !== null);
+  const [moreOpen, setMoreOpen] = useState(lookForDomain !== null || editing !== null);
   const [observedAt, setObservedAt] = useState<string | null>(null);
 
   // Observe → Understand → Act (D14)
-  const [step, setStep] = useState<Step>("a");
-  const [whatISee, setWhatISee] = useState("");
-  const [domains, setDomains] = useState<AiDomain[]>(lookForDomain ? [lookForDomain] : []);
-  const [frequency, setFrequency] = useState<string | null>(null);
-  const [duration, setDuration] = useState("");
-  const [intensity, setIntensity] = useState<Intensity | null>(null);
-  const [when, setWhen] = useState<WhenDetail>({});
-  const [needs, setNeeds] = useState<string[]>([]);
-  const [needsText, setNeedsText] = useState("");
-  const [whatWeDid, setWhatWeDid] = useState("");
-  const [planFocus, setPlanFocus] = useState<string | null>(null);
-  const [didItChange, setDidItChange] = useState<DidItChange | null>(null);
-  const [whatChanged, setWhatChanged] = useState("");
-  const [documentation, setDocumentation] = useState("");
+  const [step, setStep] = useState<Step>(editing ? (editing.whatWeDid ? "e" : "d") : "a");
+  const [whatISee, setWhatISee] = useState(editing?.whatISee ?? "");
+  const [domains, setDomains] = useState<AiDomain[]>(editing?.domains ?? (lookForDomain ? [lookForDomain] : []));
+  const [frequency, setFrequency] = useState<string | null>(editing?.frequency ?? null);
+  const [duration, setDuration] = useState(editing?.duration ?? "");
+  const [intensity, setIntensity] = useState<Intensity | null>(editing?.intensity ?? null);
+  const [when, setWhen] = useState<WhenDetail>(editing?.when ?? {});
+  const [needs, setNeeds] = useState<string[]>(editing?.needs ?? []);
+  const [needsText, setNeedsText] = useState(editing?.needsText ?? "");
+  const [whatWeDid, setWhatWeDid] = useState(editing?.whatWeDid ?? "");
+  const [planFocus, setPlanFocus] = useState<string | null>(editing?.planFocus ?? null);
+  const [didItChange, setDidItChange] = useState<DidItChange | null>(editing?.didItChange ?? null);
+  const [whatChanged, setWhatChanged] = useState(editing?.whatChanged ?? "");
+  const [documentation, setDocumentation] = useState(editing?.documentation ?? "");
 
   const contexts = list("observation_contexts");
   const helpOptions = list("what_helps").filter((h) => h.key !== "other");
@@ -144,6 +204,23 @@ export function QuickObservationForm({
       what_changed: didItChange === "yes" || didItChange === "partly" ? whatChanged : undefined,
       documentation,
     });
+    if (initial) {
+      // Every field is sent, so clearing one in the form clears it on the server too.
+      const update: ObservationUpdate = {
+        observation,
+        context,
+        focus_area_id: focusId,
+        support_level: support,
+        what_helped: [...helps, ...custom.map((c) => ({ custom: c }))],
+        domains,
+        attributes: attributes ?? null,
+        details: details ?? null,
+        ...(observedAt ? { observed_at: new Date(observedAt).toISOString() } : {}),
+      };
+      const r = await run(() => updateObservation(initial.id, update), { success: t("observations.updated") });
+      if (r.ok) onSaved(r.data.observation);
+      return;
+    }
     const body: ObservationInput = {
       observation,
       client_request_id: requestId,
@@ -501,7 +578,7 @@ export function QuickObservationForm({
 
       <div className="sticky bottom-[calc(4.75rem+env(safe-area-inset-bottom))] z-20 -mx-1 rounded-lg bg-ground/90 p-1 backdrop-blur lg:bottom-4">
         <Button type="submit" size="xl" className="w-full" loading={pending} icon={<Save className="size-6" aria-hidden />}>
-          {t("observations.save")}
+          {initial ? t("observations.saveChanges") : t("observations.save")}
         </Button>
       </div>
     </form>

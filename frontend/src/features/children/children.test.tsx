@@ -423,6 +423,36 @@ describe("ChildProfilePage (Overview)", () => {
     expect(screen.queryByTestId("section-good-to-know")).toBeNull();
   });
 
+  it("shows the family's own words in What helps (first two, then more) and Interests", async () => {
+    const worded: ProfileResponse = {
+      ...profile,
+      parent_perspective: {
+        ...profile.parent_perspective!,
+        sections: {
+          ...profile.parent_perspective!.sections,
+          who: { ...profile.parent_perspective!.sections!.who, what_attracts: "Anything with wheels" },
+          joy: { happy_safe_successful: "Building with his father" },
+          social: { what_helps_socially: "One friend at a time" },
+          behaviour: { what_works: "A calm voice", helps_cooperation: "A choice of two" },
+        },
+      },
+    };
+    mockFetch({ "GET /api/children/c1": { body: { child: detail } }, "GET /api/children/c1/profile": { body: worded } });
+    renderApp({ routes, url: "/children/c1", user: teacher, options });
+    const words = await screen.findByTestId("parent-helps");
+    expect(within(words).getByText("Building with his father").getAttribute("dir")).toBe("auto");
+    expect(within(words).getByText("One friend at a time")).toBeTruthy();
+    expect(within(words).queryByText("A calm voice")).toBeNull();
+    expect(within(words).getAllByText("Parent said")).toHaveLength(2);
+    fireEvent.click(within(words).getByRole("button", { name: "Show more of the family's words" }));
+    expect(within(words).getByText("A calm voice")).toBeTruthy();
+    expect(within(words).getByText("A choice of two")).toBeTruthy();
+    expect(within(screen.getByTestId("section-interests")).getByText("Anything with wheels")).toBeTruthy();
+    const data = overviewData(worded);
+    expect(data.parentHelps.map((r) => r.key)).toEqual(["happySafe", "socially", "whatWorks", "cooperation"]);
+    expect(data.attracts?.text).toBe("Anything with wheels");
+  });
+
   it("prompts the quick baseline once the family's answers arrived", async () => {
     const fresh: ProfileResponse = {
       child_id: "c1",

@@ -48,6 +48,15 @@
       "private": "Only the kindergarten team sees this"
     },
     "familyWords": "In the family's words",
+    "attracts": "What especially draws the child",
+    "parentHelps": {
+      "happySafe": "What makes the child feel happy, safe and successful",
+      "socially": "What helps with other children",
+      "whatWorks": "What works at home",
+      "cooperation": "What helps the child cooperate"
+    },
+    "showMore": "Show more of the family's words",
+    "showLess": "Show less",
     "appreciate": "What the family loves most",
     "mainStrengths": "Main strengths",
     "goodToKnow": {

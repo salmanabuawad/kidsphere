@@ -339,6 +339,10 @@ def test_focus_suggestion_categories_exist(lists):
                 assert item["category"] in categories, f"{name}.{item['key']} has unknown category"
 
 
+# Teacher-only options (OQ-2): the AI-only referral terms do not apply to their labels.
+TEACHER_ONLY_OPTIONS = {("involvement_steps", "referral_as_needed")}
+
+
 def test_no_banned_or_numeric_terms_in_labels(data, lists):
     terms = _banned(data, "clinical") + _banned(data, "child_deficit") + _banned(data, "ai_only")
     allow = _allow(data)
@@ -347,6 +351,8 @@ def test_no_banned_or_numeric_terms_in_labels(data, lists):
         for item in items:
             for lang, text in _labels(item):
                 hits = _find_banned(text, terms, allow)
+                if (name, item["key"]) in TEACHER_ONLY_OPTIONS:  # OQ-2: only the teacher picks it; AI never
+                    hits = [h for h in hits if h not in _banned(data, "ai_only")]
                 if hits:
                     problems.append(f"{name}.{item['key']} ({lang}) {text!r}: {hits}")
                 if NUMERIC_RE.search(text):

@@ -40,6 +40,7 @@ import {
   type EntryMode,
   type Meeting,
 } from "./model";
+import { SectionStatusControl } from "./SectionStatusControl";
 import { useQuestionnaire, type QuestionnaireState } from "./useQuestionnaire";
 
 /**
@@ -126,6 +127,7 @@ export function QuestionnaireWizard({
             child={child.data?.child}
             collapsible={mode === "meeting" && sectionKeys.length > 1}
             defaultOpen={i === 0}
+            staffChildId={mode === "self" ? undefined : childId}
           />
         );
       })}
@@ -181,6 +183,7 @@ function SectionCard({
   child,
   collapsible,
   defaultOpen,
+  staffChildId,
 }: {
   section: RegistrySection;
   step: number;
@@ -188,6 +191,8 @@ function SectionCard({
   child: ChildBasics | undefined;
   collapsible: boolean;
   defaultOpen: boolean;
+  /** Staff filling it in for the family or at a meeting set the section status (Review later, …). */
+  staffChildId?: string;
 }) {
   const { t } = useI18n();
   const sm = useSourceModel();
@@ -209,6 +214,7 @@ function SectionCard({
       {items.map((item) => (
         <QuestionBlock key={item.id} item={item} section={ds} q={q} child={child} />
       ))}
+      {staffChildId && <SectionStatusControl childId={staffChildId} section={ds} value={status} onSaved={q.setData} />}
     </CardBody>
   );
   return (

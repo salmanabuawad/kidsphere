@@ -14,8 +14,9 @@ import { ChildLayout } from "@/features/children";
 import { filterQuery, HistoryFilterBar, useUrlFilters, type FilterField } from "@/features/timeline";
 import { isEdited, observationsUrl, PAGE_SIZE, type ObservationPage, type ObservationRow } from "./api";
 
-/** The Observations tab filters (X-34): date range, focus, domain, situation and kind, kept in the URL. */
-export const OBSERVATION_FIELDS: readonly FilterField[] = ["dates", "focus", "domain", "context", "source"];
+/** The Observations tab filters (X-34): date range, focus, domain, situation, kind and result (stage E of a
+ *  quick observation, how an activity went for feedback), kept in the URL. */
+export const OBSERVATION_FIELDS: readonly FilterField[] = ["dates", "focus", "domain", "context", "source", "change", "result"];
 
 const RESULT_TONE: Record<string, Tone> = { worked_well: "strength", partly: "attention", did_not_work: "neutral" };
 

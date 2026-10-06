@@ -87,6 +87,8 @@
   },
   "save": "Save observation",
   "saved": "Observation saved",
+  "updated": "Changes saved. The earlier version is kept.",
+  "saveChanges": "Save changes",
   "picker": {
     "title": "Who did you observe?",
     "search": "Search for a child",

@@ -89,8 +89,8 @@ from app.ai.schemas import (
     game_adapter,
     pack_model,
 )
-from app.config import settings
 from app.errors import AppError
+from app.services.settings import EffectiveAI, effective_ai
 from app.models import AiSuggestion, Baseline, ChildProfile, FocusArea, Observation, User
 
 log = logging.getLogger("app.ai")
@@ -124,8 +124,12 @@ class UnderstandingResult(BaseModel):
     suggestion_id: str | None = None
 
 
-def _use_claude(client) -> bool:
-    return client is not None or bool(settings.anthropic_api_key)
+def _use_claude(client, cfg: EffectiveAI) -> bool:
+    """Admin provider_mode "template" always wins; otherwise Claude when a client is injected
+    or a key is set (a key saved in the admin settings, else .env)."""
+    if cfg.provider_mode == "template":
+        return False
+    return client is not None or bool(cfg.api_key)
 
 
 def resolve_template(kind: str, ctx: AIContext) -> str | None:
@@ -190,14 +194,15 @@ def generate(kind: str, ctx: AIContext, *, client=None) -> GenerationResult:
         raise ValueError(f"unknown kind {kind!r}")
     template = resolve_template(kind, ctx)
     fallback_reason = None
-    if _use_claude(client):
+    cfg = effective_ai()
+    if _use_claude(client, cfg):
         try:
             data = call_claude(kind, SYSTEM_PROMPT, user_prompt(kind, ctx, template),
-                               provider_model(kind, template, ctx.include_video), client=client)
+                               provider_model(kind, template, ctx.include_video), client=client, config=cfg)
             content, issues = validate_output(kind, data, template, ctx.include_video, ai=True)
             if content is not None:
                 return GenerationResult(title=_title(kind, content), content=content, provider="claude",
-                                        model=settings.anthropic_model, is_template=False)
+                                        model=cfg.model, is_template=False)
             fallback_reason = _fallback_code(issues)
             log.warning("ai output rejected op=%s reason=%s issues=%d first=%s", kind, fallback_reason, len(issues),
                         issues[0] if issues else "")
@@ -454,11 +459,12 @@ def _understanding(ctx: AIContext, observations, focus_areas, baseline_items, *,
     fallback_reason = None
     suggestion = None
     provider, model = "template", template_provider.TEMPLATE_MODEL
-    if _use_claude(client):
+    cfg = effective_ai()
+    if _use_claude(client, cfg):
         try:
             data = call_claude("understanding", UNDERSTANDING_SYSTEM_PROMPT,
                                understanding_prompt(ai_ctx, [], [], [], payload=payload),
-                               UnderstandingSuggestion, client=client)
+                               UnderstandingSuggestion, client=client, config=cfg)
             suggestion = UnderstandingSuggestion.model_validate(data)
             issues = check_content(suggestion, set(), ai=True)
             if issues:
@@ -466,7 +472,7 @@ def _understanding(ctx: AIContext, observations, focus_areas, baseline_items, *,
                 log.warning("understanding rejected: unsafe issues=%d first=%s", len(issues), issues[0])
             else:
                 _restore_baseline_texts(suggestion, baseline, ai_baseline)
-                provider, model = "claude", settings.anthropic_model
+                provider, model = "claude", cfg.model
         except ValidationError as e:
             fallback_reason, suggestion = "AI_INVALID_OUTPUT", None
             log.warning("understanding rejected: invalid issues=%s", _error_list(e)[:3])
@@ -576,17 +582,19 @@ def draft_functional_summary(db: Session, child, lang: str, user: User | None, *
     draft = None
     fallback_reason = None
     provider, model = "template", template_provider.TEMPLATE_MODEL
-    if _use_claude(client):
+    cfg = effective_ai()
+    if _use_claude(client, cfg):
         try:
             data = call_claude("functional_summary", FUNCTIONAL_SUMMARY_SYSTEM_PROMPT,
-                               functional_summary_prompt(ai_ctx, payload), FunctionalSummaryDraft, client=client)
+                               functional_summary_prompt(ai_ctx, payload), FunctionalSummaryDraft, client=client,
+                               config=cfg)
             draft = FunctionalSummaryDraft.model_validate(data)
             issues = check_content(draft, set(), ai=True)
             if issues:
                 fallback_reason, draft = "AI_UNSAFE_OUTPUT", None
                 log.warning("functional summary rejected: unsafe issues=%d first=%s", len(issues), issues[0])
             else:
-                provider, model = "claude", settings.anthropic_model
+                provider, model = "claude", cfg.model
         except ValidationError as e:
             fallback_reason, draft = "AI_INVALID_OUTPUT", None
             log.warning("functional summary rejected: invalid issues=%s", _error_list(e)[:3])

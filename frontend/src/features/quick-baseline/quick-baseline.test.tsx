@@ -66,7 +66,7 @@ describe("Quick baseline", () => {
     expect(document.documentElement.dir).toBe(locale === "en" ? "ltr" : "rtl");
   });
 
-  it("needs exactly 3 main strengths before it can be marked as enough, then offers Create baseline", async () => {
+  it("needs exactly 3 main strengths and 3 things to remember before it can be marked as enough, then offers Create baseline", async () => {
     const bodies: Record<string, unknown>[] = [];
     let posted = 0;
     mockFetch({
@@ -96,6 +96,12 @@ describe("Quick baseline", () => {
     // A 4th cannot be added.
     expect((within(form).getByRole("button", { name: /Good memory/ }) as HTMLButtonElement).disabled).toBe(true);
     fireEvent.change(within(form).getByRole("textbox", { name: "Thing to remember 1" }), { target: { value: "Likes a quiet corner" } });
+    // 3 strengths but only 1 thing to remember: still not enough (PQ-TCH-03 is 3 + 3).
+    expect(within(form).getByText(/Write exactly 3 things to remember/)).toBeTruthy();
+    expect((screen.getByTestId("qb-save") as HTMLButtonElement).disabled).toBe(true);
+    fireEvent.change(within(form).getByRole("textbox", { name: "Thing to remember 2" }), { target: { value: "Brother in class B" } });
+    fireEvent.change(within(form).getByRole("textbox", { name: "Thing to remember 3" }), { target: { value: "Needs a heads-up" } });
+    expect(within(form).queryByText(/Write exactly 3 things to remember/)).toBeNull();
     fireEvent.click(screen.getByTestId("qb-save"));
 
     await waitFor(() => expect(bodies).toHaveLength(1));
@@ -105,13 +111,55 @@ describe("Quick baseline", () => {
       status: "sufficient",
       data: {
         main_strengths: [{ key: "imagination" }, { key: "curiosity" }, { key: "creativity" }],
-        remember: [{ text: "Likes a quiet corner" }],
+        remember: [{ text: "Likes a quiet corner" }, { text: "Brother in class B" }, { text: "Needs a heads-up" }],
       },
     });
 
     fireEvent.click(await screen.findByTestId("qb-create-baseline"));
     await waitFor(() => expect(posted).toBe(1));
     await waitFor(() => expect(router.state.location.pathname).toBe("/children/c1"));
+  });
+
+  it("types into line 2 while line 1 is empty without moving the text", async () => {
+    const bodies: Record<string, unknown>[] = [];
+    mockFetch({
+      "GET /api/children/c1/profile": { body: profile() },
+      "GET /api/children/c1": { body: child },
+      "PATCH /api/children/c1/profile": (init) => {
+        const body = JSON.parse(String(init?.body)) as Record<string, unknown>;
+        bodies.push(body);
+        return { body: profile(body.data as Record<string, unknown>) };
+      },
+    });
+    renderApp({ routes, url: "/children/c1/quick-baseline", user: teacher, options });
+    const form = await screen.findByTestId("quick-baseline-form");
+    const line = (n: number) => within(form).getByRole("textbox", { name: `Thing to remember ${n}` }) as HTMLInputElement;
+    fireEvent.change(line(2), { target: { value: "L" } });
+    fireEvent.change(line(2), { target: { value: "Likes" } });
+    expect(line(1).value).toBe("");
+    expect(line(2).value).toBe("Likes");
+    fireEvent.change(line(1), { target: { value: "First" } });
+    fireEvent.change(line(1), { target: { value: "" } });
+    expect(line(2).value).toBe("Likes"); // clearing line 1 does not shift the others
+    fireEvent.click(screen.getByTestId("qb-save"));
+    await waitFor(() => expect(bodies).toHaveLength(1));
+    expect((bodies[0]!.data as { remember: unknown }).remember).toEqual([{ text: "Likes" }]);
+  });
+
+  it("explains a server refusal of the 3 things to remember", async () => {
+    const three = [{ key: "imagination" }, { key: "curiosity" }, { key: "creativity" }];
+    mockFetch({
+      "GET /api/children/c1/profile": { body: profile({ main_strengths: three, remember: [{ text: "a" }, { text: "b" }, { text: "c" }] }, "sufficient") },
+      "GET /api/children/c1": { body: child },
+      "PATCH /api/children/c1/profile": {
+        status: 400,
+        body: { error: { code: "VALIDATION", message: "x", details: [{ path: "data.remember", message: "Write 3 things to remember" }] } },
+      },
+    });
+    renderApp({ routes, url: "/children/c1/quick-baseline", user: teacher, options });
+    await screen.findByTestId("quick-baseline-form");
+    fireEvent.click(screen.getByTestId("qb-save"));
+    expect(await screen.findByText(/Write exactly 3 things to remember/)).toBeTruthy();
   });
 
   it("is staff only", async () => {
