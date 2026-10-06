@@ -84,5 +84,9 @@
   "notAnswered": "לא נענה",
   "notObserved": "טרם נצפה",
   "kindergarten": "גן",
-  "moreKindergartens": "ועוד {count}"
+  "moreKindergartens": "ועוד {count}",
+  "pages": "עמודים",
+  "pageOf": "עמוד {current} מתוך {total}",
+  "previousPage": "העמוד הקודם",
+  "nextPage": "העמוד הבא"
 }

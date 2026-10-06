@@ -1,3 +1,4 @@
+import { FitPager } from "@/components/ui/FitPager";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { Link, Navigate, useLocation, useParams } from "react-router";
 import {
@@ -270,11 +271,11 @@ export function Timeline({ childId }: { childId: string }) {
           />
         )
       ) : (
-        <div className="space-y-8">
+        <FitPager className="space-y-8" reserve={150}>
           {groups.map((g) => (
             <DayGroup key={g.key} at={g.at} items={g.items} childId={childId} />
           ))}
-        </div>
+        </FitPager>
       )}
 
       {error && (

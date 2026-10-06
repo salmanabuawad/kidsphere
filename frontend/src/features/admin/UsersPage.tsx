@@ -1,3 +1,4 @@
+import { FitPager } from "@/components/ui/FitPager";
 import { useMemo, useState } from "react";
 import { KeyRound, Pencil, Plus, Search, UserCheck, UserX } from "lucide-react";
 import { UsersIcon } from "@/icons";
@@ -40,7 +41,7 @@ function UserRow({
 }) {
   const { t } = useI18n();
   return (
-    <li className="flex flex-wrap items-center gap-x-4 gap-y-3 px-4 py-3.5 sm:px-5" data-testid={`user-row-${user.email}`}>
+    <div className="flex flex-wrap items-center gap-x-4 gap-y-3 px-4 py-3.5 sm:px-5" data-testid={`user-row-${user.email}`}>
       <div className="flex min-w-0 flex-1 basis-60 items-center gap-3">
         <Avatar name={user.name} className={user.is_active ? undefined : "opacity-50"} />
         <div className="min-w-0">
@@ -77,7 +78,7 @@ function UserRow({
           </Button>
         )}
       </div>
-    </li>
+    </div>
   );
 }
 
@@ -171,7 +172,7 @@ export function UsersPage() {
         />
       ) : (
         <Card>
-          <ul className="divide-y divide-line">
+          <FitPager as="ul" className="divide-y divide-line" reserve={120}>
             {shown.map((u) => (
               <UserRow
                 key={u.id}
@@ -182,7 +183,7 @@ export function UsersPage() {
                 onToggleActive={() => (u.is_active ? setDeactivating(u) : void setActive(u, true))}
               />
             ))}
-          </ul>
+          </FitPager>
         </Card>
       )}
 

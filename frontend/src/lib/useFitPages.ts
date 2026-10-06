@@ -14,7 +14,7 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react
  * between the container's top and the window's bottom minus ``reserve`` (the sticky action
  * bar). A block taller than the space gets a page of its own.
  */
-export function useFitPages(count: number, { reserve = 120, gap = 24 }: { reserve?: number; gap?: number } = {}) {
+export function useFitPages(count: number, { reserve = 120 }: { reserve?: number } = {}) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const items = useRef<(HTMLElement | null)[]>([]);
   const [measuring, setMeasuring] = useState(true);
@@ -40,30 +40,31 @@ export function useFitPages(count: number, { reserve = 120, gap = 24 }: { reserv
     if (!measuring) return;
     const top = containerRef.current ? containerRef.current.getBoundingClientRect().top + window.scrollY : 0;
     const available = Math.max(200, window.innerHeight - top - reserve);
+    // Positions, not just heights, so grids (cards side by side) page by rows.
     const out: number[][] = [];
     let current: number[] = [];
-    let used = 0;
+    let pageTop: number | null = null;
     for (let i = 0; i < count; i++) {
-      const h = items.current[i]?.offsetHeight ?? 0;
-      if (h === 0) {
-        current.push(i); // a hidden (not shown) question takes no room
+      const el = items.current[i];
+      const rect = el && el.offsetHeight > 0 ? el.getBoundingClientRect() : null;
+      if (!rect) {
+        current.push(i); // a hidden (not shown) block takes no room
         continue;
       }
-      const need = used === 0 ? h : used + gap + h;
-      if (need > available && current.some((j) => (items.current[j]?.offsetHeight ?? 0) > 0)) {
+      if (pageTop === null) pageTop = rect.top;
+      if (rect.bottom - pageTop > available && current.some((j) => (items.current[j]?.offsetHeight ?? 0) > 0)) {
         out.push(current);
         current = [i];
-        used = h;
+        pageTop = rect.top;
       } else {
         current.push(i);
-        used = need;
       }
     }
     if (current.length || out.length === 0) out.push(current);
     setPages(out);
     setPage((p) => Math.min(p, out.length - 1));
     setMeasuring(false);
-  }, [measuring, count, reserve, gap]);
+  }, [measuring, count, reserve]);
 
   const itemRef = useCallback((i: number) => (el: HTMLElement | null) => {
     items.current[i] = el;

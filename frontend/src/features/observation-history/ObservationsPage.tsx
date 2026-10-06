@@ -1,3 +1,4 @@
+import { FitPager } from "@/components/ui/FitPager";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { Link, useLocation, useParams } from "react-router";
 import { ArrowRight, MessageSquareQuote, Zap } from "lucide-react";
@@ -126,11 +127,11 @@ function ObservationHistory({ childId }: { childId: string }) {
           />
         )
       ) : (
-        <ol className="space-y-3" data-testid="observation-list">
+        <FitPager as="ol" className="space-y-3" testId="observation-list" reserve={150}>
           {rows.map((o) => (
             <ObservationCard key={o.id} childId={childId} observation={o} back={search} />
           ))}
-        </ol>
+        </FitPager>
       )}
 
       {error && (
@@ -211,7 +212,7 @@ function ObservationCard({ childId, observation: o, back }: { childId: string; o
   const { formatDate } = useFormat();
   const edited = isEdited(o);
   return (
-    <li data-testid="observation-row" data-source={o.source}>
+    <div data-testid="observation-row" data-source={o.source}>
       <article className="rounded-lg border border-line bg-surface p-4">
         <header className="mb-1 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5">
           <span className="font-semibold text-ink" dir="auto">
@@ -253,6 +254,6 @@ function ObservationCard({ childId, observation: o, back }: { childId: string; o
           </Link>
         </footer>
       </article>
-    </li>
+    </div>
   );
 }

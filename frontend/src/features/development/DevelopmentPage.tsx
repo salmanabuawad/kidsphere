@@ -2,7 +2,7 @@ import { useState, type ReactNode } from "react";
 import { useLocation, useNavigate, useParams } from "react-router";
 import { ClipboardCheck, Flag, History, Lightbulb, ListChecks, Plus, Sparkles } from "lucide-react";
 import { CurrentFocusIcon, DevelopmentIcon, TimelineIcon } from "@/icons";
-import { Alert, Badge, Button, ButtonLink, Card, CardBody, CardHeader, Chip, Dialog, EmptyState, Skeleton } from "@/components/ui";
+import { Alert, Badge, Button, ButtonLink, Card, CardBody, CardHeader, Chip, Dialog, EmptyState, FitPager, Skeleton } from "@/components/ui";
 import { ProvenanceBadges } from "@/components/source";
 import { pick } from "@/i18n/config";
 import { useI18n } from "@/i18n/I18nProvider";
@@ -98,7 +98,7 @@ function Development({ childId }: { childId: string }) {
   const latest = reviews.data?.reviews[0];
 
   return (
-    <div className="space-y-6">
+    <FitPager className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
           <h2 className="font-display text-title flex items-center gap-3 font-semibold text-ink">
@@ -175,7 +175,7 @@ function Development({ childId }: { childId: string }) {
           </div>
         }
       />
-    </div>
+    </FitPager>
   );
 }
 

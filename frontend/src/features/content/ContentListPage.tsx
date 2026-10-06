@@ -6,7 +6,7 @@ import { useState } from "react";
 import { Link, useParams } from "react-router";
 import { ChevronDown, ChevronRight, Plus } from "lucide-react";
 import { PackIcon, PresentIcon } from "@/icons";
-import { Alert, Badge, Button, ButtonLink, EmptyState, Skeleton } from "@/components/ui";
+import { Alert, Badge, Button, ButtonLink, EmptyState, FitPager, Skeleton } from "@/components/ui";
 import { ChildLayout } from "@/features/children";
 import { useI18n } from "@/i18n/I18nProvider";
 import { paths } from "@/lib/paths";
@@ -64,7 +64,7 @@ export function ContentList({ childId }: { childId: string }) {
           }
         />
       ) : (
-        <>
+        <FitPager className="space-y-8">
           {STATUS_ORDER.filter((s) => s !== "archived").map((s) => {
             const list = byStatus(s);
             if (list.length === 0) return null;
@@ -78,7 +78,7 @@ export function ContentList({ childId }: { childId: string }) {
               {showArchived && <StatusSection status="archived" items={archived} />}
             </section>
           )}
-        </>
+        </FitPager>
       )}
     </div>
   );

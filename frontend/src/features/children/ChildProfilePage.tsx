@@ -2,7 +2,7 @@ import { useState, type ReactNode } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router";
 import { ArrowRight, ClipboardCheck, ClipboardList, HeartHandshake, Lightbulb, Lock, MessageCircleQuestion, Pencil, PencilLine, Phone, Plus, Utensils } from "lucide-react";
 import { ProvenanceBadge, ProvenanceBadges, type ProvenanceEntry } from "@/components/source";
-import { Alert, Badge, Button, ButtonLink, Card, CardBody, CardHeader, Chip, NumeralBlock, PageSkeleton } from "@/components/ui";
+import { Alert, Badge, Button, ButtonLink, Card, CardBody, CardHeader, Chip, FitPager, NumeralBlock, PageSkeleton } from "@/components/ui";
 import {
   AttentionIcon,
   ContentIcon,
@@ -108,7 +108,7 @@ function StaffOverview({ child }: { child: ChildStaffView }) {
   const summary = typeof child.current_understanding?.summary === "string" ? child.current_understanding.summary : null;
 
   return (
-    <div className="space-y-5">
+    <FitPager className="space-y-5">
       <ActionBar childId={child.id} />
 
       {(data.heart || data.describeWords.length > 0) && <HeartCard data={data} name={displayName(child)} />}
@@ -179,7 +179,7 @@ function StaffOverview({ child }: { child: ChildStaffView }) {
       )}
 
       <PromptsCard child={child} data={data} cycleId={assessments.data?.current?.id ?? null} />
-    </div>
+    </FitPager>
   );
 }
 

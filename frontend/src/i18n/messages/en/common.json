@@ -81,5 +81,9 @@
   "notAnswered": "Not answered",
   "notObserved": "Not observed yet",
   "kindergarten": "Kindergarten",
-  "moreKindergartens": "and {count} more"
+  "moreKindergartens": "and {count} more",
+  "pages": "Pages",
+  "pageOf": "Page {current} of {total}",
+  "previousPage": "Previous page",
+  "nextPage": "Next page"
 }

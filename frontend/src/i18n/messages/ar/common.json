@@ -93,5 +93,9 @@
   "notAnswered": "لم تتم الإجابة",
   "notObserved": "لم يُلاحَظ بعد",
   "kindergarten": "الروضة",
-  "moreKindergartens": "و{count} أخرى"
+  "moreKindergartens": "و{count} أخرى",
+  "pages": "الصفحات",
+  "pageOf": "صفحة {current} من {total}",
+  "previousPage": "الصفحة السابقة",
+  "nextPage": "الصفحة التالية"
 }

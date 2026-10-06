@@ -12,3 +12,4 @@ export { FullPageSpinner, PageSkeleton, Skeleton, Spinner } from "./Spinner";
 export { Table } from "./Table";
 export { TabNav, Tabs, type TabItem } from "./Tabs";
 export { Toaster, toast, type ToastTone } from "./Toast";
+export { FitPager } from "./FitPager";

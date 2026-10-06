@@ -2,7 +2,7 @@ import { useMemo, useState, type ReactNode } from "react";
 import { Link } from "react-router";
 import { ArchiveRestore, Calendar, PencilLine, Plus, Search } from "lucide-react";
 import { useAuth } from "@/auth/AuthProvider";
-import { Alert, Badge, Button, ButtonLink, cardTappable, Checkbox, Chip, EmptyState, Input, PageHeader, PageSkeleton, Select } from "@/components/ui";
+import { Alert, Badge, Button, ButtonLink, cardTappable, Checkbox, Chip, EmptyState, FitPager, Input, PageHeader, PageSkeleton, Select } from "@/components/ui";
 import { AttentionIcon, ChildrenIcon, ContentIcon, StrengthsIcon } from "@/icons";
 import { useI18n } from "@/i18n/I18nProvider";
 import { useFormat } from "@/lib/format";
@@ -171,14 +171,14 @@ export function ChildListPage() {
           }
         />
       ) : (
-        <ul className="grid gap-3 md:grid-cols-2 xl:grid-cols-3" data-testid="child-cards">
+        <FitPager as="ul" className="grid gap-3 md:grid-cols-2 xl:grid-cols-3" testId="child-cards">
           {visible.map((c, i) => (
             // Cards settle in one after another, once (a short stagger, capped).
-            <li key={c.id} className="animate-placed" style={{ animationDelay: `${Math.min(i, 8) * 50}ms` }}>
+            <div key={c.id} className="animate-placed h-full" style={{ animationDelay: `${Math.min(i, 8) * 50}ms` }}>
               <ChildListCard child={c} />
-            </li>
+            </div>
           ))}
-        </ul>
+        </FitPager>
       )}
     </div>
   );

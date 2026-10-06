@@ -1,3 +1,4 @@
+import { FitPager } from "@/components/ui/FitPager";
 import { useMemo, useState } from "react";
 import { ChevronDown, Pencil, Plus, Trash2, UserRoundCog } from "lucide-react";
 import { ChildrenIcon, ClassesIcon, ParentHomeIcon } from "@/icons";
@@ -207,7 +208,7 @@ export function ClassesPage() {
           }
         />
       ) : (
-        <div className="space-y-8">
+        <FitPager className="space-y-8">
           {groups.map((g) => (
             <section key={g.kindergarten} aria-label={g.kindergarten}>
               <SectionTitle icon={<KindergartenTile theme={g.classes[0]?.theme} className="size-8 text-base" />}>
@@ -230,7 +231,7 @@ export function ClassesPage() {
               </div>
             </section>
           ))}
-        </div>
+        </FitPager>
       )}
 
       <ClassDialog
