@@ -1,4 +1,6 @@
-"""WP-08: quick observations (create, idempotency, validation, scope, edit, audit)."""
+"""WP-08: quick observations (create, idempotency, validation, scope, edit, audit);
+WP2-TO: structured observations (D14 stages, domains, attributes, versions, filters)."""
+import uuid
 from datetime import datetime, timedelta, timezone
 
 from sqlalchemy import func, select
@@ -162,3 +164,171 @@ def test_request_id_for_another_child_is_rejected(teacher_client, make_child, kl
     r = teacher_client.post(url(second), json={"observation": "x", "client_request_id": "same"})
     assert r.status_code == 409
     assert count(db, second) == 0
+
+
+# --------------------------------------------------------------------------- WP2-TO: structured observations (D14)
+
+
+def versions_of(db, obs_id):
+    from app.models import RecordVersion
+
+    db.expire_all()
+    return db.scalars(select(RecordVersion).where(RecordVersion.entity_type == "observation",
+                                                  RecordVersion.entity_id == obs_id).order_by(RecordVersion.seq)).all()
+
+
+def test_structured_stages_domains_and_attributes_round_trip(teacher_client, child, db):
+    from app.services import history
+
+    focus = make_focus(db, child)
+    history.record(db, child_id=child.id, entity_type="focus_area", entity_id=focus.id, data={"title": "v1"},
+                   user=None, via="manual")
+    history.record(db, child_id=child.id, entity_type="focus_area", entity_id=focus.id, data={"title": "v2"},
+                   user=None, via="manual")
+    db.commit()
+    body = {
+        "observation": "Got up from group time after about 5 minutes",
+        "context": "group_time",
+        "domains": ["executive_function", "social", "executive_function"],
+        "attributes": {"frequency": "often", "duration_minutes": 5, "intensity": "moderate"},
+        "details": {
+            "what_i_see": "Stood up and walked to the window",
+            "when_detail": {"time": "09:30", "activity": "group_time", "activity_text": "Story", "with_whom": "Lina",
+                            "before_event": "Snack", "after_event": ""},
+            "needs": {"helps": ["movement", {"key": "visual_support"}, {"custom": "A cushion"}, "movement"],
+                      "text": "A short break"},
+            "what_we_did": "Gave him the page-turner role",
+            "plan_ref": {"focus_area_id": str(focus.id)},
+            "did_it_change": "partly",
+            "what_changed": "Stayed until the end of the story",
+            "documentation": "Second time this week",
+        },
+    }
+    r = teacher_client.post(url(child), json=body)
+    assert r.status_code == 201, r.text
+    obs = r.json()["observation"]
+    assert obs["domains"] == ["executive_function", "social"]
+    assert obs["attributes"] == {"frequency": "often", "duration_minutes": 5, "intensity": "moderate"}
+    assert obs["details"] == {
+        "what_i_see": "Stood up and walked to the window",
+        "when_detail": {"time": "09:30", "activity": "group_time", "activity_text": "Story", "with_whom": "Lina",
+                        "before_event": "Snack"},
+        "needs": {"helps": [{"key": "movement"}, {"key": "visual_support"}, {"custom": "A cushion"}],
+                  "text": "A short break"},
+        "what_we_did": "Gave him the page-turner role",
+        "plan_ref": {"focus_area_id": str(focus.id), "version_seq": 2},
+        "did_it_change": "partly",
+        "what_changed": "Stayed until the end of the story",
+        "documentation": "Second time this week",
+    }
+    assert obs["version_count"] == 1
+    # The stored document can be sent back as it came (PUT keeps the shape).
+    again = teacher_client.put(f"/api/observations/{obs['id']}", json={"details": obs["details"]})
+    assert again.status_code == 200, again.text
+    assert again.json()["observation"]["details"] == obs["details"]
+    assert again.json()["observation"]["version_count"] == 1  # nothing changed: no new version
+
+
+def test_domains_default_to_the_area(teacher_client, child):
+    r = teacher_client.post(url(child), json={"observation": "Climbed the frame", "area": "motor"})
+    assert r.json()["observation"]["domains"] == ["gross_motor", "fine_motor"]
+    r = teacher_client.post(url(child), json={"observation": "Climbed", "area": "motor", "domains": []})
+    assert r.json()["observation"]["domains"] == []
+    r = teacher_client.post(url(child), json={"observation": "Smiled"})
+    assert r.json()["observation"]["domains"] == []
+
+
+def test_structured_validation(teacher_client, child, other_child, db):
+    other_focus = make_focus(db, other_child, "Other")
+    bad = [
+        {"observation": "x", "domains": ["attention"]},
+        {"observation": "x", "domains": ["strengths"]},
+        {"observation": "x", "attributes": {"frequency": "always_and_forever"}},
+        {"observation": "x", "attributes": {"duration_minutes": 0}},
+        {"observation": "x", "attributes": {"duration_minutes": 91}},
+        {"observation": "x", "attributes": {"intensity": "extreme"}},
+        {"observation": "x", "attributes": {"score": 3}},
+        {"observation": "x", "details": {"when_detail": {"activity": "party"}}},
+        {"observation": "x", "details": {"when_detail": {"time": "x" * 61}}},
+        {"observation": "x", "details": {"needs": {"helps": ["magic"]}}},
+        {"observation": "x", "details": {"needs": {"helps": [{"key": "magic"}]}}},
+        {"observation": "x", "details": {"what_changed": "x" * 1001}},
+        {"observation": "x", "details": {"documentation": "x" * 2001}},
+        {"observation": "x", "details": {"plan_ref": {"focus_area_id": str(other_focus.id)}}},
+        {"observation": "x", "details": {"plan_ref": {"version_seq": 1}}},
+    ]
+    for body in bad:
+        r = teacher_client.post(url(child), json=body)
+        assert r.status_code == 400, (body, r.text)
+        assert r.json()["error"]["code"] == "VALIDATION"
+    assert count(db, child) == 0
+
+
+def test_create_and_every_change_write_versions(teacher_client, admin_client, parent_client, other_teacher_client,
+                                                teacher, child, db):
+    created = teacher_client.post(url(child), json={"observation": "First words", "context": "free_play"}).json()["observation"]
+    put = f"/api/observations/{created['id']}"
+    assert teacher_client.put(put, json={"observation": "First words to Omar", "domains": ["language"]}).status_code == 200
+    assert teacher_client.put(put, json={"observation": "First words to Omar"}).status_code == 200  # no change
+    assert admin_client.put(put, json={"details": {"what_changed": "Said it again"}}).status_code == 200
+    rows = versions_of(db, uuid.UUID(created["id"]))
+    assert [v.seq for v in rows] == [1, 2, 3]
+    assert [v.via for v in rows] == ["manual", "manual", "manual"]
+    assert rows[0].data["observation"] == "First words" and rows[0].data["domains"] == []
+    assert rows[1].data["observation"] == "First words to Omar" and rows[1].data["domains"] == ["language"]
+    assert rows[2].data["details"] == {"what_changed": "Said it again"}
+    assert rows[0].changed_by == teacher.id and rows[2].changed_role == "admin"
+    assert "id" not in rows[0].data and "created_at" not in rows[0].data
+
+    r = teacher_client.get(f"{put}/versions")
+    assert r.status_code == 200, r.text
+    got = r.json()
+    assert got["observation_id"] == created["id"]
+    assert [v["seq"] for v in got["versions"]] == [1, 2, 3]
+    assert got["versions"][0]["data"]["observation"] == "First words"
+    assert got["versions"][1]["changed_by_name"] == teacher.name
+    assert teacher_client.get(url(child)).json()["observations"][0]["version_count"] == 3
+
+    for c in (parent_client, other_teacher_client):
+        assert c.get(f"{put}/versions").status_code == 404
+    assert teacher_client.get(f"/api/observations/{uuid.uuid4()}/versions").status_code == 404
+    db.expire_all()
+    actions = [a for (a,) in db.execute(select(AuditLog.action).order_by(AuditLog.id)).all()]
+    assert actions == ["observation.create", "observation.update", "observation.update"]
+
+
+def test_list_filters(teacher_client, child, make_observation, teacher, db):
+    focus = make_focus(db, child)
+
+    def day(n):
+        return datetime(2026, 9, n, 9, 0, tzinfo=timezone.utc)
+
+    make_observation(child, "A", teacher, observed_at=day(1), context="arrival", domains=["emotional"])
+    make_observation(child, "B", teacher, observed_at=day(10), context="yard", domains=["gross_motor", "social"],
+                     focus_area_id=focus.id)
+    make_observation(child, "C", teacher, observed_at=datetime(2026, 9, 20, 23, 59, tzinfo=timezone.utc),
+                     context="yard", domains=["social"])
+    make_observation(child, None, teacher, observed_at=day(25), source="content_feedback", domains=["social"])
+
+    def ids(**params):
+        r = teacher_client.get(url(child), params=params)
+        assert r.status_code == 200, r.text
+        return {o["observation"] or "D" for o in r.json()["observations"]}
+
+    assert ids() == {"A", "B", "C", "D"}
+    assert ids(date_from="2026-09-10") == {"B", "C", "D"}
+    assert ids(date_to="2026-09-20") == {"A", "B", "C"}
+    assert ids(date_from="2026-09-10", date_to="2026-09-10") == {"B"}
+    assert ids(domain="social") == {"B", "C", "D"}
+    assert ids(domain="emotional") == {"A"}
+    assert ids(domain="language") == set()
+    assert ids(context="yard") == {"B", "C"}
+    assert ids(source="content_feedback") == {"D"}
+    assert ids(source="quick", domain="social") == {"B", "C"}
+    assert ids(focus_area_id=str(focus.id)) == {"B"}
+    assert ids(domain="social", context="yard", date_from="2026-09-15") == {"C"}
+    for params in ({"domain": "strengths"}, {"context": "party"}, {"source": "parent"}, {"date_from": "yesterday"},
+                   {"date_from": "2026-09-10", "date_to": "2026-09-01"}):
+        r = teacher_client.get(url(child), params=params)
+        assert r.status_code == 400, params
+        assert r.json()["error"]["code"] == "VALIDATION"

@@ -2,7 +2,9 @@ import { fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { mockFetch, renderApp, teacher, type Handler } from "@/test/utils";
 import { adam, options } from "@/features/observations/testData";
-import type { CurrentUnderstandingResponse, DraftContext, Review, ReviewInput, ReviewsResponse, SuggestResponse } from "./api";
+import { planOptions } from "@/features/focus/testData";
+import arDevelopment from "@/i18n/messages/ar/development.json";
+import type { CurrentUnderstandingResponse, DraftContext, FunctionalSummary, Review, ReviewInput, ReviewsResponse, SuggestResponse, SummariesResponse, SummaryInput } from "./api";
 import { blankDraft, buildPayload, projectedActive } from "./ReviewPage";
 import { routes } from "./routes";
 
@@ -109,6 +111,7 @@ function developmentHandlers(over: Record<string, Handler> = {}): Record<string,
       body: { latest: { id: "b1", created_at: "2026-09-01T10:00:00Z", created_by: { id: "u1", name: "Rana" }, baseline_data: {} }, earlier: [{ id: "b0", created_at: "2026-08-01T10:00:00Z", created_by: { id: "u1", name: "Rana" } }] },
     },
     "GET /api/children/c1/development-reviews": { body: { reviews: [review], context } satisfies ReviewsResponse },
+    "GET /api/children/c1/functional-summaries": { body: { latest_approved: null, drafts: [], history: [], ai_drafts: {} } satisfies SummariesResponse },
     ...over,
   };
 }
@@ -324,5 +327,262 @@ describe("review payload helpers", () => {
     expect(p.focus_review[0]).toMatchObject({ decision: "edit", edit: { title: "Joining play with one friend", description: null } });
     expect(p.focus_review[1]).toEqual({ decision: "create", create: { category: "social", title: "Sharing toys" } });
     expect(p.baseline_validation.every((v) => v.status === "needs_more_observation")).toBe(true);
+  });
+});
+
+// --------------------------------------------------------------------------- WP2-PLAN: follow-up, summary, understanding over time
+
+const summaryRow = (over: Partial<FunctionalSummary>): FunctionalSummary => ({
+  id: "s1",
+  child_id: "c1",
+  supersedes_id: null,
+  superseded_by: null,
+  review_id: null,
+  assessment_id: null,
+  general_description: "Adam enjoys building with one friend.",
+  main_strengths: { items: [{ key: "building" }], text: null },
+  main_needs: { items: ["Starting shared play"], text: null },
+  adaptations: "Start at the block corner.",
+  follow_up_with_parents: "Share the building game at home.",
+  team_recommendations: "Offer a building role at group time.",
+  source: "manual",
+  ai_suggestion_id: null,
+  status: "approved",
+  approved_by: { id: "u1", name: "Rana" },
+  approved_at: "2026-10-02T10:00:00Z",
+  created_by: { id: "u1", name: "Rana" },
+  created_at: "2026-10-02T09:00:00Z",
+  provenance: [{ label: "teacher_approved" }],
+  ...over,
+});
+
+describe("Review follow-up (Domain 16)", () => {
+  it("starts empty even after a suggestion and saves every follow-up field with the suggestion id", async () => {
+    let saved: ReviewInput | null = null;
+    mockFetch(
+      developmentHandlers({
+        "POST /api/children/c1/development-reviews/suggest": { body: { ...suggestion, suggestion_id: "ais-1" } },
+        "POST /api/children/c1/development-reviews": (init) => {
+          saved = JSON.parse(String(init?.body)) as ReviewInput;
+          return {
+            status: 201,
+            body: { review, current_understanding: understanding.current_understanding, warnings: [{ code: "WORDING", path: "follow_up.involvement.note", message: "x" }] },
+          };
+        },
+      }),
+    );
+    renderApp({ routes, url: "/children/c1/review/new", user: teacher, options: planOptions });
+    fireEvent.click(await screen.findByRole("button", { name: "Suggest a summary" }));
+    const step = await screen.findByTestId("follow-up-step");
+    expect((within(step).getByLabelText(/When we will look again/) as HTMLInputElement).value).toBe("");
+    expect(within(step).queryAllByRole("radio", { checked: true })).toHaveLength(0);
+
+    fireEvent.change(within(step).getByLabelText(/When we will look again/), { target: { value: "2026-12-15" } });
+    const improvement = within(step).getByRole("radiogroup", { name: "Has anything changed overall?" });
+    fireEvent.click(within(improvement).getByRole("radio", { name: /Partial improvement/ }));
+    fireEvent.change(within(step).getByLabelText(/Tell a bit more/), { target: { value: "Joins one friend" } });
+    fireEvent.click(within(step).getByRole("button", { name: /Social/ }));
+    fireEvent.click(within(step).getByRole("button", { name: "Joining group play" }));
+    fireEvent.change(within(step).getByLabelText("What worked well?"), { target: { value: "Building first" } });
+    fireEvent.change(within(step).getByLabelText("What needs to change?"), { target: { value: "Shorter group time" } });
+    const involvement = within(step).getByRole("radiogroup", { name: "Next step with the family or the team" });
+    fireEvent.click(within(involvement).getByRole("radio", { name: "Involve a specialist if needed" }));
+    fireEvent.change(within(step).getByLabelText(/Details/), { target: { value: "Talk with the family first" } });
+
+    fireEvent.click(screen.getByRole("button", { name: "Approve and save" }));
+    await waitFor(() => expect(saved).not.toBeNull());
+    const body = saved as unknown as ReviewInput;
+    expect(body.ai_suggestion_id).toBe("ais-1");
+    expect(body.follow_up).toEqual({
+      reassessment_on: "2026-12-15",
+      improvement: { level: "partial", note: "Joins one friend" },
+      areas: { domains: ["social"], focus_area_ids: ["f1"] },
+      what_worked: "Building first",
+      what_to_change: "Shorter group time",
+      involvement: { key: "referral_as_needed", note: "Talk with the family first" },
+    });
+    expect(await screen.findByText(/The details of the next step use words we usually avoid/)).toBeTruthy();
+  });
+
+  it("sends no follow-up when it was left empty", () => {
+    const d = blankDraft(context, understanding.current_understanding);
+    d.understanding.summary = "Summary";
+    expect(buildPayload(d).follow_up).toBeUndefined();
+    expect(buildPayload(d).ai_suggestion_id).toBeUndefined();
+  });
+});
+
+describe("Development tab: understanding over time, summary, original baseline", () => {
+  function handlers(summaries: SummariesResponse, extra: Record<string, Handler> = {}) {
+    return developmentHandlers({
+      "GET /api/children/c1/baseline": {
+        body: {
+          latest: {
+            id: "b1",
+            created_at: "2026-09-01T10:00:00Z",
+            created_by: { id: "u1", name: "Rana" },
+            original: false,
+            baseline_data: { strengths: [{ key: "building" }, { custom: "Tells long stories" }], interests: [], what_helps: [], focus_areas: [] },
+          },
+          earlier: [{ id: "b0", created_at: "2026-08-01T10:00:00Z", created_by: { id: "u1", name: "Rana" }, original: true }],
+          original_id: "b0",
+          count: 2,
+        },
+      },
+      "GET /api/children/c1/baselines/b0": {
+        body: {
+          baseline: {
+            id: "b0",
+            child_id: "c1",
+            created_at: "2026-08-01T10:00:00Z",
+            created_by: { id: "u1", name: "Rana" },
+            original: true,
+            latest: false,
+            number: 1,
+            count: 2,
+            summary: "Adam appears to enjoy cars.",
+            baseline_data: {
+              strengths: [{ key: "building" }, { key: "imagination" }],
+              interests: [],
+              what_helps: [],
+              focus_areas: [{ id: "f1", title: "Joining group play", category: "social" }],
+            },
+          },
+        },
+      },
+      "GET /api/children/c1/functional-summaries": { body: summaries },
+      ...extra,
+    });
+  }
+
+  it("shows the understanding over time and compares the original baseline with the latest", async () => {
+    mockFetch(handlers({ latest_approved: null, drafts: [], history: [], ai_drafts: {} }));
+    renderApp({ routes, url: "/children/c1/development", user: teacher, options: planOptions });
+    const timeline = await screen.findByTestId("understanding-timeline");
+    await waitFor(() => expect(within(timeline).getAllByTestId("understanding-step")).toHaveLength(2));
+    const steps = within(timeline).getAllByTestId("understanding-step");
+    expect(steps[0]!.textContent).toContain("First picture (original baseline)");
+    expect(steps[0]!.textContent).toContain("Adam appears to enjoy cars.");
+    expect(steps[1]!.getAttribute("data-current")).toBe("true");
+    expect(within(steps[1]!).getByText("Teacher approved")).toBeTruthy();
+    expect(steps[1]!.textContent).toContain("Approved by Rana");
+
+    const compare = await screen.findByTestId("baseline-compare");
+    const original = within(compare).getByTestId("compare-original");
+    const latest = within(compare).getByTestId("compare-latest");
+    expect(within(original).getByText("Imagination").closest("li")!.getAttribute("data-marker")).toBe("gone");
+    expect(within(latest).getByText("Tells long stories").closest("li")!.getAttribute("data-marker")).toBe("new");
+    expect(within(latest).getByText("New since the original")).toBeTruthy();
+    expect(within(original).getByText("Joining group play")).toBeTruthy();
+    expect(screen.getAllByRole("link").some((a) => a.getAttribute("href") === "/children/c1/development/timeline")).toBe(true);
+    expect(document.body.textContent).not.toMatch(SCORING);
+  });
+
+  it("shows the approved summary and a draft, approves the draft and keeps the history", async () => {
+    let approved = 0;
+    const draft = summaryRow({
+      id: "s2",
+      supersedes_id: "s1",
+      status: "draft",
+      source: "ai_draft",
+      ai_suggestion_id: "ais-9",
+      approved_by: null,
+      approved_at: null,
+      provenance: [{ label: "ai_suggested" }],
+      general_description: "Adam builds with friends.",
+    });
+    mockFetch(
+      handlers(
+        { latest_approved: summaryRow({}), drafts: [draft], history: [draft, summaryRow({ superseded_by: "s2" })], ai_drafts: {} },
+        {
+          "POST /api/functional-summaries/s2/approve": () => {
+            approved += 1;
+            return { body: { summary: { ...draft, status: "approved" } } };
+          },
+        },
+      ),
+    );
+    renderApp({ routes, url: "/children/c1/development", user: teacher, options: planOptions });
+    const card = await screen.findByTestId("summary-card");
+    const approvedPart = await within(card).findByTestId("summary-approved");
+    expect(within(approvedPart).getByText("Teacher approved")).toBeTruthy();
+    expect(within(approvedPart).getByText(/Approved by Rana on/)).toBeTruthy();
+    expect(within(approvedPart).getByTestId("summary-main_needs").textContent).toContain("Starting shared play");
+    expect(within(approvedPart).getByTestId("summary-follow_up_with_parents").textContent).toContain("Share the building game at home.");
+    const draftPart = within(card).getByTestId("summary-draft");
+    expect(within(draftPart).getByText("AI suggested")).toBeTruthy();
+    expect(within(draftPart).getByText("Adam builds with friends.")).toBeTruthy();
+    fireEvent.click(within(draftPart).getByRole("button", { name: "Approve" }));
+    await waitFor(() => expect(approved).toBe(1));
+
+    fireEvent.click(within(card).getByRole("button", { name: "Earlier versions" }));
+    expect(within(card).getByTestId("summary-history").querySelectorAll("li")).toHaveLength(2);
+  });
+
+  it("drafts with AI, compares with the draft and saves a new version", async () => {
+    let posted: SummaryInput | null = null;
+    const aiDraft = {
+      general_description: "Adam enjoys building.",
+      main_strengths: { items: [{ key: "building" }], text: null },
+      main_needs: { items: ["Joining a group"], text: null },
+      adaptations: "One friend first.",
+      follow_up_with_parents: null,
+      team_recommendations: "Offer a role.",
+    };
+    mockFetch(
+      handlers(
+        { latest_approved: summaryRow({}), drafts: [], history: [summaryRow({})], ai_drafts: {} },
+        {
+          "POST /api/children/c1/functional-summaries/suggest": {
+            body: { draft: aiDraft, suggestion_id: "ais-2", provider: "template", is_template: true, possible_patterns: [], next_observation_questions: [] },
+          },
+          "POST /api/children/c1/functional-summaries": (init) => {
+            posted = JSON.parse(String(init?.body)) as SummaryInput;
+            return { status: 201, body: { summary: summaryRow({ id: "s3", status: "draft", source: "ai_draft", ai_suggestion_id: "ais-2" }) } };
+          },
+        },
+      ),
+    );
+    renderApp({ routes, url: "/children/c1/development", user: teacher, options: planOptions });
+    const card = await screen.findByTestId("summary-card");
+    await within(card).findByTestId("summary-approved");
+    fireEvent.click(within(card).getByRole("button", { name: "Draft with AI" }));
+    const general = (await screen.findByLabelText("General description")) as HTMLTextAreaElement;
+    expect(general.value).toBe("Adam enjoys building.");
+    expect(screen.getByText(/without the child's name/)).toBeTruthy();
+    fireEvent.change(general, { target: { value: "Adam enjoys building with one friend." } });
+    fireEvent.click(screen.getByRole("button", { name: "Compare with the AI draft" }));
+    expect(screen.getAllByTestId("ai-text")[0]!.textContent).toContain("Adam enjoys building.");
+    fireEvent.click(screen.getByRole("button", { name: "Save draft" }));
+    await waitFor(() => expect(posted).not.toBeNull());
+    expect(posted).toEqual({
+      general_description: "Adam enjoys building with one friend.",
+      main_strengths: { items: [{ key: "building" }], text: null },
+      main_needs: { items: ["Joining a group"], text: null },
+      adaptations: "One friend first.",
+      follow_up_with_parents: null,
+      team_recommendations: "Offer a role.",
+      source: "ai_draft",
+      ai_suggestion_id: "ais-2",
+      supersedes_id: "s1",
+    });
+  });
+
+  it("renders the new sections in Hebrew", async () => {
+    mockFetch(handlers({ latest_approved: summaryRow({}), drafts: [], history: [summaryRow({})], ai_drafts: {} }));
+    renderApp({ routes, url: "/children/c1/development", user: { ...teacher, language: "he" }, locale: "he", options: planOptions });
+    expect(await screen.findByText("ההבנה לאורך זמן")).toBeTruthy();
+    expect(await screen.findByText("סיכום קצר")).toBeTruthy();
+    expect(await screen.findByText("תמונת הפתיחה המקורית והאחרונה")).toBeTruthy();
+    expect(document.documentElement.dir).toBe("rtl");
+  });
+
+  it("renders the review follow-up in Arabic", async () => {
+    mockFetch(developmentHandlers());
+    renderApp({ routes, url: "/children/c1/review/new", user: { ...teacher, language: "ar" }, locale: "ar", options: planOptions });
+    fireEvent.click(await screen.findByRole("button", { name: arDevelopment.review.start.blank }));
+    expect(await screen.findByText("4. المتابعة")).toBeTruthy();
+    expect(screen.getByText("إشراك مختص عند الحاجة")).toBeTruthy();
+    expect(document.documentElement.dir).toBe("rtl");
   });
 });

@@ -10,7 +10,7 @@ import pytest
 from sqlalchemy import select
 
 from app.config import settings
-from app.models import AuditLog, ChildProfile, FocusArea, GeneratedContent, Observation
+from app.models import AuditLog, ChildProfile, FocusArea, GeneratedContent, Observation, RecordVersion
 
 KINDS = ("story", "video", "digital_game", "real_world_activity")
 MODES = ("growth_support", "strength_builder")
@@ -236,9 +236,16 @@ def test_context_uses_focus_observations_and_masks_classmates(teacher_client, ad
     db.commit()
     gi = generate(teacher_client, child, focus, kind="story")["content"]["generation_input"]
     assert gi["recent_observations"] == ["[child] asked [friend] to build a road."]
-    # strength_builder has no focus: the most recent observations are used
+    # strength_builder has no focus: only observations tagged with the strength's AI domains are
+    # sent (building → fine_motor, play), never unrelated recent ones (COVERAGE-MATRIX §7.3).
     gi = generate(teacher_client, child, mode="strength_builder", kind="story")["content"]["generation_input"]
-    assert len(gi["recent_observations"]) == 2
+    assert gi["recent_observations"] == [] and gi["domains"] == {}
+    db.add(Observation(child_id=child.id, observation="Adam built a tall tower with Omar.", domains=["fine_motor"],
+                       created_by=teacher.id))
+    db.commit()
+    gi = generate(teacher_client, child, mode="strength_builder", kind="story")["content"]["generation_input"]
+    assert list(gi["domains"]) == ["fine_motor"]
+    assert [o["text"] for o in gi["domains"]["fine_motor"]["observations"]] == ["[child] built a tall tower with [friend]."]
 
 
 def test_context_masks_the_kindergarten_and_the_adults(teacher_client, adam, db, teacher, make_child, make_class,
@@ -442,7 +449,8 @@ def test_delete_only_drafts_and_archive_from_any_status(teacher_client, adam, db
     assert teacher_client.post(f"/api/content/{used['id']}/approve").status_code == 200  # idempotent
     assert teacher_client.delete(f"/api/content/{draft['id']}").status_code == 204
     db.expire_all()
-    assert db.get(GeneratedContent, draft["id"]) is None
+    gone = db.get(GeneratedContent, draft["id"])  # a soft delete (OQ-5): the row stays, hidden everywhere
+    assert gone is not None and gone.deleted_at is not None and gone.status == "draft"
     assert teacher_client.get(f"/api/content/{draft['id']}").status_code == 404
 
     teacher_client.post(f"/api/content/{used['id']}/feedback", json={"result": "partly"})
@@ -555,3 +563,161 @@ def test_maya_spec_45_story_builder(teacher_client, maya):
     auto = generate(teacher_client, maya, mode="strength_builder", kind="digital_game",
                     target_strength="storytelling")["content"]
     assert auto["template"] == "story_builder"
+
+
+# --------------------------------------------------------------------------- history, soft delete, AI domains (WP2-AI)
+
+
+def versions(client, content_id, expect=200):
+    r = client.get(f"/api/content/{content_id}/versions")
+    assert r.status_code == expect, r.text
+    return r.json()["versions"] if expect == 200 else None
+
+
+def test_generate_edit_and_regenerate_each_add_a_version(teacher_client, adam, db):
+    """X-15: content is never overwritten; the AI draft and every edit stay in record_versions."""
+    child, focus = adam
+    c = generate(teacher_client, child, focus, kind="story")["content"]
+    first_title = c["title"]
+    (v1,) = versions(teacher_client, c["id"])
+    assert (v1["seq"], v1["via"], v1["entity_type"], v1["changed_by_name"]) == (1, "generated", "content", "Teacher")
+    assert v1["data"]["title"] == first_title and v1["data"]["content"]["title"] == first_title
+    assert v1["data"]["is_template"] is True and v1["data"]["generation_input"]["name"] == "Adam"
+
+    r = teacher_client.put(f"/api/content/{c['id']}", json={"title": "A garage for everyone"})
+    assert r.status_code == 200, r.text
+    # an unchanged save adds nothing
+    assert teacher_client.put(f"/api/content/{c['id']}", json={"title": "A garage for everyone"}).status_code == 200
+    r = teacher_client.post(f"/api/content/{c['id']}/regenerate", json={"instruction": "Use buses"})
+    assert r.status_code == 200, r.text
+    listed = versions(teacher_client, c["id"])
+    assert [(v["seq"], v["via"]) for v in listed] == [(3, "regenerated"), (2, "edited"), (1, "generated")]
+    assert listed[1]["data"]["title"] == "A garage for everyone" and listed[2]["data"]["title"] == first_title
+    assert listed[0]["data"]["variant"] == 1 and listed[0]["data"]["generation_input"]["instruction"] == "Use buses"
+
+    dup = teacher_client.post(f"/api/content/{c['id']}/duplicate").json()["content"]
+    assert [(v["seq"], v["via"]) for v in versions(teacher_client, dup["id"])] == [(1, "manual")]
+
+
+def test_pack_rows_each_get_a_version(teacher_client, adam, db):
+    child, focus = adam
+    items = generate(teacher_client, child, focus, kind="pack")["items"]
+    for item in items:
+        assert [v["via"] for v in versions(teacher_client, item["id"])] == ["generated"]
+
+
+def test_a_row_without_history_keeps_its_state_before_the_first_change(teacher_client, adam, db, teacher):
+    child, focus = adam
+    c = generate(teacher_client, child, focus, kind="real_world_activity")["content"]
+    original = db.get(GeneratedContent, c["id"])
+    old = GeneratedContent(child_id=child.id, focus_area_id=focus.id, mode="growth_support",
+                           content_type="real_world_activity", language="en", title="Old activity",
+                           content={**original.content, "title": "Old activity"}, status="approved",
+                           generation_input=original.generation_input, ai_provider="template",
+                           ai_model="kidsphere-template-1", is_template=True, created_by=teacher.id)
+    db.add(old)
+    db.commit()
+    r = teacher_client.put(f"/api/content/{old.id}", json={"title": "Old activity, renewed"})
+    assert r.status_code == 200, r.text
+    listed = versions(teacher_client, old.id)
+    assert [(v["seq"], v["via"], v["changed_role"]) for v in listed] == [(2, "edited", "teacher"), (1, "system", "system")]
+    assert listed[1]["data"]["title"] == "Old activity" and listed[1]["data"]["status"] == "approved"
+    assert listed[0]["data"]["status"] == "draft"
+
+
+def test_versions_are_staff_only(teacher_client, parent_client, other_teacher_client, adam, db):
+    child, focus = adam
+    c = generate(teacher_client, child, focus, kind="story")["content"]
+    approve(teacher_client, c["id"])
+    teacher_client.post(f"/api/content/{c['id']}/share", json={"shared": True})
+    assert parent_client.get(f"/api/content/{c['id']}").status_code == 200  # shared with the parent
+    versions(parent_client, c["id"], expect=404)
+    versions(other_teacher_client, c["id"], expect=404)
+    versions(teacher_client, "not-a-uuid", expect=404)
+
+
+def test_soft_deleted_drafts_disappear_everywhere(teacher_client, adam, db):
+    """OQ-5: DELETE keeps the row (deleted_at/deleted_by); lists, packs and every action hide it."""
+    child, focus = adam
+    items = generate(teacher_client, child, focus, kind="pack")["items"]
+    story, pack_id = items[0], items[0]["pack_id"]
+    assert teacher_client.delete(f"/api/content/{story['id']}").status_code == 204
+    db.expire_all()
+    row = db.get(GeneratedContent, story["id"])
+    assert row.deleted_at is not None and row.deleted_by is not None and row.status == "draft"
+    listed = teacher_client.get(f"/api/children/{child.id}/content").json()["content"]
+    assert story["id"] not in {c["id"] for c in listed} and len(listed) == len(items) - 1
+    assert story["id"] not in {c["id"] for c in teacher_client.get(f"/api/packs/{pack_id}").json()["items"]}
+    url = f"/api/content/{story['id']}"
+    assert teacher_client.get(url).status_code == 404
+    assert teacher_client.put(url, json={"title": "x"}).status_code == 404
+    for action in ("approve", "regenerate", "duplicate", "archive"):
+        assert teacher_client.post(f"{url}/{action}", json={}).status_code == 404, action
+    assert teacher_client.post(f"{url}/share", json={"shared": False}).status_code == 404
+    assert teacher_client.delete(url).status_code == 404
+    versions(teacher_client, story["id"], expect=404)
+    # The versions are kept.
+    assert db.scalar(select(RecordVersion.id).where(RecordVersion.entity_id == row.id)) is not None
+    (audit_row,) = audit_rows(db, "content.delete")
+    assert audit_row.meta["soft"] is True
+
+
+def test_draft_count_ignores_deleted_drafts(teacher_client, adam):
+    child, focus = adam
+    a = generate(teacher_client, child, focus, kind="story")["content"]
+    generate(teacher_client, child, focus, kind="story")
+    assert teacher_client.delete(f"/api/content/{a['id']}").status_code == 204
+    assert teacher_client.get(f"/api/children/{child.id}").json()["child"]["draft_content_count"] == 1
+
+
+def _assessment_cache():
+    return {
+        "emotional": {"status": "in_progress", "data": {
+            "items": {"calms_after_frustration": {"level": "some_support", "note": "SECRET-EMO-NOTE"}},
+            "fields": {"what_makes_it_harder": {"text": "SECRET-HARDER"}}}},
+        "independence": {"status": "sufficient", "data": {"items": {
+            "dressing": {"level": "some_support", "note": "SECRET-DRESS-NOTE"},
+            "eating": {"level": "independent"},
+            "toilet": {"level": "not_observed"}}}},
+        "sensory": {"status": "in_progress", "data": {"items": {
+            "noise": {"effect": "affects", "reaction_text": "SECRET-COVERS-EARS", "helps": ["reduced_stimulation"]},
+            "light": {"effect": "no_visible_effect"},
+            "smells": {"effect": "sometimes"}}}},
+    }
+
+
+def test_content_sends_only_the_focus_domains(teacher_client, adam, db, teacher, make_assessment):
+    """X-28: a focus in category independence sends only the independence block; the domains are recorded."""
+    child, _ = adam
+    focus = add_focus(db, child, teacher, suggestion_key="dressing_independently", title="Dressing for the yard",
+                      category="independence")
+    make_assessment(child, created_by=teacher, domains=_assessment_cache())
+    db.add_all([
+        Observation(child_id=child.id, observation="Put on the coat with a picture card.", domains=["independence"],
+                    details={"needs": {"helps": ["visual_support"], "text": "SECRET-NEEDS-TEXT"}},
+                    note="SECRET-OBS-NOTE", created_by=teacher.id),
+        Observation(child_id=child.id, observation="Shared the blocks in the corner.", domains=["social"],
+                    created_by=teacher.id),
+    ])
+    db.commit()
+    gi = generate(teacher_client, child, focus, kind="real_world_activity")["content"]["generation_input"]
+    assert list(gi["domains"]) == ["independence"]
+    block = gi["domains"]["independence"]
+    # In the registry's question order (eating before dressing), whatever the JSONB key order.
+    assert block["assessment"] == [{"item": "eating", "level": "independent", "effect": None, "helps": []},
+                                   {"item": "dressing", "level": "some_support", "effect": None, "helps": []}]
+    assert [o["text"] for o in block["observations"]] == ["Put on the coat with a picture card."]
+    assert block["helps"] == ["visual_support"]
+    dumped = json.dumps(gi)
+    assert "SECRET" not in dumped and "Shared the blocks" not in dumped and "calms_after_frustration" not in dumped
+    # avoid: only what the teacher observed (noise affects, smells sometimes -> strong_smells)
+    assert gi["avoid"] == ["noise", "strong_smells"]
+
+
+def test_parent_reported_sensitivities_never_become_avoid(teacher_client, adam, db):
+    child, focus = adam
+    profile = db.scalar(select(ChildProfile).where(ChildProfile.child_id == child.id))
+    profile.sensitivities = [{"key": "certain_foods", "sources": ["parent"]}, {"key": "noise", "sources": ["parent"]}]
+    db.commit()
+    gi = generate(teacher_client, child, focus, kind="story")["content"]["generation_input"]
+    assert gi["avoid"] == [] and "certain_foods" not in json.dumps(gi)

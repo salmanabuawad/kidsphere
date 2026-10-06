@@ -11,13 +11,18 @@ import pytest
 from app.ai import claude_provider, template_provider
 from app.ai.context import build_context
 from app.ai.prompts import SYSTEM_PROMPT
-from app.ai.service import generate, suggest_understanding, suggest_understanding_result
+from app.ai.service import generate, suggest_understanding_result
 from app.config import settings
 
 try:  # anthropic 1.x uses httpx2; fall back for older SDKs
     import httpx2 as httpx_mod
 except ImportError:  # pragma: no cover
     import httpx as httpx_mod
+
+def suggest_understanding(*args, **kwargs):
+    """The suggestion only (the DB-level app.ai.service.suggest_understanding also persists it)."""
+    return suggest_understanding_result(*args, **kwargs).suggestion
+
 
 TODAY = date(2026, 10, 5)
 CHILD = {"name": "Adam Haddad", "birth_date": date(2022, 8, 5), "gender": "boy", "parent_contact": "050-1"}
@@ -326,7 +331,7 @@ def test_understanding_masks_every_free_text_sent_to_claude():
     prompt = fake.calls[0]["messages"][0]["content"]
     for name in ("Noa", "Levi", "Yusuf", "Haddad", "Rana", "Dana"):
         assert name not in prompt
-    for masked in ("[child] built with [friend]. [friend] joined [child].",  # observation text + note
+    for masked in ('"text": "[child] built with [friend]."',  # observation text only: the note is never sent
                    "Mum [adult] and teacher [adult] watched [child].",  # adults
                    '"title": "Playing with [friend]"',  # focus title
                    "Start next to [friend], then [child] invites one more friend",  # focus description
@@ -335,6 +340,8 @@ def test_understanding_masks_every_free_text_sent_to_claude():
                    "[child] plays with [friend].", "Invite [friend]."):  # current understanding
         assert masked in prompt, masked
     assert '"label": "Building"' in prompt  # vocabulary labels are not touched
+    assert "joined" not in prompt  # the observation note
+    assert '"name": "[child]"' in prompt and "Adam" not in prompt  # de-identified analysis (X-31)
 
     # The teacher gets the baseline items back with their own wording, so the review screen can match them.
     bv = {(b.list, b.key): b for b in result.suggestion.baseline_validation}
@@ -365,3 +372,78 @@ def test_understanding_masking_does_not_change_the_template_suggestion():
     s = suggest_understanding(u_ctx(), [obs(1)], focus_areas, BASELINE, child_names=["Adam Haddad"],
                               classmate_names=["Yusuf"])
     assert s.areas_for_support == ["Playing with Yusuf"]
+
+
+# --------------------------------------------------------------------------- source-document AI policy (WP2-AI)
+
+
+@pytest.mark.parametrize("field,value", [
+    ("teacher_note", "If this continues, consider a referral to a specialist."),
+    ("teacher_note", "כדאי לשקול הפניה לגורם מקצועי."),
+    ("goal", "تحويله إلى أخصائي إذا لزم الأمر"),
+    ("teacher_note", "This shows a weakness in sharing."),  # deficit wording in teacher-facing AI text
+])
+def test_referral_or_deficit_wording_in_claude_content_falls_back(field, value):
+    ctx = ctx_for()
+    data = valid_output("story", ctx)
+    data[field] = value
+    result = generate("story", ctx, client=FakeClaude(data))
+    assert result.provider == "template" and result.fallback_reason == "AI_UNSAFE_OUTPUT"
+
+
+@pytest.mark.parametrize("field,value", [
+    ("summary", "[child] might benefit from a referral to a specialist."),
+    ("next_steps", "מומלץ על הפניה להערכה."),
+    ("possible_patterns", ["قد يحتاج إلى إحالة."]),
+    ("areas_for_support", ["A weakness in turn taking"]),
+])
+def test_referral_wording_in_a_claude_understanding_falls_back(field, value):
+    data = claude_understanding()
+    data[field] = value
+    result = suggest_understanding_result(u_ctx(), [obs(1)], FOCUS_AREAS, BASELINE, client=FakeClaude(data))
+    assert result.provider == "template" and result.fallback_reason == "AI_UNSAFE_OUTPUT"
+    dumped = json.dumps(result.suggestion.model_dump(), ensure_ascii=False)
+    assert "referral" not in dumped and "הפניה" not in dumped and "إحالة" not in dumped
+
+
+def test_analysis_payload_is_de_identified_and_the_answer_restored():
+    data = claude_understanding()
+    data["summary"] = "[child] appears to enjoy building with [friend]."
+    data["possible_patterns"] = ["[child] may find it easier after a short preparation."]
+    data["next_observation_questions"] = [{"domain": "social", "question": "When does [child] join [friend]?"}]
+    fake = FakeClaude(data)
+    result = suggest_understanding_result(u_ctx(), [obs(1)], FOCUS_AREAS, BASELINE, client=fake,
+                                          child_names=["Adam Haddad"], classmate_names=["Noa"])
+    prompt = fake.calls[0]["messages"][0]["content"]
+    assert '"name": "[child]"' in prompt and "Adam" not in prompt and "Haddad" not in prompt
+    assert fake.calls[0]["system"].count("[child]") >= 1
+    s = result.suggestion
+    assert s.summary == "Adam appears to enjoy building with a friend."
+    assert s.possible_patterns == ["Adam may find it easier after a short preparation."]
+    assert s.next_observation_questions[0].question == "When does Adam join a friend?"
+
+
+def test_sensitivity_support_needs_never_reach_the_ai():
+    baseline = [{"list": "strengths", "key": "building", "label": "Building"},
+                {"list": "support_needs", "key": "certain_foods", "label": "Certain foods"},
+                {"list": "support_needs", "key": None, "custom": "The blue bathroom", "label": "The blue bathroom"},
+                {"list": "support_needs", "key": "dressing", "label": "Dressing / undressing"}]
+    fake = FakeClaude(claude_understanding())
+    suggest_understanding_result(u_ctx(), [obs(1)], FOCUS_AREAS, baseline, client=fake, relevant_domains=["social"])
+    prompt = fake.calls[0]["messages"][0]["content"]
+    assert "certain_foods" not in prompt and "blue bathroom" not in prompt
+    assert "dressing" not in prompt  # independence levels only for independence-related requests
+    fake = FakeClaude(claude_understanding())
+    suggest_understanding_result(u_ctx(), [obs(1)], FOCUS_AREAS, baseline, client=fake,
+                                 relevant_domains=["independence"])
+    prompt = fake.calls[0]["messages"][0]["content"]
+    assert "dressing" in prompt and "certain_foods" not in prompt
+
+
+def test_template_understanding_has_hedged_patterns_and_next_questions():
+    observations = [obs(1, level="significant_support"), obs(2, level="some_support"), obs(3, level="independent")]
+    s = suggest_understanding(u_ctx(), observations, FOCUS_AREAS, BASELINE)
+    assert s.possible_patterns and all("may" in p.lower() for p in s.possible_patterns)
+    assert s.next_observation_questions
+    assert s.next_observation_questions[0].domain in ("social", "play")
+    assert "Joining group play" in s.next_observation_questions[0].question

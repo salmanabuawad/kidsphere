@@ -1,0 +1,29 @@
+{# Compact running header (pages 2+, static/report.css) and the full header block on page 1.
+   The wordmark is its own left-to-right inline block (.wm) so it reads "KidSphere" in RTL reports too. #}
+<div class="running-header">
+  <span class="rh-brand"><img class="rh-mark" src="static/kidsphere-mark.png" alt=""><span class="wm"><span class="kid">Kid</span><span class="sphere">Sphere</span></span></span>
+  <span class="rh-sep">·</span>
+  <span class="rh-title">{{ meta.title }}</span>
+  <span class="rh-sep">·</span>
+  <span class="rh-child">{{ meta.child.name | iso }}</span>
+</div>
+<header class="cover">
+  <div class="brand-row">
+    <img class="mark" src="static/kidsphere-mark.png" alt="KidSphere">
+    <div class="brand-text">
+      <p class="wordmark"><span class="wm"><span class="kid">Kid</span><span class="sphere">Sphere</span></span></p>
+      <p class="report-label">{{ t.report_label }}</p>
+    </div>
+  </div>
+  <h1 class="report-title">{{ meta.title }}</h1>
+  {% if meta.subtitle %}<p class="subtitle">{{ meta.subtitle }}</p>{% endif %}
+  <div class="facts">
+    <div class="fact"><p class="fact-k">{{ t.child }}</p><p class="fact-v">{{ meta.child.name | iso }}</p></div>
+    <div class="fact"><p class="fact-k">{{ t.age }}</p><p class="fact-v">{{ meta.child.age | iso }}</p></div>
+    <div class="fact"><p class="fact-k">{{ t.kindergarten }}</p><p class="fact-v">{{ meta.child.kindergarten | iso }}</p></div>
+    <div class="fact"><p class="fact-k">{{ t.report_date }}</p><p class="fact-v">{{ meta.report_date | ltr }}</p></div>
+    <div class="fact"><p class="fact-k">{{ t.prepared_by }}</p><p class="fact-v">{{ meta.prepared_by | iso }}</p></div>
+    {% if meta.range_text %}<div class="fact"><p class="fact-k">{{ t.period }}</p><p class="fact-v">{{ meta.range_text }}</p></div>{% endif %}
+  </div>
+  {% if meta.note %}<p class="cover-note">{{ meta.note }}</p>{% endif %}
+</header>

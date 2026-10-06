@@ -7,19 +7,22 @@ The KidSphere icon set: 27 painted block glyphs, one SVG per icon, named exactly
 | Ink | Hex | Token | Where |
 |---|---|---|---|
 | Outline | `#1F2233` | `ink` | Every outline, the pupil of `attention`, the antenna balls of `video`, the whole of `arrow-next` |
-| Brand paint | `#005DBD` | `brand` | The nine nav icons, exported in their active state: `children`, `observe-add`, `timeline`, `development`, `content`, `account`, `users`, `classes`, `parent-home`. Also the arch of the legacy `brand-mark` |
-| Sky paint | `#33A7E0` | `paint-sky` | `story`, `video`, `game`, `activity`, `pack`, `present`, `note-quote` |
+| Accent paint | `#0A9EA3` | `accent` | The nine nav icons, exported in their active state: `children`, `observe-add`, `timeline`, `development`, `content`, `account`, `users`, `classes`, `parent-home`. The logo's teal: a navy `brand` paint would sit at 1.44:1 against the graphite outline and stop reading as coloured in |
+| Brand fill | `#0D3D72` | `brand` | The arch of the legacy `brand-mark` (the logo's navy) |
+| Sky paint | `#44C2F2` | `paint-sky` | `story`, `video`, `game`, `activity`, `pack`, `present`, `note-quote` |
 | Sun paint | `#FDC010` | `paint-sun` | `strengths`, `strength-builder`, the ball of `worked-well`, `partly` and `did-not-work`, the ball of the legacy `brand-mark` |
 | Berry paint | `#EE4E89` | `paint-berry` | `interests`, the cube of the legacy `brand-mark` |
-| Leaf paint | `#4DB956` | `paint-leaf` | `what-helps` |
+| Leaf paint | `#4CC2A6` | `paint-leaf` | `what-helps` |
 | Grape paint | `#BC6ECE` | `paint-grape` | `current-focus`, `growth-support` |
-| Tangerine paint | `#FA8927` | `paint-tangerine` | `attention` |
+| Tangerine paint | `#F99E3A` | `paint-tangerine` | `attention` |
+
+The accent, sky, leaf and tangerine values follow the logo (2026-10-06): its teal "Sphere", its sky, its green and its star orange. Sun, berry and grape are unchanged.
 
 `arrow-next` is single-ink `#1F2233` (`on-paint`), drawn for the sun RoundButton. The legacy `brand-mark` has three flat fills and no outline.
 
 ## Dark theme
 
-`dark/<name>.svg` holds 26 of the glyphs (and the legacy `brand-mark`) baked with the dark-theme values: outline `ink` `#F3EEE6` (also the pupil of `attention` and the antenna balls of `video`), `paint-sun` `#F9C635`, `paint-berry` `#F56696`, `paint-leaf` `#61C568`, `paint-grape` `#C77DD8`, `paint-tangerine` `#FA9947`, `paint-sky` `#43B5E8` and `brand` `#8CB4FE`. They are drawn for a walnut ground, so view them on a dark tile. `arrow-next` has no dark copy: it always sits on a paint fill, in graphite `on-paint`, in both themes.
+`dark/<name>.svg` holds 26 of the glyphs (and the legacy `brand-mark`) baked with the dark-theme values: outline `ink` `#F3EEE6` (also the pupil of `attention` and the antenna balls of `video`), `paint-sun` `#F9C635`, `paint-berry` `#F56696`, `paint-leaf` `#5FCEB3`, `paint-grape` `#C77DD8`, `paint-tangerine` `#FCA953`, `paint-sky` `#5DCDFA`, `accent` `#35B9BE` (the nav icons) and `brand` `#90BAF1` (the legacy `brand-mark` arch). They are drawn for a walnut ground, so view them on a dark tile. `arrow-next` has no dark copy: it always sits on a paint fill, in graphite `on-paint`, in both themes.
 
 - A preview places both files, the light one with `.ks-ico--l` and the dark one with `.ks-ico--d` (see `components/bundle.css`), and the theme shows one.
 - Never filter the light files to fake the dark theme: no drop-shadow halo, no invert, no grayscale.

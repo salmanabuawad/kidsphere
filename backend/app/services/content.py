@@ -1,13 +1,19 @@
-"""Generated content (spec §14–19, §30–33; PLAN-ADJUSTMENTS B7, B8, B9, B14, B15).
+"""Generated content (spec §14–19, §30–33; PLAN-ADJUSTMENTS B7, B8, B9, B14, B15;
+COVERAGE-MATRIX §7, X-15, X-28).
 
 Generation
     ``generate_content`` validates the goal (growth_support → one of the child's
     ACTIVE focus areas; strength_builder → a profile strength key or a
-    ``strength_targets`` key), builds the allow-listed AIContext (child, profile,
-    focus incl. its plan, at most 5 recent observations for that focus or else the
-    most recent ones, the names to mask (other children of the kindergarten,
-    the parents and the teachers), the current understanding),
-    calls ``app.ai.generate`` and inserts DRAFT rows. The profile is never changed.
+    ``strength_targets`` key), builds the allow-listed AIContext and calls
+    ``app.ai.generate``, then inserts DRAFT rows. The profile is never changed.
+    The context holds the child, the profile labels, the focus incl. its plan
+    (without ``who``), at most 5 observations linked to that focus, the names to
+    mask (other children of the kindergarten, the parents and the teachers), the
+    current understanding and the blocks of the RELEVANT AI domains only
+    (``app.ai.domains.for_focus`` / ``for_strength``: teacher-assessment keys and
+    levels, a few tagged observations, help keys). ``avoid`` holds only what the
+    teacher observed in Domain 9. The domains sent are kept in
+    ``generation_input.domains``.
 
 Pack storage (content_type has no 'pack' value)
     A pack request stores one row per part, all sharing one ``pack_id``:
@@ -24,8 +30,17 @@ Lifecycle (B9)
     approved → completed     on feedback (services/feedback.py; repeat allowed)
     any → new draft row      duplicate (pack_id is not copied)
     any → archived           archive
-    DELETE                   drafts only, else 409
+    DELETE                   drafts only, else 409. A SOFT delete (OQ-5): sets
+                             ``deleted_at`` / ``deleted_by``; the row disappears from
+                             every list and lookup (404) but is never removed.
     share {shared:true}      approved|completed only, else 409; unsharing always works
+
+History (never overwritten; X-15)
+    Every generate, regenerate, edit and duplicate writes the FULL new row state to
+    ``record_versions`` (entity 'content', via generated | regenerated | edited |
+    manual) in the same transaction. A row without any version yet (created before
+    the history existed) first gets its current state recorded (via 'system').
+    ``GET /api/content/{id}/versions`` (staff only) returns them, newest first.
 
 Visibility
     Staff see every row of a child in scope. Parents see only rows that are
@@ -47,29 +62,29 @@ Parents get the first line plus ``content`` (detail, without teacher_note).
 import copy
 import uuid
 
-from sqlalchemy import or_, select
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app import access, vocab
-from app.ai import build_context, find_unsafe_text, generate, validate_output
+from app.ai import build_context, find_unsafe_text, for_focus, for_strength, generate, validate_output
+from app.ai import gather as ai_gather
+from app.ai.gather import adult_names, classmate_names  # noqa: F401  (re-exported: reviews use them)
 from app.audit import audit
 from app.config import settings
 from app.errors import AppError
 from app.models import (
     LANGUAGE_VALUES,
     Child,
-    ChildParent,
     ChildProfile,
-    Class,
-    ClassTeacher,
     ContentFeedback,
     FocusArea,
     GeneratedContent,
     Observation,
+    RecordVersion,
     User,
 )
 from app.schemas.content import ContentUpdate, GenerateIn, RegenerateIn, ShareIn
-from app.services import video_service
+from app.services import history, video_service
 from app.sessions import utcnow
 
 MAX_CONTEXT_OBSERVATIONS = 5
@@ -98,10 +113,18 @@ def parent_visible(row: GeneratedContent) -> bool:
     return bool(row.shared_with_parent) and row.status in PARENT_STATUSES
 
 
+def live_row_or_404(db: Session, user: User, content_id, lock: bool = False) -> GeneratedContent:
+    """A content row of a child in scope that is not soft-deleted (else 404)."""
+    row = access.get_child_row_or_404(db, user, GeneratedContent, content_id, lock=lock)
+    if row.deleted_at is not None:
+        raise AppError("NOT_FOUND")
+    return row
+
+
 def row_for_write(db: Session, user: User, content_id, lock: bool = True) -> GeneratedContent:
     """A content row the user may change (staff in scope). Parents get 403 for content
-    they can see and 404 for anything else; out-of-scope ids are 404."""
-    row = access.get_child_row_or_404(db, user, GeneratedContent, content_id, lock=lock)
+    they can see and 404 for anything else; out-of-scope ids and deleted drafts are 404."""
+    row = live_row_or_404(db, user, content_id, lock=lock)
     if not access.is_staff(user):
         raise AppError("FORBIDDEN" if parent_visible(row) else "NOT_FOUND")
     return row
@@ -213,6 +236,7 @@ def _list_query():
     return (
         select(GeneratedContent, FocusArea.title, last)
         .outerjoin(FocusArea, FocusArea.id == GeneratedContent.focus_area_id)
+        .where(GeneratedContent.deleted_at.is_(None))
     )
 
 
@@ -237,7 +261,7 @@ def list_content(db: Session, user: User, child_id, status: str | None = None, p
 
 
 def get_content(db: Session, user: User, content_id) -> dict:
-    row = access.get_child_row_or_404(db, user, GeneratedContent, content_id)
+    row = live_row_or_404(db, user, content_id)
     staff = access.is_staff(user)
     if not staff and not parent_visible(row):
         raise AppError("NOT_FOUND")
@@ -250,7 +274,7 @@ def get_pack(db: Session, user: User, pack_id) -> dict:
     except ValueError:
         raise AppError("NOT_FOUND") from None
     staff = access.is_staff(user)
-    stmt = select(GeneratedContent).where(GeneratedContent.pack_id == pid,
+    stmt = select(GeneratedContent).where(GeneratedContent.pack_id == pid, GeneratedContent.deleted_at.is_(None),
                                           GeneratedContent.child_id.in_(access.scoped_child_ids(user)))
     if not staff:
         stmt = _parent_filter(stmt)
@@ -300,54 +324,32 @@ def _check_goal(db: Session, child: Child, profile: ChildProfile | None, body: G
     return None, body.target_strength
 
 
-def _recent_observations(db: Session, child_id, focus_id=None) -> list[str]:
-    def query(extra=None):
-        stmt = select(Observation.observation).where(Observation.child_id == child_id, Observation.observation.is_not(None))
-        if extra is not None:
-            stmt = stmt.where(extra)
-        stmt = stmt.order_by(Observation.observed_at.desc(), Observation.id.desc()).limit(MAX_CONTEXT_OBSERVATIONS)
-        return list(db.scalars(stmt).all())
-
-    if focus_id is not None:
-        rows = query(Observation.focus_area_id == focus_id)
-        if rows:
-            return rows
-    return query()
+def _focus_observations(db: Session, child_id, focus_id) -> list[Observation]:
+    """The newest observations linked to the focus (at most 5, each with a text). Without a focus
+    nothing: the relevant domains bring their own observations (no unrelated fallback)."""
+    if focus_id is None:
+        return []
+    rows = db.scalars(
+        select(Observation).where(Observation.child_id == child_id, Observation.focus_area_id == focus_id)
+        .order_by(Observation.observed_at.desc(), Observation.id.desc()).limit(MAX_CONTEXT_OBSERVATIONS * 4)
+    ).all()
+    return [r for r in rows if ai_gather.observation_text(r)][:MAX_CONTEXT_OBSERVATIONS]
 
 
-def _kindergarten_classes(child: Child):
-    """The ids of every class of the child's kindergarten (shared yard, mixed activities)."""
-    kindergarten = select(Class.kindergarten).where(Class.id == child.class_id).scalar_subquery()
-    return select(Class.id).where(Class.kindergarten == kindergarten)
-
-
-def classmate_names(db: Session, child: Child) -> list[str]:
-    """Names (full and preferred) of the other children, for masking in AI input as [friend]:
-    every child of the same kindergarten and every child without a class; every other child
-    when this one has no class."""
-    stmt = select(Child.name, Child.preferred_name).where(Child.id != child.id)
-    if child.class_id is not None:
-        stmt = stmt.where(or_(Child.class_id.in_(_kindergarten_classes(child)), Child.class_id.is_(None)))
-    return [n for row in db.execute(stmt).all() for n in row if n]
-
-
-def adult_names(db: Session, child: Child) -> list[str]:
-    """Names of the adults around the child, for masking in AI input as [adult]: the parent name on
-    the child, the linked parent accounts and the teachers of the kindergarten's classes (of every
-    class when the child has no class)."""
-    names = [child.parent_name]
-    names += db.scalars(select(User.name).join(ChildParent, ChildParent.user_id == User.id)
-                        .where(ChildParent.child_id == child.id)).all()
-    teachers = select(User.name).join(ClassTeacher, ClassTeacher.user_id == User.id)
-    if child.class_id is not None:
-        teachers = teachers.where(ClassTeacher.class_id.in_(_kindergarten_classes(child)))
-    names += db.scalars(teachers.distinct()).all()
-    return [n for n in names if n]
+def relevant_domains(focus: FocusArea | None, target: str | None) -> list[str]:
+    """The AI domains a content request concerns: the focus category (growth_support) or the target
+    strength (strength_builder). The content type adds none."""
+    if focus is not None:
+        return for_focus(focus.category, focus.suggestion_key)
+    return for_strength(target)
 
 
 def _context(db: Session, child: Child, profile: ChildProfile | None, *, mode: str, kind: str, language: str,
              focus: FocusArea | None, target: str | None, template: str | None = None,
              instruction: str | None = None, variant: int = 0, include_video: bool = False):
+    linked = _focus_observations(db, child.id, focus.id if focus is not None else None)
+    blocks, avoid = ai_gather.content_domains(db, child.id, relevant_domains(focus, target),
+                                              exclude_observation_ids=[o.id for o in linked])
     return build_context(
         child=child,
         profile=profile,
@@ -356,7 +358,7 @@ def _context(db: Session, child: Child, profile: ChildProfile | None, *, mode: s
         language=language,
         focus=focus,
         target_strength=target,
-        recent_observations=_recent_observations(db, child.id, focus.id if focus is not None else None),
+        recent_observations=linked,
         classmate_names=classmate_names(db, child),
         adult_names=adult_names(db, child),
         current_understanding=profile.current_understanding if profile else None,
@@ -364,6 +366,8 @@ def _context(db: Session, child: Child, profile: ChildProfile | None, *, mode: s
         instruction=instruction,
         variant=variant,
         include_video=include_video,
+        avoid=avoid,
+        domains=blocks,
     )
 
 
@@ -421,6 +425,7 @@ def generate_content(db: Session, user: User, child_id, body: GenerateIn) -> dic
     db.add_all(rows)
     db.flush()
     for row in rows:
+        _record_version(db, row, user, "generated")
         audit(db, user, "content.generate", "content", row.id, child_id=child.id, mode=body.mode,
               content_type=row.content_type, template=_template(row), language=language, provider=result.provider,
               is_template=result.is_template, pack_id=str(pack_id) if pack_id else None,
@@ -431,6 +436,34 @@ def generate_content(db: Session, user: User, child_id, body: GenerateIn) -> dic
     if pack_id:
         return {"items": items, "pack_id": str(pack_id), "fallback_reason": result.fallback_reason}
     return {"content": items[0], "fallback_reason": result.fallback_reason}
+
+
+# --------------------------------------------------------------------------- history (X-15)
+
+
+def _record_version(db: Session, row: GeneratedContent, user: User | None, via: str):
+    """The full current state of ``row`` as its next record_versions entry."""
+    db.flush()
+    return history.record(db, child_id=row.child_id, entity_type="content", entity_id=row.id,
+                          data=history.snapshot(row), user=user, via=via)
+
+
+def _ensure_base_version(db: Session, row: GeneratedContent) -> None:
+    """Before the first change of a row that has no version yet (made before the history
+    existed, or inserted directly), keep its current state (via 'system')."""
+    exists = db.scalar(select(RecordVersion.id).where(RecordVersion.entity_type == "content",
+                                                      RecordVersion.entity_id == row.id).limit(1))
+    if exists is None:
+        _record_version(db, row, None, "system")
+
+
+def list_versions(db: Session, user: User, content_id) -> dict:
+    """GET /api/content/{id}/versions: every saved state, newest first (staff only; 404 otherwise)."""
+    if not access.is_staff(user):
+        raise AppError("NOT_FOUND")
+    row = live_row_or_404(db, user, content_id)
+    rows = history.versions(db, child_id=row.child_id, entity_type="content", entity_id=row.id, newest_first=True)
+    return {"content_id": str(row.id), "versions": [history.version_out(v) for v in rows]}
 
 
 # --------------------------------------------------------------------------- edits
@@ -495,11 +528,13 @@ def update_content(db: Session, user: User, content_id, body: ContentUpdate) -> 
     old = row.content or {}
     changed = sorted(k for k in set(content) | set(old) if content.get(k) != old.get(k))
     if changed:
+        _ensure_base_version(db, row)
         from_status = row.status
         row.content = content
         row.title = content["title"]
         if row.status == "approved":
             _back_to_draft(row)
+        _record_version(db, row, user, "edited")
         audit(db, user, "content.edit", "content", row.id, child_id=row.child_id, fields=changed,
               from_status=from_status)
     db.flush()
@@ -554,6 +589,7 @@ def regenerate_content(db: Session, user: User, content_id, body: RegenerateIn) 
     db.expire_all()
     row = row_for_write(db, user, row_id)  # locked; the status may have changed meanwhile
     _require(row, EDITABLE, message)
+    _ensure_base_version(db, row)
     from_status = row.status
     row.content = content
     row.title = content["title"]
@@ -568,6 +604,7 @@ def regenerate_content(db: Session, user: User, content_id, body: RegenerateIn) 
         row.video_external_job_id = None
     if row.status == "approved":
         _back_to_draft(row)
+    _record_version(db, row, user, "regenerated")
     audit(db, user, "content.regenerate", "content", row.id, child_id=row.child_id, variant=variant,
           from_status=from_status, provider=result.provider, is_template=result.is_template,
           with_instruction=bool(body.instruction), fallback_reason=result.fallback_reason)
@@ -600,6 +637,7 @@ def duplicate_content(db: Session, user: User, content_id) -> dict:
     )
     db.add(new)
     db.flush()
+    _record_version(db, new, user, "manual")
     audit(db, user, "content.duplicate", "content", new.id, child_id=row.child_id, source_id=row.id,
           source_status=row.status)
     db.flush()
@@ -634,9 +672,12 @@ def archive_content(db: Session, user: User, content_id) -> dict:
 
 
 def delete_content(db: Session, user: User, content_id) -> None:
+    """Soft delete (OQ-5): the draft disappears from every list and lookup; the row and its
+    versions stay (a DB CHECK allows deleted_at only on a draft)."""
     row = row_for_write(db, user, content_id)
     _require(row, ("draft",), "Only drafts can be deleted. Archive it instead.")
+    row.deleted_at = utcnow()
+    row.deleted_by = user.id
     audit(db, user, "content.delete", "content", row.id, child_id=row.child_id, content_type=row.content_type,
-          pack_id=str(row.pack_id) if row.pack_id else None)
-    db.delete(row)
+          pack_id=str(row.pack_id) if row.pack_id else None, soft=True)
     db.commit()

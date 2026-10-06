@@ -76,7 +76,7 @@ def test_staff_wizard_flow(teacher_client, teacher, child, db):
 
     rows = db.scalars(select(AuditLog).where(AuditLog.action == "profile.section_update")).all()
     assert len(rows) == 6
-    assert all(set(r.meta) == {"section", "perspective"} for r in rows)
+    assert all(set(r.meta) == {"section", "perspective", "mode"} and r.meta["mode"] == "self" for r in rows)
 
 
 def test_parent_flow_and_shape(parent_client, teacher_client, parent, child):
@@ -99,7 +99,8 @@ def test_parent_flow_and_shape(parent_client, teacher_client, parent, child):
     assert r.json()["wizard"]["step"] == 7 and r.json()["wizard"]["completed_at"]
 
     got = parent_client.get(url(child)).json()
-    assert set(got) == {"child_id", "perspective", "parent_perspective", "wizard"}
+    assert set(got) == {"child_id", "perspective", "parent_perspective", "questionnaire", "wizard"}
+    assert got["questionnaire"]["status"] == "draft"  # the legacy "complete" flag does not send the questionnaire
 
 
 def test_parent_cannot_write_teacher_perspective(parent_client, child):
@@ -112,7 +113,8 @@ def test_staff_entering_parent_answers_is_stamped(teacher_client, teacher, child
     r = teacher_client.patch(url(child), json={"perspective": "parent", "section": "social", "data": {"social": ["initiates_play"]}})
     assert r.status_code == 200, r.text
     stamps = r.json()["parent_perspective"]["entered"]["social"]
-    assert stamps == [{"by": str(teacher.id), "by_name": teacher.name, "role": "teacher", "reported_by": "parent", "at": stamps[0]["at"]}]
+    assert stamps == [{"by": str(teacher.id), "by_name": teacher.name, "role": "teacher", "reported_by": "parent",
+                       "at": stamps[0]["at"], "mode": "on_behalf", "version_seq": 1}]
     assert r.json()["teacher_perspective"]["sections"] == {}
 
     # Same data again: no new stamp. Changed data: appended, never replaced.
@@ -166,6 +168,10 @@ def test_validation(teacher_client, child):
         {"section": "health", "data": {}},
         {"data": {"strengths": []}},
         {"wizard_step": 0},
+        {"wizard_step": 11},
+        {"status": "sufficient"},
+        {"section": "who", "status": "done"},
+        {"section": "who", "data": {"not_answered": ["nonsense"]}},
         {"role": "admin"},
     ]
     for body in cases:

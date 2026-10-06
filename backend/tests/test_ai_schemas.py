@@ -13,6 +13,7 @@ from app.ai.schemas import (
     PackOut,
     ProfileItem,
     StoryOut,
+    FunctionalSummaryDraft,
     UnderstandingSuggestion,
     VideoPlanOut,
     game_adapter,
@@ -213,7 +214,8 @@ def _walk(node):
 
 @pytest.mark.parametrize("kind,template,video_on", [
     ("story", None, False), ("real_world_activity", None, False), ("video", None, False),
-    ("understanding", None, False), ("pack", "story_builder", True), ("pack", "categorize", False),
+    ("understanding", None, False), ("functional_summary", None, False), ("pack", "story_builder", True),
+    ("pack", "categorize", False),
     *[("digital_game", t, False) for t in GAME_TEMPLATES],
 ])
 def test_provider_schema_via_sdk_transform(kind, template, video_on):
@@ -232,3 +234,54 @@ def test_pack_model_fixes_game_template():
     pack = {"story": STORY, "activity": ACTIVITY, "game": mc(), "discussion_prompts": ["a", "b", "c"]}
     with pytest.raises(ValidationError):
         model.model_validate(pack)
+
+
+# --------------------------------------------------------------------------- analysis outputs (WP2-AI)
+
+SUMMARY = {
+    "general_description": "[child] appears to enjoy building with one friend.",
+    "main_strengths": {"items": [{"key": "building", "label": "Building"},
+                                 {"custom": "Kind to animals", "label": "Kind to animals"}], "text": None},
+    "main_needs": {"items": ["Starting shared play"], "text": "Joining a group with a known friend."},
+    "adaptations": "Start with one friend.",
+    "team_recommendations": "Use the same short instruction across the team.",
+    "possible_patterns": ["May find it easier to join after a short preparation."],
+    "next_observation_questions": [{"domain": "social", "question": "When does [child] join play most easily?"}],
+}
+
+
+def test_functional_summary_draft_shape():
+    FunctionalSummaryDraft.model_validate(SUMMARY)
+    fields = set(FunctionalSummaryDraft.model_fields)
+    # The teacher writes these herself: never part of an AI draft (X-24, X-25, X-30).
+    for absent in ("follow_up_with_parents", "involvement", "focus_decisions", "close", "closing", "decision",
+                   "referral", "reassessment_on"):
+        assert absent not in fields
+    for extra in ({"follow_up_with_parents": "Call the parents."}, {"involvement": {"key": "referral_as_needed"}}):
+        with pytest.raises(ValidationError):
+            FunctionalSummaryDraft.model_validate({**SUMMARY, **extra})
+
+
+def test_next_observation_questions_use_the_ai_domains():
+    with pytest.raises(ValidationError):
+        FunctionalSummaryDraft.model_validate({**SUMMARY, "next_observation_questions": [
+            {"domain": "health", "question": "x"}]})
+    with pytest.raises(ValidationError):
+        FunctionalSummaryDraft.model_validate({**SUMMARY, "possible_patterns": ["p"] * 6})
+    with pytest.raises(ValidationError):
+        FunctionalSummaryDraft.model_validate({**SUMMARY, "main_strengths": {"items": [{"label": "x"}]}})
+
+
+def test_understanding_gains_patterns_and_questions_with_defaults():
+    data = {
+        "summary": "Adam appears to enjoy building.", "strengths": [], "interests": [], "what_helps": [],
+        "areas_for_support": [], "adaptations": "Keep it short.", "next_steps": "Observe.",
+        "baseline_validation": [], "focus_review": [],
+    }
+    s = UnderstandingSuggestion.model_validate(data)
+    assert s.possible_patterns == [] and s.next_observation_questions == []
+    s = UnderstandingSuggestion.model_validate({**data, "possible_patterns": ["May prefer quiet corners."],
+                                                "next_observation_questions": [
+                                                    {"domain": "sensory", "question": "What happens in the yard?"}]})
+    assert s.next_observation_questions[0].domain == "sensory"
+    assert "involvement" not in UnderstandingSuggestion.model_fields

@@ -1,16 +1,32 @@
 """System and user prompts for the Claude provider.
 
-Plain string constants plus two builders:
-    user_prompt(kind, ctx, template=None) -> str
-    understanding_prompt(ctx, observations, focus_areas, baseline_items) -> str
+Plain string constants plus the builders:
+    user_prompt(kind, ctx, template=None) -> str                     content generation
+    understanding_payload(ctx, observations, focus_areas, baseline_items) -> dict
+    understanding_prompt(ctx, observations, focus_areas, baseline_items, payload=None) -> str
+    functional_summary_payload(ctx, observations, focus_areas) -> dict
+    functional_summary_prompt(ctx, payload) -> str
 The JSON shape itself is enforced by the structured-output schema; the prompts
 explain the intent of each field.
+
+Analysis payloads (understanding, functional summary) are de-identified: the
+child is ``[child]`` (never the first name; X-31, OQ-4) and every free text is
+already masked by the caller. The payload dicts are exactly what is embedded in
+the prompt; app.ai.service stores them as ``ai_suggestions.input``.
 """
 import json
 
-from app.ai.context import ADULT_TOKEN, CHILD_TOKEN, FRIEND_TOKEN, AIContext
+from app.ai.context import ADULT_TOKEN, CHILD_TOKEN, EMAIL_TOKEN, FRIEND_TOKEN, PHONE_TOKEN, AIContext
 
 LANGUAGE_NAMES = {"en": "English", "ar": "Arabic", "he": "Hebrew"}
+
+# Shared by every prompt (COVERAGE-MATRIX §7.8; X-30).
+AI_MUST_NOT = (
+    "- Never recommend a referral, a specialist or a professional evaluation, and never suggest involving "
+    "other professionals: that decision belongs to the teacher alone. Never close, pause or choose goals or "
+    "focus areas, and never overwrite what the teacher or the family wrote.\n"
+    "- Never present a pattern as a fact: say what the observations may suggest (\"may\", \"appears to\")."
+)
 
 SYSTEM_PROMPT = f"""You are the KidSphere teacher's assistant. You help kindergarten teachers create short, personalised developmental content for one child aged 3-6. A teacher reviews, edits and approves everything you write before a child sees it.
 
@@ -22,13 +38,15 @@ Two modes:
 
 Language and tone:
 - Use careful, observational language in teacher-facing text ("appears to enjoy", "may need support with", "was observed to"). Never make clinical judgements or name medical or developmental conditions, never label the child, never predict anything clinical, never infer health, religion, race or other sensitive traits.
-- Strengths first. Describe change descriptively, never with scores, points, percentages or counts of success.
+- Strengths first. Describe change descriptively, never with scores, points, percentages or counts of success. Never describe weaknesses or failure, also not in teacher-facing text.
 - Child-facing text (story text, questions, game text, narration, activity titles and instructions read aloud) uses short sentences, concrete words and a warm tone for ages 3-6. It never mentions difficulties, weaknesses, problems of the child, risk, failure, scores or points, and never says the content was made because the child finds something hard. Mistakes are "let's try again" moments.
 - Every story and video ends positively. Games have no losing; choices in story_builder have no correct answer.
 - Use the child's name only where it feels natural (for example once in a story or in a question); otherwise use a friendly character inspired by the child's interests.
 - Respect the "avoid" list: do not build content around those things.
+- "domains" holds what the teacher observed in the developmental domains this request is about (item keys with the support needed, the things that help, a few recent observations). Use it to pitch the content; never quote it in child-facing text.
 - Never include links, web addresses, brand names, advertisements or references to real media characters.
-- Do not reveal teacher observations or private family information in child-facing text. The free texts in the context (observations, the focus area, custom labels, the current understanding, the teacher's instruction) use {CHILD_TOKEN} for the child, {FRIEND_TOKEN} for other children and {ADULT_TOKEN} for a parent or teacher; never invent real names for them, and never put these placeholders in the output: use the child's given name, "a friend" or "a grown-up" instead.
+- Do not reveal teacher observations or private family information in child-facing text. The free texts in the context (observations, the focus area, custom labels, the current understanding, the teacher's instruction) use {CHILD_TOKEN} for the child, {FRIEND_TOKEN} for other children, {ADULT_TOKEN} for a parent or teacher, {PHONE_TOKEN} and {EMAIL_TOKEN} for contact details; never invent real names or details for them, and never put these placeholders in the output: use the child's given name, "a friend" or "a grown-up" instead.
+{AI_MUST_NOT}
 - Write every text field in the requested output language. Use natural, idiomatic phrasing for that language (Arabic: Modern Standard Arabic suitable for young children; Hebrew: simple modern Hebrew). Follow the child's grammatical gender when it is given; otherwise use neutral wording where possible.
 - Return only the structured JSON object requested."""
 
@@ -70,15 +88,32 @@ GAME_GUIDES = {
     "story_builder": "Game template story_builder: 3-5 steps (for example character -> place -> what happens -> how it ends); each step has a prompt and 2-4 choices (label + emoji) with no correct answer; closing_prompt invites the child to tell their story (for example 'Now tell your story!').",
 }
 
+
+_ANALYSIS_RULES = f"""- Observational, careful language only: "appears to", "was observed to", "may need support with". Never make clinical judgements or name conditions, never label the child, never infer health or sensitive traits. Never describe weaknesses, deficits or failure.
+- Strengths and interests first. Describe change descriptively; never use scores, points, percentages or counts of success.
+{AI_MUST_NOT}
+- The data is de-identified. The child is always {CHILD_TOKEN}: write {CHILD_TOKEN} wherever you refer to the child (KidSphere puts the name back), and never guess or invent a name. Free texts use {FRIEND_TOKEN} for other children, {ADULT_TOKEN} for a parent or teacher, {PHONE_TOKEN} and {EMAIL_TOKEN} for contact details; never write these in the output except {CHILD_TOKEN}: use "a friend" or "an adult" instead.
+- "domains" holds the teacher's own observation by developmental domain (item keys with the support needed, sensory effects, day-map stages, the things that help). Each observation is tagged with its domains.
+- possible_patterns: at most 5 short, hedged sentences about what the observations may suggest across situations (for example "may find it easier when ..."); never a conclusion, never about health or the family.
+- next_observation_questions: at most 5 {{domain, question}} pairs: what the teacher could look at next to understand {CHILD_TOKEN} better, in natural kindergarten moments; never a test, never a referral.
+- Write in the requested output language. Return only the structured JSON object requested."""
+
 UNDERSTANDING_SYSTEM_PROMPT = f"""You help a kindergarten teacher draft a "current understanding" of one child from the teacher's own observations. The teacher reviews and edits it; nothing changes the profile without the teacher.
 
 Rules:
-- Observational, careful language only: "appears to", "was observed to", "may need support with". Never make clinical judgements or name conditions, never label the child, never infer health or sensitive traits.
-- Strengths and interests first. Describe change descriptively; never use scores, points, percentages or counts of success.
+{_ANALYSIS_RULES}
 - Never claim certainty from limited data. A focus area or baseline item may only get a status other than needs_more_observation when at least 3 linked observations since the latest baseline support it; otherwise use needs_more_observation.
-- Use only the vocabulary keys provided for strengths, interests and what_helps (use "custom" for anything else) and only the given focus_area_id values and observation ids.
-- Free texts (observations, focus areas, baseline items, custom labels, the current understanding) use {CHILD_TOKEN} for the child, {FRIEND_TOKEN} for other children and {ADULT_TOKEN} for a parent or teacher. Refer to the child by the given name; never invent names.
-- Write in the requested output language. Return only the structured JSON object requested."""
+- Use only the vocabulary keys provided for strengths, interests and what_helps (use "custom" for anything else) and only the given focus_area_id values and observation ids."""
+
+FUNCTIONAL_SUMMARY_SYSTEM_PROMPT = f"""You help a kindergarten teacher draft a short functional summary of one child (a whole, strengths-first picture of how the child takes part in kindergarten life). It is only a draft: the teacher edits it and approves it; it never changes the profile, the goals or the teacher's observation.
+
+Rules:
+{_ANALYSIS_RULES}
+- general_description: 3-6 careful sentences about how {CHILD_TOKEN} takes part in the day.
+- main_strengths: up to 5 strengths (key from the strengths vocabulary when it fits, otherwise custom) and optional text.
+- main_needs: up to 4 short areas for support, worded as what helps {CHILD_TOKEN} grow (never as a deficit), and optional text.
+- adaptations: practical adaptations that appear to help. team_recommendations: how the kindergarten team can respond consistently.
+- Do not write anything about following up with the parents, about involving other professionals, or about which goals to keep, pause or close: the teacher decides those."""
 
 
 def _context_json(ctx: AIContext) -> str:
@@ -125,25 +160,74 @@ def user_prompt(kind: str, ctx: AIContext, template: str | None = None) -> str:
     return "\n\n".join(parts)
 
 
-def understanding_prompt(ctx: AIContext, observations: list[dict], focus_areas: list[dict], baseline_items: list[dict]) -> str:
-    lang = LANGUAGE_NAMES.get(ctx.language, ctx.language)
-    payload = {
-        "child": {"name": ctx.name, "age_years": ctx.age_years},
-        "profile": {
-            "strengths": [i.model_dump(exclude_none=True) for i in ctx.strengths],
-            "interests": [i.model_dump(exclude_none=True) for i in ctx.interests],
-            "what_helps": [i.model_dump(exclude_none=True) for i in ctx.what_helps],
-        },
+# --------------------------------------------------------------------------- analysis (de-identified)
+
+
+def _labels(items) -> list[dict]:
+    return [i.model_dump(exclude_none=True) for i in items]
+
+
+def _domains(ctx: AIContext) -> dict:
+    """Analysis domain blocks: keys, levels and help keys (observations travel in the observation list)."""
+    out = {}
+    for domain, block in ctx.domains.items():
+        data = block.model_dump(mode="json", exclude_none=True)
+        data.pop("observations", None)
+        for item in data.get("assessment", []):
+            if not item.get("helps"):
+                item.pop("helps", None)
+        out[domain] = data
+    return out
+
+
+def understanding_payload(ctx: AIContext, observations: list[dict], focus_areas: list[dict],
+                          baseline_items: list[dict]) -> dict:
+    """The de-identified understanding payload. Every text in the arguments must be masked already."""
+    return {
+        "child": {"name": CHILD_TOKEN, "age_years": ctx.age_years},
+        "profile": {"strengths": _labels(ctx.strengths), "interests": _labels(ctx.interests),
+                    "what_helps": _labels(ctx.what_helps)},
         "current_understanding": ctx.current_understanding.model_dump(exclude_none=True) if ctx.current_understanding else None,
+        "domains": _domains(ctx),
         "focus_areas": focus_areas,
         "baseline_items": baseline_items,
         "observations_since_baseline": observations,
     }
+
+
+def understanding_prompt(ctx: AIContext, observations: list[dict], focus_areas: list[dict], baseline_items: list[dict],
+                         payload: dict | None = None) -> str:
+    lang = LANGUAGE_NAMES.get(ctx.language, ctx.language)
+    payload = payload if payload is not None else understanding_payload(ctx, observations, focus_areas, baseline_items)
     return "\n\n".join([
         f"Draft a suggested current understanding. Output language: {lang} ({ctx.language}).",
         "summary: 3-5 careful sentences. strengths/interests/what_helps: what the observations appear to show "
         "(key from the vocabulary or custom). areas_for_support: short descriptive phrases. adaptations and next_steps: "
         "practical, short. baseline_validation: one entry per baseline item with status, note and the ids of the "
-        "observations that relate to it. focus_review: one entry per focus area.",
+        "observations that relate to it. focus_review: one entry per focus area. possible_patterns and "
+        "next_observation_questions: optional, hedged.",
+        "Data (JSON):\n" + json.dumps(payload, ensure_ascii=False, indent=1, default=str),
+    ])
+
+
+def functional_summary_payload(ctx: AIContext, observations: list[dict], focus_areas: list[dict]) -> dict:
+    """The de-identified functional-summary payload (no health, family or parent free text)."""
+    return {
+        "child": {"name": CHILD_TOKEN, "age_years": ctx.age_years},
+        "profile": {"strengths": _labels(ctx.strengths), "interests": _labels(ctx.interests),
+                    "what_helps": _labels(ctx.what_helps)},
+        "current_understanding": ctx.current_understanding.model_dump(exclude_none=True) if ctx.current_understanding else None,
+        "domains": _domains(ctx),
+        "focus_areas": focus_areas,
+        "observations": observations,
+    }
+
+
+def functional_summary_prompt(ctx: AIContext, payload: dict) -> str:
+    lang = LANGUAGE_NAMES.get(ctx.language, ctx.language)
+    return "\n\n".join([
+        f"Draft a short functional summary. Output language: {lang} ({ctx.language}).",
+        "Fields: general_description, main_strengths {items, text}, main_needs {items, text} (areas for support), "
+        "adaptations, team_recommendations, possible_patterns, next_observation_questions.",
         "Data (JSON):\n" + json.dumps(payload, ensure_ascii=False, indent=1, default=str),
     ])

@@ -1,4 +1,5 @@
-"""Data checks for backend/app/data/options.json (WP-04).
+"""Data checks for backend/app/data/options.json and the list fragments in
+backend/app/data/lists/*.json (merged into the lists by app/vocab.py).
 
 Standard library + pytest only: no app imports and no database, so this runs
 before (and independently of) the rest of the backend.
@@ -10,13 +11,25 @@ from pathlib import Path
 
 import pytest
 
-OPTIONS_PATH = Path(__file__).resolve().parents[1] / "app" / "data" / "options.json"
+DATA_DIR = Path(__file__).resolve().parents[1] / "app" / "data"
+OPTIONS_PATH = DATA_DIR / "options.json"
+FRAGMENT_PATHS = sorted((DATA_DIR / "lists").glob("*.json"))
 LANGS = ("en", "ar", "he")
 KEY_RE = re.compile(r"^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$")
 NUMERIC_RE = re.compile(r"\d+\s*%|\bscore\b|\bpoints\b", re.IGNORECASE)
 ALLOWED_ITEM_FIELDS = {"key", "icon", "category", "label", "short"}
+BANNED_GROUPS = ("clinical", "child_deficit", "ai_only", "allow_phrases")
 ARABIC_RE = re.compile("[؀-ۿ]")
 HEBREW_RE = re.compile("[֐-׿]")
+
+# The PDF footer disclaimer (SPEC-UPDATE; docs/terminology.md). It names what the
+# report is not, so the clause with the banned word is in allow_phrases (OQ-3).
+DISCLAIMERS = {
+    "en": "This report is based on parent information, teacher observations and educational follow-up. "
+          "It is not a medical or clinical diagnosis.",
+    "he": "דוח זה מבוסס על מידע מההורים, על תצפיות של הגננת ועל מעקב חינוכי. הוא אינו מהווה אבחנה רפואית או קלינית.",
+    "ar": "يستند هذا التقرير إلى معلومات من الأهل وملاحظات المعلّمة والمتابعة التربوية. وهو ليس تشخيصاً طبياً أو سريرياً.",
+}
 
 # Lists other packages code against. Exact key sets where the spec fixes them,
 # a minimum count where the spec gives examples.
@@ -52,8 +65,9 @@ EXACT_KEYS = {
     ],
     "independence_areas": [
         "eating", "drinking", "toilet", "washing_hands", "dressing", "shoes", "tidying_toys",
-        "keeping_belongings", "starting_activity", "finishing_activity",
+        "organizing_belongings", "keeping_belongings", "starting_activity", "finishing_activity",
     ],
+    "contact_preferences": ["personal_conversation", "phone", "message", "meeting", "other"],
     "support_levels": ["independent", "some_support", "significant_support", "not_observed"],
     "sensitivities": [
         "noise", "touch", "clothing", "textures", "dirt", "strong_smells", "bright_lights",
@@ -78,6 +92,20 @@ EXACT_KEYS = {
         "what_happens_next", "story_builder",
     ],
     "relations": ["mother", "father", "guardian", "other"],
+    # lists/common.json (COVERAGE-MATRIX §3.3.7)
+    "section_statuses": ["not_started", "in_progress", "sufficient", "review_later"],
+    "provenance": ["parent_said", "teacher_observed", "ai_suggested", "teacher_approved"],
+    "ai_domains": [
+        "emotional", "social", "communication", "language", "executive_function", "play",
+        "gross_motor", "fine_motor", "independence", "sensory", "cognitive", "daily_routine",
+    ],
+    "observation_domains": [
+        "emotional", "social", "language", "executive_function", "play", "gross_motor",
+        "fine_motor", "independence", "sensory", "cognitive", "daily_routine", "strengths",
+        "priority_needs",
+    ],
+    "yes_no": ["yes", "no"],
+    "yes_no_sometimes": ["yes", "no", "sometimes"],
 }
 
 REQUIRED_SUBSETS = {
@@ -109,6 +137,9 @@ REQUIRED_SUBSETS = {
     ],
     "sad_helps": ["other"],
     "transition_helps": ["other"],
+    "hope_child_feels": [
+        "safe", "loved", "belonging", "independent", "capable", "happy", "socially_accepted", "curious",
+    ],
 }
 
 REQUIRED_LISTS = sorted(set(EXACT_KEYS) | set(REQUIRED_SUBSETS))
@@ -125,8 +156,19 @@ def data(raw):
 
 
 @pytest.fixture(scope="module")
-def lists(data):
-    return data["lists"]
+def fragments():
+    return {path.name: json.loads(path.read_text(encoding="utf-8")) for path in FRAGMENT_PATHS}
+
+
+@pytest.fixture(scope="module")
+def lists(data, fragments):
+    """The merged lists, as app/vocab.py builds them (options.json first, then fragments by file name)."""
+    merged = dict(data["lists"])
+    for fragment in fragments.values():
+        lists_ = fragment.get("lists") if isinstance(fragment, dict) else None
+        for name, items in (lists_ if isinstance(lists_, dict) else {}).items():
+            merged.setdefault(name, items)
+    return merged
 
 
 def _labels(item):
@@ -141,6 +183,10 @@ def _banned(data, group):
     return [t.lower() for lang in LANGS for t in terms[lang]]
 
 
+def _allow(data):
+    return [p.lower() for lang in LANGS for p in data["banned_terms"]["allow_phrases"][lang]]
+
+
 def _find_banned(text, terms, allow):
     lowered = text.lower()
     for phrase in allow:
@@ -148,21 +194,39 @@ def _find_banned(text, terms, allow):
     return [t for t in terms if t in lowered]
 
 
-def test_file_is_utf8_without_bom_and_lf(raw):
-    assert not raw.startswith(b"\xef\xbb\xbf"), "options.json must not start with a BOM"
-    assert b"\r\n" not in raw, "options.json must use LF line endings"
+@pytest.mark.parametrize("path", [OPTIONS_PATH, *FRAGMENT_PATHS], ids=lambda p: p.name)
+def test_files_are_utf8_without_bom_and_lf(path):
+    raw = path.read_bytes()
+    assert not raw.startswith(b"\xef\xbb\xbf"), f"{path.name} must not start with a BOM"
+    assert b"\r\n" not in raw, f"{path.name} must use LF line endings"
     raw.decode("utf-8")
 
 
 def test_top_level_shape(data):
     assert isinstance(data["lists"], dict)
     banned = data["banned_terms"]
-    for group in ("clinical", "child_deficit", "allow_phrases"):
+    assert set(banned) == set(BANNED_GROUPS)
+    for group in BANNED_GROUPS:
         for lang in LANGS:
             terms = banned[group][lang]
             assert isinstance(terms, list) and terms, f"banned_terms.{group}.{lang} is empty"
             assert all(isinstance(t, str) and t.strip() == t and t for t in terms)
             assert len(set(terms)) == len(terms), f"duplicate in banned_terms.{group}.{lang}"
+
+
+def test_common_fragment_exists():
+    assert "common.json" in {p.name for p in FRAGMENT_PATHS}
+
+
+def test_fragments_hold_only_new_lists(data, fragments):
+    seen = {name: "options.json" for name in data["lists"]}
+    for file_name, fragment in fragments.items():
+        assert isinstance(fragment, dict) and set(fragment) == {"lists"}, f"{file_name} must hold only {{'lists': ...}}"
+        assert isinstance(fragment["lists"], dict) and fragment["lists"], f"{file_name} has no lists"
+        for name, items in fragment["lists"].items():
+            assert name not in seen, f"list {name!r} in {file_name} is already defined in {seen[name]}"
+            assert isinstance(items, list) and items, f"{file_name}: list {name!r} is empty"
+            seen[name] = file_name
 
 
 def test_spec_section_2_terms_are_banned(data):
@@ -246,6 +310,19 @@ def test_attention_category_uses_neutral_label(lists):
     assert attention["label"]["ar"] == "التركيز والمثابرة"
 
 
+def test_source_document_labels(lists):
+    """COVERAGE-MATRIX §3.3.7 edits (source wording) and the OQ-3 neutral domain labels."""
+    label = {(name, i["key"]): i["label"] for name, items in lists.items() for i in items}
+    assert label[("contact_preferences", "meeting")]["he"] == "פגישה מסודרת"
+    assert label[("hope_child_feels", "safe")]["he"] == "בטוח/ה"
+    assert label[("independence_areas", "dressing")]["en"] == "Dressing / undressing"
+    assert label[("independence_areas", "dressing")]["he"] == "לבוש והפשטה"
+    assert label[("independence_areas", "organizing_belongings")]["he"] == "סידור חפצים"
+    assert label[("ai_domains", "executive_function")]["he"] == "ריכוז, התמדה וארגון"
+    assert label[("observation_domains", "sensory")]["en"] == "Things in the environment that may affect the child"
+    assert label[("observation_domains", "priority_needs")]["en"] == "Where to focus next"
+
+
 def test_focus_suggestion_categories_exist(lists):
     categories = {i["key"] for i in lists["priority_categories"]}
     used = set()
@@ -263,8 +340,8 @@ def test_focus_suggestion_categories_exist(lists):
 
 
 def test_no_banned_or_numeric_terms_in_labels(data, lists):
-    terms = _banned(data, "clinical") + _banned(data, "child_deficit")
-    allow = [p.lower() for lang in LANGS for p in data["banned_terms"]["allow_phrases"][lang]]
+    terms = _banned(data, "clinical") + _banned(data, "child_deficit") + _banned(data, "ai_only")
+    allow = _allow(data)
     problems = []
     for name, items in lists.items():
         for item in items:
@@ -280,9 +357,35 @@ def test_no_banned_or_numeric_terms_in_labels(data, lists):
 def test_allow_phrases_do_not_hide_plain_banned_terms(data):
     """The matcher itself: allowed phrases pass, the bare banned term still fails."""
     terms = _banned(data, "clinical") + _banned(data, "child_deficit")
-    allow = [p.lower() for lang in LANGS for p in data["banned_terms"]["allow_phrases"][lang]]
+    allow = _allow(data)
     assert _find_banned("Problem solving and نقاط القوة and פתרון בעיות", terms, allow) == []
     assert _find_banned("You got 3 points!", terms, allow) == ["points"]
     assert "adhd" in _find_banned("Possible ADHD", terms, allow)
     assert "הפרעה" in _find_banned("ייתכן שיש הפרעה", terms, allow)
     assert "اضطراب" in _find_banned("قد يكون لديه اضطراب", terms, allow)
+    assert "diagnosis" in _find_banned("A diagnosis of the child", terms, allow)
+
+
+@pytest.mark.parametrize("lang", LANGS)
+def test_the_pdf_disclaimer_passes_only_through_its_allow_phrase(data, lang):
+    terms = _banned(data, "clinical") + _banned(data, "child_deficit")
+    text = DISCLAIMERS[lang]
+    assert _find_banned(text, terms, []), "the disclaimer names a banned word"
+    assert _find_banned(text, terms, _allow(data)) == []
+    assert not NUMERIC_RE.search(text)
+    own = [p for p in data["banned_terms"]["allow_phrases"][lang] if p.lower() in text.lower()]
+    assert own, f"no {lang} allow phrase is part of the {lang} disclaimer"
+
+
+def test_ai_only_terms_catch_referral_wording_without_false_positives(data):
+    ai_only = _banned(data, "ai_only")
+    allow = _allow(data)
+    for text in ("We recommend a referral for further support.", "It may help to refer the child to a specialist.",
+                 "The child could be referred for a specialist evaluation.",
+                 "מומלץ לשקול הפנייה לגורם מקצועי", "כדאי להפנות את הילד", "نوصي بإحالة الطفل",
+                 "يُنصح بتحويله إلى أخصائي"):
+        assert _find_banned(text, ai_only, allow), text
+    for text in ("She prefers quiet play and preferred the blue blocks.", "Contact preferences: phone",
+                 "Referring back to the story, he smiled.", "הילדה העדיפה לשחק בפינה השקטה ובחרה בהפניית מבט",
+                 "يفضّل اللعب الهادئ في الحالة العادية رغم استحالة الخروج"):
+        assert _find_banned(text, ai_only, allow) == [], text

@@ -11,7 +11,14 @@
     "tellUs": "Tell us about your child",
     "shared": "Shared activities",
     "noChildren": "No children are connected to your account yet",
-    "noChildrenHint": "The kindergarten will connect your child to your account. Then you will see them here."
+    "noChildrenHint": "The kindergarten will connect your child to your account. Then you will see them here.",
+    "questionnaire": {
+      "notStarted": "The getting-to-know questionnaire is waiting for you.",
+      "draft": "You are on step {step} of {total}. Your answers are saved.",
+      "sent": "Sent to the kindergarten",
+      "continue": "Continue the questionnaire",
+      "review": "View or update my answers"
+    }
   },
   "shared": {
     "title": "Shared activities",

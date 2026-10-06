@@ -10,16 +10,25 @@ Group=kidsphere-mvp
 WorkingDirectory=/var/www/kidsphere/backend
 EnvironmentFile=/var/www/kidsphere/backend/.env
 Environment=PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
+# PDF reports (WeasyPrint): fontconfig needs a writable cache. ProtectHome hides the
+# home directory and ProtectSystem=strict makes everything else read-only, so the
+# cache lives in the systemd-managed CacheDirectory (/var/cache/kidsphere-mvp, owned
+# by the service user and writable even under ProtectSystem=strict). WeasyPrint's
+# per-render font copies go to the private /tmp (PrivateTmp) and are removed after
+# each render.
+CacheDirectory=kidsphere-mvp
+CacheDirectoryMode=0700
+Environment=XDG_CACHE_HOME=/var/cache/kidsphere-mvp
 ExecStart=/var/www/kidsphere/backend/venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 3071 --workers 1 --proxy-headers --forwarded-allow-ips 127.0.0.1 --no-server-header
 Restart=always
 RestartSec=3
 
-# Hardening: the app only needs to write uploads.
+# Hardening: the app only needs to write uploads (and the fontconfig cache above).
 NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=strict
 ProtectHome=true
-ReadWritePaths=/var/www/kidsphere/uploads
+ReadWritePaths=/var/www/kidsphere/uploads -/var/cache/kidsphere-mvp
 MemoryMax=512M
 
 [Install]

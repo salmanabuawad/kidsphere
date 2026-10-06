@@ -4,7 +4,7 @@
  * pencil, trash, check...) stay lucide-react; option emoji stay content.
  *
  * Colour: the outline is currentColor; the one painted primitive uses its paint
- * token (`--paint-*`, or `--brand` for nav icons) unless `paint` or the CSS
+ * token (`--paint-*`, or the logo teal `--accent` for nav icons) unless `paint` or the CSS
  * variable `--icon-paint` says otherwise.
  */
 export { BlockIcon, type BlockIconProps } from "./BlockIcon";

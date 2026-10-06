@@ -1,0 +1,12 @@
+{% from "_macros.html" import answer, tag %}
+<div class="entries">
+{% for e in block["items"] %}
+  <div class="entry">
+    <p class="entry-title">{% if e.meta %}<span class="entry-meta">{{ e.meta | iso }}</span> {% endif %}<span class="entry-name">{{ e.title | iso }}</span>{% if e.source %} {{ tag(e.source) }}{% endif %}</p>
+    {% if e.answer %}<div class="a">{{ answer(e.answer, meta.dir) }}</div>{% endif %}
+    {% for part in e.parts %}
+    <div class="part"><p class="part-k">{{ part.k }}</p><div class="a">{{ answer(part.v, meta.dir) }}</div></div>
+    {% endfor %}
+  </div>
+{% endfor %}
+</div>

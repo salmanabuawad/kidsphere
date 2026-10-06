@@ -30,6 +30,11 @@ STATUS: dict[str, int] = {
     "UPLOAD_FAILED": 400,
     "RATE_LIMITED": 429,
     "AI_UNAVAILABLE": 503,
+    "ASSESSMENT_OPEN": 409,
+    "ASSESSMENT_CLOSED": 409,
+    "SUMMARY_APPROVED": 409,
+    "REPORT_BUSY": 503,
+    "REPORT_FAILED": 500,
     "INTERNAL": 500,
 }
 
@@ -47,7 +52,21 @@ MESSAGES: dict[str, str] = {
     "UPLOAD_FAILED": "The upload could not be processed.",
     "RATE_LIMITED": "Too many attempts. Please wait and try again.",
     "AI_UNAVAILABLE": "The content generator is not available right now.",
+    "ASSESSMENT_OPEN": "An observation cycle is already open for this child.",
+    "ASSESSMENT_CLOSED": "This observation cycle is closed. Start a reassessment to add to it.",
+    "SUMMARY_APPROVED": "This summary is already approved. Save a new version instead.",
+    "REPORT_BUSY": "Another report is being prepared. Please try again in a moment.",
+    "REPORT_FAILED": "The report could not be created.",
     "INTERNAL": "Something went wrong.",
+}
+
+# DB guards that a service can hit in a race (migration 0002) carry a constraint
+# name; an IntegrityError with one of these names becomes that error code.
+CONSTRAINT_CODES: dict[str, str] = {
+    "focus_areas_max_active": "FOCUS_LIMIT",
+    "teacher_assessments_one_open_uq": "ASSESSMENT_OPEN",
+    "teacher_assessments_closed": "ASSESSMENT_CLOSED",
+    "functional_summaries_approved": "SUMMARY_APPROVED",
 }
 
 
@@ -98,6 +117,9 @@ def install_error_handlers(app: FastAPI) -> None:
 
     @app.exception_handler(IntegrityError)
     def _integrity(request: Request, exc: IntegrityError):
+        constraint = getattr(getattr(exc.orig, "diag", None), "constraint_name", None)
+        if constraint in CONSTRAINT_CODES:
+            return error_response(CONSTRAINT_CODES[constraint])
         sqlstate = getattr(exc.orig, "sqlstate", None)
         if sqlstate == "23505":  # unique_violation
             return error_response("DUPLICATE")

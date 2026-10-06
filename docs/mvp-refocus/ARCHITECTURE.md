@@ -1,5 +1,7 @@
 # Kidsphere MVP target architecture
 
+> **Status (2026-10-06):** this is the original target design for the first six waves. The source-document work (parent questionnaire, observation model, full history, provenance, AI domains, PDF reports) was designed in [COVERAGE-MATRIX.md](COVERAGE-MATRIX.md) §3–§7 and is implemented as described in the root [ARCHITECTURE.md](../../ARCHITECTURE.md) (20 tables, Alembic `0002_source_documents`). Where this document and those two differ, they win.
+
 ## 1. Shape
 ```
 Browser (React SPA, ar/he/en, RTL)
@@ -374,3 +376,8 @@ Feedback writes `content_feedback`, the mirrored `observations` row (source=cont
 - No base classes, factories, repository layer or event bus; the only "provider" choice is one if-statement.
 - One models file and one Alembic chain. A schema change after 0001 is a new numbered revision, owned by at most one package per wave.
 - Small React components per feature folder. Shared things live only in `components/ui`, `lib` and `i18n`.
+## 14. Source-document extension (summary; details in COVERAGE-MATRIX.md and the root ARCHITECTURE.md)
+- **Registries, not hand-picked fields:** `backend/app/data/source/{parent_questionnaire,observation_model}.json` describe every source item (storage path, options, sensitivity, AI policy, PDF placement, en/ar/he label). The wizard, Parent View, Teacher Observation tab, PDF builders and AI payload policy read them; `tests/test_coverage_matrix.py` keeps them, the matrix and the code in step.
+- **Never overwrite:** `record_versions` (profile sections, observations, focus areas, content), append-only `teacher_assessment_entries`, immutable closed cycles, `functional_summaries` (edit = new row), `ai_suggestions`, `report_exports`, soft-deleted drafts. Guards are DB triggers; the services also check (409 codes).
+- **Schema change rule kept:** 0002 is one additive, hand-written revision; its data steps only insert rows or add missing JSON keys.
+- **No new services:** PDFs render in-process with WeasyPrint under one lock; nothing is queued.

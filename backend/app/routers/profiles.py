@@ -1,8 +1,10 @@
-"""Child profile sections (GET/PATCH /children/{id}/profile).
+"""Child profile sections (GET/PATCH /children/{id}/profile) and their history.
 
-Owned by WP-06. Paths are relative to /api (no router prefix); main.py includes this module.
+Paths are relative to /api (no router prefix); main.py includes this module.
 Staff see both perspectives and the merged lists; parents see and write only the
-parent perspective. See app/services/profiles.py for the JSON shapes.
+parent perspective (their questionnaire, including their own health answers) and
+never the teacher perspective or the quick baseline. See app/services/profiles.py
+for the JSON shapes.
 """
 from fastapi import APIRouter
 
@@ -21,3 +23,10 @@ def get_profile(child_id: str, db: DB, user: CurrentUser) -> dict:
 @router.patch("/children/{child_id}/profile")
 def patch_profile(child_id: str, body: ProfilePatch, db: DB, user: CurrentUser) -> dict:
     return profiles.update_profile(db, user, child_id, body)
+
+
+@router.get("/children/{child_id}/profile/history")
+def profile_history(child_id: str, db: DB, user: CurrentUser, perspective: str | None = None,
+                    section: str | None = None) -> dict:
+    """Every saved version of the profile sections (staff only; 404 for parents)."""
+    return profiles.profile_history(db, user, child_id, perspective, section)

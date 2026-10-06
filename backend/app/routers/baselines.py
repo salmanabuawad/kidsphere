@@ -1,11 +1,13 @@
-"""Baselines and current understanding (/children/{id}/baseline, /children/{id}/current-understanding).
+"""Baselines and current understanding (/children/{id}/baseline, /children/{id}/baselines/{bid},
+/children/{id}/current-understanding).
 
-Owned by WP-06. Paths are relative to /api (no router prefix); main.py includes this module.
+Paths are relative to /api (no router prefix); main.py includes this module.
 Baselines are immutable: there is deliberately no PUT/PATCH/DELETE route.
+GET /baselines/{bid} is staff only and answers 404 to parents (like the other new endpoints).
 """
 from fastapi import APIRouter
 
-from app.deps import DB, StaffUser
+from app.deps import DB, CurrentUser, StaffUser
 from app.services import baselines
 
 router = APIRouter(tags=["baselines"])
@@ -19,6 +21,11 @@ def create_baseline(child_id: str, db: DB, user: StaffUser) -> dict:
 @router.get("/children/{child_id}/baseline")
 def get_baseline(child_id: str, db: DB, user: StaffUser) -> dict:
     return baselines.get_baselines(db, user, child_id)
+
+
+@router.get("/children/{child_id}/baselines/{baseline_id}")
+def get_one_baseline(child_id: str, baseline_id: str, db: DB, user: CurrentUser) -> dict:
+    return baselines.get_baseline(db, user, child_id, baseline_id)
 
 
 @router.get("/children/{child_id}/current-understanding")

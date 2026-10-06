@@ -1,6 +1,6 @@
 # AppShell
 
-The frame around every teacher, admin and parent screen: phone-first, with a top bar and a bottom bar whose centre is a big toy-blue Observe block, and a side nav from lg.
+The frame around every teacher, admin and parent screen: phone-first, with a top bar and a bottom bar whose centre is a big navy `brand` Observe block, and a side nav from lg.
 
 ## When to use
 
@@ -21,7 +21,7 @@ The frame around every teacher, admin and parent screen: phone-first, with a top
 | State | Pill | Icon | Label |
 |---|---|---|---|
 | Inactive | none | `ink-muted` outline, no paint | `ink-muted` |
-| Active (`aria-current="page"`) | `brand-soft` | `ink` outline with `brand` paint | `brand` at 600 |
+| Active (`aria-current="page"`) | `brand-soft` | `ink` outline with `accent` paint (the logo teal; navy would vanish against the outline) | `brand` at 600 |
 
 - **Observe**: a 56px `brand` block (`radius-md`, not a circle) with the `observe-add` glyph at 28px in `on-brand`, raised half out of the bar (`margin-block-start: -24px`) by a 4px `ground` ring and `shadow-lip-brand`. "Observe" sits underneath in `caption` 600 `brand`. Hover `brand-strong`; pressed sinks 2px with a 1px lip.
 

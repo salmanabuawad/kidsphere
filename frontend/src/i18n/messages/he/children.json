@@ -27,12 +27,58 @@
     "languages": "שפות",
     "editBasics": "עריכת פרטים",
     "parents": "הורים",
+    "kindergarten": "גן",
+    "exportPdf": "ייצוא PDF",
     "tabs": {
       "label": "דפי הילד/ה",
-      "profile": "פרופיל",
-      "timeline": "ציר זמן",
-      "content": "תוכן",
-      "development": "התפתחות"
+      "overview": "סקירה",
+      "parentView": "מבט ההורים",
+      "teacherObservation": "תצפית הגננת",
+      "plan": "תוכנית",
+      "activities": "פעילויות",
+      "observations": "תצפיות",
+      "development": "התפתחות",
+      "reports": "דוחות"
+    }
+  },
+  "overview": {
+    "heart": {
+      "title": "משפט מהלב",
+      "intro": "מה המשפחה רצתה שתדעי לפני שתפגשי את {name}",
+      "private": "רק צוות הגן רואה את זה"
+    },
+    "familyWords": "במילים של המשפחה",
+    "appreciate": "מה המשפחה הכי אוהבת בילד/ה",
+    "mainStrengths": "חוזקות מרכזיות",
+    "goodToKnow": {
+      "title": "כדאי לדעת",
+      "mostImportant": "הדבר החשוב ביותר לדעת",
+      "routines": "הרגלים ושגרות לשמור",
+      "overwhelm": "מצבים שעלולים להיות יותר מדי",
+      "overwhelmKnow": "מה חשוב שהצוות ידע ברגעים האלה",
+      "transitionObject": "חפץ מעבר או שגרת פרידה",
+      "mayBeDifficult": "מה עשוי להקשות",
+      "remember": "לזכור",
+      "notes": "הערות בתיק",
+      "foodNote": "יש הערה על אוכל בתיק",
+      "medicalNote": "יש הערה רפואית בתיק",
+      "openParentView": "פתיחה במבט ההורים",
+      "reach": "איך ליצור קשר עם המשפחה",
+      "communication": "מה חשוב למשפחה",
+      "contact": "פרטי קשר"
+    },
+    "nextReview": "המעקב הבא: {date}",
+    "allObservations": "כל התצפיות",
+    "prompts": {
+      "title": "הצעדים הבאים",
+      "familyAnswersTitle": "תשובות המשפחה התקבלו",
+      "familyAnswersBody": "קראי מה המשפחה שיתפה על {name} ומלאי את הקריאה הראשונה המהירה.",
+      "quickBaselineAction": "קריאה ראשונה מהירה",
+      "quickBaseline": "קריאה ראשונה מהירה",
+      "openQuestion": "שאלה לבירור עם המשפחה",
+      "openQuestionAction": "פתיחת הקריאה הראשונה",
+      "reviewLater": "סומן לחזור אליו בהמשך",
+      "parentSection": "תשובות המשפחה"
     }
   },
   "profile": {

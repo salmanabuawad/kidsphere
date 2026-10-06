@@ -22,6 +22,10 @@ const options: OptionLists = {
     { key: "adult_mediation", icon: "🧑‍🏫", label: L("Adult guidance", "توجيه من شخص بالغ", "תיווך של מבוגר") },
     { key: "other", label: L("Other", "أخرى", "אחר") },
   ],
+  ai_domains: [
+    { key: "independence", label: L("Independence", "الاستقلالية", "עצמאות") },
+    { key: "social", label: L("Social", "الجانب الاجتماعي", "חברתי") },
+  ],
 };
 
 const adam: ChildStaffView = {
@@ -388,6 +392,81 @@ describe("ContentReviewPage", () => {
     expect(screen.queryByRole("button", { name: "New version" })).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: "Duplicate as new draft" }));
     expect(await screen.findByRole("heading", { level: 1, name: "Copy of the story" })).toBeTruthy();
+  });
+});
+
+describe("ContentReviewPage: history and AI domains (WP2-AI)", () => {
+  const aiDraft = { ...en.story, title: "The Little Garage" } as unknown as Record<string, unknown>;
+  const versions = {
+    content_id: "s1",
+    versions: [
+      {
+        id: 3,
+        seq: 2,
+        via: "edited",
+        data: { title: en.story.title, content: en.story as unknown as Record<string, unknown>, status: "draft", is_template: true },
+        changed_by_name: "Rana Haddad",
+        changed_role: "teacher",
+        created_at: "2026-10-02T10:00:00Z",
+      },
+      {
+        id: 2,
+        seq: 1,
+        via: "generated",
+        data: { title: "The Little Garage", content: aiDraft, status: "draft", is_template: false },
+        changed_by_name: "Rana Haddad",
+        changed_role: "teacher",
+        created_at: "2026-10-01T10:00:00Z",
+      },
+    ],
+  };
+
+  it("lists the AI draft and the edits, opens an earlier version and names the domains used", async () => {
+    const item = row({
+      generation_input: {
+        mode: "growth_support",
+        focus: { title: "Joining group play" },
+        domains: { independence: { assessment: [{ item: "dressing", level: "some_support" }], helps: [] } },
+      },
+    });
+    mockFetch({ "GET /api/content/s1": { body: { content: item } }, "GET /api/content/s1/versions": { body: versions } });
+    renderApp({ routes, url: "/content/s1", user: teacher, options });
+
+    const card = await screen.findByTestId("version-history");
+    const rows = within(card).getAllByTestId("version-row");
+    expect(rows.map((r) => r.getAttribute("data-via"))).toEqual(["edited", "generated"]);
+    expect(within(rows[0]!).getByText("Edited")).toBeTruthy();
+    expect(within(rows[0]!).getByText("Current")).toBeTruthy();
+    expect(within(rows[1]!).getByText("First draft")).toBeTruthy();
+    // The AI draft carries the visible "AI suggested" provenance chip (not a tooltip).
+    expect(rows[1]!.querySelector('[data-provenance="ai_suggested"]')?.textContent).toContain("AI suggested");
+    expect(within(rows[1]!).getByText("Made with AI")).toBeTruthy();
+    expect(rows[0]!.querySelector("[data-provenance]")).toBeNull();
+    expect(within(rows[0]!).getByText(/By Rana Haddad/)).toBeTruthy();
+
+    fireEvent.click(within(rows[1]!).getByRole("button", { name: "View this version" }));
+    const preview = await screen.findByTestId("version-preview");
+    expect(within(preview).getByTestId("story-player")).toBeTruthy();
+
+    expect(screen.getByTestId("why-domains").textContent).toBe("Independence");
+    expect(document.body.textContent).not.toMatch(NO_SCORES);
+  });
+
+  it("shows nothing when the history cannot be loaded, and no domains row without domains", async () => {
+    mockFetch({ "GET /api/content/s1": { body: { content: row({}) } } });
+    renderApp({ routes, url: "/content/s1", user: teacher, options });
+    expect(await screen.findByTestId("why-card")).toBeTruthy();
+    await waitFor(() => expect(screen.queryByTestId("version-history")).toBeNull());
+    expect(screen.queryByTestId("why-domains")).toBeNull();
+  });
+
+  it("is RTL in Hebrew with the history labels", async () => {
+    mockFetch({ "GET /api/content/s1": { body: { content: row({}) } }, "GET /api/content/s1/versions": { body: versions } });
+    renderApp({ routes, url: "/content/s1", user: { ...teacher, language: "he" }, options, locale: "he" });
+    const card = await screen.findByTestId("version-history");
+    expect(within(card).getByText("גרסאות קודמות")).toBeTruthy();
+    expect(within(card).getByText("טיוטה ראשונה")).toBeTruthy();
+    expect(document.documentElement.dir).toBe("rtl");
   });
 });
 

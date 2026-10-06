@@ -59,5 +59,25 @@
     "joinNumber": "{years} {months}"
   },
   "minutes_one": "{count} minute",
-  "minutes_other": "{count} minutes"
+  "minutes_other": "{count} minutes",
+  "sectionStatus": {
+    "label": "Section status",
+    "not_started": "Not started",
+    "in_progress": "In progress",
+    "sufficient": "Sufficient observation",
+    "sufficientAnswers": "Enough for now",
+    "review_later": "Review later"
+  },
+  "provenance": {
+    "label": "Source",
+    "parent_said": "Parent said",
+    "teacher_observed": "Teacher observed",
+    "ai_suggested": "AI suggested",
+    "teacher_approved": "Teacher approved",
+    "enteredBy": "Entered by {name}",
+    "enteredByOn": "Entered by {name} on {date}",
+    "inMeeting": "In a meeting with the family"
+  },
+  "notAnswered": "Not answered",
+  "notObserved": "Not observed yet"
 }

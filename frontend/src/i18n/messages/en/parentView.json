@@ -1,0 +1,39 @@
+{
+  "unavailable": "The questionnaire could not be loaded. Please try again.",
+  "backToParentView": "Back to the Parent View",
+  "private": "Private",
+  "showPrivate": "Show the private answers",
+  "earlierForm": "From the earlier form",
+  "header": {
+    "description": "The family's own answers, in the order of the questionnaire. Only the kindergarten team sees them.",
+    "sent": "Sent on {date}",
+    "draft": "Started, not sent yet",
+    "notStarted": "Not started yet",
+    "filledOn": "Date filled in",
+    "schoolYear": "School year {year}",
+    "howFilled": "How it was filled in",
+    "meeting": "Meeting"
+  },
+  "actions": {
+    "onBehalf": "Enter the family's answers",
+    "meeting": "Fill in together with the family"
+  },
+  "versions": {
+    "label": "Which answers to show",
+    "latest": "Latest answers",
+    "initial": "As first sent",
+    "initialNote": "You are looking at the answers as the family first sent them. Later changes are kept in each section's history."
+  },
+  "history": {
+    "open": "History",
+    "title": "History: {section}",
+    "empty": "No saved versions yet.",
+    "initial": "First sent",
+    "earlier": "Earlier form"
+  },
+  "firstReading": {
+    "title": "Teacher's first reading",
+    "description": "Your quick baseline after reading the family's answers.",
+    "open": "Open the quick baseline"
+  }
+}

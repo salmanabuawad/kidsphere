@@ -29,6 +29,16 @@ Classes and children
     child           "Adam" in ``klass``, linked to ``parent``
     other_child     "Maya" in ``other_class``, linked to ``other_parent``
 
+Child-owned rows (committed; extra keyword arguments are model columns)
+    make_focus_area(child, title="Joining group play", category="social", status="active",
+                    plan=None, created_by=None, **fields) -> FocusArea
+    make_observation(child, text="Built a tower with a friend", created_by=None, **fields)
+                    -> Observation (source 'quick'; observed_at now unless given)
+    make_assessment(child, created_by=None, kind="initial", **fields) -> TeacherAssessment
+                    (an open cycle; ``teacher_id``/``created_by`` default to ``created_by``)
+    make_ai_suggestion(child, kind="understanding", input=None, output=None, created_by=None,
+                       **fields) -> AiSuggestion (provider 'template', outcome 'pending')
+
 HTTP clients (fastapi.testclient.TestClient; no Origin header is sent)
     client                      anonymous client
     client_for(user) -> TestClient
@@ -41,10 +51,17 @@ Settings and files
     settings.upload_dir points to a fresh tmp directory for every test.
     sample_options              points settings.options_path at
                                 tests/fixtures/options.sample.json (for /api/options
-                                and vocab tests); returns the Path.
+                                and vocab tests); returns the Path. The fixtures folder
+                                has no lists/ or source/ folder, so no list fragments
+                                are merged and every source registry is {}.
+
+History rows are append-only (DB triggers): never UPDATE or DELETE record_versions,
+teacher_assessment_entries, report_exports, ai_suggestions (except resolving a
+pending outcome), functional_summaries (except draft -> approved) or a closed
+teacher_assessments row in a test; the per-test TRUNCATE does not fire them.
 """
 import itertools
-from datetime import date
+from datetime import date, datetime, timezone
 from pathlib import Path
 
 import pytest
@@ -56,7 +73,18 @@ from sqlalchemy import make_url, text
 from app import vocab
 from app.config import BACKEND_DIR, settings
 from app.db import SessionLocal, engine
-from app.models import Child, ChildParent, ChildProfile, Class, ClassTeacher, User
+from app.models import (
+    AiSuggestion,
+    Child,
+    ChildParent,
+    ChildProfile,
+    Class,
+    ClassTeacher,
+    FocusArea,
+    Observation,
+    TeacherAssessment,
+    User,
+)
 from app.security import hash_password
 from app.sessions import COOKIE_NAME, create_session
 
@@ -236,6 +264,55 @@ def child(make_child, klass, parent):
 @pytest.fixture
 def other_child(make_child, other_class, other_parent):
     return make_child(other_class, parents=[other_parent], name="Maya", birth_date=date(2021, 11, 20))
+
+
+def _add(db, row):
+    db.add(row)
+    db.commit()
+    return row
+
+
+@pytest.fixture
+def make_focus_area(db):
+    def make(child, title="Joining group play", category="social", status="active", plan=None, created_by=None,
+             **fields):
+        return _add(db, FocusArea(child_id=child.id, title=title, category=category, status=status, plan=plan,
+                                  created_by=created_by.id if created_by is not None else None, **fields))
+
+    return make
+
+
+@pytest.fixture
+def make_observation(db):
+    def make(child, text="Built a tower with a friend", created_by=None, **fields):
+        fields.setdefault("source", "quick")
+        fields.setdefault("observed_at", datetime.now(timezone.utc))
+        return _add(db, Observation(child_id=child.id, observation=text,
+                                    created_by=created_by.id if created_by is not None else None, **fields))
+
+    return make
+
+
+@pytest.fixture
+def make_assessment(db):
+    def make(child, created_by=None, kind="initial", **fields):
+        uid = created_by.id if created_by is not None else None
+        fields.setdefault("teacher_id", uid)
+        return _add(db, TeacherAssessment(child_id=child.id, kind=kind, created_by=uid, **fields))
+
+    return make
+
+
+@pytest.fixture
+def make_ai_suggestion(db):
+    def make(child, kind="understanding", input=None, output=None, created_by=None, **fields):
+        fields.setdefault("provider", "template")
+        fields.setdefault("is_template", True)
+        return _add(db, AiSuggestion(child_id=child.id, kind=kind, input=input or {"child": "[child]"},
+                                     output=output or {"summary": "Enjoys building with others."},
+                                     created_by=created_by.id if created_by is not None else None, **fields))
+
+    return make
 
 
 def _new_client(**kwargs) -> TestClient:

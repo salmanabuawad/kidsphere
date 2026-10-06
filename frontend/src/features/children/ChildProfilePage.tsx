@@ -1,7 +1,8 @@
 import { useState, type ReactNode } from "react";
 import { Link, useParams } from "react-router";
-import { ArrowRight, ClipboardCheck, Lightbulb, Pencil, PencilLine, Plus } from "lucide-react";
-import { Alert, Badge, Button, ButtonLink, Card, CardBody, CardHeader, NumeralBlock, PageSkeleton } from "@/components/ui";
+import { ArrowRight, ClipboardCheck, ClipboardList, HeartHandshake, Lightbulb, Lock, MessageCircleQuestion, Pencil, PencilLine, Phone, Plus, Utensils } from "lucide-react";
+import { ProvenanceBadge, ProvenanceBadges, type ProvenanceEntry } from "@/components/source";
+import { Alert, Badge, Button, ButtonLink, Card, CardBody, CardHeader, Chip, NumeralBlock, PageSkeleton } from "@/components/ui";
 import {
   AttentionIcon,
   ContentIcon,
@@ -14,22 +15,26 @@ import {
   WhatHelpsIcon,
   type KidIcon,
 } from "@/icons";
+import { pick } from "@/i18n/config";
 import { useI18n } from "@/i18n/I18nProvider";
 import { useFormat } from "@/lib/format";
 import { useOptions } from "@/lib/options";
 import { paths } from "@/lib/paths";
+import { useSourceModel } from "@/lib/sourceModel";
 import { useErrorMessage } from "@/lib/useAction";
 import { useFetch } from "@/lib/useFetch";
 import { cn } from "@/lib/utils";
-import { childUrl, displayName, isStaffView, WIZARD_REVIEW_STEP } from "./api";
+import { assessmentsUrl, childUrl, displayName, isStaffView, profileUrl, WIZARD_REVIEW_STEP } from "./api";
 import { ChildLayout } from "./ChildLayout";
-import { ProfileItemChips, SECTION_CHIP_CAP } from "./ProfileItems";
-import type { ChildDetail, ChildStaffView, FocusAreaSummary, FocusPlan, ProfileItem } from "./types";
+import { mainFirst, nextReviewOn, overviewData, type GoodToKnowRow, type OverviewData, type ReviewLater } from "./overview";
+import { ProfileItemChips, SECTION_CHIP_CAP, useProfileItem } from "./ProfileItems";
+import { parentSaid } from "./provenance";
+import type { AssessmentsSummary, ChildDetail, ChildStaffView, FocusAreaSummary, FocusPlan, ProfileItem, ProfileResponse } from "./types";
 
 const PLAN_STEPS: (keyof FocusPlan)[] = ["strength_used", "need", "adaptation", "what_we_will_do", "success_looks_like"];
 const MAX_FOCUS = 3;
 
-/** /children/:id — who this child is, at a glance (spec §13). */
+/** /children/:id — the Overview tab: who this child is, at a glance (spec §13, COVERAGE-MATRIX §5.1). */
 export function ChildProfilePage() {
   const { id = "" } = useParams();
   const { t } = useI18n();
@@ -62,57 +67,52 @@ export function ChildProfilePage() {
 
   return (
     <ChildLayout childId={id} child={child} onChanged={reload}>
-      {isStaffView(child) ? <StaffProfile child={child} /> : <BasicProfile strengths={child.strengths} interests={child.interests} />}
+      {isStaffView(child) ? <StaffOverview child={child} /> : <BasicProfile strengths={child.strengths} interests={child.interests} />}
     </ChildLayout>
   );
 }
 
-function StaffProfile({ child }: { child: ChildStaffView }) {
+/**
+ * The staff Overview, in the observation model's closing order (OM-D99-01): who the child
+ * is (from the heart, good to know) → where they succeed (strengths, interests, what
+ * helps) → where they need support and what we do (current focus, recent development) →
+ * next steps. Every chip carries visible provenance badges (X-22).
+ */
+function StaffOverview({ child }: { child: ChildStaffView }) {
   const { t } = useI18n();
-  const name = displayName(child);
-  const wizardDone = !!child.wizard.completed_at;
+  // The questionnaire, the quick baseline and the section statuses (WP2-PQ), and the
+  // teacher observation cycle (WP2-TO). Both are optional: the Overview works without them.
+  const profile = useFetch<ProfileResponse>(profileUrl(child.id));
+  const assessments = useFetch<AssessmentsSummary>(assessmentsUrl(child.id));
+  const data = overviewData(profile.data, assessments.data ?? null);
+  const lists = {
+    strengths: profile.data?.strengths ?? child.strengths,
+    interests: profile.data?.interests ?? child.interests,
+    what_helps: profile.data?.what_helps ?? child.what_helps,
+  };
   const summary = typeof child.current_understanding?.summary === "string" ? child.current_understanding.summary : null;
 
   return (
     <div className="space-y-5">
-      {!wizardDone ? (
-        <Alert
-          tone="tip"
-          title={t("children.profile.continueTitle")}
-          action={
-            <ButtonLink to={paths.childEdit(child.id, child.wizard.step || 1)} variant="secondary" icon={<PencilLine aria-hidden />}>
-              {t("children.profile.continueAction")}
-            </ButtonLink>
-          }
-        >
-          {t("children.profile.continueBody", { name })}
-        </Alert>
-      ) : (
-        !child.baseline.exists && (
-          <Alert
-            tone="info"
-            title={t("children.profile.baselineTitle")}
-            action={
-              <ButtonLink to={paths.childEdit(child.id, WIZARD_REVIEW_STEP)} variant="secondary" icon={<ClipboardCheck aria-hidden />}>
-                {t("children.profile.baselineAction")}
-              </ButtonLink>
-            }
-          >
-            {t("children.profile.baselineBody", { name })}
-          </Alert>
-        )
-      )}
-
       <ActionBar childId={child.id} />
+
+      {(data.heart || data.describeWords.length > 0) && <HeartCard data={data} name={displayName(child)} />}
+
+      <GoodToKnowCard child={child} data={data} />
 
       <Section
         title={t("children.profile.strengths")}
         tone="strength"
         empty={t("children.profile.strengthsEmpty")}
         list="strengths"
-        items={child.strengths}
+        items={lists.strengths}
         editTo={paths.childEdit(child.id, 2)}
-      />
+        mainFirst
+      >
+        {data.appreciate && (
+          <QuoteBlock label={t("children.overview.appreciate")} text={data.appreciate.text} provenance={[parentSaid(data.appreciate.stamp)]} />
+        )}
+      </Section>
 
       <div className="grid gap-5 lg:grid-cols-2">
         <Section
@@ -120,7 +120,7 @@ function StaffProfile({ child }: { child: ChildStaffView }) {
           tone="interest"
           empty={t("children.profile.interestsEmpty")}
           list="interests"
-          items={child.interests}
+          items={lists.interests}
           editTo={paths.childEdit(child.id, 2)}
         />
         <Section
@@ -128,7 +128,7 @@ function StaffProfile({ child }: { child: ChildStaffView }) {
           tone="helps"
           empty={t("children.profile.whatHelpsEmpty")}
           list="what_helps"
-          items={child.what_helps}
+          items={lists.what_helps}
           editTo={paths.childEdit(child.id, 3)}
         />
       </div>
@@ -139,7 +139,11 @@ function StaffProfile({ child }: { child: ChildStaffView }) {
 
       {summary && (
         <Card>
-          <CardHeader title={t("children.profile.understanding")} icon={<Lightbulb className="text-ink-muted" aria-hidden />} />
+          <CardHeader
+            title={t("children.profile.understanding")}
+            icon={<Lightbulb className="text-ink-muted" aria-hidden />}
+            action={<ProvenanceBadges kinds={["teacher_approved"]} />}
+          />
           <CardBody>
             <p className="leading-relaxed text-ink" dir="auto">
               {summary}
@@ -147,6 +151,8 @@ function StaffProfile({ child }: { child: ChildStaffView }) {
           </CardBody>
         </Card>
       )}
+
+      <PromptsCard child={child} data={data} cycleId={assessments.data?.current?.id ?? null} />
     </div>
   );
 }
@@ -185,6 +191,173 @@ function ActionBar({ childId }: { childId: string }) {
         {t("children.profile.actions.edit")}
       </ButtonLink>
     </nav>
+  );
+}
+
+/** A labelled quote of someone's own words, with its provenance. */
+function QuoteBlock({ label, text, provenance, className }: { label: ReactNode; text: string; provenance: ProvenanceEntry[]; className?: string }) {
+  return (
+    <figure className={cn("rounded-md bg-tray px-4 py-3", className)}>
+      <figcaption className="text-caption mb-1 flex flex-wrap items-center gap-2 font-medium text-ink-muted">
+        <span>{label}</span>
+        <ProvenanceBadges kinds={provenance} />
+      </figcaption>
+      <blockquote className="text-base leading-relaxed text-ink" dir="auto">
+        {text}
+      </blockquote>
+    </figure>
+  );
+}
+
+/**
+ * "From the heart" (PQ-HRT-01): the family's one message before the teacher meets the
+ * child, prominent and staff only (PARENT SAID). "In the family's words" (PQ-INTRO-05)
+ * sits under it. Never shown to other families and never used in content.
+ */
+function HeartCard({ data, name }: { data: OverviewData; name: string }) {
+  const { t } = useI18n();
+  const resolve = useProfileItem();
+  const heart = data.heart;
+  return (
+    <section aria-labelledby="section-heart" className="rounded-lg border border-line bg-accent-soft p-4 md:p-5" data-testid="section-heart">
+      <div className="mb-3 flex flex-wrap items-center gap-3">
+        <span className="flex size-8 shrink-0 items-center justify-center rounded-sm bg-surface [&_svg]:size-5" aria-hidden>
+          <HeartHandshake className="text-accent-strong" />
+        </span>
+        <h2 id="section-heart" className="font-display text-title min-w-0 font-semibold text-ink">
+          {t("children.overview.heart.title")}
+        </h2>
+        <span className="text-caption ms-auto inline-flex items-center gap-1 text-ink-muted">
+          <Lock className="size-3.5" aria-hidden />
+          {t("children.overview.heart.private")}
+        </span>
+      </div>
+      {heart && (
+        <figure>
+          <figcaption className="text-caption mb-1 flex flex-wrap items-center gap-2 text-ink-muted">
+            <span>{t("children.overview.heart.intro", { name })}</span>
+            <ProvenanceBadges kinds={[parentSaid(heart.stamp)]} />
+          </figcaption>
+          <blockquote className="font-display text-lg leading-relaxed text-ink" dir="auto">
+            {heart.message}
+          </blockquote>
+        </figure>
+      )}
+      {data.describeWords.length > 0 && (
+        <div className={cn(heart && "mt-4")}>
+          <p className="text-caption mb-2 flex flex-wrap items-center gap-2 font-medium text-ink-muted">
+            <span>{t("children.overview.familyWords")}</span>
+            <ProvenanceBadges kinds={["parent_said"]} />
+          </p>
+          <ul className="flex flex-wrap gap-2">
+            {data.describeWords.map((w, i) => (
+              <li key={w.key ?? w.custom ?? i}>
+                <Chip tone="outline">{resolve("describe_words", w).label}</Chip>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </section>
+  );
+}
+
+/**
+ * "Good to know" (§5.1): the most important thing, routines to keep, what may be too much,
+ * the teacher's "remember" lines, and staff-only indicators for food and health notes that
+ * link to the Parent View. The health text itself is never shown here.
+ */
+function GoodToKnowCard({ child, data }: { child: ChildStaffView; data: OverviewData }) {
+  const { t } = useI18n();
+  const { optionLabel } = useOptions();
+  const contact = child.parent_contact?.trim();
+  const reach = data.reach;
+  if (!data.goodToKnow.length && !data.foodNote && !data.medicalNote && !reach) return null;
+  const health = paths.childParentView(child.id, { section: "health" });
+  return (
+    <section aria-labelledby="section-good-to-know" className="rounded-lg border border-line bg-surface p-4 md:p-5" data-testid="section-good-to-know">
+      <SectionHeading id="section-good-to-know" title={t("children.overview.goodToKnow.title")} tile="bg-tray" icon={<ClipboardList className="text-ink" />} />
+      {data.goodToKnow.length > 0 && (
+        <dl className="space-y-3">
+          {data.goodToKnow.map((row, i) => (
+            <GoodToKnowItem key={`${row.key}-${i}`} row={row} />
+          ))}
+        </dl>
+      )}
+      {(data.foodNote || data.medicalNote) && (
+        <ul className={cn("flex flex-wrap gap-2", data.goodToKnow.length > 0 && "mt-4")} aria-label={t("children.overview.goodToKnow.notes")}>
+          {data.foodNote && (
+            <li>
+              <NoteLink to={health} icon={<Utensils aria-hidden />} testId="note-food">
+                {t("children.overview.goodToKnow.foodNote")}
+              </NoteLink>
+            </li>
+          )}
+          {data.medicalNote && (
+            <li>
+              <NoteLink to={health} icon={<AttentionIcon size={16} aria-hidden />} testId="note-medical">
+                {t("children.overview.goodToKnow.medicalNote")}
+              </NoteLink>
+            </li>
+          )}
+        </ul>
+      )}
+      {reach && (
+        <div className="mt-4 rounded-md bg-tray px-4 py-3" data-testid="reach-family">
+          <p className="text-caption mb-1 flex flex-wrap items-center gap-2 font-medium text-ink-muted">
+            <Phone className="size-4" aria-hidden />
+            <span>{t("children.overview.goodToKnow.reach")}</span>
+            <ProvenanceBadges kinds={[parentSaid(reach.stamp)]} />
+          </p>
+          <p className="text-ink">
+            {[...reach.channels.filter((k) => k !== "other").map((k) => optionLabel("contact_preferences", k)), ...(reach.other ? [reach.other] : [])].join(" · ")}
+          </p>
+          {reach.matters && (
+            <p className="mt-1 text-sm text-ink" dir="auto">
+              <span className="font-medium">{t("children.overview.goodToKnow.communication")}: </span>
+              {reach.matters}
+            </p>
+          )}
+          {contact && (
+            <p className="mt-1 text-sm text-ink-muted">
+              {t("children.overview.goodToKnow.contact")}: <bdi dir="ltr">{contact}</bdi>
+            </p>
+          )}
+        </div>
+      )}
+    </section>
+  );
+}
+
+function GoodToKnowItem({ row }: { row: GoodToKnowRow }) {
+  const { t } = useI18n();
+  const provenance: ProvenanceEntry[] = row.from === "parent" ? [parentSaid(row.stamp)] : ["teacher_observed"];
+  return (
+    <div data-testid={`good-${row.key}`}>
+      <dt className="text-caption flex flex-wrap items-center gap-2 font-medium text-ink-muted">
+        <span>{t(`children.overview.goodToKnow.${row.key}`)}</span>
+        <ProvenanceBadges kinds={provenance} />
+      </dt>
+      <dd className="mt-0.5 text-base leading-relaxed text-ink" dir="auto">
+        {row.text}
+      </dd>
+    </div>
+  );
+}
+
+function NoteLink({ to, icon, children, testId }: { to: string; icon: ReactNode; children: ReactNode; testId: string }) {
+  const { t } = useI18n();
+  return (
+    <Link
+      to={to}
+      data-testid={testId}
+      className="inline-flex min-h-11 items-center gap-2 rounded-sm border border-line-strong bg-surface px-3 text-sm font-medium text-ink underline-offset-2 hover:bg-tray hover:underline [&_svg]:size-4"
+    >
+      {icon}
+      <span>{children}</span>
+      <span className="sr-only"> · {t("children.overview.goodToKnow.openParentView")}</span>
+      <ArrowRight className="text-ink-muted rtl:-scale-x-100" aria-hidden />
+    </Link>
   );
 }
 
@@ -235,6 +408,8 @@ function Section({
   list,
   items,
   editTo,
+  mainFirst: splitMain,
+  children,
 }: {
   title: string;
   tone: keyof typeof SECTION_TONES;
@@ -243,10 +418,17 @@ function Section({
   items: ProfileItem[];
   /** The wizard step that edits this section (staff). */
   editTo?: string;
+  /** Strengths: the 3 main strengths (⭐, quick baseline) come first, on their own row. */
+  mainFirst?: boolean;
+  children?: ReactNode;
 }) {
   const { t } = useI18n();
   const id = `section-${list}`;
   const { tile, Icon } = SECTION_TONES[tone];
+  const ordered = splitMain ? mainFirst(items) : items;
+  const main = splitMain ? ordered.filter((i) => i.main) : [];
+  const rest = splitMain ? ordered.filter((i) => !i.main) : ordered;
+  const staff = !!editTo;
   return (
     <section aria-labelledby={id} className="rounded-lg border border-line bg-surface p-4 md:p-5" data-testid={id}>
       <SectionHeading
@@ -271,8 +453,20 @@ function Section({
       {items.length === 0 ? (
         <p className="text-sm text-ink-muted">{empty}</p>
       ) : (
-        <ProfileItemChips list={list} items={items} tone={tone} cap={SECTION_CHIP_CAP} />
+        <div className="space-y-3">
+          {main.length > 0 && (
+            <div data-testid="main-strengths">
+              <p className="text-caption mb-2 font-semibold text-ink">
+                <span aria-hidden>⭐ </span>
+                {t("children.overview.mainStrengths")}
+              </p>
+              <ProfileItemChips list={list} items={main} tone={tone} provenance={staff} />
+            </div>
+          )}
+          {rest.length > 0 && <ProfileItemChips list={list} items={rest} tone={tone} cap={SECTION_CHIP_CAP} provenance={staff} />}
+        </div>
       )}
+      {children && <div className="mt-4">{children}</div>}
     </section>
   );
 }
@@ -296,7 +490,7 @@ function FocusCard({ child }: { child: ChildStaffView }) {
                 {t("children.profile.focusFull")}
               </Badge>
             )}
-            <ButtonLink to={paths.childFocus(child.id)} size="sm" variant="soft" icon={full ? undefined : <Plus aria-hidden />}>
+            <ButtonLink to={paths.childPlan(child.id)} size="sm" variant="soft" icon={full ? undefined : <Plus aria-hidden />}>
               {t("children.profile.manageFocus")}
             </ButtonLink>
           </div>
@@ -315,12 +509,14 @@ function FocusCard({ child }: { child: ChildStaffView }) {
   );
 }
 
-/** A focus row (spec 6.7): `focus-soft`, a 22px grape numeral block, the title in ink. */
+/** A focus row (spec 6.7): `focus-soft`, a 22px grape numeral block, the title in ink, the next review date. */
 function FocusRow({ childId, focus, n }: { childId: string; focus: FocusAreaSummary; n: number }) {
   const { t } = useI18n();
   const { optionLabel } = useOptions();
+  const { formatDate } = useFormat();
   const [open, setOpen] = useState(false);
   const steps = PLAN_STEPS.filter((k) => typeof focus.plan?.[k] === "string" && focus.plan[k]!.trim());
+  const review = nextReviewOn(focus);
   return (
     <li className="rounded-md bg-focus-soft px-3 py-2">
       <div className="flex min-h-11 flex-wrap items-center gap-x-3 gap-y-2">
@@ -329,7 +525,14 @@ function FocusRow({ childId, focus, n }: { childId: string; focus: FocusAreaSumm
           <p className="font-semibold text-ink" dir="auto">
             {focus.title}
           </p>
-          <p className="text-caption text-ink-muted">{optionLabel("priority_categories", focus.category)}</p>
+          <p className="text-caption flex flex-wrap gap-x-3 text-ink-muted">
+            <span>{optionLabel("priority_categories", focus.category)}</span>
+            {review && (
+              <span data-testid="focus-next-review">
+                {t("children.overview.nextReview", { date: formatDate(`${review}T12:00:00`) })}
+              </span>
+            )}
+          </p>
           {focus.description && (
             <p className="mt-1 text-sm text-ink" dir="auto">
               {focus.description}
@@ -382,11 +585,12 @@ function FocusRow({ childId, focus, n }: { childId: string; focus: FocusAreaSumm
 
 /** Recent development (spec 6.7): the latest quote in a tray well, with the note-quote icon. */
 function RecentCard({ child }: { child: ChildStaffView }) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const { formatDate } = useFormat();
-  const { item, labelOf } = useOptions();
+  const { item } = useOptions();
   const latest = child.latest_observation;
   const support = latest?.support_level ? item("support_levels", latest.support_level) : undefined;
+  const supportLabel = support ? pick(support.short ?? support.label, locale) || support.key : null;
   return (
     <section aria-labelledby="section-recent" className="rounded-lg border border-line bg-surface p-4 md:p-5">
       <SectionHeading
@@ -409,14 +613,153 @@ function RecentCard({ child }: { child: ChildStaffView }) {
           </blockquote>
           <figcaption className="text-caption tabular mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-ink-muted">
             <span>{t("children.profile.lastObserved", { date: formatDate(latest.observed_at) })}</span>
-            {support && <span className="rounded-sm bg-surface px-2 py-0.5 font-medium text-ink">{labelOf(support)}</span>}
+            {supportLabel && <span className="rounded-sm bg-surface px-2 py-0.5 font-medium text-ink">{supportLabel}</span>}
+            <ProvenanceBadge kind="teacher_observed" />
           </figcaption>
         </figure>
       )}
-      <Link to={paths.childTimeline(child.id)} className="mt-3 inline-flex min-h-11 items-center gap-1 text-sm font-semibold text-brand hover:underline">
-        {t("children.profile.timelineLink")}
-        <ArrowRight className="size-4 rtl:-scale-x-100" aria-hidden />
-      </Link>
+      <div className="mt-3 flex flex-wrap gap-x-5">
+        <Link to={paths.childObservations(child.id)} className="inline-flex min-h-11 items-center gap-1 text-sm font-semibold text-brand underline-offset-2 hover:underline">
+          {t("children.overview.allObservations")}
+          <ArrowRight className="size-4 rtl:-scale-x-100" aria-hidden />
+        </Link>
+        <Link to={paths.childDevelopmentTimeline(child.id)} className="inline-flex min-h-11 items-center gap-1 text-sm font-semibold text-brand underline-offset-2 hover:underline">
+          {t("children.profile.timelineLink")}
+          <ArrowRight className="size-4 rtl:-scale-x-100" aria-hidden />
+        </Link>
+      </div>
     </section>
+  );
+}
+
+/**
+ * Next steps (§5.1 "Prompts"): finish the profile, create the baseline, the quick baseline
+ * once the family's answers arrived, the open question for the family, and everything a
+ * teacher marked "Review later". Nothing is shown when there is nothing to do.
+ */
+function PromptsCard({ child, data, cycleId }: { child: ChildStaffView; data: OverviewData; cycleId: string | null }) {
+  const { t } = useI18n();
+  const { optionLabel } = useOptions();
+  const name = displayName(child);
+  const wizardDone = !!child.wizard.completed_at;
+  const prompts: ReactNode[] = [];
+
+  if (!wizardDone)
+    prompts.push(
+      <Alert
+        key="continue"
+        tone="tip"
+        title={t("children.profile.continueTitle")}
+        action={
+          <ButtonLink to={paths.childEdit(child.id, child.wizard.step || 1)} variant="secondary" icon={<PencilLine aria-hidden />}>
+            {t("children.profile.continueAction")}
+          </ButtonLink>
+        }
+      >
+        {t("children.profile.continueBody", { name })}
+      </Alert>,
+    );
+  else if (!child.baseline.exists)
+    prompts.push(
+      <Alert
+        key="baseline"
+        tone="info"
+        title={t("children.profile.baselineTitle")}
+        action={
+          <ButtonLink to={paths.childEdit(child.id, WIZARD_REVIEW_STEP)} variant="secondary" icon={<ClipboardCheck aria-hidden />}>
+            {t("children.profile.baselineAction")}
+          </ButtonLink>
+        }
+      >
+        {t("children.profile.baselineBody", { name })}
+      </Alert>,
+    );
+
+  if (data.questionnaireSubmitted && !data.bridgeStarted)
+    prompts.push(
+      <Alert
+        key="quick-baseline"
+        tone="info"
+        title={t("children.overview.prompts.familyAnswersTitle")}
+        action={
+          <ButtonLink to={paths.childQuickBaseline(child.id)} variant="secondary" icon={<ClipboardCheck aria-hidden />}>
+            {t("children.overview.prompts.quickBaselineAction")}
+          </ButtonLink>
+        }
+      >
+        {t("children.overview.prompts.familyAnswersBody", { name })}
+      </Alert>,
+    );
+
+  if (data.openQuestion)
+    prompts.push(
+      <div key="question" className="rounded-md bg-tray px-4 py-3" data-testid="open-question">
+        <p className="text-caption mb-1 flex flex-wrap items-center gap-2 font-medium text-ink-muted">
+          <MessageCircleQuestion className="size-4" aria-hidden />
+          <span>{t("children.overview.prompts.openQuestion")}</span>
+          <ProvenanceBadges kinds={["teacher_observed"]} />
+        </p>
+        <p className="text-base text-ink" dir="auto">
+          {data.openQuestion}
+        </p>
+        <Link to={paths.childQuickBaseline(child.id)} className="mt-1 inline-flex min-h-11 items-center text-sm font-semibold text-brand underline underline-offset-2">
+          {t("children.overview.prompts.openQuestionAction")}
+        </Link>
+      </div>,
+    );
+
+  if (data.reviewLaterDomains.length || data.reviewLater.length)
+    prompts.push(
+      <div key="later" className="rounded-md bg-tray px-4 py-3" data-testid="review-later">
+        <p className="text-caption mb-2 font-medium text-ink-muted">{t("children.overview.prompts.reviewLater")}</p>
+        <ul className="flex flex-wrap gap-2">
+          {data.reviewLaterDomains.map((d) => (
+            <li key={`d:${d}`}>
+              <PromptLink to={paths.childTeacherObservation(child.id, { cycle: cycleId, domain: d })}>{optionLabel("observation_domains", d)}</PromptLink>
+            </li>
+          ))}
+          {data.reviewLater.map((s) => (
+            <li key={`${s.perspective}:${s.section}`}>
+              <ReviewLaterSection childId={child.id} later={s} />
+            </li>
+          ))}
+        </ul>
+      </div>,
+    );
+
+  if (!prompts.length) return null;
+  return (
+    <section aria-labelledby="section-prompts" className="space-y-3" data-testid="section-prompts">
+      <h2 id="section-prompts" className="font-display text-title font-semibold text-ink">
+        {t("children.overview.prompts.title")}
+      </h2>
+      {prompts}
+    </section>
+  );
+}
+
+function PromptLink({ to, children }: { to: string; children: ReactNode }) {
+  return (
+    <Link
+      to={to}
+      className="inline-flex min-h-11 items-center gap-1 rounded-sm border border-line-strong bg-surface px-3 text-sm font-medium text-ink underline-offset-2 hover:underline"
+    >
+      <span dir="auto">{children}</span>
+      <ArrowRight className="size-4 text-ink-muted rtl:-scale-x-100" aria-hidden />
+    </Link>
+  );
+}
+
+/** A questionnaire / quick-baseline section marked "Review later", labelled from the source registry. */
+function ReviewLaterSection({ childId, later }: { childId: string; later: ReviewLater }) {
+  const { t } = useI18n();
+  const sm = useSourceModel();
+  if (later.perspective === "teacher")
+    return <PromptLink to={paths.childQuickBaseline(childId)}>{t("children.overview.prompts.quickBaseline")}</PromptLink>;
+  const sec = sm.section("parent_questionnaire", later.section);
+  return (
+    <PromptLink to={paths.childParentView(childId, { section: later.section })}>
+      {sec ? sm.label(sec) : t("children.overview.prompts.parentSection")}
+    </PromptLink>
   );
 }

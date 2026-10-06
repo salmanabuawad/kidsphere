@@ -1,3 +1,8 @@
 -r requirements.txt
 pytest==9.1.1
 httpx==0.28.1
+# PDF report tests: text/glyph extraction, page checks, bidi expectations, page-1 PNG previews.
+pdfminer.six==20260107
+pypdf==6.19.0
+python-bidi==0.6.11
+pypdfium2==5.14.0

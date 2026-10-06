@@ -1,0 +1,3 @@
+{% if block.ordered %}<ol class="plain-list">{% else %}<ul class="plain-list">{% endif %}
+{% for text in block["items"] %}<li dir="{{ text | autodir(meta.dir) }}">{{ text | iso }}</li>{% endfor %}
+{% if block.ordered %}</ol>{% else %}</ul>{% endif %}

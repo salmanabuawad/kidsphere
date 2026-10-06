@@ -5,9 +5,15 @@ POST /api/children/{id}/development-reviews          ``ReviewCreate``
 
 Statuses and decisions are checked against the option lists in
 app/data/options.json (``review_statuses``, ``review_decisions``,
-``validation_statuses``). The teacher is in control: any status may be saved;
+``validation_statuses``) and app/data/lists/plan.json (``improvement_levels``,
+``involvement_steps``). The teacher is in control: any status may be saved;
 the service only *warns* when a status other than needs_more_observation rests
 on fewer than 3 observations since the latest baseline (B6).
+
+``follow_up`` is the Domain 16 block (``FollowUpIn``): reassessment date, overall
+improvement, areas, what worked, what to change and the next step with the family
+or the team (``involvement``). Involvement and the reassessment date are entered by
+the teacher only: no AI schema has them, and AI suggestions never fill them.
 """
 import uuid
 from datetime import date, timedelta
@@ -17,13 +23,23 @@ from pydantic import AfterValidator, BeforeValidator, Field, model_validator
 
 from app import vocab
 from app.schemas.common import Language, StrictModel
-from app.schemas.focus import Description, FocusCreate, FocusPlan, Title
+from app.schemas.focus import Description, FocusCreate, FocusPlan, FollowUpOn, Title
 
 REVIEW_STATUSES = ("improving", "some_improvement", "no_clear_change", "needs_more_observation", "no_longer_needed")
 REVIEW_DECISIONS = ("keep", "pause", "close", "edit", "create")
 VALIDATION_STATUSES = ("supported", "partially_supported", "needs_more_observation", "may_need_refinement")
 BASELINE_LISTS = ("strengths", "interests", "what_helps", "support_needs", "focus")
 NEEDS_MORE = "needs_more_observation"
+# Domain 16 (lists/plan.json). The observation model's משמעותי / חלקי / ללא שינוי map onto
+# the review statuses (docs/terminology.md §3).
+IMPROVEMENT_LEVELS = ("significant", "partial", "no_change", "needs_more_observation")
+IMPROVEMENT_TO_REVIEW_STATUS = {
+    "significant": "improving",
+    "partial": "some_improvement",
+    "no_change": "no_clear_change",
+    "needs_more_observation": NEEDS_MORE,
+}
+INVOLVEMENT_STEPS = ("none", "consultation", "joint_plan", "referral_as_needed")
 # Lists a what_helps key may come from (the merged profile list draws on all of them).
 WHAT_HELPS_LISTS = ("what_helps", "calming_helps", "transition_helps", "sensitivity_helps", "sad_helps")
 
@@ -36,7 +52,13 @@ def _blank_to_none(v):
 
 def _option(list_name: str):
     def check(v):
-        if v is not None and not vocab.is_valid(list_name, v):
+        if v is None:
+            return v
+        try:
+            known = vocab.is_valid(list_name, v)
+        except KeyError:  # the option list itself is missing
+            known = False
+        if not known:
             raise ValueError(f"unknown {list_name} key {v!r}")
         return v
 
@@ -117,6 +139,73 @@ class FocusEdit(StrictModel):
     title: Title = None
     description: Description = None
     plan: FocusPlan | None = None
+    follow_up_on: FollowUpOn = None
+
+
+ImprovementLevel = Annotated[
+    Literal["significant", "partial", "no_change", "needs_more_observation"],
+    AfterValidator(_option("improvement_levels")),
+]
+InvolvementStep = Annotated[
+    Literal["none", "consultation", "joint_plan", "referral_as_needed"],
+    AfterValidator(_option("involvement_steps")),
+]
+ObservationDomain = Annotated[str, AfterValidator(_option("observation_domains"))]
+
+
+class ImprovementIn(StrictModel):
+    """האם חל שיפור? משמעותי / חלקי / ללא שינוי (+ needs more observation) and the elaboration."""
+
+    level: ImprovementLevel | None = None
+    note: OptText(1000) = None
+
+
+class AreasIn(StrictModel):
+    """באילו תחומים? The observation domains and/or goals concerned, plus words."""
+
+    domains: Annotated[list[ObservationDomain], Field(max_length=13)] = Field(default_factory=list)
+    focus_area_ids: Annotated[list[uuid.UUID], Field(max_length=13)] = Field(default_factory=list)
+    text: OptText(500) = None
+
+
+class InvolvementIn(StrictModel):
+    """Parent / team involvement: teacher-entered only. ``note`` gets a wording warning, never a block."""
+
+    key: InvolvementStep | None = None
+    note: OptText(1000) = None
+
+
+class FollowUpIn(StrictModel):
+    """Domain 16, stored as ``development_reviews.follow_up``."""
+
+    reassessment_on: FollowUpOn = None
+    improvement: ImprovementIn | None = None
+    areas: AreasIn | None = None
+    what_worked: OptText(1000) = None
+    what_to_change: OptText(1000) = None
+    involvement: InvolvementIn | None = None
+
+    def stored(self) -> dict | None:
+        """The full block (every field present, empty ones null), or None when nothing was given."""
+        imp = self.improvement or ImprovementIn()
+        areas = self.areas or AreasIn()
+        inv = self.involvement or InvolvementIn()
+        data = {
+            "reassessment_on": self.reassessment_on.isoformat() if self.reassessment_on else None,
+            "improvement": {"level": imp.level, "note": imp.note},
+            "areas": {
+                "domains": list(dict.fromkeys(areas.domains)),
+                "focus_area_ids": list(dict.fromkeys(str(i) for i in areas.focus_area_ids)),
+                "text": areas.text,
+            },
+            "what_worked": self.what_worked,
+            "what_to_change": self.what_to_change,
+            "involvement": {"key": inv.key, "note": inv.note},
+        }
+        empty = (not data["reassessment_on"] and not any(data["improvement"].values())
+                 and not any(data["areas"].values()) and not data["what_worked"] and not data["what_to_change"]
+                 and not any(data["involvement"].values()))
+        return None if empty else data
 
 
 class FocusReviewIn(StrictModel):
@@ -170,7 +259,10 @@ class ReviewCreate(StrictModel):
     understanding: UnderstandingIn
     baseline_validation: list[BaselineValidationIn] = Field(default_factory=list, max_length=60)
     focus_review: list[FocusReviewIn] = Field(default_factory=list, max_length=13)
+    follow_up: FollowUpIn | None = None
     ai_suggested: bool = False
+    # The /suggest result this review started from (its outcome becomes accepted or edited).
+    ai_suggestion_id: uuid.UUID | None = None
 
     @model_validator(mode="after")
     def _summaries(self):

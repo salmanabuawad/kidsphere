@@ -4,11 +4,18 @@ Status: final direction for the design-system artifact and the app restyle. It s
 
 Every hex value below was computed with the WCAG 2.x relative-luminance formula, plus OKLCH, OKLab ΔE×100 and CIEDE2000 (checked against Sharma's reference pairs). Fonts were checked against api.fontsource.org, the npm registry, unpkg file listings and the Google Fonts css2 endpoint on 2026-10-05.
 
+**Revision 2026-10-06: accents from the logo.** The accents now match the new logo (`project/assets/Logos`; sampled from the artwork: navy "Kid" `#003468`–`#124478`, teal "Sphere" `#0A9EA3`, sky `#44C2F2`, green `#4CC2A6`, star orange `#F99E3A`).
+
+- `brand` moves from toy-block blue `#005DBD` / `#8CB4FE` to the logo navy `#0D3D72` / `#90BAF1` (ΔE00 1.0 from the sampled `#0B3A6E`, nudged so it stays ΔE00 15 from `ink`). `brand-strong`, `brand-soft` and the brand lips follow it.
+- A new teal family joins it: `accent`, `accent-strong`, `accent-soft` and `on-accent` (37 colour tokens instead of 33). Teal is used sparingly: the paint of the active nav icon, because a navy paint sits at 1.44:1 against the graphite outline and stops reading as "coloured in", and the focus `ring`, which is now the `accent-strong` teal so focus never looks like a navy selection border.
+- `paint-sky`, `paint-leaf` and `paint-tangerine` become the logo's sky, green and star orange. `paint-sun`, `paint-berry`, `paint-grape`, the grounds, the inks and every meaning tint are unchanged.
+- Every table in §2 was recomputed for the new values in both themes: all 89 text pairs hold 4.5:1 and all 23 non-text pairs hold 3:1, with the same lowest pairs as before (`on-paint` on `paint-berry` 4.56, `line-strong` on `tray` 3.36).
+
 ---
 
 ## 1. Concept
 
-**The block corner, painted.** KidSphere is laid out like the wooden block set every kindergarten owns, sitting on a pale birch-plywood floor: the toy-blue arch, the sunflower ball, the berry cube, the leaf block, the grape flag and the tangerine cylinder. Everything is built from four primitives: the rounded square (block), the circle (ball), the rounded triangle (roof) and the arch (bridge).
+**The block corner, painted.** KidSphere is laid out like the wooden block set every kindergarten owns, sitting on a pale birch-plywood floor: the navy arch, the sunflower ball, the berry cube, the leaf block, the grape flag and the tangerine cylinder. Everything is built from four primitives: the rounded square (block), the circle (ball), the rounded triangle (roof) and the arch (bridge).
 
 Colour works on three layers, and each layer has one job:
 
@@ -21,18 +28,18 @@ Colour works on three layers, and each layer has one job:
    - Worth a look: tangerine eye, never red
 3. **Paint (kid layer).** A family of saturated `paint-*` colours appears only as the fill of one primitive inside an ink-outlined icon, on the painted picture blocks of the child's game board, in the present-mode finish tower, on stickers and in empty-state scenes. This is what makes KidSphere read as a kids' app, and it is small and bounded enough that a busy teacher never sees a toy store.
 
-**Brand.** `brand` is toy-block blue: hue 256 in light, a greener primary blue than the SaaS indigo, set beside a red-leaning grape for focus at hue 318–322. No saturated colour (OKLCH chroma above 0.05) sits in the AI-violet band (hue 280–305), and nothing uses a gradient.
+**Brand.** `brand` is the logo's navy ("Kid"): OKLCH hue 254.5 in light and 255.4 in dark, set beside a red-leaning grape for focus at hue 318–322. `accent` is the logo's teal ("Sphere") at hue 199, the second voice, used sparingly (§2.1). No saturated colour (OKLCH chroma above 0.05) sits in the AI-violet band (hue 280–305), and nothing uses a gradient.
 
 **Present mode.** When the tablet is handed to a child, the same blocks get big: chunky toy-key buttons with a hard lip, picture cards with a 3px colouring-book ink outline on painted blocks, a sun-yellow round arrow button, and a finish screen where a block tower stacks itself. There are no points and no scores, and nothing is ever red or an X.
 
 ### Kid signals (what makes it read as a kids' app)
 
-1. The palette is the wooden block set: toy blue, sunflower, berry, leaf, grape, tangerine and sky on birch plywood. In dark mode it becomes a warm walnut night playroom, not a generic navy-grey.
+1. The palette is the wooden block set, tuned to the logo: navy and teal, sunflower, berry, leaf green, grape, star-orange tangerine and sky on birch plywood. In dark mode it becomes a warm walnut night playroom, not a generic navy-grey.
 2. **Painted icons.** A custom set of 27 glyphs made only from blocks, balls, roofs and arches. Each has a graphite outline and exactly one primitive painted a saturated colour. The paint "slips" 1.5 units downward, like a hand-painted block.
 3. The strengths icon is a gold star sticker: a sunflower-painted star in a graphite outline.
 4. **Block chips.** Rounded-square chips, not pills. The focus chip leads with a solid grape numeral block (1, 2, 3).
 5. **Block lips.** Primary buttons, tappable cards and kid tiles have a hard, unblurred bottom lip and sink when pressed, like pressing a wooden block into sand.
-6. The centre Observe action is a big toy-blue block raised out of the bottom bar.
+6. The centre Observe action is a big navy block raised out of the bottom bar.
 7. Rounded display type: Fredoka for Latin and Hebrew, Baloo Bhaijaan 2 for Arabic. It is used on titles and on everything a child sees.
 8. Kindergarten objects stand in for features:
    - toy box: content
@@ -53,7 +60,7 @@ Colour works on three layers, and each layer has one job:
 
 ## 2. Colour tokens
 
-33 tokens: 31 with values plus 2 aliases. In tokens.json, `success` is written literally as `"{helps-ink}"` and `warning` as `"{attention-ink}"`, never as a hex value with a note.
+37 tokens: 35 with values plus 2 aliases (33 before the 2026-10-06 revision added the four `accent` tokens). In tokens.json, `success` is written literally as `"{helps-ink}"` and `warning` as `"{attention-ink}"`, never as a hex value with a note.
 
 The CSS variable is `--<name>`. Tailwind maps each one as `--color-<name>`, so `bg-ground`, `text-ink-muted`, `ring-ring` and so on.
 
@@ -67,12 +74,16 @@ The CSS variable is `--<name>`. Tailwind maps each one as `--color-<name>`, so `
 | `tray` | `#F3EBDD` | `#0E0A07` | Recessed wells: segmented, tab and support-scale tracks, search-field fill, Recent-development quote well, avatar ground, content-type tile, Draft badge, kid Done tile, ghost/secondary hover fill. |
 | `line` | `#E5DACA` | `#4F4740` | Decorative only: card borders, dividers, the bottom-bar top edge, the side-nav inline-end edge. Never the only boundary of a control. |
 | `line-strong` | `#8A7E6C` | `#8F847A` | Control borders: inputs, search, secondary buttons, unselected toggle chips, checkboxes, feedback tiles. Also the kid Done-tile outline, the timeline string, the sheet grabber and upcoming progress dots. At least 3:1 on `ground`, `surface`, `surface-raised` and `tray`. |
-| `ink` | `#1F2233` | `#F3EEE6` | Graphite in light, chalk in dark. All primary text and every icon outline. Reads on `ground`, `surface`, `surface-raised`, `tray`, `brand-soft`, `strength-soft`, `interest-soft`, `helps-soft`, `focus-soft` and `attention-soft`. Also the toast fill and the 3px colouring-book outline of kid tiles. |
-| `ink-muted` | `#57525F` | `#C0B8AD` | Secondary text ("4 years 2 months", dates, helper text, placeholders, counts), inactive nav labels and icon outlines. Reads on the same ten grounds as `ink`. |
-| `brand` | `#005DBD` | `#8CB4FE` | Toy-block blue: "act" and "you are here". As a fill: primary buttons, the centre Observe block, KidButton, check blocks, the current progress dot, and the paint of the active nav icon. As text: links, the active nav label, the soft-button label, the Ready badge and the "Observe" label; reads on `ground`, `surface`, `surface-raised`, `tray`, `brand-soft`. As a border: 2px on the selected segment, tab, feedback tile or picker tile; 4px on the selected kid tile. |
-| `brand-strong` | `#004A9C` | `#AECBFF` | Hover and pressed fill of `brand`. Also the hover label of the soft button. Reads on `ground`, `surface`, `surface-raised`, `tray`, `brand-soft`. |
-| `brand-soft` | `#D1EBFF` | `#1F3559` | Active nav pill and row, soft button, info alert, the selected fill of neutral choices (feedback tiles, content-type picker, the kid Selected tile), the "calm" kid bubble, done progress dots. |
+| `ink` | `#1F2233` | `#F3EEE6` | Graphite in light, chalk in dark. All primary text and every icon outline. Reads on `ground`, `surface`, `surface-raised`, `tray`, `brand-soft`, `accent-soft`, `strength-soft`, `interest-soft`, `helps-soft`, `focus-soft` and `attention-soft`. Also the toast fill and the 3px colouring-book outline of kid tiles. |
+| `ink-muted` | `#57525F` | `#C0B8AD` | Secondary text ("4 years 2 months", dates, helper text, placeholders, counts), inactive nav labels and icon outlines. Reads on the same eleven grounds as `ink`. |
+| `brand` | `#0D3D72` | `#90BAF1` | The logo's navy ("Kid"): "act" and "you are here". As a fill: primary buttons, the centre Observe block, KidButton, check blocks, the current progress dot. As text: links, the active nav label, the soft-button label, the Ready badge and the "Observe" label; reads on `ground`, `surface`, `surface-raised`, `tray`, `brand-soft`. As a border: 2px on the selected segment, tab, feedback tile or picker tile; 4px on the selected kid tile. Navy is close to graphite `ink` (1.44:1), so links in running text are always underlined and the active nav icon is painted `accent`, not `brand`. |
+| `brand-strong` | `#032B56` | `#B5D4FC` | Hover and pressed fill of `brand` (deeper navy in light, paler blue in dark). Also the hover label of the soft button. Reads on `ground`, `surface`, `surface-raised`, `tray`, `brand-soft`. |
+| `brand-soft` | `#D4E4FA` | `#1A3658` | The navy tint: active nav pill and row, soft button, info alert, the selected fill of neutral choices (feedback tiles, content-type picker, the kid Selected tile), the "calm" kid bubble, done progress dots. |
 | `on-brand` | `#FFFFFF` | `#0C121A` | Text and glyphs on solid fills: `brand`, `brand-strong`, `danger`, and any `*-ink` used as a fill (single-select toggle chip, focus numeral block, success check block). |
+| `accent` | `#0A9EA3` | `#35B9BE` | The logo's teal ("Sphere"), the second accent, used sparingly and never for a profile meaning or for selection. Fill only: the paint of the active nav icon (4.82:1 against the graphite outline, where navy would be 1.44:1), the default paint of nav icons outside the nav, and a teal highlight block when a second highlight helps (with `on-accent`). Never text, and never the only boundary of a control (2.76:1 on `tray` in light). |
+| `accent-strong` | `#006E73` | `#7EDDE1` | Teal text and 2px borders for a teal highlight; also the value of `ring`. Reads on `ground`, `surface`, `surface-raised`, `tray`, `accent-soft`. |
+| `accent-soft` | `#B8FCFF` | `#003940` | The teal tint, reserved for a secondary, non-meaning highlight: never selection (`brand-soft`) and never What helps (`helps-soft`). Labels on it are `ink`; `accent-strong` text reads on it. |
+| `on-accent` | `#1F2233` | `#1F2233` | Graphite in both themes: text and glyphs on an `accent` fill. Never white on `accent` (3.26:1 on the logo teal). |
 | `strength-soft` | `#FBE794` | `#433706` | Strengths: chip fill, 32px section tile, selected multi-select chip fill, the kid Hint tile. |
 | `strength-ink` | `#735603` | `#F7D471` | Strengths: 2px selected-chip border, kid Hint dashed ring, single-select fill (with `on-brand`), small tone text. Reads on `strength-soft`, `ground`, `surface`, `surface-raised`, `tray`. |
 | `interest-soft` | `#FFC9D5` | `#4C222D` | Interests: chip fill (with an emoji pod or the heart), section tile, selected chip fill. |
@@ -86,13 +97,13 @@ The CSS variable is `--<name>`. Tailwind maps each one as `--color-<name>`, so `
 | `success` | `{helps-ink}` | `{helps-ink}` | "Saved", "Approved", "Worked well recorded". Used as text, as the 1.5px border of success alerts and the Approved badge (on `surface`), and as the fill of check blocks (with `on-brand`). Always with a check glyph and a word, never on a `helps-soft` fill. Reads on `ground`, `surface`, `surface-raised`. |
 | `warning` | `{attention-ink}` | `{attention-ink}` | System warnings: unsaved changes, offline, video still processing. Always with an alert glyph. Reads on `ground`, `surface`, `surface-raised`, `attention-soft`. |
 | `danger` | `#BE2323` | `#F47C6B` | Errors and destructive confirms only: field error text and the 2px field border, error-alert border and glyph, the Delete confirm fill (with `on-brand`). Never used for anything about a child. Reads on `ground`, `surface`, `surface-raised`, `tray`. There is deliberately no `danger-soft`: error alerts are `surface` with a `danger` border. |
-| `ring` | `#004FB1` | `#98C7FF` | Keyboard focus: a solid 3px outline with a 2px offset on every interactive element. Named `ring`, not `focus-ring`, so it never collides with the Current-focus tone. At least 6.19:1 on every ground. |
+| `ring` | `#006E73` | `#7EDDE1` | Keyboard focus, in the logo's teal (the `accent-strong` value), so focus never looks like a navy selection border: a solid 3px outline with a 2px offset on every interactive element. Named `ring`, not `focus-ring`, so it never collides with the Current-focus tone. At least 4.01:1 on every ground and every tint (`focus-soft` in light is the lowest). |
 | `paint-sun` | `#FDC010` | `#F9C635` | Sunflower paint: the Strengths and Strength Builder stars, the ball in the feedback towers, the kid RoundButton fill, stickers, the finish-tower ball, the baseline timeline bead, kid picture blocks. Fill only; any glyph on it uses `on-paint`. |
 | `paint-berry` | `#EE4E89` | `#F56696` | Berry paint: the Interests heart, the finish-tower cube, kid picture blocks. Fill only. |
-| `paint-leaf` | `#4DB956` | `#61C568` | Leaf paint: the What-helps ticked block, the activity-result bead, the success toast block, kid picture blocks. Fill only. |
+| `paint-leaf` | `#4CC2A6` | `#5FCEB3` | Leaf paint, the logo's green: the What-helps ticked block, the activity-result bead, the success toast block, kid picture blocks. Fill only. |
 | `paint-grape` | `#BC6ECE` | `#C77DD8` | Grape paint: the Current-focus pennant, the Growth Support pot, the focus-change bead, kid picture blocks. Fill only. |
-| `paint-tangerine` | `#FA8927` | `#FA9947` | Tangerine paint: the attention eye iris, the warning toast block, kid picture blocks. Fill only. |
-| `paint-sky` | `#33A7E0` | `#43B5E8` | The non-meaning paint, for everyday things: content-type icons, the present icon, the observation bead and quote icon, the info toast block, empty-state scenes, kid picture blocks. Never a profile meaning. |
+| `paint-tangerine` | `#F99E3A` | `#FCA953` | Tangerine paint, the logo's star orange: the attention eye iris, the warning toast block, kid picture blocks. Fill only. |
+| `paint-sky` | `#44C2F2` | `#5DCDFA` | The logo's sky, the non-meaning paint, for everyday things: content-type icons, the present icon, the observation bead and quote icon, the info toast block, empty-state scenes, kid picture blocks. Never a profile meaning. |
 | `on-paint` | `#1F2233` | `#1F2233` | Graphite, the same value in both themes: glyphs and labels on any paint (toast glyph blocks, the RoundButton arrow and its 3px outline). Reads on every `paint-*` at 4.56:1 or better. |
 
 ### 2.2 The meaning map
@@ -101,7 +112,7 @@ Learn it once; it is the same on every screen.
 
 | Meaning | Tint and ink | Paint (icon fill) | Icon | Word always shown |
 |---|---|---|---|---|
-| Act, "you are here" | `brand-soft` / `brand` | `brand` | (any active nav icon) | button label or nav label |
+| Act, "you are here" | `brand-soft` / `brand` | `accent` (the logo teal; navy would vanish against the outline) | (any active nav icon) | button label or nav label |
 | Strengths | `strength-soft` / `strength-ink` | `paint-sun` | `strengths` (star) | "Strengths" |
 | Interests | `interest-soft` / `interest-ink` | `paint-berry` | `interests` (heart) or the option emoji | "Interests" |
 | What helps | `helps-soft` / `helps-ink` | `paint-leaf` | `what-helps` (ticked block) | "What helps" |
@@ -112,7 +123,8 @@ Learn it once; it is the same on every screen.
 
 ### 2.3 Rules
 
-- **Labels on tints are `ink`.** Tone inks are for borders, rings, single-select fills, numeral blocks and short tone words. Brand text on `brand-soft` (soft button, active nav label, Ready badge) is the one coloured-text-on-tint pair, and it passes at 5.16:1 (light) and 5.89:1 (dark).
+- **Labels on tints are `ink`.** Tone inks are for borders, rings, single-select fills, numeral blocks and short tone words. Brand text on `brand-soft` (soft button, active nav label, Ready badge) is a coloured-text-on-tint pair, and it passes at 8.44:1 (light) and 6.12:1 (dark); its teal twin, `accent-strong` on `accent-soft`, passes at 5.29:1 and 8.03:1. There are no others.
+- **Teal is the second voice, used sparingly.** `accent` (the logo's "Sphere") paints the active nav icon and backs the focus `ring` (as `accent-strong`); it may also mark a secondary, non-meaning highlight. It never carries a profile meaning, never marks selection (that is `brand`) and never replaces navy as "act".
 - **Paint never carries meaning on its own.** On teacher screens a paint appears only inside an ink-outlined icon that sits next to its word. In present mode, paints are pure play colours with no meaning, because no meaning chip, icon or word appears there.
 - **Never red for a child.** Needs, sensitivities, drafts and "keep an eye on" use attention (tangerine). `danger` is only for system errors and delete confirms.
 - **Support scale and feedback are never colour-coded by level** (see §6.8 and §6.11).
@@ -120,7 +132,7 @@ Learn it once; it is the same on every screen.
 
 ### 2.4 WCAG contrast: every text pair (4.5:1 minimum, both themes)
 
-All 81 pairs pass. The lowest is `on-paint` on `paint-berry` in light, at 4.56.
+All 89 pairs pass (81 before the 2026-10-06 revision; the new pairs are `ink` and `ink-muted` on `accent-soft`, `accent-strong` on its five grounds and `on-accent` on `accent`). The lowest is `on-paint` on `paint-berry` in light, at 4.56.
 
 | Text token | On | Light | Ratio | Dark | Ratio |
 |---|---|---|---|---|---|
@@ -133,7 +145,8 @@ All 81 pairs pass. The lowest is `on-paint` on `paint-berry` in light, at 4.56.
 | `ink` | `helps-soft` | #1F2233 on #C3F3CE | 12.76 | #F3EEE6 on #183B23 | 10.77 |
 | `ink` | `focus-soft` | #1F2233 on #EFC4F9 | 10.44 | #F3EEE6 on #3E1946 | 12.70 |
 | `ink` | `attention-soft` | #1F2233 on #FFD1AA | 11.20 | #F3EEE6 on #4E270C | 11.23 |
-| `ink` | `brand-soft` | #1F2233 on #D1EBFF | 12.76 | #F3EEE6 on #1F3559 | 10.62 |
+| `ink` | `brand-soft` | #1F2233 on #D4E4FA | 12.19 | #F3EEE6 on #1A3658 | 10.62 |
+| `ink` | `accent-soft` | #1F2233 on #B8FCFF | 13.79 | #F3EEE6 on #003940 | 10.96 |
 | `ink-muted` | `ground` | #57525F on #FBF6EC | 7.02 | #C0B8AD on #16120E | 9.50 |
 | `ink-muted` | `surface` | #57525F on #FFFFFF | 7.56 | #C0B8AD on #27221D | 8.03 |
 | `ink-muted` | `surface-raised` | #57525F on #FFFFFF | 7.56 | #C0B8AD on #312B26 | 7.11 |
@@ -143,25 +156,32 @@ All 81 pairs pass. The lowest is `on-paint` on `paint-berry` in light, at 4.56.
 | `ink-muted` | `helps-soft` | #57525F on #C3F3CE | 6.13 | #C0B8AD on #183B23 | 6.34 |
 | `ink-muted` | `focus-soft` | #57525F on #EFC4F9 | 5.02 | #C0B8AD on #3E1946 | 7.47 |
 | `ink-muted` | `attention-soft` | #57525F on #FFD1AA | 5.38 | #C0B8AD on #4E270C | 6.61 |
-| `ink-muted` | `brand-soft` | #57525F on #D1EBFF | 6.13 | #C0B8AD on #1F3559 | 6.25 |
-| `brand` | `ground` | #005DBD on #FBF6EC | 5.91 | #8CB4FE on #16120E | 8.94 |
-| `brand` | `surface` | #005DBD on #FFFFFF | 6.36 | #8CB4FE on #27221D | 7.56 |
-| `brand` | `surface-raised` | #005DBD on #FFFFFF | 6.36 | #8CB4FE on #312B26 | 6.70 |
-| `brand` | `tray` | #005DBD on #F3EBDD | 5.37 | #8CB4FE on #0E0A07 | 9.46 |
-| `brand` | `brand-soft` | #005DBD on #D1EBFF | 5.16 | #8CB4FE on #1F3559 | 5.89 |
-| `brand-strong` | `ground` | #004A9C on #FBF6EC | 7.93 | #AECBFF on #16120E | 11.35 |
-| `brand-strong` | `surface` | #004A9C on #FFFFFF | 8.54 | #AECBFF on #27221D | 9.59 |
-| `brand-strong` | `surface-raised` | #004A9C on #FFFFFF | 8.54 | #AECBFF on #312B26 | 8.50 |
-| `brand-strong` | `tray` | #004A9C on #F3EBDD | 7.21 | #AECBFF on #0E0A07 | 12.00 |
-| `brand-strong` | `brand-soft` | #004A9C on #D1EBFF | 6.93 | #AECBFF on #1F3559 | 7.47 |
-| `on-brand` | `brand` | #FFFFFF on #005DBD | 6.36 | #0C121A on #8CB4FE | 9.02 |
-| `on-brand` | `brand-strong` | #FFFFFF on #004A9C | 8.54 | #0C121A on #AECBFF | 11.45 |
+| `ink-muted` | `brand-soft` | #57525F on #D4E4FA | 5.86 | #C0B8AD on #1A3658 | 6.25 |
+| `ink-muted` | `accent-soft` | #57525F on #B8FCFF | 6.63 | #C0B8AD on #003940 | 6.45 |
+| `brand` | `ground` | #0D3D72 on #FBF6EC | 10.11 | #90BAF1 on #16120E | 9.30 |
+| `brand` | `surface` | #0D3D72 on #FFFFFF | 10.89 | #90BAF1 on #27221D | 7.86 |
+| `brand` | `surface-raised` | #0D3D72 on #FFFFFF | 10.89 | #90BAF1 on #312B26 | 6.97 |
+| `brand` | `tray` | #0D3D72 on #F3EBDD | 9.20 | #90BAF1 on #0E0A07 | 9.84 |
+| `brand` | `brand-soft` | #0D3D72 on #D4E4FA | 8.44 | #90BAF1 on #1A3658 | 6.12 |
+| `brand-strong` | `ground` | #032B56 on #FBF6EC | 13.14 | #B5D4FC on #16120E | 12.23 |
+| `brand-strong` | `surface` | #032B56 on #FFFFFF | 14.15 | #B5D4FC on #27221D | 10.34 |
+| `brand-strong` | `surface-raised` | #032B56 on #FFFFFF | 14.15 | #B5D4FC on #312B26 | 9.17 |
+| `brand-strong` | `tray` | #032B56 on #F3EBDD | 11.95 | #B5D4FC on #0E0A07 | 12.94 |
+| `brand-strong` | `brand-soft` | #032B56 on #D4E4FA | 10.97 | #B5D4FC on #1A3658 | 8.05 |
+| `accent-strong` | `ground` | #006E73 on #FBF6EC | 5.61 | #7EDDE1 on #16120E | 11.82 |
+| `accent-strong` | `surface` | #006E73 on #FFFFFF | 6.04 | #7EDDE1 on #27221D | 9.99 |
+| `accent-strong` | `surface-raised` | #006E73 on #FFFFFF | 6.04 | #7EDDE1 on #312B26 | 8.85 |
+| `accent-strong` | `tray` | #006E73 on #F3EBDD | 5.10 | #7EDDE1 on #0E0A07 | 12.50 |
+| `accent-strong` | `accent-soft` | #006E73 on #B8FCFF | 5.29 | #7EDDE1 on #003940 | 8.03 |
+| `on-brand` | `brand` | #FFFFFF on #0D3D72 | 10.89 | #0C121A on #90BAF1 | 9.38 |
+| `on-brand` | `brand-strong` | #FFFFFF on #032B56 | 14.15 | #0C121A on #B5D4FC | 12.34 |
 | `on-brand` | `danger` | #FFFFFF on #BE2323 | 6.08 | #0C121A on #F47C6B | 7.11 |
 | `on-brand` | `strength-ink` | #FFFFFF on #735603 | 6.86 | #0C121A on #F7D471 | 13.08 |
 | `on-brand` | `interest-ink` | #FFFFFF on #A42056 | 7.19 | #0C121A on #FDAEBE | 10.72 |
 | `on-brand` | `helps-ink` | #FFFFFF on #206B38 | 6.52 | #0C121A on #95DFA4 | 11.97 |
 | `on-brand` | `focus-ink` | #FFFFFF on #7C2D88 | 8.11 | #0C121A on #D79FE9 | 8.97 |
 | `on-brand` | `attention-ink` | #FFFFFF on #984500 | 6.59 | #0C121A on #FAB27B | 10.49 |
+| `on-accent` | `accent` | #1F2233 on #0A9EA3 | 4.82 | #1F2233 on #35B9BE | 6.62 |
 | `strength-ink` | `ground` | #735603 on #FBF6EC | 6.37 | #F7D471 on #16120E | 12.96 |
 | `strength-ink` | `surface` | #735603 on #FFFFFF | 6.86 | #F7D471 on #27221D | 10.96 |
 | `strength-ink` | `surface-raised` | #735603 on #FFFFFF | 6.86 | #F7D471 on #312B26 | 9.71 |
@@ -194,10 +214,10 @@ All 81 pairs pass. The lowest is `on-paint` on `paint-berry` in light, at 4.56.
 | `ground` | `ink` | #FBF6EC on #1F2233 | 14.60 | #16120E on #F3EEE6 | 16.13 |
 | `on-paint` | `paint-sun` | #1F2233 on #FDC010 | 9.53 | #1F2233 on #F9C635 | 9.86 |
 | `on-paint` | `paint-berry` | #1F2233 on #EE4E89 | 4.56 | #1F2233 on #F56696 | 5.41 |
-| `on-paint` | `paint-leaf` | #1F2233 on #4DB956 | 6.28 | #1F2233 on #61C568 | 7.26 |
+| `on-paint` | `paint-leaf` | #1F2233 on #4CC2A6 | 7.17 | #1F2233 on #5FCEB3 | 8.22 |
 | `on-paint` | `paint-grape` | #1F2233 on #BC6ECE | 4.69 | #1F2233 on #C77DD8 | 5.51 |
-| `on-paint` | `paint-tangerine` | #1F2233 on #FA8927 | 6.50 | #1F2233 on #FA9947 | 7.28 |
-| `on-paint` | `paint-sky` | #1F2233 on #33A7E0 | 5.80 | #1F2233 on #43B5E8 | 6.75 |
+| `on-paint` | `paint-tangerine` | #1F2233 on #F99E3A | 7.48 | #1F2233 on #FCA953 | 8.19 |
+| `on-paint` | `paint-sky` | #1F2233 on #44C2F2 | 7.67 | #1F2233 on #5DCDFA | 8.67 |
 | `success` | `ground` | #206B38 on #FBF6EC | 6.05 | #95DFA4 on #16120E | 11.86 |
 | `success` | `surface` | #206B38 on #FFFFFF | 6.52 | #95DFA4 on #27221D | 10.03 |
 | `success` | `surface-raised` | #206B38 on #FFFFFF | 6.52 | #95DFA4 on #312B26 | 8.89 |
@@ -209,7 +229,7 @@ All 81 pairs pass. The lowest is `on-paint` on `paint-berry` in light, at 4.56.
 
 ### 2.5 Non-text contrast (3:1 minimum): control borders, focus ring, selection borders
 
-All 13 rows pass. The tone inks used as rings or borders, `ink` used as icon outlines and kid-tile outlines, and `on-brand` used as glyphs all already pass the 4.5:1 text table above.
+All 23 rows pass (13 before the 2026-10-06 revision). The focus `ring` is checked against every ground and every tint, because a control can sit on any of them; the lowest is `focus-soft` in light, at 4.01. The tone inks used as rings or borders, `ink` used as icon outlines and kid-tile outlines, and `on-brand` used as glyphs all already pass the 4.5:1 text table above.
 
 | Element | Against | Light | Ratio | Dark | Ratio |
 |---|---|---|---|---|---|
@@ -217,15 +237,25 @@ All 13 rows pass. The tone inks used as rings or borders, `ink` used as icon out
 | `line-strong` | `surface` | #8A7E6C on #FFFFFF | 3.98 | #8F847A on #27221D | 4.31 |
 | `line-strong` | `surface-raised` | #8A7E6C on #FFFFFF | 3.98 | #8F847A on #312B26 | 3.82 |
 | `line-strong` | `tray` | #8A7E6C on #F3EBDD | 3.36 | #8F847A on #0E0A07 | 5.40 |
-| `ring` | `ground` | #004FB1 on #FBF6EC | 7.08 | #98C7FF on #16120E | 10.60 |
-| `ring` | `surface` | #004FB1 on #FFFFFF | 7.63 | #98C7FF on #27221D | 8.96 |
-| `ring` | `surface-raised` | #004FB1 on #FFFFFF | 7.63 | #98C7FF on #312B26 | 7.94 |
-| `ring` | `tray` | #004FB1 on #F3EBDD | 6.44 | #98C7FF on #0E0A07 | 11.22 |
-| `ring` | `brand-soft` | #004FB1 on #D1EBFF | 6.19 | #98C7FF on #1F3559 | 6.98 |
-| `brand` | `ground` | #005DBD on #FBF6EC | 5.91 | #8CB4FE on #16120E | 8.94 |
-| `brand` | `surface` | #005DBD on #FFFFFF | 6.36 | #8CB4FE on #27221D | 7.56 |
-| `brand` | `surface-raised` | #005DBD on #FFFFFF | 6.36 | #8CB4FE on #312B26 | 6.70 |
-| `brand` | `tray` | #005DBD on #F3EBDD | 5.37 | #8CB4FE on #0E0A07 | 9.46 |
+| `ring` | `ground` | #006E73 on #FBF6EC | 5.61 | #7EDDE1 on #16120E | 11.82 |
+| `ring` | `surface` | #006E73 on #FFFFFF | 6.04 | #7EDDE1 on #27221D | 9.99 |
+| `ring` | `surface-raised` | #006E73 on #FFFFFF | 6.04 | #7EDDE1 on #312B26 | 8.85 |
+| `ring` | `tray` | #006E73 on #F3EBDD | 5.10 | #7EDDE1 on #0E0A07 | 12.50 |
+| `ring` | `strength-soft` | #006E73 on #FBE794 | 4.88 | #7EDDE1 on #433706 | 7.45 |
+| `ring` | `interest-soft` | #006E73 on #FFC9D5 | 4.19 | #7EDDE1 on #4C222D | 8.46 |
+| `ring` | `helps-soft` | #006E73 on #C3F3CE | 4.90 | #7EDDE1 on #183B23 | 7.89 |
+| `ring` | `focus-soft` | #006E73 on #EFC4F9 | 4.01 | #7EDDE1 on #3E1946 | 9.30 |
+| `ring` | `attention-soft` | #006E73 on #FFD1AA | 4.30 | #7EDDE1 on #4E270C | 8.22 |
+| `ring` | `brand-soft` | #006E73 on #D4E4FA | 4.68 | #7EDDE1 on #1A3658 | 7.78 |
+| `ring` | `accent-soft` | #006E73 on #B8FCFF | 5.29 | #7EDDE1 on #003940 | 8.03 |
+| `brand` | `ground` | #0D3D72 on #FBF6EC | 10.11 | #90BAF1 on #16120E | 9.30 |
+| `brand` | `surface` | #0D3D72 on #FFFFFF | 10.89 | #90BAF1 on #27221D | 7.86 |
+| `brand` | `surface-raised` | #0D3D72 on #FFFFFF | 10.89 | #90BAF1 on #312B26 | 6.97 |
+| `brand` | `tray` | #0D3D72 on #F3EBDD | 9.20 | #90BAF1 on #0E0A07 | 9.84 |
+| `accent-strong` | `ground` | #006E73 on #FBF6EC | 5.61 | #7EDDE1 on #16120E | 11.82 |
+| `accent-strong` | `surface` | #006E73 on #FFFFFF | 6.04 | #7EDDE1 on #27221D | 9.99 |
+| `accent-strong` | `surface-raised` | #006E73 on #FFFFFF | 6.04 | #7EDDE1 on #312B26 | 8.85 |
+| `accent-strong` | `tray` | #006E73 on #F3EBDD | 5.10 | #7EDDE1 on #0E0A07 | 12.50 |
 
 
 ### 2.6 Boundaries and fills that are decorative by design
@@ -242,15 +272,19 @@ These pairs are reported for completeness. They are not text or control boundari
 | RoundButton boundary | 14.60 | 11.67 | Light theme: the 3px `on-paint` outline against `ground`. Dark theme: the `paint-sun` fill against `ground`. |
 | `paint-*` vs `surface` | 1.65–3.45 | 5.42–9.87 | Paint is a fill inside an `ink` outline, which is at least 10:1 on every ground. Paint never carries text unless the text is `on-paint`. |
 | Paint vs its own tone tile (ΔE00) | 14.7–26.4 | 40.8–59.0 | Sun on `strength-soft` is the closest pair. Every pair is above the ΔE00 12 threshold of the cut-out rule (§5.2). |
+| `accent` vs `ground` / `surface` / `tray` | 3.03 / 3.26 / 2.76 | 7.84 / 6.63 / 8.29 | `accent` is a fill only: an icon paint inside an `ink` outline (4.82:1 against graphite in light), or a highlight block labelled `on-accent`. Teal text and borders use `accent-strong` (5.10:1 or better). |
+| `brand` vs `ink` | 1.44 | 1.74 | Navy and graphite are close, so `brand` never marks a link by colour alone (links in running text are underlined) and never paints an icon under an `ink` outline: the active nav icon takes `accent`. |
+| `accent-soft` vs `surface` | 1.14 | 1.24 | A tint, like the tone tints; any highlight on it also carries a word. |
 
 ### 2.7 Tone separation (fixes the must_fix tint and ink collisions)
 
 These tables use CIEDE2000 (ΔE00) and OKLab ΔE×100 (ΔEok). Targets:
 
 - Every `-soft` is at least ΔEok 8 from `surface` in light.
-- Any two tones are at least ΔEok 6 and ΔE00 12 apart.
+- Any two tones are at least ΔE00 12 apart in both themes, and ΔEok 6 apart in light.
 - `focus-soft` and `brand-soft` are at least ΔE00 15 apart in both themes.
-- Easily confused inks are at least ΔE00 15 apart.
+- `accent-soft` is at least ΔE00 12 from `helps-soft` and from `brand-soft` in both themes, so teal never reads as What helps or as selection.
+- Easily confused inks are at least ΔE00 15 apart, including `brand` and `ink` (navy and graphite).
 
 Light-theme OKLCH chroma of the tints:
 
@@ -261,7 +295,8 @@ Light-theme OKLCH chroma of the tints:
 | `helps-soft` | 0.070 |
 | `focus-soft` | 0.085 |
 | `attention-soft` | 0.073 |
-| `brand-soft` | 0.039 |
+| `brand-soft` | 0.035 |
+| `accent-soft` | 0.067 |
 
 | Tint pair | Light ΔE00 | Light ΔEok | Dark ΔE00 | Dark ΔEok |
 |---|---|---|---|---|
@@ -269,46 +304,60 @@ Light-theme OKLCH chroma of the tints:
 | strength / helps | 20.4 | 8.8 | 19.2 | 6.4 |
 | strength / focus | 47.2 | 18.4 | 41.1 | 15.1 |
 | strength / attention | 15.0 | 7.0 | 14.6 | 5.3 |
-| strength / brand-soft | 34.7 | 13.9 | 36.2 | 13.5 |
+| strength / brand-soft | 35.6 | 13.9 | 35.4 | 13.3 |
+| strength / accent-soft | 30.7 | 13.9 | 27.7 | 10.3 |
 | interest / helps | 42.7 | 13.3 | 41.4 | 11.9 |
 | interest / focus | 12.9 | 6.0 | 13.4 | 6.7 |
 | interest / attention | 20.4 | 6.7 | 17.1 | 5.4 |
-| interest / brand-soft | 29.6 | 9.9 | 23.7 | 10.8 |
+| interest / brand-soft | 24.5 | 8.5 | 25.3 | 11.1 |
+| interest / accent-soft | 44.9 | 14.3 | 39.6 | 11.6 |
 | helps / focus | 35.2 | 16.1 | 34.1 | 15.0 |
 | helps / attention | 28.7 | 10.5 | 31.6 | 9.9 |
-| helps / brand-soft | 23.4 | 8.0 | 29.6 | 10.5 |
+| helps / brand-soft | 25.0 | 8.6 | 28.9 | 10.1 |
+| **helps / accent-soft** | **14.9** | 6.2 | **15.4** | 5.4 |
 | focus / attention | 32.2 | 12.4 | 30.0 | 11.9 |
-| **focus / brand-soft** | **21.6** | 10.1 | **17.6** | 9.1 |
-| attention / brand-soft | 29.1 | 11.7 | 31.7 | 13.6 |
+| **focus / brand-soft** | **18.7** | 8.6 | **19.2** | 9.6 |
+| focus / accent-soft | 33.0 | 15.1 | 28.5 | 12.3 |
+| attention / brand-soft | 27.2 | 10.9 | 31.9 | 13.7 |
+| attention / accent-soft | 32.8 | 14.2 | 32.7 | 12.1 |
+| **brand-soft / accent-soft** | **17.0** | 6.6 | **16.4** | 5.3 |
 | strength-soft / surface | 22.5 | 12.9 | 16.3 | 10.1 |
 | interest-soft / surface | 20.1 | 13.0 | 18.3 | 8.4 |
 | helps-soft / surface | 20.2 | 10.6 | 20.5 | 8.6 |
 | focus-soft / surface | 23.1 | 15.2 | 23.6 | 9.9 |
 | attention-soft / surface | 19.5 | 13.1 | 16.4 | 8.7 |
-| brand-soft / surface | 11.8 | 8.2 | 20.6 | 11.0 |
+| brand-soft / surface | 11.5 | 9.3 | 20.3 | 11.0 |
+| accent-soft / surface | 18.5 | 8.6 | 19.3 | 8.7 |
+
+In dark, some tint pairs sit below ΔEok 6 (strength / attention 5.3, interest / attention 5.4, helps / accent-soft 5.4, brand-soft / accent-soft 5.3): the dark tints have little chroma room, and each of those pairs stays above ΔE00 14.
 
 Closest ink pairs, by ΔE00 (light / dark):
 
 | Ink pair | Light | Dark |
 |---|---|---|
+| `brand` / `ink` | 15.3 | 26.5 |
 | `attention-ink` / `danger` | 16.2 | 18.7 |
 | `strength-ink` / `attention-ink` | 16.7 | 17.1 |
 | `interest-ink` / `focus-ink` | 17.2 | 17.8 |
 | `interest-ink` / `danger` | 18.9 | 17.7 |
-| `brand` / `focus-ink` | 26.8 | 23.2 |
+| `accent-strong` / `helps-ink` | 21.0 | 20.6 |
+| `brand` / `accent-strong` | 26.1 | 21.0 |
+| `brand` / `focus-ink` | 24.7 | 23.9 |
 
-All other pairs are above 24.
+All other pairs of coloured inks are above 24. `brand` is the sampled logo navy `#0B3A6E` nudged by ΔE00 1.0 to `#0D3D72`, which lifts `brand` / `ink` from 14.6 to 15.3.
 
 Hue placement (OKLCH degrees):
 
 | Colour | Hue |
 |---|---|
 | danger | 27–30 |
-| attention | 50–62 |
+| attention and tangerine | 50–64 |
 | strength | 85–96 |
 | helps | 145–152 |
-| sky | 232–235 |
-| brand | 241–262 |
+| leaf paint (the logo green) | 175 |
+| accent (the logo teal) | 198–208 |
+| sky (the logo sky) | 228 |
+| brand (the logo navy) | 254–256 |
 | focus and grape | 318–322 |
 | interest | 2–6 |
 
@@ -437,7 +486,7 @@ Chips and avatars are rounded squares (blocks), never pills or circles.
 |---|---|---|---|
 | `shadow-lip` | `0 2px 0 0 rgb(31 34 51 / 0.14)` | `0 2px 0 0 rgb(0 0 0 / 0.55)` | Tappable cards, secondary and danger buttons, the selected segment or tab block, selected feedback tiles |
 | `shadow-lip-lg` | `0 4px 0 0 rgb(31 34 51 / 0.18)` | `0 4px 0 0 rgb(0 0 0 / 0.60)` | Card hover, kid ChoiceCards, RoundButton, plain KidButton |
-| `shadow-lip-brand` | `0 3px 0 0 #033B7A` | `0 3px 0 0 #4D70B2` | Primary buttons, brand KidButton, the centre Observe block |
+| `shadow-lip-brand` | `0 3px 0 0 #011A3A` | `0 3px 0 0 #4C73A5` | Primary buttons, brand KidButton, the centre Observe block (a deeper navy under the navy fill in light, a mid blue under the pale blue in dark) |
 | `shadow-sheet` | `0 12px 32px -12px rgb(31 34 51 / 0.30), 0 -6px 20px -14px rgb(31 34 51 / 0.20)` | `0 12px 32px -12px rgb(0 0 0 / 0.70), 0 -6px 20px -14px rgb(0 0 0 / 0.50)` | Dialogs, bottom sheets, toasts, menus |
 
 **Dark depth** does not rely on lips. It comes from the 1px `line` card border (2.05:1 against `ground`) and the surface steps (`surface` is 1.18:1 and `surface-raised` 1.33:1 against `ground`).
@@ -506,7 +555,7 @@ No loops, no idle bobbing, no confetti.
 | `story`, `video`, `game`, `activity`, `pack`, `present`, `note-quote` | `ink` | `paint-sky` |
 | `worked-well`, `partly`, `did-not-work` | `ink` | `paint-sun` on the ball, the same for all three |
 | Nav icon, inactive | `ink-muted` | None |
-| Nav icon, active (bottom-bar pill, side-nav row) | `ink` | `brand` on the designated primitive ("coloured in") |
+| Nav icon, active (bottom-bar pill, side-nav row) | `ink` | `accent` on the designated primitive ("coloured in"): the logo teal, 4.82:1 against the graphite outline, where the navy `brand` would be 1.44:1 |
 | Nav icon used at 48px or more (empty states) | `ink` | `paint-sky` on the designated primitive |
 | On a solid fill: brand Observe block, primary button, single-select chip, danger | `on-brand` | None (single colour) |
 | On a paint fill: RoundButton, toast glyph block | `on-paint` | None |
@@ -522,14 +571,14 @@ No loops, no idle bobbing, no confetti.
 **Delivery in the app.** One component, `src/components/icons/BlockIcon.tsx` (`<BlockIcon name size active? />`), renders inline SVG with:
 
 - `stroke="var(--ink)"`, or `--ink-muted`, `--on-brand` or `--on-paint` by context
-- `fill="var(--paint-…)"` on the paint shape
+- `fill="var(--paint-…)"` on the paint shape (`var(--accent)` for nav icons)
 - `aria-hidden`, because the label always comes from adjacent text
 
 **Delivery in the design-system artifact.** `assets/Icons/<name>.svg` bakes the light-theme hex values, with no `currentColor`:
 
 - outline `#1F2233`
 - paint in its light hex
-- nav icons exported in their active state, with `#005DBD` paint
+- nav icons exported in their active state, with the `accent` paint `#0A9EA3` (`#35B9BE` in `dark/`)
 
 `assets/Icons/README.md` names these inks.
 
@@ -639,7 +688,7 @@ These rules apply to every component:
 
 | Variant | Rest | Hover | Pressed | Rules |
 |---|---|---|---|---|
-| primary | `brand` fill, `on-brand` label and icon, `shadow-lip-brand` | `brand-strong` fill | translateY(2px), lip `0 1px 0 0 #033B7A` (dark `#4D70B2`) | One per view |
+| primary | `brand` fill, `on-brand` label and icon, `shadow-lip-brand` | `brand-strong` fill | translateY(2px), lip `0 1px 0 0 #011A3A` (dark `#4C73A5`) | One per view |
 | secondary | `surface` fill, 1.5px `line-strong` border, `ink` label, `shadow-lip` | `tray` fill | translateY(2px), no lip | Replaces the old `outline` variant and the ink-filled `secondary` (keep `outline` as an alias) |
 | soft | `brand-soft` fill, `brand` label, no border, no lip | `brand-strong` label plus an inset 1.5px `brand` ring | translateY(1px) | Second-rank actions: View development, the Edit profile sheet |
 | ghost | Transparent, `ink-muted` label | `tray` fill, `ink` label | `tray` fill | Cancel, toolbars, tertiary actions |
@@ -779,7 +828,7 @@ A tappable Card, min-height 72, padding 12 / 16, laid out as a grid: avatar | te
 - **Track.** `tray` fill, `radius-md`, 4px padding, 4px gap, about 52px tall overall. Three equal segments, each at least 44px tall.
 - **Unselected segment.** Transparent, `label` 500 in `ink-muted`; hover turns the label `ink`.
 - **Selected segment:**
-  - a `surface` block with a 2px `brand` border (5.37:1 on `tray` in light, 9.46:1 in dark)
+  - a `surface` block with a 2px `brand` border (9.20:1 on `tray` in light, 9.84:1 in dark)
   - `shadow-lip`
   - a leading 16px Check in `brand`
   - label at 600 in `ink`
@@ -862,7 +911,7 @@ Disabled: opacity 0.4, no lip.
 #### RoundButton (next, back, replay)
 
 - **Box.** A 72px circle (80 at md), `radius-round`.
-- **Default.** `paint-sun` fill, a 3px `on-paint` outline, `arrow-next` at 36px in `on-paint`, `shadow-lip-lg`. This is the second bright crayon in present mode, beside the brand blue. Pressed: translateY(3px), no lip.
+- **Default.** `paint-sun` fill, a 3px `on-paint` outline, `arrow-next` at 36px in `on-paint`, `shadow-lip-lg`. This is the second bright crayon in present mode, beside the brand navy. Pressed: translateY(3px), no lip.
 - **Other variants.**
   - brand: `brand` fill, `on-brand` icon, no outline
   - plain: `surface` fill, 3px `ink` outline, `ink` icon
@@ -968,7 +1017,7 @@ Then a 56px star sticker stamps beside the tower at the inline-end (320ms).
   |---|---|---|---|
   | Inactive | none | `ink-muted` | `ink-muted` outline, no paint |
   | Hover | `tray` | `ink` | as inactive |
-  | Active (`aria-current="page"`) | `brand-soft` | `brand` at 600 | `ink` outline with `brand` paint |
+  | Active (`aria-current="page"`) | `brand-soft` | `brand` at 600 | `ink` outline with `accent` paint |
 - **Footer.** A 1px `line` top border and padding-top 12. It holds:
   - the user block: a 36px avatar, the name in `label` 600 `ink`, the role in `caption` `ink-muted`; it shows as active on the Account page
   - the LocaleSwitcher
@@ -984,7 +1033,7 @@ Then a 56px star sticker stamps beside the tower at the inline-end (320ms).
   | State | Pill | Icon | Label |
   |---|---|---|---|
   | Inactive | none | `ink-muted` outline | `ink-muted` |
-  | Active | `brand-soft` | `ink` outline with `brand` paint | `brand` at 600 |
+  | Active | `brand-soft` | `ink` outline with `accent` paint | `brand` at 600 |
 - **Centre Observe action (raised).**
   - **Block.** A 56px block, not a circle: `radius-md`, `brand` fill.
   - **Glyph.** `observe-add` at 28px in `on-brand`; its bold plus is the ＋.
@@ -1103,7 +1152,7 @@ At most 1152 wide. Padding-inline is 16 on phone and 32 from md up. Padding-bott
 ### 6.19 Tabs
 
 - **Construction.** The same as SupportScale: a `tray` track (`radius-md`, 4px padding). Tabs are at least 44px tall; inactive labels are `label` 500 in `ink-muted`.
-- **Selected tab.** A `surface` block with a 2px `brand` border, `shadow-lip`, a leading 16px Check in `brand`, and the label at 600 in `ink`. This follows the segmented-button convention: the border (5.37:1 on `tray`) plus the check is the non-colour cue.
+- **Selected tab.** A `surface` block with a 2px `brand` border, `shadow-lip`, a leading 16px Check in `brand`, and the label at 600 in `ink`. This follows the segmented-button convention: the border (9.20:1 on `tray`) plus the check is the non-colour cue.
 - **Hover.** The label turns `ink`.
 - **Keyboard.** `role="tablist"`. Arrow keys follow the reading direction; Home and End jump to the ends.
 - **More than 4 tabs.** The track scrolls horizontally with scroll-snap, with no gradient fade.
@@ -1159,7 +1208,7 @@ At most 1152 wide. Padding-inline is 16 on phone and 32 from md up. Padding-bott
 | K1 | Kid appeal | Tints visible and distinct (OKLCH chroma .07–.10, ΔE 8 or more from card, 6 or more between tones; interest pinker, attention more orange, strength more yellow) | §2.7. Light chroma is 0.063–0.105. ΔEok from `surface` is 8.2–15.2. The closest tone pair is ΔEok 6.0 / ΔE00 12.9. Hues: interest 4, attention 62, strength 96. Every `ink` and `ink-muted` pair on the new tints passes (lowest 5.02). |
 | K2 | Kid appeal | Coloured idle state in present mode, all 7 CardStates mapped, never red or an X | §6.10: painted picture blocks on idle tiles, and a full 7-state table (Other and Suggested included) |
 | K3 | Kid appeal | Design the FinishScreen | §6.10: a self-stacking block tower plus a sticker stamp, no counts, static under reduced motion, test ids kept |
-| K4 | Kid appeal | Keep the brand away from the AI-violet look in dark mode | The brand is toy-block blue (hue 256 light, 262 dark), and focus and grape sit at hue 318–322. Nothing falls between hue 280 and 305. Flat fills only. `on-brand` on `brand` is 6.36 (light) and 9.02 (dark). |
+| K4 | Kid appeal | Keep the brand away from the AI-violet look in dark mode | The brand is the logo navy (hue 254.5 light, 255.4 dark) with the logo teal `accent` at hue 199, and focus and grape sit at hue 318–322. Nothing falls between hue 280 and 305. Flat fills only. `on-brand` on `brand` is 10.89 (light) and 9.38 (dark). |
 | K5 | Kid appeal | Separate interest from danger in ink and in tint | `interest-ink` vs `danger` is ΔE00 18.9 (light) and 17.7 (dark). There is no `danger-soft` tint at all, because error alerts are `surface` with a `danger` border. |
 | T1 | Teacher | `focus-soft` vs `brand-soft` 15 or more in both themes | ΔE00 21.6 (light) and 17.6 (dark). The numeral block stays on every focus chip. |
 | T2 | Teacher | Neutral avatars | `tray` ground with `ink` initials, or a photo, and no hashing (§6.6, §6.20) |
@@ -1168,9 +1217,9 @@ At most 1152 wide. Padding-inline is 16 on phone and 32 from md up. Padding-bott
 | T5 | Teacher | Decouple success from What helps | Success alerts and the Approved badge are `surface` with a `success` border, a check and a word. `helps-soft` is never a success ground. |
 | T6 | Teacher | Nav labels at least 13px (14 in Arabic) | Bottom-bar labels use `caption` 500 at 13/16 (14/18 in Arabic); the side nav uses `label` 14 |
 | T7 | Teacher | Present tiles shouldn't rotate through meaning tints | Tile grounds are neutral `surface`. Only the inner picture block rotates, through the saturated play paints, never through the meaning tints. Present mode shows no meaning chips, icons or words, so the paints there carry no meaning. |
-| T8 | Teacher | Document `brand` text on `brand-soft` honestly | §2.3 and §2.4: 5.16 (light) and 5.89 (dark) |
+| T8 | Teacher | Document `brand` text on `brand-soft` honestly | §2.3 and §2.4: 8.44 (light) and 6.12 (dark) since the 2026-10-06 navy (5.16 and 5.89 with the earlier blue) |
 | T9 | Teacher | Card separation in dark; strength vs attention in dark | 1px `line` card border at 2.05:1, `surface` step 1.18:1, and strength-soft vs attention-soft in dark at ΔE00 14.6 |
-| X1 | Technical | Non-colour cue on Tabs and the support scale | A 2px `brand` border (5.37 / 9.46 on `tray`) plus a Check glyph (§6.8, §6.19) |
+| X1 | Technical | Non-colour cue on Tabs and the support scale | A 2px `brand` border (9.20 / 9.84 on `tray`) plus a Check glyph (§6.8, §6.19) |
 | X2 | Technical | Bordered search field | `tray` fill plus a 1.5px `line-strong` border (3.69–3.98 light, 4.31–5.10 dark) |
 | X3 | Technical | Duotone fill disappears (on same-tone tiles and in dark) | Saturated paints replace the pastel fills: 5.42–9.87:1 against dark `surface`, and at least ΔE00 14.7 from their own tile. The cut-out rule is documented (§5.2). |
 | X4 | Technical | Dark separation and dark `line-strong` | Dark `line-strong` `#8F847A` measures 3.82–5.40 (5.40 on `tray`). Dark `line` is 2.05 against `ground`. Surface steps are 1.18 and 1.33. |

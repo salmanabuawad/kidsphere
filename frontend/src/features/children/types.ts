@@ -1,3 +1,5 @@
+import type { ProvenanceEntry } from "@/components/source";
+
 /**
  * Shapes of /api/children (WP-05). Other features may import these via
  * "@/features/children".
@@ -33,6 +35,13 @@ export type ProfileItem = {
   key?: string;
   custom?: string;
   sources?: string[];
+  /**
+   * Derived provenance labels (app.provenance: GET /profile items): plain labels or badge
+   * objects {label, entered_by?, mode?}. When absent, the UI derives them from `sources`.
+   */
+  provenance?: ProvenanceEntry[];
+  /** One of the 3 main strengths from the teacher's quick baseline (⭐ first). */
+  main?: boolean;
   /** what_helps items: the option list the key belongs to (calming_helps, transition_helps, …). */
   list?: string;
   what_happens?: string;
@@ -59,6 +68,8 @@ export type FocusAreaSummary = {
   description: string | null;
   plan: FocusPlan | null;
   created_at: string | null;
+  /** The goal's follow-up date (ISO date; 0002). Older goals may only have plan.review_on. */
+  follow_up_on?: string | null;
 };
 
 export type LatestObservation = {
@@ -122,3 +133,50 @@ export type ChildBasicsInput = Partial<{
   parent_name: string | null;
   parent_contact: string | null;
 }>;
+
+/** An `entered` stamp of a profile section (who typed it, whose answer it is, how). */
+export type EnteredStamp = {
+  by?: string | null;
+  by_name?: string | null;
+  role?: string | null;
+  reported_by?: "parent" | "teacher" | null;
+  at?: string | null;
+  mode?: "self" | "on_behalf" | "meeting" | null;
+};
+
+/** {status, by, at} of one questionnaire / teacher section (absent = not started). */
+export type SectionStatusEntry = { status?: string | null; by?: string | null; at?: string | null; derived?: boolean };
+
+/** One perspective of GET /api/children/{id}/profile (COVERAGE-MATRIX §3.3.1; sections are open JSON). */
+export type PerspectiveData = {
+  sections?: Record<string, Record<string, unknown> | undefined>;
+  entered?: Record<string, EnteredStamp[] | undefined>;
+  section_status?: Record<string, SectionStatusEntry | undefined>;
+  questionnaire?: {
+    status?: "draft" | "submitted" | null;
+    submitted_at?: string | null;
+    entry_mode?: "self" | "on_behalf" | "meeting" | null;
+    [k: string]: unknown;
+  } | null;
+  [k: string]: unknown;
+};
+
+/** GET /api/children/{id}/profile for staff: both perspectives plus the merged lists (with provenance[]). */
+export type ProfileResponse = {
+  child_id: string;
+  perspective?: string;
+  parent_perspective?: PerspectiveData;
+  teacher_perspective?: PerspectiveData;
+  strengths?: ProfileItem[];
+  interests?: ProfileItem[];
+  what_helps?: ProfileItem[];
+  section_status?: unknown;
+  questionnaire?: unknown;
+  [k: string]: unknown;
+};
+
+/** The part of GET /api/children/{id}/teacher-assessments the Overview reads (WP2-TO). */
+export type AssessmentsSummary = {
+  current: { id: string; domains?: Record<string, { status?: string | null } | undefined> } | null;
+  earlier?: unknown[];
+};

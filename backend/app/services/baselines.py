@@ -16,6 +16,12 @@ a DB trigger rejects UPDATE and direct DELETE. ``baseline_data``::
      "focus_areas": [{id, category, suggestion_key, title, description, plan, status, created_at}],
      "wizard_completed_at", "created_by": {id, name, role}, "created_at"}
 
+``GET /children/{id}/baseline`` returns the latest in full and the earlier ones by date,
+with the first baseline ever flagged ``original`` (``original_id``). ``GET
+/children/{id}/baselines/{bid}`` returns any baseline in full (staff only; parents
+get 404), flagged ``original`` / ``latest``, with its first-picture ``summary``: the
+original-vs-latest viewer of the Development tab (X-12).
+
 On the first baseline (no current understanding yet) ``child_profiles.current_understanding``
 is initialised::
 
@@ -24,14 +30,16 @@ is initialised::
 """
 import copy
 from datetime import date
+from types import SimpleNamespace
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app import vocab
+from app import access, vocab
 from app.access import get_child_or_404
 from app.ai.context import first_name, staff_confirmed
 from app.audit import audit
+from app.errors import AppError
 from app.models import Baseline, Child, Class, FocusArea, User
 from app.services.focus_areas import focus_out
 from app.services.profiles import MERGED_LISTS, get_profile_row, iso, perspective
@@ -288,15 +296,52 @@ def list_baselines(db: Session, child_id) -> list[Baseline]:
 
 
 def get_baselines(db: Session, user: User, child_id) -> dict:
+    """The latest baseline in full, the earlier ones by date; the first one ever is the original (X-12)."""
     child = get_child_or_404(db, user, child_id, write=True)
     rows = list_baselines(db, child.id)
+    original_id = rows[-1].id if rows else None
     return {
-        "latest": baseline_out(db, rows[0]) if rows else None,
+        "latest": {**baseline_out(db, rows[0]), "original": rows[0].id == original_id} if rows else None,
         "earlier": [
-            {"id": str(r.id), "created_at": iso(r.created_at), "created_by": _user_ref(db, r.created_by)}
+            {"id": str(r.id), "created_at": iso(r.created_at), "created_by": _user_ref(db, r.created_by),
+             "original": r.id == original_id}
             for r in rows[1:]
         ],
+        "original_id": str(original_id) if original_id else None,
+        "count": len(rows),
     }
+
+
+def first_picture(child: Child, data: dict, lang: str, baseline_id, created_at) -> str | None:
+    """The first-picture summary of a snapshot, worded as when it was created (not stored in it)."""
+    lists = SimpleNamespace(**{name: data.get(name) or [] for name in ("strengths", "interests", "what_helps")})
+    focus = [SimpleNamespace(title=f["title"]) for f in data.get("focus_areas") or []
+             if isinstance(f, dict) and f.get("title")]
+    return initial_understanding(child, lists, focus, lang, baseline_id, created_at).get("summary")
+
+
+def get_baseline(db: Session, user: User, child_id, baseline_id) -> dict:
+    """GET /children/{id}/baselines/{bid}: any baseline in full. Staff only (parents get 404).
+    ``original`` marks the first baseline ever; ``number`` counts from 1 (the original)."""
+    if not access.is_staff(user):
+        raise AppError("NOT_FOUND", "Child not found.")
+    child = get_child_or_404(db, user, child_id, write=True)
+    rows = list(reversed(list_baselines(db, child.id)))  # oldest first
+    wanted = str(baseline_id).strip().lower()
+    index = next((i for i, r in enumerate(rows) if str(r.id) == wanted), None)
+    if index is None:
+        raise AppError("NOT_FOUND")
+    row = rows[index]
+    out = baseline_out(db, row)
+    data = row.baseline_data if isinstance(row.baseline_data, dict) else {}
+    return {"baseline": {
+        **out,
+        "original": index == 0,
+        "latest": index == len(rows) - 1,
+        "number": index + 1,
+        "count": len(rows),
+        "summary": first_picture(child, data, user.language or "en", row.id, row.created_at),
+    }}
 
 
 def baseline_summary(data: dict) -> dict:

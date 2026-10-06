@@ -8,9 +8,19 @@ from types import SimpleNamespace
 
 from sqlalchemy import select, text
 
-from app.ai import build_context, claude_provider
+from app.ai import claude_provider
 from app.config import settings
-from app.models import AuditLog, Baseline, Child, ChildProfile, DevelopmentReview, FocusArea, GeneratedContent
+from app.models import (
+    AI_DOMAIN_VALUES,
+    AiSuggestion,
+    AuditLog,
+    Baseline,
+    ChildProfile,
+    DevelopmentReview,
+    FocusArea,
+    GeneratedContent,
+    RecordVersion,
+)
 
 SCORING = re.compile(r"\d+\s*%|\bscore\b|\bpoints\b", re.IGNORECASE)
 
@@ -92,7 +102,7 @@ def profile_row(db, child):
 # --------------------------------------------------------------------------- suggest
 
 
-def test_suggest_writes_nothing(teacher_client, child, db):
+def test_suggest_writes_only_one_ai_suggestion(teacher_client, teacher, child, db):
     focus_id, baseline_id = setup_child(teacher_client, child)
     observe(teacher_client, child, focus_id)
     observe(teacher_client, child, None, note="Painted with the whole group")
@@ -102,6 +112,11 @@ def test_suggest_writes_nothing(teacher_client, child, db):
     r = teacher_client.post(suggest_url(child), json={"language": "en"})
     assert r.status_code == 200, r.text
     data = r.json()
+    assert data["suggestion_id"] and data["possible_patterns"] == list(data["suggestion"].get("possible_patterns") or [])
+    assert isinstance(data["next_observation_questions"], list)
+    # The Domain 16 follow-up is the teacher's alone: never part of a suggestion.
+    for word in ("involvement", "reassessment_on", "follow_up"):
+        assert word not in r.text
     assert data["provider"] == "template" and data["is_template"] is True
     assert data["baseline"]["id"] == baseline_id
     assert data["observation_count_since_baseline"] == 2
@@ -109,7 +124,7 @@ def test_suggest_writes_nothing(teacher_client, child, db):
     assert [(f["id"], f["observation_count"]) for f in data["focus_areas"]] == [(focus_id, 1)]
     lists = {i["list"] for i in data["baseline_items"]}
     assert lists == {"strengths", "interests", "support_needs", "focus"}
-    assert {"list": "support_needs", "key": "dressing", "custom": None, "label": "Dressing"} in data["baseline_items"]
+    assert {"list": "support_needs", "key": "dressing", "custom": None, "label": "Dressing / undressing"} in data["baseline_items"]
     s = data["suggestion"]
     assert s["summary"] and "Adam" in s["summary"]
     assert set(s) >= {"strengths", "interests", "what_helps", "areas_for_support", "adaptations", "next_steps",
@@ -117,12 +132,28 @@ def test_suggest_writes_nothing(teacher_client, child, db):
     assert not SCORING.search(r.text)
 
     db.expire_all()
-    assert table_counts(db) == before
+    after = table_counts(db)
+    assert after == {**before, "ai_suggestions": before["ai_suggestions"] + 1, "audit_log": before["audit_log"] + 1}
     assert json.dumps(profile_row(db, child).current_understanding, sort_keys=True) == profile_before
+    row = db.get(AiSuggestion, data["suggestion_id"])
+    assert (row.kind, row.outcome, row.provider, row.is_template, row.created_by) == (
+        "understanding", "pending", "template", True, teacher.id)
+    assert row.output == data["suggestion"]
+    # The stored input is the de-identified payload (app.ai.service): no names.
+    sent = json.dumps(row.input, ensure_ascii=False)
+    assert "[child]" in sent and "Adam" not in sent
+    assert "Built a garage with a friend" in sent
+    assert set(row.domains) <= set(AI_DOMAIN_VALUES)
+    audit_row = db.scalars(select(AuditLog).where(AuditLog.action == "review.suggest")).one()
+    assert audit_row.object_id == row.id and audit_row.child_id == child.id
 
-    # No body at all is fine too.
-    assert teacher_client.post(suggest_url(child)).status_code == 200
-    assert table_counts(db) == before
+    # No body at all is fine too; the earlier unused suggestion is discarded.
+    second = teacher_client.post(suggest_url(child))
+    assert second.status_code == 200
+    db.expire_all()
+    assert table_counts(db)["ai_suggestions"] == before["ai_suggestions"] + 2
+    assert db.get(AiSuggestion, data["suggestion_id"]).outcome == "discarded"
+    assert db.get(AiSuggestion, second.json()["suggestion_id"]).outcome == "pending"
 
 
 def test_suggest_does_not_create_a_profile_row(teacher_client, make_child, klass, db):
@@ -415,8 +446,6 @@ def test_timeline_shows_the_review(teacher_client, child):
 
 def test_new_content_uses_the_approved_understanding(teacher_client, child, db):
     """PLAN B3: after an approved review, the generation_input of new content contains it."""
-    from app.main import app
-
     focus_id, _ = setup_child(teacher_client, child)
     summary = "Adam appears to enjoy building with one friend and starts shared play more often."
     body = review_body(summary=summary, focus_review=[
@@ -424,23 +453,14 @@ def test_new_content_uses_the_approved_understanding(teacher_client, child, db):
     body["understanding"]["adaptations"] = "Offer a building role first."
     assert teacher_client.post(reviews_url(child), json=body).status_code == 201
 
-    has_generate = any(getattr(r, "path", "").endswith("/content/generate") and "POST" in (getattr(r, "methods", None) or ())
-                       for r in app.routes)
-    if has_generate:
-        r = teacher_client.post(f"/api/children/{child.id}/content/generate", json={
-            "mode": "growth_support", "content_type": "real_world_activity", "focus_area_id": focus_id,
-            "language": "en"})
-        assert r.status_code in (200, 201), r.text
-        db.expire_all()
-        row = db.scalars(select(GeneratedContent).where(GeneratedContent.child_id == child.id)
-                         .order_by(GeneratedContent.created_at.desc())).first()
-        generation_input = row.generation_input
-    else:  # content generation (WP-11) not wired yet: the AI context it will store
-        profile = profile_row(db, child)
-        generation_input = build_context(
-            child=db.get(Child, child.id), profile=profile, mode="growth_support", content_type="real_world_activity",
-            language="en", focus=db.get(FocusArea, focus_id), current_understanding=profile.current_understanding,
-        ).model_dump(mode="json")
+    r = teacher_client.post(f"/api/children/{child.id}/content/generate", json={
+        "mode": "growth_support", "content_type": "real_world_activity", "focus_area_id": focus_id,
+        "language": "en"})
+    assert r.status_code == 201, r.text
+    db.expire_all()
+    row = db.scalars(select(GeneratedContent).where(GeneratedContent.child_id == child.id)
+                     .order_by(GeneratedContent.created_at.desc())).first()
+    generation_input = row.generation_input
     # The child's own names are masked in every free text sent to the AI.
     assert generation_input["current_understanding"]["summary"] == summary.replace("Adam", "[child]")
     assert generation_input["current_understanding"]["adaptations"] == "Offer a building role first."
@@ -516,3 +536,183 @@ def test_access_rules(teacher_client, parent_client, other_teacher_client, other
     assert client.get(reviews_url(child)).status_code == 401
     assert client.post(reviews_url(child), json=body).status_code == 401
     assert teacher_client.get("/api/children/not-a-uuid/development-reviews").status_code == 404
+
+
+# --------------------------------------------------------------------------- WP2-PLAN: Domain 16 follow-up, AI suggestions, goal history
+
+
+FOLLOW_UP = {
+    "reassessment_on": "2026-12-15",
+    "improvement": {"level": "partial", "note": "Joins in with one friend, not yet with a group."},
+    "areas": {"domains": ["social", "play"], "focus_area_ids": [], "text": "Mostly free play"},
+    "what_worked": "Starting at the block corner with one friend",
+    "what_to_change": "Shorter group times",
+    "involvement": {"key": "joint_plan", "note": "Agree a shared plan with the parents at the next meeting"},
+}
+
+
+def test_follow_up_stores_and_returns_every_domain_16_field(teacher_client, child, db):
+    focus_id, _ = setup_child(teacher_client, child)
+    follow_up = {**FOLLOW_UP, "areas": {**FOLLOW_UP["areas"], "focus_area_ids": [focus_id]}}
+    body = review_body(focus_review=[{"focus_area_id": focus_id, "status": "needs_more_observation", "decision": "keep"}],
+                       follow_up=follow_up, ai_suggested=False)
+    r = teacher_client.post(reviews_url(child), json=body)
+    assert r.status_code == 201, r.text
+    out = r.json()
+    assert out["review"]["follow_up"] == follow_up
+    assert out["review"]["provenance"] == ["teacher_approved"]
+    # B6: "partial improvement" rests on no observation since the baseline: a polite warning.
+    assert {w["path"] for w in out["warnings"]} == {"follow_up.improvement.level"}
+
+    db.expire_all()
+    stored = db.get(DevelopmentReview, out["review"]["id"])
+    assert stored.follow_up == follow_up
+    listed = teacher_client.get(reviews_url(child)).json()["reviews"][0]
+    assert listed["follow_up"] == follow_up
+    log = db.scalars(select(AuditLog).where(AuditLog.action == "review.create")).one()
+    assert "involvement.key" in log.meta["follow_up"] and "Agree" not in json.dumps(log.meta)
+
+    # Every option of the two new lists is accepted; an empty block is stored as null.
+    for level in ("significant", "no_change", "needs_more_observation"):
+        for key in ("none", "consultation", "referral_as_needed"):
+            fu = {"improvement": {"level": level}, "involvement": {"key": key}}
+            r = teacher_client.post(reviews_url(child), json=review_body(follow_up=fu))
+            assert r.status_code == 201, r.text
+            assert r.json()["review"]["follow_up"]["involvement"]["key"] == key
+    r = teacher_client.post(reviews_url(child), json=review_body(follow_up={"involvement": {}}))
+    assert r.status_code == 201 and r.json()["review"]["follow_up"] is None
+
+
+def test_follow_up_validation_and_wording(teacher_client, child, other_child, make_focus_area, db):
+    focus_id, _ = setup_child(teacher_client, child)
+    other_focus = make_focus_area(other_child)
+    for fu in (
+        {"improvement": {"level": "great"}},
+        {"involvement": {"key": "refer"}},
+        {"areas": {"domains": ["communication"]}},  # an AI domain, not one of the 13 observation domains
+        {"reassessment_on": "soon"},
+        {"what_worked": "x" * 1001},
+        {"involvement": {"key": "none", "extra": 1}},
+    ):
+        r = teacher_client.post(reviews_url(child), json=review_body(follow_up=fu))
+        assert r.status_code == 400, (fu, r.text)
+    r = teacher_client.post(reviews_url(child), json=review_body(
+        follow_up={"areas": {"focus_area_ids": [focus_id, str(other_focus.id)]}}))
+    assert r.status_code == 400 and r.json()["error"]["details"][0]["path"] == "follow_up.areas.focus_area_ids.1"
+
+    # Teacher text keeps the 422 check ...
+    r = teacher_client.post(reviews_url(child), json=review_body(follow_up={"what_to_change": "Possible ADHD"}))
+    assert r.status_code == 422 and r.json()["error"]["details"][0]["path"] == "follow_up.what_to_change"
+    r = teacher_client.post(reviews_url(child), json=review_body(follow_up={"improvement": {"note": "a disorder"}}))
+    assert r.status_code == 422
+    # ... except the involvement note, which only warns (OQ-3).
+    fu = {"involvement": {"key": "referral_as_needed", "note": "The family mentioned an earlier diagnosis"}}
+    r = teacher_client.post(reviews_url(child), json=review_body(follow_up=fu))
+    assert r.status_code == 201, r.text
+    wording = [w for w in r.json()["warnings"] if w["code"] == "WORDING"]
+    assert [w["path"] for w in wording] == ["follow_up.involvement.note"]
+    assert r.json()["review"]["follow_up"]["involvement"] == fu["involvement"]
+
+
+def test_saving_from_a_suggestion_marks_it_accepted_or_edited(teacher_client, child, other_child, db,
+                                                               make_ai_suggestion):
+    focus_id, _ = setup_child(teacher_client, child)
+    keep = [{"focus_area_id": focus_id, "status": "needs_more_observation", "decision": "keep"}]
+
+    # Saved exactly as suggested → accepted.
+    data = teacher_client.post(suggest_url(child), json={"language": "en"}).json()
+    s = data["suggestion"]
+    as_is = review_body(focus_review=keep, summary=s["summary"], ai_suggested=True,
+                        ai_suggestion_id=data["suggestion_id"])
+    as_is["understanding"] = {
+        "summary": s["summary"],
+        "strengths": [{"key": i["key"]} if i["key"] else {"custom": i["custom"]} for i in s["strengths"]],
+        "interests": [{"key": i["key"]} if i["key"] else {"custom": i["custom"]} for i in s["interests"]],
+        "what_helps": [{"key": i["key"]} if i["key"] else {"custom": i["custom"]} for i in s["what_helps"]],
+        "areas_for_support": s["areas_for_support"],
+        "adaptations": s["adaptations"],
+        "next_steps": s["next_steps"],
+    }
+    r = teacher_client.post(reviews_url(child), json=as_is)
+    assert r.status_code == 201, r.text
+    review = r.json()["review"]
+    assert review["ai_suggestion_id"] == data["suggestion_id"] and review["ai_suggested"] is True
+    db.expire_all()
+    row = db.get(AiSuggestion, data["suggestion_id"])
+    assert (row.outcome, row.used_by_type, str(row.used_by_id)) == ("accepted", "development_review", review["id"])
+    assert row.resolved_at is not None
+
+    # Changed before saving → edited.
+    data = teacher_client.post(suggest_url(child), json={"language": "en"}).json()
+    r = teacher_client.post(reviews_url(child), json=review_body(
+        focus_review=keep, summary="Adam builds with one friend most mornings.", ai_suggestion_id=data["suggestion_id"]))
+    assert r.status_code == 201, r.text
+    db.expire_all()
+    assert db.get(AiSuggestion, data["suggestion_id"]).outcome == "edited"
+
+    # Someone else's suggestion, or one of another kind, is unknown here.
+    foreign = make_ai_suggestion(other_child)
+    summary_kind = make_ai_suggestion(child, kind="functional_summary")
+    for sid in (foreign.id, summary_kind.id):
+        r = teacher_client.post(reviews_url(child), json=review_body(ai_suggestion_id=str(sid)))
+        assert r.status_code == 400 and r.json()["error"]["details"][0]["path"] == "ai_suggestion_id"
+
+
+def test_review_decisions_are_kept_in_the_goal_history(teacher_client, child, db):
+    """X-21: close → reopen → close keeps both closures, each linked to its review."""
+    focus_id, _ = setup_child(teacher_client, child)
+    close = [{"focus_area_id": focus_id, "status": "no_longer_needed", "decision": "close", "note": "Joins in now"}]
+    first = teacher_client.post(reviews_url(child), json=review_body(focus_review=close)).json()["review"]["id"]
+    reopen = [{"focus_area_id": focus_id, "status": "no_clear_change", "decision": "keep"}]
+    second = teacher_client.post(reviews_url(child), json=review_body(focus_review=reopen)).json()["review"]["id"]
+    close[0]["note"] = "Steady for a month"
+    third = teacher_client.post(reviews_url(child), json=review_body(focus_review=close)).json()["review"]["id"]
+    edit = [{"focus_area_id": focus_id, "status": "improving", "decision": "edit",
+             "edit": {"follow_up_on": "2027-01-10", "plan": {"frequency": "Twice a week"}}}]
+    r = teacher_client.post(reviews_url(child), json=review_body(focus_review=edit))
+    assert r.status_code == 201, r.text
+    fourth = r.json()["review"]["id"]
+
+    db.expire_all()
+    rows = db.scalars(select(RecordVersion).where(RecordVersion.entity_id == focus_id)
+                      .order_by(RecordVersion.seq)).all()
+    assert [(v.via, v.data["status"], str(v.review_id) if v.review_id else None) for v in rows] == [
+        ("manual", "active", None), ("review", "completed", first), ("review", "active", second),
+        ("review", "completed", third), ("review", "completed", fourth)]
+    assert rows[-1].data["follow_up_on"] == "2027-01-10" and rows[-1].data["plan"] == {"frequency": "Twice a week"}
+    changes = teacher_client.get(f"/api/focus-areas/{focus_id}/versions").json()["status_changes"]
+    assert [(c["status"], c["close_reason"], c["review_id"]) for c in changes] == [
+        ("active", None, None), ("completed", "Joins in now", first), ("active", None, second),
+        ("completed", "Steady for a month", third)]
+
+    # A focus created in a review gets its first version (via review) too.
+    create = [{"decision": "create", "create": {"category": "social", "title": "Sharing toys",
+                                                "follow_up_on": "2027-02-01"}}]
+    r = teacher_client.post(reviews_url(child), json=review_body(focus_review=create))
+    assert r.status_code == 201, r.text
+    new_id = r.json()["review"]["focus_review"][0]["focus_area_id"]
+    db.expire_all()
+    new_rows = db.scalars(select(RecordVersion).where(RecordVersion.entity_id == new_id)).all()
+    assert [(v.seq, v.via, str(v.review_id)) for v in new_rows] == [(1, "review", r.json()["review"]["id"])]
+    assert db.get(FocusArea, new_id).follow_up_on.isoformat() == "2027-02-01"
+
+
+def test_context_lists_stage_e_results_per_focus_since_the_last_review(teacher_client, teacher, child, db,
+                                                                      make_focus_area, make_observation):
+    """OM-D14-10 / X-38: the review sees 'did anything change' per focus, as dated items."""
+    focus = make_focus_area(child, created_by=teacher)
+    other = make_focus_area(child, title="Dressing", category="independence", created_by=teacher)
+    now = datetime.now(timezone.utc)
+    linked = make_observation(child, created_by=teacher, focus_area_id=focus.id, observed_at=now - timedelta(days=2),
+                              details={"did_it_change": "yes"})
+    by_plan = make_observation(child, created_by=teacher, observed_at=now - timedelta(days=1),
+                               details={"did_it_change": "partly", "plan_ref": {"focus_area_id": str(focus.id)}})
+    make_observation(child, created_by=teacher, focus_area_id=focus.id, details={"what_i_see": "x"})
+    make_observation(child, created_by=teacher, focus_area_id=other.id, details={"did_it_change": "no"})
+    db.commit()
+    ctx = teacher_client.get(reviews_url(child)).json()["context"]
+    by_id = {f["id"]: f["changes"] for f in ctx["focus_areas"]}
+    assert [i["id"] for i in by_id[str(focus.id)]["yes"]] == [str(linked.id)]
+    assert [i["id"] for i in by_id[str(focus.id)]["partly"]] == [str(by_plan.id)]
+    assert by_id[str(focus.id)]["no"] == [] and by_id[str(focus.id)]["yes"][0]["observed_at"]
+    assert [len(by_id[str(other.id)][k]) for k in ("yes", "partly", "no")] == [0, 0, 1]

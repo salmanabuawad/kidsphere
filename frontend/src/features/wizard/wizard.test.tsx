@@ -1,7 +1,7 @@
-import { fireEvent, screen, waitFor } from "@testing-library/react";
+import { fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { OptionLists } from "@/lib/options";
-import { parent, renderApp, teacher, mockFetch } from "@/test/utils";
+import { renderApp, teacher, mockFetch } from "@/test/utils";
 import type { ProfileResponse } from "./api";
 import { routes } from "./routes";
 
@@ -56,7 +56,7 @@ describe("staff wizard", () => {
     const { router } = renderApp({ routes, url: "/children/c1/edit/4", user: teacher, options });
 
     expect(await screen.findByRole("heading", { name: /playing and talking/i })).toBeTruthy();
-    expect(screen.getByRole("tab", { name: "Teacher says" }).getAttribute("aria-selected")).toBe("true");
+    expect(screen.queryByRole("tab", { name: "Parent says" })).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: /initiates play/i }));
     fireEvent.click(screen.getByTestId("wizard-next"));
 
@@ -64,23 +64,15 @@ describe("staff wizard", () => {
     expect(bodies).toEqual([{ perspective: "teacher", section: "social", data: { social: ["initiates_play"] }, wizard_step: 5 }]);
   });
 
-  it("lets staff enter the parent's answers", async () => {
-    const bodies: { perspective?: string }[] = [];
+  it("points staff to the family's questionnaire (on behalf or in a meeting) instead of a per-step toggle", async () => {
     mockFetch({
       "GET /api/children/c1/profile": { body: profile() },
       "GET /api/children/c1": { body: child },
-      "PATCH /api/children/c1/profile": (init) => {
-        bodies.push(JSON.parse(String(init?.body)));
-        return { body: profile() };
-      },
     });
     renderApp({ routes, url: "/children/c1/edit/4", user: teacher, options });
-    fireEvent.click(await screen.findByRole("tab", { name: "Parent says" }));
-    expect(screen.getByText(/on their behalf/i)).toBeTruthy();
-    fireEvent.click(screen.getByRole("button", { name: /asks questions/i }));
-    fireEvent.click(screen.getByRole("button", { name: /save & finish later/i }));
-    await waitFor(() => expect(bodies).toHaveLength(1));
-    expect(bodies[0]).toMatchObject({ perspective: "parent", section: "social", data: { communication: ["asks_questions"] }, wizard_step: 4 });
+    const note = await screen.findByTestId("family-answers-note");
+    expect(within(note).getByRole("link", { name: "Enter the family's answers" }).getAttribute("href")).toBe("/children/c1/parent-view/answers/1?mode=on_behalf");
+    expect(within(note).getByRole("link", { name: "Fill in together with the family" }).getAttribute("href")).toBe("/children/c1/parent-view/answers/1?mode=meeting");
   });
 
   it("resumes at the saved step", async () => {
@@ -104,29 +96,3 @@ describe("staff wizard", () => {
   });
 });
 
-describe("parent onboarding", () => {
-  it("shows only parent questions, without the perspective toggle or focus picker", async () => {
-    mockFetch({
-      "GET /api/children/c1/profile": {
-        body: { child_id: "c1", perspective: "parent", parent_perspective: { sections: {}, entered: {} }, wizard: { step: 7, completed_at: null } },
-      },
-      "GET /api/children/c1": { body: child },
-    });
-    renderApp({ routes, url: "/parent/children/c1/onboarding", user: parent, options });
-    expect(await screen.findByText(/most like adam to develop/i)).toBeTruthy();
-    expect(screen.queryByRole("tab", { name: "Teacher says" })).toBeNull();
-    expect(screen.queryByRole("button", { name: /joining group play/i })).toBeNull();
-  });
-
-  it("renders RTL in Arabic", async () => {
-    mockFetch({
-      "GET /api/children/c1/profile": {
-        body: { child_id: "c1", perspective: "parent", parent_perspective: { sections: {}, entered: {} }, wizard: { step: 2, completed_at: null } },
-      },
-      "GET /api/children/c1": { body: child },
-    });
-    renderApp({ routes, url: "/parent/children/c1/onboarding", user: { ...parent, language: "ar" }, options, locale: "ar" });
-    expect(await screen.findByText("الخطوة 1 من 6")).toBeTruthy();
-    expect(document.documentElement.dir).toBe("rtl");
-  });
-});

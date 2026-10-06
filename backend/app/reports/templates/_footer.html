@@ -1,0 +1,7 @@
+{# Running footer: the disclaimer on every page (docs/terminology.md, verbatim), plus an optional
+   report-specific line (R3: the observation model's footer). The page number "x / y" is a margin
+   box in static/page-ltr.css and static/page-rtl.css. #}
+<div class="running-footer">
+  {% if meta.footer_note %}<p class="footer-note">{{ meta.footer_note }}</p>{% endif %}
+  <p class="disclaimer">{{ t.disclaimer }}</p>
+</div>

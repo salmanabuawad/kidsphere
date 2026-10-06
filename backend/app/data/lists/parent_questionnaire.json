@@ -1,0 +1,84 @@
+{
+  "lists": {
+    "pq_interests": [
+      {"key": "pretend_play", "icon": "🎭", "label": {"en": "Pretend play", "ar": "اللعب التخيلي", "he": "משחקי דמיון"}},
+      {"key": "cars_transport", "icon": "🚗", "label": {"en": "Cars and transportation", "ar": "السيارات ووسائل النقل", "he": "מכוניות וכלי תחבורה"}},
+      {"key": "building_assembly", "icon": "🧱", "label": {"en": "Building and assembling", "ar": "البناء والتركيب", "he": "בנייה והרכבה"}},
+      {"key": "drawing_crafts", "icon": "🎨", "label": {"en": "Drawing and crafts", "ar": "الرسم والأشغال اليدوية", "he": "ציור ויצירה"}},
+      {"key": "music_singing", "icon": "🎵", "label": {"en": "Music and singing", "ar": "الموسيقى والغناء", "he": "מוזיקה ושירה"}},
+      {"key": "dance_movement", "icon": "💃", "label": {"en": "Dance and movement", "ar": "الرقص والحركة", "he": "ריקוד ותנועה"}},
+      {"key": "stories_books", "icon": "📚", "label": {"en": "Stories and books", "ar": "القصص والكتب", "he": "סיפורים וספרים"}},
+      {"key": "outdoor_play", "icon": "🌳", "label": {"en": "Outdoor play", "ar": "اللعب في الخارج", "he": "משחקי חוץ"}},
+      {"key": "animals", "icon": "🐘", "label": {"en": "Animals", "ar": "الحيوانات", "he": "בעלי חיים"}},
+      {"key": "social_games", "icon": "🤝", "label": {"en": "Social games", "ar": "الألعاب الجماعية", "he": "משחקים חברתיים"}},
+      {"key": "screen_games", "icon": "💻", "label": {"en": "Computer and screen games", "ar": "ألعاب الحاسوب والشاشات", "he": "משחקי מחשב ומסכים"}},
+      {"key": "other", "icon": "➕", "label": {"en": "Other", "ar": "أخرى", "he": "אחר"}}
+    ],
+    "pq_frustration_reactions": [
+      {"key": "cries", "label": {"en": "Cries", "ar": "يبكي", "he": "בוכה"}},
+      {"key": "shouts", "label": {"en": "Shouts", "ar": "يصرخ", "he": "צועק/ת"}},
+      {"key": "moves_away", "label": {"en": "Moves away", "ar": "يبتعد", "he": "מתרחק/ת"}},
+      {"key": "turns_to_adult", "label": {"en": "Turns to an adult", "ar": "يلجأ إلى شخص بالغ", "he": "פונה למבוגר"}},
+      {"key": "asks_for_hug", "label": {"en": "Asks for a hug", "ar": "يطلب حضناً", "he": "מבקש/ת חיבוק"}},
+      {"key": "hard_to_calm", "label": {"en": "Takes time to calm down", "ar": "يحتاج وقتاً ليهدأ", "he": "לוקח לו/ה זמן להירגע"}},
+      {"key": "outburst", "label": {"en": "Big feelings come out all at once", "ar": "تخرج مشاعره القوية دفعة واحدة", "he": "רגשות חזקים יוצאים בבת אחת"}},
+      {"key": "other", "label": {"en": "Other", "ar": "أخرى", "he": "אחר"}}
+    ],
+    "pq_morning_separation": [
+      {"key": "easily", "label": {"en": "Says goodbye easily", "ar": "يودّع بسهولة", "he": "נפרד/ת בקלות"}},
+      {"key": "needs_time", "label": {"en": "Needs some time", "ar": "يحتاج بعض الوقت", "he": "זקוק/ה לזמן"}},
+      {"key": "very_difficult", "label": {"en": "Finds it very hard", "ar": "يجد الأمر صعباً جداً", "he": "קשה לו/ה מאוד"}},
+      {"key": "varies", "label": {"en": "Changes from day to day", "ar": "يختلف من يوم لآخر", "he": "משתנה מיום ליום"}}
+    ],
+    "pq_social_contact": [
+      {"key": "initiates", "label": {"en": "Starts the play", "ar": "يبادر إلى اللعب", "he": "יוזם/ת משחק"}},
+      {"key": "waits_to_be_approached", "label": {"en": "Waits for others to approach", "ar": "ينتظر أن يبادر الآخرون", "he": "מחכה שיפנו אליו/ה"}},
+      {"key": "prefers_alone", "label": {"en": "Prefers to play alone", "ar": "يفضّل اللعب وحده", "he": "מעדיף/ה לשחק לבד"}},
+      {"key": "familiar_children", "label": {"en": "Plays mostly with familiar children", "ar": "يلعب غالباً مع أطفال يعرفهم", "he": "משחק/ת בעיקר עם ילדים מוכרים"}},
+      {"key": "needs_mediation", "label": {"en": "Joins in with an adult's help", "ar": "ينضم بمساعدة شخص بالغ", "he": "זקוק/ה לתיווך"}},
+      {"key": "other", "label": {"en": "Other", "ar": "أخرى", "he": "אחר"}}
+    ],
+    "pq_express_needs": [
+      {"key": "words", "label": {"en": "In words", "ar": "بالكلمات", "he": "במילים"}},
+      {"key": "sentences", "label": {"en": "In sentences", "ar": "بجمل", "he": "במשפטים"}},
+      {"key": "gestures", "label": {"en": "With gestures", "ar": "بالإيماءات", "he": "באמצעות מחוות"}},
+      {"key": "crying_behaviour", "label": {"en": "Through crying or actions", "ar": "من خلال البكاء أو التصرفات", "he": "באמצעות בכי או התנהגות"}},
+      {"key": "turns_to_adult", "label": {"en": "Turns to an adult", "ar": "يلجأ إلى شخص بالغ", "he": "פונה למבוגר"}},
+      {"key": "other", "label": {"en": "Other", "ar": "أخرى", "he": "אחר"}}
+    ],
+    "pq_degree": [
+      {"key": "very_much", "label": {"en": "Very much", "ar": "كثيراً", "he": "מאוד"}},
+      {"key": "sometimes", "label": {"en": "Sometimes", "ar": "أحياناً", "he": "לפעמים"}},
+      {"key": "a_little", "label": {"en": "A little", "ar": "قليلاً", "he": "מעט"}}
+    ],
+    "pq_stop_activity": [
+      {"key": "easily", "label": {"en": "Easily", "ar": "بسهولة", "he": "בקלות"}},
+      {"key": "needs_preparation", "label": {"en": "Needs preparation in advance", "ar": "يحتاج إلى تحضير مسبق", "he": "זקוק/ה להכנה מראש"}},
+      {"key": "resists", "label": {"en": "Resists", "ar": "يمانع", "he": "מתנגד/ת"}},
+      {"key": "cries_or_angry", "label": {"en": "Cries or gets angry", "ar": "يبكي أو يغضب", "he": "בוכה או כועס/ת"}},
+      {"key": "very_difficult", "label": {"en": "Finds it very hard", "ar": "يجد الأمر صعباً جداً", "he": "קשה לו/ה מאוד"}}
+    ],
+    "health_food_flags": [
+      {"key": "allergy", "icon": "🥜", "label": {"en": "Food sensitivity or allergy", "ar": "حساسية من بعض الأطعمة", "he": "רגישות או אלרגיה למזון"}},
+      {"key": "preference", "icon": "🍽️", "label": {"en": "Food preferences", "ar": "تفضيلات في الطعام", "he": "העדפות באוכל"}},
+      {"key": "eating_difficulty", "icon": "🥄", "label": {"en": "Eating difficulties", "ar": "صعوبات في الأكل", "he": "קשיי אכילה"}}
+    ],
+    "pq_independence_levels": [
+      {"key": "independent", "label": {"en": "Independent", "ar": "مستقل", "he": "עצמאי/ת"}},
+      {"key": "needs_help", "label": {"en": "Needs help", "ar": "يحتاج إلى مساعدة", "he": "זקוק/ה לעזרה"}}
+    ],
+    "pq_help_amount": [
+      {"key": "a_little", "label": {"en": "A little help", "ar": "قليل من المساعدة", "he": "קצת עזרה"}},
+      {"key": "a_lot", "label": {"en": "A lot of help", "ar": "مساعدة كبيرة", "he": "הרבה עזרה"}}
+    ],
+    "pq_entry_modes": [
+      {"key": "self", "label": {"en": "Filled in by the family", "ar": "عبّأته العائلة", "he": "מולא על ידי המשפחה"}},
+      {"key": "on_behalf", "label": {"en": "Entered by staff for the family", "ar": "أدخله الطاقم نيابةً عن العائلة", "he": "הוזן על ידי הצוות עבור המשפחה"}},
+      {"key": "meeting", "label": {"en": "Filled in together at a meeting", "ar": "عُبّئ معاً في لقاء", "he": "מולא יחד בפגישה"}}
+    ],
+    "qb_question_statuses": [
+      {"key": "open", "label": {"en": "Still open", "ar": "ما زال مفتوحاً", "he": "עדיין פתוחה"}},
+      {"key": "clarified", "label": {"en": "Clarified", "ar": "تمّ توضيحه", "he": "התבררה"}}
+    ]
+  }
+}

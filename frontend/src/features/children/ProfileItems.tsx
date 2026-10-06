@@ -1,7 +1,9 @@
 import { useCallback, useState, type ReactNode } from "react";
+import { ProvenanceBadges } from "@/components/source";
 import { Chip, toneGlyph, type Tone } from "@/components/ui";
 import { useI18n } from "@/i18n/I18nProvider";
 import { useOptions, type OptionItem } from "@/lib/options";
+import { itemProvenance, provenanceLabels } from "./provenance";
 import type { ProfileItem } from "./types";
 
 /** Lists a merged what_helps key may come from when the item does not say (WP-06 sets item.list). */
@@ -37,7 +39,9 @@ const itemKey = (it: ProfileItem, i: number) => (it.key ? `k:${it.key}:${it.list
 /**
  * Chips for one profile list in the list's tone. `fallbackIcon` is used (for other
  * tones) when the option has no emoji. `limit` caps the chips; with `cap` the rest open
- * from a "+N" chip.
+ * from a "+N" chip. With `provenance`, every chip carries its visible source badges
+ * (PARENT SAID / TEACHER OBSERVED / AI SUGGESTED / TEACHER APPROVED; X-22): the API
+ * `provenance[]`, or labels derived from `sources`. Without it, the sources stay a tooltip.
  */
 export function ProfileItemChips({
   list,
@@ -46,6 +50,7 @@ export function ProfileItemChips({
   fallbackIcon,
   limit,
   cap,
+  provenance = false,
 }: {
   list: string;
   items: ProfileItem[];
@@ -56,6 +61,8 @@ export function ProfileItemChips({
   cap?: number;
   /** Kept for callers; chips have one size. */
   size?: "sm" | "md";
+  /** Show the provenance badges as visible text next to each chip. */
+  provenance?: boolean;
 }) {
   const resolve = useProfileItem();
   const { t } = useI18n();
@@ -67,12 +74,22 @@ export function ProfileItemChips({
     <ul className="flex flex-wrap gap-2">
       {shown.map((it, i) => {
         const r = resolve(list, it);
+        const chip = (
+          <Chip tone={tone} icon={toneGlyph(tone, r.icon, fallbackIcon)}>
+            {r.label}
+          </Chip>
+        );
+        if (provenance)
+          return (
+            <li key={itemKey(it, i)} className="inline-flex max-w-full flex-wrap items-center gap-1" data-testid="profile-chip">
+              {chip}
+              <ProvenanceBadges kinds={provenanceLabels(itemProvenance(it))} />
+            </li>
+          );
         const sources = (it.sources ?? []).map((s) => t(`children.profile.sources.${s}`)).join(" · ");
         return (
           <li key={itemKey(it, i)} title={sources || undefined}>
-            <Chip tone={tone} icon={toneGlyph(tone, r.icon, fallbackIcon)}>
-              {r.label}
-            </Chip>
+            {chip}
           </li>
         );
       })}

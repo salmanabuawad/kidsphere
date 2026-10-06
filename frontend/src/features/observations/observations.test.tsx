@@ -27,7 +27,7 @@ describe("QuickObservation", () => {
     const text = await screen.findByLabelText(/What happened\?/);
     fireEvent.change(text, { target: { value: "Asked Omar: can we build this together?" } });
     fireEvent.click(screen.getByRole("button", { name: /Free play/ }));
-    fireEvent.click(screen.getByRole("button", { name: /With support/ }));
+    fireEvent.click(screen.getByRole("radio", { name: /With support/ }));
     fireEvent.click(screen.getByRole("button", { name: /Save observation/ }));
 
     await waitFor(() => expect(router.state.location.pathname).toBe("/children/c1"));
@@ -62,7 +62,8 @@ describe("QuickObservation", () => {
     fireEvent.click(screen.getByRole("button", { name: "Add" }));
     fireEvent.click(screen.getByRole("button", { name: /More details/ }));
     fireEvent.change(screen.getByLabelText(/What do I see\?/), { target: { value: "Watched first" } });
-    fireEvent.click(screen.getByRole("button", { name: "Partly" }));
+    fireEvent.click(screen.getByRole("button", { name: /Step E/ }));
+    fireEvent.click(screen.getByRole("radio", { name: "Partly" }));
     fireEvent.click(screen.getByRole("button", { name: /Save observation/ }));
 
     await waitFor(() => expect(sent).not.toBeNull());
@@ -80,7 +81,7 @@ describe("QuickObservation", () => {
     renderApp({ routes, url: "/children/c1/observe", user: teacher, options });
     const legend = await screen.findByText("How much support was needed?");
     const group = legend.closest("fieldset")!;
-    const buttons = within(group).getAllByRole("button");
+    const buttons = within(group).getAllByRole("radio");
     expect(buttons.map((b) => b.textContent?.replace(/\p{Extended_Pictographic}/gu, "").trim())).toEqual(["Independent", "With support", "Difficult"]);
     for (const b of buttons) expect(b.className).toContain("min-h-16");
     for (const b of within(screen.getByText("Where?").closest("fieldset")!).getAllByRole("button")) expect(b.className).toContain("min-h-16");
@@ -118,8 +119,124 @@ describe("QuickObservation", () => {
     renderApp({ routes, url: "/children/c1/observe", user: { ...teacher, language: "ar" }, locale: "ar", options });
     expect(await screen.findByText("ماذا حدث؟")).toBeTruthy();
     await waitFor(() => expect(document.documentElement.dir).toBe("rtl"));
-    expect(screen.getByRole("button", { name: /بمساعدة/ })).toBeTruthy();
+    expect(screen.getByRole("radio", { name: /بمساعدة/ })).toBeTruthy();
     expect(screen.getByRole("button", { name: /اللعب الحر/ })).toBeTruthy();
+  });
+});
+
+describe("Observe → Understand → Act stepper (D14)", () => {
+  const L = (en: string, ar: string, he: string) => ({ en, ar, he });
+  const stepperOptions = {
+    ...options,
+    ai_domains: [
+      { key: "social", icon: "🤝", label: L("Social", "الجانب الاجتماعي", "חברתי") },
+      { key: "play", icon: "🧸", label: L("Play", "اللعب", "משחק") },
+    ],
+    observation_frequency: [
+      { key: "once", label: L("Once", "مرة واحدة", "פעם אחת") },
+      { key: "often", label: L("Often", "غالباً", "לעיתים קרובות") },
+    ],
+  };
+
+  it("saves areas, how often / long / strongly, when_detail, needs, the plan link and what changed", async () => {
+    let sent: Record<string, unknown> | null = null;
+    mockFetch({
+      "GET /api/children/c1": { body: { child: adam } },
+      "POST /api/children/c1/observations": (init) => {
+        sent = JSON.parse(String(init?.body));
+        return saved(sent!);
+      },
+    });
+    renderApp({ routes, url: "/children/c1/observe", user: teacher, options: stepperOptions });
+
+    fireEvent.change(await screen.findByLabelText(/What happened\?/), { target: { value: "Stood at the edge of the train game" } });
+    fireEvent.click(screen.getByRole("button", { name: /More details/ }));
+
+    // A: what I see + areas + how often / how long / how strongly
+    expect(screen.getByText(/Describe the facts without interpreting/)).toBeTruthy();
+    fireEvent.change(screen.getByLabelText("What do I see?"), { target: { value: "Watched for a minute, then joined" } });
+    fireEvent.click(screen.getByRole("button", { name: /Social/ }));
+    fireEvent.click(screen.getByRole("radio", { name: "Often" }));
+    fireEvent.change(screen.getByLabelText(/About how long/), { target: { value: "5" } });
+    fireEvent.click(screen.getByRole("radio", { name: "Strongly" }));
+
+    // B: when
+    fireEvent.click(screen.getByRole("button", { name: "Next" }));
+    fireEvent.change(screen.getByLabelText("At what time?"), { target: { value: "09:30" } });
+    fireEvent.click(screen.getByRole("radio", { name: /Yard/ }));
+    fireEvent.change(screen.getByLabelText("With whom?"), { target: { value: "Lina" } });
+
+    // C: what the child may need (7 chips + other)
+    fireEvent.click(screen.getByRole("button", { name: "Next" }));
+    const stageC = screen.getByRole("group", { name: "What might the child need?" });
+    expect(within(stageC).getAllByRole("button").length).toBe(7);
+    fireEvent.click(within(stageC).getByRole("button", { name: /Adult guidance/ }));
+    fireEvent.change(screen.getByLabelText("Something else the child may need"), { target: { value: "A friend to start with" } });
+
+    // D: what we will do, linked to a Current Focus
+    fireEvent.click(screen.getByRole("button", { name: /Step D/ }));
+    fireEvent.change(screen.getByLabelText("What will we do?"), { target: { value: "Invite Lina to join him" } });
+    fireEvent.click(screen.getByRole("radio", { name: "Joining group play" }));
+
+    // E: did anything change
+    fireEvent.click(screen.getByRole("button", { name: "Next" }));
+    expect(screen.queryByLabelText("What changed?")).toBeNull();
+    fireEvent.click(screen.getByRole("radio", { name: "Yes" }));
+    fireEvent.change(screen.getByLabelText("What changed?"), { target: { value: "Joined after a minute" } });
+    fireEvent.change(screen.getByLabelText("Documentation"), { target: { value: "Second morning in a row" } });
+
+    // Going back keeps what was written.
+    fireEvent.click(screen.getByRole("button", { name: /Step A/ }));
+    expect((screen.getByLabelText("What do I see?") as HTMLTextAreaElement).value).toBe("Watched for a minute, then joined");
+
+    fireEvent.click(screen.getByRole("button", { name: /Save observation/ }));
+    await waitFor(() => expect(sent).not.toBeNull());
+    expect(sent).toMatchObject({
+      observation: "Stood at the edge of the train game",
+      domains: ["social"],
+      attributes: { frequency: "often", duration_minutes: 5, intensity: "strong" },
+      details: {
+        what_i_see: "Watched for a minute, then joined",
+        when_detail: { time: "09:30", activity: "yard", with_whom: "Lina" },
+        needs: { helps: ["adult_mediation"], text: "A friend to start with" },
+        what_we_did: "Invite Lina to join him",
+        plan_ref: { focus_area_id: "f1" },
+        did_it_change: "yes",
+        what_changed: "Joined after a minute",
+        documentation: "Second morning in a row",
+      },
+    });
+    expect(sent).not.toHaveProperty("focus_area_id");
+    expect(JSON.stringify(sent)).not.toMatch(/score|points|\d+\s*%/i);
+  });
+
+  it("sends no details when the stepper is left empty", async () => {
+    let sent: Record<string, unknown> | null = null;
+    mockFetch({
+      "GET /api/children/c1": { body: { child: adam } },
+      "POST /api/children/c1/observations": (init) => {
+        sent = JSON.parse(String(init?.body));
+        return saved(sent!);
+      },
+    });
+    renderApp({ routes, url: "/children/c1/observe", user: teacher, options: stepperOptions });
+    fireEvent.change(await screen.findByLabelText(/What happened\?/), { target: { value: "Smiled at arrival" } });
+    fireEvent.click(screen.getByRole("button", { name: /More details/ }));
+    fireEvent.click(screen.getByRole("button", { name: /Step E/ }));
+    fireEvent.click(screen.getByRole("button", { name: /Save observation/ }));
+    await waitFor(() => expect(sent).not.toBeNull());
+    expect(sent).not.toHaveProperty("details");
+    expect(sent).not.toHaveProperty("attributes");
+    expect(sent).not.toHaveProperty("domains");
+  });
+
+  it("renders the stepper in Hebrew with RTL arrows and letters", async () => {
+    mockFetch({ "GET /api/children/c1": { body: { child: adam } } });
+    renderApp({ routes, url: "/children/c1/observe", user: { ...teacher, language: "he" }, locale: "he", options: stepperOptions });
+    fireEvent.click(await screen.findByRole("button", { name: /פרטים נוספים/ }));
+    expect(screen.getByText("תצפית ← הבנה ← פעולה")).toBeTruthy();
+    expect(screen.getByLabelText("מה אני רואה?")).toBeTruthy();
+    expect(screen.getByRole("button", { name: /שלב ה/ })).toBeTruthy();
   });
 });
 

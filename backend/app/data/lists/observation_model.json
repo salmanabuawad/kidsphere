@@ -1,0 +1,38 @@
+{
+  "lists": {
+    "observation_principles": [
+      {"key": "natural_varied_situations", "icon": "🌳", "label": {"en": "Observe the child in natural, varied situations through the day", "ar": "نلاحظ الطفل في مواقف طبيعية ومتنوعة خلال اليوم", "he": "להתבונן בילד/ה במצבים טבעיים ומגוונים לאורך היום"}},
+      {"key": "behaviour_not_interpretation", "icon": "👀", "label": {"en": "Describe what you see, not what it might mean", "ar": "نصف ما نراه، لا ما قد يعنيه", "he": "לתאר את מה שרואים, לא את הפרשנות"}},
+      {"key": "frequency_intensity_duration_context", "icon": "🕘", "label": {"en": "Note how often, how strongly, how long and in what situation", "ar": "ننتبه إلى عدد المرات والشدة والمدة والسياق", "he": "לשים לב לתדירות, לעוצמה, למשך ולהקשר"}},
+      {"key": "independent_vs_supported", "icon": "🤝", "label": {"en": "Tell apart what the child does alone from what they do with support", "ar": "نميّز بين ما يفعله الطفل وحده وما يفعله بمساعدة", "he": "להבחין בין מה שהילד/ה עושה לבד לבין מה שמופיע בעזרת תיווך"}},
+      {"key": "strengths_alongside_needs", "icon": "⭐", "label": {"en": "Alongside every area for support, note strengths, interests and what helps the child succeed", "ar": "إلى جانب كل مجال دعم، نلاحظ نقاط القوة والاهتمامات وما يساعد الطفل على النجاح", "he": "לצד כל תחום לתמיכה, לזהות גם חוזקות, תחומי עניין ומה שעוזר לילד/ה להצליח"}},
+      {"key": "no_inappropriate_comparison", "icon": "🧩", "label": {"en": "Avoid comparing children with each other", "ar": "نتجنّب مقارنة الأطفال ببعضهم", "he": "להימנע מהשוואה בין ילדים"}},
+      {"key": "interpret_by_age_context_development", "icon": "🌱", "label": {"en": "Read what you see in light of the child's age, situation and development", "ar": "نقرأ ما نراه في ضوء عمر الطفل وظروفه ونموّه", "he": "לקרוא את מה שרואים לאור הגיל, ההקשר וההתפתחות של הילד/ה"}}
+    ],
+    "observation_frequency": [
+      {"key": "once", "label": {"en": "Once", "ar": "مرة واحدة", "he": "פעם אחת"}},
+      {"key": "sometimes", "label": {"en": "Sometimes", "ar": "أحياناً", "he": "לפעמים"}},
+      {"key": "often", "label": {"en": "Often", "ar": "غالباً", "he": "לעיתים קרובות"}},
+      {"key": "most_of_the_time", "label": {"en": "Most of the time", "ar": "معظم الوقت", "he": "רוב הזמן"}}
+    ],
+    "sensory_effects": [
+      {"key": "affects", "label": {"en": "Seems to affect the child", "ar": "يبدو أنه يؤثر على الطفل", "he": "נראה שמשפיע על הילד/ה"}, "short": {"en": "Affects", "ar": "يؤثر", "he": "משפיע"}},
+      {"key": "sometimes", "label": {"en": "Sometimes affects the child", "ar": "يؤثر أحياناً", "he": "משפיע לפעמים"}, "short": {"en": "Sometimes", "ar": "أحياناً", "he": "לפעמים"}},
+      {"key": "no_visible_effect", "label": {"en": "No visible effect", "ar": "لا تأثير ظاهر", "he": "ללא השפעה נראית"}, "short": {"en": "No visible effect", "ar": "لا تأثير ظاهر", "he": "ללא השפעה נראית"}},
+      {"key": "not_observed", "label": {"en": "Not observed yet", "ar": "لم يُلاحظ بعد", "he": "טרם נצפה"}, "short": {"en": "Not observed", "ar": "لم يُلاحظ", "he": "לא נצפה"}}
+    ],
+    "need_areas": [
+      {"key": "emotional", "icon": "💛", "category": "emotional", "label": {"en": "Emotional", "ar": "الجانب العاطفي", "he": "רגשי"}},
+      {"key": "social", "icon": "🤝", "category": "social", "label": {"en": "Social", "ar": "الجانب الاجتماعي", "he": "חברתי"}},
+      {"key": "language", "icon": "🗣️", "category": "language", "label": {"en": "Language", "ar": "اللغة", "he": "שפה"}},
+      {"key": "communication", "icon": "💬", "category": "communication", "label": {"en": "Communication", "ar": "التواصل", "he": "תקשורת"}},
+      {"key": "attention", "icon": "🎯", "category": "attention", "label": {"en": "Focus & persistence", "ar": "التركيز والمثابرة", "he": "ריכוז והתמדה"}},
+      {"key": "motor", "icon": "🤸", "category": "motor", "label": {"en": "Movement & motor skills", "ar": "المهارات الحركية", "he": "תנועה ומוטוריקה"}},
+      {"key": "cognitive", "icon": "🧩", "category": "learning", "label": {"en": "Learning & thinking", "ar": "التعلّم والتفكير", "he": "למידה וחשיבה"}},
+      {"key": "independence", "icon": "🧭", "category": "independence", "label": {"en": "Independence", "ar": "الاستقلالية", "he": "עצמאות"}},
+      {"key": "sensory", "icon": "🌤️", "category": "emotional", "label": {"en": "Things in the environment", "ar": "أشياء في البيئة", "he": "דברים בסביבה"}},
+      {"key": "behaviour", "icon": "🌿", "label": {"en": "Coping in everyday situations", "ar": "التعامل مع المواقف اليومية", "he": "התמודדות במצבים יומיומיים"}},
+      {"key": "adapting_to_setting", "icon": "🏡", "category": "transitions", "label": {"en": "Settling into the kindergarten", "ar": "التأقلم مع الروضة", "he": "הסתגלות לגן"}}
+    ]
+  }
+}

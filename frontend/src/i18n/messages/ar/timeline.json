@@ -3,20 +3,61 @@
   "intro": "ما حدث، من الأحدث إلى الأقدم.",
   "empty": "لا شيء في المسار بعد",
   "emptyHint": "ستظهر هنا الملاحظات وتغييرات التركيز والتقييمات بعد استخدام المحتوى.",
+  "emptyFiltered": "لا يوجد ما يطابق هذه التصفية",
   "addObservation": "إضافة ملاحظة",
   "loadOlder": "عرض الأقدم",
+  "backToDevelopment": "التطور",
+  "show": "عرض",
+  "groups": {
+    "start": "الصورة الأولى",
+    "plans": "الخطط والأهداف",
+    "activities": "الأنشطة",
+    "observations": "الملاحظات",
+    "reviews": "المراجعات",
+    "approved": "تحديثات معتمدة"
+  },
   "types": {
     "baseline": "تم إنشاء نقطة البداية",
+    "questionnaire_submitted": "وصل استبيان العائلة",
     "focus_opened": "تركيز جديد",
+    "plan_changed": "تم تحديث الخطة",
+    "focus_reopened": "عاد التركيز نشطاً",
     "focus_closed_completed": "اكتمل التركيز",
     "focus_closed_paused": "توقف التركيز مؤقتاً",
     "observation": "ملاحظة",
     "content_feedback": "انطباع بعد الاستخدام",
     "content_approved": "تمت الموافقة على المحتوى",
-    "review": "مراجعة التطور"
+    "review": "مراجعة التطور",
+    "summary_approved": "تم اعتماد الملخص الوظيفي",
+    "assessment_closed": "أُغلقت دورة الملاحظة"
+  },
+  "changes": {
+    "title": "الهدف",
+    "description": "الوصف",
+    "category": "المجال",
+    "plan": "الخطة",
+    "follow_up_on": "موعد المتابعة"
+  },
+  "changed": "ما تغيّر: {fields}",
+  "viaReview": "تقرّر في مراجعة التطور",
+  "entryMode": {
+    "self": "عبّأته العائلة",
+    "on_behalf": "أدخله الطاقم نيابة عن العائلة",
+    "meeting": "عُبّئ مع العائلة في لقاء"
+  },
+  "summarySource": {
+    "manual": "كتبه الطاقم",
+    "ai_draft": "مسودة بمساعدة الذكاء الاصطناعي، اعتمدها الطاقم"
+  },
+  "cycle": {
+    "initial": "دورة الملاحظة الأولى",
+    "reassessment": "دورة ملاحظة للمتابعة"
   },
   "feedbackOn": "بعد «{title}»",
   "focusLink": "التركيز: {title}",
   "baselineText": "تم حفظ الصورة الأولى لمواطن القوة والاهتمامات وما يساعد.",
-  "openReview": "فتح صفحة التطور"
+  "openReview": "فتح صفحة التطور",
+  "openPlan": "فتح الخطة",
+  "openParentView": "فتح رؤية الأهل",
+  "openCycle": "فتح ملاحظة المعلّمة"
 }

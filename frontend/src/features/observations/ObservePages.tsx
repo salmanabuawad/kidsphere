@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router";
+import { Link, useLocation, useNavigate, useParams } from "react-router";
 import { ChevronLeft, ChevronRight, Search, Zap } from "lucide-react";
 import { Alert, Button, ButtonLink, EmptyState, Input, PageHeader, PageSkeleton, Skeleton } from "@/components/ui";
 import { useI18n } from "@/i18n/I18nProvider";
@@ -8,7 +8,7 @@ import { paths } from "@/lib/paths";
 import { useErrorMessage } from "@/lib/useAction";
 import { useFetch } from "@/lib/useFetch";
 import { ChildAvatar, childUrl, displayName, isStaffView, type ChildCard, type ChildDetail, type ChildListResponse } from "@/features/children";
-import { recentChildIds } from "./api";
+import { isLookFor, recentChildIds, type LookFor } from "./api";
 import { QuickObservationForm } from "./QuickObservationForm";
 
 /**
@@ -19,6 +19,9 @@ export function ChildObservePage() {
   const { id = "" } = useParams();
   const { t } = useI18n();
   const navigate = useNavigate();
+  const location = useLocation();
+  const raw = (location.state as { lookFor?: unknown } | null)?.lookFor;
+  const lookFor: LookFor | null = isLookFor(raw) ? raw : null;
   const toMessage = useErrorMessage();
   const { data, error, reload } = useFetch<{ child: ChildDetail }>(childUrl(id));
   const child = data?.child;
@@ -64,7 +67,7 @@ export function ChildObservePage() {
         </div>
       </div>
       <p className="mb-5 text-sm text-muted">{t("observations.intro")}</p>
-      <QuickObservationForm childId={child.id} focusAreas={focus} onSaved={() => navigate(paths.child(child.id))} />
+      <QuickObservationForm childId={child.id} focusAreas={focus} lookFor={lookFor} onSaved={() => navigate(paths.child(child.id))} />
     </div>
   );
 }

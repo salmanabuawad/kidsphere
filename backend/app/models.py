@@ -1,8 +1,16 @@
-"""All 14 tables as SQLAlchemy 2 models.
+"""All 20 tables as SQLAlchemy 2 models.
 
-The schema itself is created by the hand-written Alembic revision
-``migrations/versions/0001_initial.py``; these models must mirror it
-(tests/test_migrations.py checks that every column exists in both).
+The schema itself is created by the hand-written Alembic revisions
+``migrations/versions/0001_initial.py`` and ``0002_source_documents.py``; these
+models must mirror them (tests/test_migrations.py checks that every column
+exists in both).
+
+History tables (0002): ``record_versions``, ``teacher_assessment_entries`` and
+``report_exports`` are append-only; ``ai_suggestions`` only allow a pending
+outcome to be resolved; ``functional_summaries`` only allow draft -> approved;
+a closed ``teacher_assessments`` row is immutable. DB triggers enforce this:
+never UPDATE or DELETE those rows, insert a new one instead. Write versions
+through ``app.services.history.record``.
 
 Conventions:
 - uuid primary keys (Python ``uuid4`` default, ``gen_random_uuid()`` in the DB).
@@ -32,7 +40,7 @@ from sqlalchemy import (
     func,
     text,
 )
-from sqlalchemy.dialects.postgresql import JSONB, UUID
+from sqlalchemy.dialects.postgresql import ARRAY, DATERANGE, JSONB, UUID, Range
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 ROLE_VALUES = ("admin", "teacher", "parent")
@@ -46,6 +54,35 @@ VIDEO_STATUS_VALUES = ("script_ready", "generating", "ready", "failed")
 OBSERVATION_SOURCE_VALUES = ("quick", "content_feedback")
 SUPPORT_LEVEL_VALUES = ("independent", "some_support", "significant_support", "not_observed")
 FEEDBACK_RESULT_VALUES = ("worked_well", "partly", "did_not_work")
+
+# 0002 (COVERAGE-MATRIX §3). Labels for the lists live in app/data/lists/common.json.
+AI_DOMAIN_VALUES = (
+    "emotional", "social", "communication", "language", "executive_function", "play",
+    "gross_motor", "fine_motor", "independence", "sensory", "cognitive", "daily_routine",
+)
+ASSESSMENT_DOMAIN_VALUES = (
+    "emotional", "social", "language", "executive_function", "play", "gross_motor", "fine_motor",
+    "independence", "sensory", "cognitive", "daily_routine", "strengths", "priority_needs",
+)
+SECTION_STATUS_VALUES = ("not_started", "in_progress", "sufficient", "review_later")
+RECORD_ENTITY_VALUES = ("profile_section", "observation", "focus_area", "content")
+RECORD_VIA_VALUES = (
+    "backfill", "self", "on_behalf", "meeting", "manual", "review", "assessment",
+    "generated", "regenerated", "edited", "status", "system",
+)
+CHANGED_ROLE_VALUES = ("admin", "teacher", "parent", "system")
+REPORTED_BY_VALUES = ("parent", "teacher")
+AI_SUGGESTION_KIND_VALUES = ("understanding", "functional_summary", "observation_questions")
+AI_SUGGESTION_OUTCOME_VALUES = ("pending", "accepted", "edited", "discarded")
+AI_SUGGESTION_USED_BY_VALUES = ("development_review", "functional_summary")
+ASSESSMENT_KIND_VALUES = ("initial", "reassessment")
+ASSESSMENT_STATUS_VALUES = ("open", "closed")
+ASSESSMENT_ENTERED_ROLE_VALUES = ("admin", "teacher")
+SUMMARY_SOURCE_VALUES = ("manual", "ai_draft")
+SUMMARY_STATUS_VALUES = ("draft", "approved")
+REPORT_TYPE_VALUES = (
+    "full", "parent_questionnaire", "teacher_observation", "current_development", "intervention_plan", "timeline",
+)
 
 
 class Base(DeclarativeBase):
@@ -200,6 +237,14 @@ class FocusArea(Base):
     created_at: Mapped[datetime] = _created()
     updated_at: Mapped[datetime] = _updated()
     closed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    # 0002: Domain 15/16 follow-up date (plan.review_on is legacy text), the plan
+    # period (observation cycle) and the Domain 13 need it came from
+    # ({assessment_id, index}). At most 3 active per child: the service returns
+    # 409 FOCUS_LIMIT; a deferred DB constraint trigger backs it up at COMMIT.
+    follow_up_on: Mapped[date | None] = mapped_column(Date)
+    assessment_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("teacher_assessments.id", ondelete="SET NULL"))
+    source_need: Mapped[dict | None] = mapped_column(JSONB)
 
 
 class GeneratedContent(Base):
@@ -230,6 +275,9 @@ class GeneratedContent(Base):
     created_by: Mapped[uuid.UUID | None] = _user_fk()
     created_at: Mapped[datetime] = _created()
     updated_at: Mapped[datetime] = _updated()
+    # 0002: soft delete of drafts (OQ-5); a CHECK allows it only while status = 'draft'.
+    deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    deleted_by: Mapped[uuid.UUID | None] = _user_fk()
 
 
 class Observation(Base):
@@ -254,6 +302,11 @@ class Observation(Base):
     created_by: Mapped[uuid.UUID | None] = _user_fk()
     created_at: Mapped[datetime] = _created()
     updated_at: Mapped[datetime] = _updated()
+    # 0002: the AI domains (AI_DOMAIN_VALUES; CHECK + GIN index) and descriptive
+    # attributes {frequency, duration_minutes, intensity} (never a score).
+    domains: Mapped[list[str]] = mapped_column(
+        ARRAY(Text), nullable=False, default=list, server_default=text("'{}'::text[]"))
+    attributes: Mapped[dict | None] = mapped_column(JSONB)
 
 
 class ContentFeedback(Base):
@@ -284,6 +337,9 @@ class DevelopmentReview(Base):
     ai_suggested: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default=text("false"))
     created_by: Mapped[uuid.UUID | None] = _user_fk()
     created_at: Mapped[datetime] = _created()
+    # 0002: the Domain 16 follow-up block and the AI suggestion the review used.
+    follow_up: Mapped[dict | None] = mapped_column(JSONB)
+    ai_suggestion_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("ai_suggestions.id"))
 
 
 class AuditLog(Base):
@@ -297,3 +353,145 @@ class AuditLog(Base):
     child_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
     meta: Mapped[dict] = mapped_column("metadata", JSONB, nullable=False, default=dict, server_default=text("'{}'::jsonb"))
     created_at: Mapped[datetime] = _created()
+
+
+# --------------------------------------------------------------------------- 0002: source documents
+
+
+class AiSuggestion(Base):
+    """What was sent to the AI (de-identified) and what came back. Only ``outcome``
+    (pending -> accepted/edited/discarded), ``used_by_*`` and ``resolved_at`` may
+    change, once; the row is otherwise immutable (DB trigger)."""
+
+    __tablename__ = "ai_suggestions"
+
+    id: Mapped[uuid.UUID] = _pk()
+    child_id: Mapped[uuid.UUID] = _child_fk()
+    kind: Mapped[str] = mapped_column(Text, nullable=False)
+    provider: Mapped[str] = mapped_column(Text, nullable=False)
+    model: Mapped[str | None] = mapped_column(Text)
+    is_template: Mapped[bool] = mapped_column(Boolean, nullable=False)
+    fallback_reason: Mapped[str | None] = mapped_column(Text)
+    domains: Mapped[list[str]] = mapped_column(
+        ARRAY(Text), nullable=False, default=list, server_default=text("'{}'::text[]"))
+    input: Mapped[dict] = mapped_column(JSONB, nullable=False)
+    output: Mapped[dict] = mapped_column(JSONB, nullable=False)
+    outcome: Mapped[str] = mapped_column(Text, nullable=False, default="pending", server_default="pending")
+    used_by_type: Mapped[str | None] = mapped_column(Text)
+    used_by_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
+    created_by: Mapped[uuid.UUID | None] = _user_fk()
+    created_at: Mapped[datetime] = _created()
+    resolved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class RecordVersion(Base):
+    """Append-only history: the FULL state of a profile section, observation,
+    focus area or content row after each change (seq 1 = first known state).
+    Write rows with ``app.services.history.record``."""
+
+    __tablename__ = "record_versions"
+
+    id: Mapped[int] = mapped_column(BigInteger, Identity(always=True), primary_key=True)
+    child_id: Mapped[uuid.UUID] = _child_fk()
+    entity_type: Mapped[str] = mapped_column(Text, nullable=False)
+    entity_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
+    # profile_section: '<perspective>:<section>', e.g. 'parent:health', 'teacher:bridge'
+    entity_key: Mapped[str] = mapped_column(Text, nullable=False, default="", server_default="")
+    seq: Mapped[int] = mapped_column(Integer, nullable=False)
+    data: Mapped[dict | list] = mapped_column(JSONB, nullable=False)
+    changed_by: Mapped[uuid.UUID | None] = _user_fk()
+    changed_by_name: Mapped[str | None] = mapped_column(Text)
+    changed_role: Mapped[str | None] = mapped_column(Text)
+    reported_by: Mapped[str | None] = mapped_column(Text)
+    via: Mapped[str] = mapped_column(Text, nullable=False)
+    review_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("development_reviews.id"))
+    ai_suggestion_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("ai_suggestions.id"))
+    created_at: Mapped[datetime] = _created()
+
+
+class TeacherAssessment(Base):
+    """One teacher full-observation cycle (header = observation model section A).
+    At most one open and one initial cycle per child; a closed cycle is immutable."""
+
+    __tablename__ = "teacher_assessments"
+
+    id: Mapped[uuid.UUID] = _pk()
+    child_id: Mapped[uuid.UUID] = _child_fk()
+    kind: Mapped[str] = mapped_column(Text, nullable=False, default="initial", server_default="initial")
+    previous_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("teacher_assessments.id"))
+    filled_on: Mapped[date] = mapped_column(Date, nullable=False, server_default=func.current_date())
+    period_from: Mapped[date | None] = mapped_column(Date)
+    period_to: Mapped[date | None] = mapped_column(Date)
+    period_note: Mapped[str | None] = mapped_column(Text)
+    teacher_id: Mapped[uuid.UUID | None] = _user_fk()
+    filled_by_text: Mapped[str | None] = mapped_column(Text)
+    child_snapshot: Mapped[dict] = _jsonb_dict()
+    # cache of the latest entry per domain: {<domain>: {status, entry_id, data, updated_by, updated_at}}
+    domains: Mapped[dict] = _jsonb_dict()
+    status: Mapped[str] = mapped_column(Text, nullable=False, default="open", server_default="open")
+    created_by: Mapped[uuid.UUID | None] = _user_fk()
+    created_at: Mapped[datetime] = _created()
+    updated_at: Mapped[datetime] = _updated()
+    closed_by: Mapped[uuid.UUID | None] = _user_fk()
+    closed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class TeacherAssessmentEntry(Base):
+    """Append-only: every domain save is a new row holding the full domain document.
+    Inserts only into an open cycle (the DB trigger locks the cycle row)."""
+
+    __tablename__ = "teacher_assessment_entries"
+
+    id: Mapped[uuid.UUID] = _pk()
+    assessment_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("teacher_assessments.id", ondelete="CASCADE"), nullable=False)
+    child_id: Mapped[uuid.UUID] = _child_fk()
+    domain: Mapped[str] = mapped_column(Text, nullable=False)
+    status: Mapped[str] = mapped_column(Text, nullable=False)
+    data: Mapped[dict] = mapped_column(JSONB, nullable=False)
+    entered_by: Mapped[uuid.UUID | None] = _user_fk()
+    entered_by_name: Mapped[str | None] = mapped_column(Text)
+    entered_role: Mapped[str] = mapped_column(Text, nullable=False)
+    entered_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())
+
+
+class FunctionalSummary(Base):
+    """Domain 17. Every edit inserts a new row (``supersedes_id``); the only allowed
+    update is draft -> approved (with approved_by/approved_at)."""
+
+    __tablename__ = "functional_summaries"
+
+    id: Mapped[uuid.UUID] = _pk()
+    child_id: Mapped[uuid.UUID] = _child_fk()
+    supersedes_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("functional_summaries.id"))
+    review_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("development_reviews.id"))
+    assessment_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("teacher_assessments.id"))
+    general_description: Mapped[str | None] = mapped_column(Text)
+    main_strengths: Mapped[dict] = _jsonb_dict()
+    main_needs: Mapped[dict] = _jsonb_dict()
+    adaptations: Mapped[str | None] = mapped_column(Text)
+    follow_up_with_parents: Mapped[str | None] = mapped_column(Text)
+    team_recommendations: Mapped[str | None] = mapped_column(Text)
+    source: Mapped[str] = mapped_column(Text, nullable=False)
+    ai_suggestion_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("ai_suggestions.id"))
+    status: Mapped[str] = mapped_column(Text, nullable=False, default="draft", server_default="draft")
+    approved_by: Mapped[uuid.UUID | None] = _user_fk()
+    approved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    created_by: Mapped[uuid.UUID | None] = _user_fk()
+    created_at: Mapped[datetime] = _created()
+
+
+class ReportExport(Base):
+    """Append-only PDF export log. Never stores report content."""
+
+    __tablename__ = "report_exports"
+
+    id: Mapped[uuid.UUID] = _pk()
+    child_id: Mapped[uuid.UUID] = _child_fk()
+    report_type: Mapped[str] = mapped_column(Text, nullable=False)
+    language: Mapped[str] = mapped_column(Text, nullable=False)
+    generated_by: Mapped[uuid.UUID | None] = _user_fk()
+    generated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())
+    date_range: Mapped[Range[date] | None] = mapped_column(DATERANGE)
+    # include_* flags, assessment_id; never content
+    options: Mapped[dict] = _jsonb_dict()

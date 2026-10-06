@@ -26,6 +26,7 @@ import {
   canShare,
   contentUrl,
   deleteContent,
+  domainsUsed,
   duplicateContent,
   isUsable,
   regenerateContent,
@@ -36,6 +37,7 @@ import {
 } from "./api";
 import { ContentEditor } from "./ContentEditor";
 import { ContentPreview } from "./ContentPreview";
+import { VersionHistory } from "./VersionHistory";
 import { FeedbackDialog } from "./FeedbackDialog";
 import { ModeBadge, ResultBadge, SourceBadge, StatusChip, TYPE_ICONS, typeKey } from "./ui";
 
@@ -223,6 +225,7 @@ function Review({ item, onChange }: { item: ContentDetail; onChange: (c: Content
             </CardBody>
           </Card>
           <WhyCard item={item} />
+          <VersionHistory key={`${item.id}:${item.updated_at ?? ""}:${item.variant ?? 0}:${item.title}`} item={item} />
           <FeedbackHistory item={item} />
         </aside>
       </div>
@@ -382,6 +385,8 @@ function WhyCard({ item }: { item: ContentDetail }) {
     }
     return fallback;
   };
+  // The AI domains sent with the request (only those the focus or strength concerns).
+  const domains = domainsUsed(gi).map((d) => optionLabel("ai_domains", d));
   return (
     <Card data-testid="why-card">
       <CardHeader title={t("content.review.why")} />
@@ -392,6 +397,11 @@ function WhyCard({ item }: { item: ContentDetail }) {
           {target && <Row label={t("content.review.whyStrength")}>{strengthLabel(target.key, target.label)}</Row>}
           {gi.strengths && gi.strengths.length > 0 && <Row label={t("content.review.whyStrengths")}>{labels(gi.strengths)}</Row>}
           {gi.interests && gi.interests.length > 0 && <Row label={t("content.review.whyInterests")}>{labels(gi.interests)}</Row>}
+          {domains.length > 0 && (
+            <Row label={t("content.review.whyDomains")}>
+              <span data-testid="why-domains">{domains.join(" · ")}</span>
+            </Row>
+          )}
           {lang && <Row label={t("content.review.whyLanguage")}>{lang}</Row>}
           {gi.instruction && <Row label={t("content.review.whyInstruction")}>{gi.instruction}</Row>}
           {typeof item.variant === "number" && item.variant > 0 && <Row label={t("content.review.versionLabel")}>{t("content.review.version", { n: item.variant + 1 })}</Row>}

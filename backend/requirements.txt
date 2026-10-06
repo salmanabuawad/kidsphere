@@ -10,3 +10,6 @@ bcrypt==5.0.0
 python-multipart==0.0.32
 Pillow==12.3.0
 anthropic==1.11.0
+# PDF reports (app/reports): HTML + CSS -> PDF with Pango/HarfBuzz text layout (true RTL, Arabic shaping).
+weasyprint==70.0
+Jinja2==3.1.6

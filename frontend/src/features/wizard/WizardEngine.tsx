@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { ArrowLeft, ArrowRight, Check, ChevronDown, Save } from "lucide-react";
+import { ArrowLeft, ArrowRight, ChevronDown, Save, Users } from "lucide-react";
 import { Alert } from "@/components/ui/Alert";
-import { Button } from "@/components/ui/Button";
+import { Button, ButtonLink } from "@/components/ui/Button";
 import { Card, CardBody } from "@/components/ui/Card";
 import { PageSkeleton } from "@/components/ui/Spinner";
 import { useI18n } from "@/i18n/I18nProvider";
 import { useFormat } from "@/lib/format";
+import { paths } from "@/lib/paths";
 import { useAction } from "@/lib/useAction";
 import { useFetch } from "@/lib/useFetch";
 import { cn } from "@/lib/utils";
@@ -85,8 +86,8 @@ export function useWizardProfile(childId: string) {
 export type WizardProfile = ReturnType<typeof useWizardProfile>;
 
 /**
- * One step (2–7) of the wizard for staff or parent. Staff toggle between the
- * parent's and the teacher's answers; parents only see their own questions.
+ * One step (2–7) of the wizard. Staff fill the teacher's own answers here; the family's
+ * answers are entered from the Parent View ("for the family" or "together in a meeting").
  */
 export function WizardStep({
   childId,
@@ -111,7 +112,7 @@ export function WizardStep({
 }) {
   const { t } = useI18n();
   const child = useFetch<{ child: ChildBasics }>(childUrl(childId));
-  const [perspective, setPerspective] = useState<PerspectiveName>(mode === "parent" ? "parent" : "teacher");
+  const perspective: PerspectiveName = mode === "parent" ? "parent" : "teacher";
   const def = stepDef(step);
   const name = childFirstName(child.data?.child, t("wizard.theChild"));
 
@@ -137,12 +138,11 @@ export function WizardStep({
         </div>
       </div>
 
-      {mode === "staff" && <PerspectiveToggle value={perspective} onChange={setPerspective} />}
+      {mode === "staff" && <FamilyAnswersNote childId={childId} />}
       <EnteredNote stamps={(perspective === "parent" ? wiz.data.parent_perspective : wiz.data.teacher_perspective)?.entered?.[def.section]} perspective={perspective} />
 
       <Card>
         <CardBody className="space-y-8 py-6">
-          {mode === "staff" && perspective === "parent" && <Alert tone="info">{t("wizard.enteringForParent")}</Alert>}
           <StepFields def={def} fields={fields.filter((f) => !f.collapsed)} perspective={perspective} wiz={wiz} name={name} />
           {fields.some((f) => f.collapsed) && (
             <details className="group rounded-md border border-line">
@@ -178,26 +178,24 @@ export function WizardStep({
   );
 }
 
-function PerspectiveToggle({ value, onChange }: { value: PerspectiveName; onChange: (p: PerspectiveName) => void }) {
+/**
+ * The staff wizard holds the teacher's own answers. The family's questionnaire is entered
+ * from the Parent View, for the family or together in a meeting (replaces the old
+ * per-step Parent / Teacher toggle).
+ */
+function FamilyAnswersNote({ childId }: { childId: string }) {
   const { t } = useI18n();
   return (
-    <div className="inline-flex gap-1 rounded-md bg-tray p-1" role="tablist" aria-label={t("wizard.perspective.label")}>
-      {(["teacher", "parent"] as const).map((p) => (
-        <button
-          key={p}
-          type="button"
-          role="tab"
-          aria-selected={value === p}
-          onClick={() => onChange(p)}
-          className={cn(
-            "flex min-h-11 items-center gap-1.5 rounded-md px-4 text-sm transition-colors",
-            value === p ? "border-2 border-brand bg-surface px-3.5 font-semibold text-ink shadow-lip" : "font-medium text-ink-muted hover:text-ink",
-          )}
-        >
-          {value === p && <Check className="size-4 shrink-0 text-brand" strokeWidth={2.5} aria-hidden />}
-          {t(`wizard.perspective.${p}`)}
-        </button>
-      ))}
+    <div className="flex flex-wrap items-center justify-between gap-2 rounded-md bg-tray px-4 py-3" data-testid="family-answers-note">
+      <p className="text-sm text-ink">{t("wizard.familyAnswers.note")}</p>
+      <div className="flex flex-wrap gap-2">
+        <ButtonLink size="sm" variant="secondary" to={paths.childParentAnswers(childId, 1, "on_behalf")}>
+          {t("wizard.familyAnswers.onBehalf")}
+        </ButtonLink>
+        <ButtonLink size="sm" variant="ghost" icon={<Users aria-hidden />} to={paths.childParentAnswers(childId, 1, "meeting")}>
+          {t("wizard.familyAnswers.meeting")}
+        </ButtonLink>
+      </div>
     </div>
   );
 }

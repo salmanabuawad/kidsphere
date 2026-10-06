@@ -24,7 +24,7 @@ Every icon has two inks: the outline, and one paint on one primitive.
 | Content and play: `story`, `video`, `game`, `activity`, `pack`, `present`, `note-quote` | `ink` | `paint-sky` |
 | Feedback: `worked-well`, `partly`, `did-not-work` | `ink` | `paint-sun` on the ball, the same for all three, so no outcome reads as a grade |
 | Nav icon, inactive | `ink-muted` | None |
-| Nav icon, active (bottom-bar pill, side-nav row) | `ink` | `brand` on its designated piece |
+| Nav icon, active (bottom-bar pill, side-nav row) | `ink` | `accent`, the logo teal, on its designated piece (a navy `brand` paint would sit at 1.44:1 against the graphite outline) |
 | Nav icon at 48px or more (empty states) | `ink` | `paint-sky` |
 | On a solid fill: the Observe block, a primary button, a single-select chip, a danger confirm | `on-brand` | None |
 | On a paint fill: the sun RoundButton, a toast glyph block | `on-paint` | None |
@@ -56,7 +56,7 @@ In present mode, direction follows the content language, not the UI language: a 
 ## Using the icons
 
 - In the app, import the components from `@/icons`: `StrengthsIcon`, `WhatHelpsIcon`, `StoryIcon`, or `<BlockIcon name="story" />` for data-driven slots. They take the same props as a lucide icon (`size`, `className`, `strokeWidth`, `aria-*`), so they drop into nav metadata unchanged.
-- Set the outline colour with the text colour (`text-ink`, `text-ink-muted`, `text-on-brand`). Set the paint with the `paint` prop (`paint={false}` for outline only, or any colour such as `var(--paint-sky)`) or from a parent with the CSS variable `--icon-paint`: an active nav link sets it to `var(--brand)`, an inactive one to `transparent`.
+- Set the outline colour with the text colour (`text-ink`, `text-ink-muted`, `text-on-brand`). Set the paint with the `paint` prop (`paint={false}` for outline only, or any colour such as `var(--paint-sky)`) or from a parent with the CSS variable `--icon-paint`: an active nav link sets it to `var(--accent)`, an inactive one to `transparent`.
 - Pass `size={16}` for chip-sized icons so the slip turns off.
 - Leave icons `aria-hidden`: the word beside them is the label. An icon-only button carries both `aria-label` and `title`.
 - Use the SVG files in `assets/Icons` only where an icon must be an `<img>` (documentation, previews). They are baked with the light-theme inks, and `assets/Icons/dark` holds the same icons baked with the dark-theme inks; place both and let the theme show one. Never filter a light file to fake the dark theme.

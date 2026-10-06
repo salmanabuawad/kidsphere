@@ -18,7 +18,7 @@ A three-level segmented radio group for how much support a child needed, with on
 
 - Track: `role="radiogroup"`, `tray` fill, `radius-md`, 4px padding and gap, about 52px tall overall.
 - Segment: equal widths, at least 44px tall, `label` 500 in `ink-muted`; hover turns the label `ink`.
-- Selected segment: a `surface` block with a 2px `brand` border (5.37:1 on `tray` in light, 9.46:1 in dark), `shadow-lip`, a leading 16px Check in `brand`, and the label at 600 in `ink`. The border and the check together are the non-colour cue.
+- Selected segment: a `surface` block with a 2px `brand` border (9.20:1 on `tray` in light, 9.84:1 in dark), `shadow-lip`, a leading 16px Check in `brand`, and the label at 600 in `ink`. The border and the check together are the non-colour cue.
 
 ## Behaviour
 

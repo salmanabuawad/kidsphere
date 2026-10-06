@@ -27,12 +27,58 @@
     "languages": "اللغات",
     "editBasics": "تعديل التفاصيل",
     "parents": "الأهل",
+    "kindergarten": "الروضة",
+    "exportPdf": "تصدير PDF",
     "tabs": {
       "label": "صفحات الطفل",
-      "profile": "الملف",
-      "timeline": "الخط الزمني",
-      "content": "المحتوى",
-      "development": "التطور"
+      "overview": "نظرة عامة",
+      "parentView": "رؤية الأهل",
+      "teacherObservation": "ملاحظة المعلّمة",
+      "plan": "الخطة",
+      "activities": "الأنشطة",
+      "observations": "الملاحظات",
+      "development": "التطور",
+      "reports": "التقارير"
+    }
+  },
+  "overview": {
+    "heart": {
+      "title": "من القلب",
+      "intro": "ما أرادت العائلة أن تعرفيه قبل لقاء {name}",
+      "private": "يراه طاقم الروضة فقط"
+    },
+    "familyWords": "بكلمات العائلة",
+    "appreciate": "أكثر ما تحبه العائلة فيه",
+    "mainStrengths": "مواطن القوة الرئيسية",
+    "goodToKnow": {
+      "title": "من المفيد أن تعرفي",
+      "mostImportant": "أهم ما يجب معرفته",
+      "routines": "عادات نحافظ عليها",
+      "overwhelm": "مواقف قد تكون أكثر من اللازم",
+      "overwhelmKnow": "ما يجب أن يعرفه الطاقم في هذه اللحظات",
+      "transitionObject": "غرض مريح أو روتين وداع",
+      "mayBeDifficult": "ما قد يجعل الأمور أصعب",
+      "remember": "تذكّري",
+      "notes": "ملاحظات مسجّلة",
+      "foodNote": "ملاحظة عن الطعام مسجّلة",
+      "medicalNote": "ملاحظة طبية مسجّلة",
+      "openParentView": "فتح في رؤية الأهل",
+      "reach": "كيف نتواصل مع العائلة",
+      "communication": "ما يهم العائلة",
+      "contact": "التواصل"
+    },
+    "nextReview": "المراجعة القادمة: {date}",
+    "allObservations": "كل الملاحظات",
+    "prompts": {
+      "title": "الخطوات التالية",
+      "familyAnswersTitle": "وصلت إجابات العائلة",
+      "familyAnswersBody": "اقرئي ما شاركته العائلة عن {name} واملئي القراءة الأولى السريعة.",
+      "quickBaselineAction": "القراءة الأولى السريعة",
+      "quickBaseline": "القراءة الأولى السريعة",
+      "openQuestion": "سؤال للتوضيح مع العائلة",
+      "openQuestionAction": "فتح القراءة الأولى السريعة",
+      "reviewLater": "للمراجعة لاحقاً",
+      "parentSection": "إجابات العائلة"
     }
   },
   "profile": {

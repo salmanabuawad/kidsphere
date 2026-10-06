@@ -41,34 +41,38 @@ KidSphere stores sensitive information about young children. It is an educationa
 - gender, only when it is girl or boy (for Arabic and Hebrew grammar)
 - the language, mode, content type and game template
 - at most 3 strength labels, 3 interest labels and 3 what-helps labels
-- at most 3 sensitivity keys ("avoid")
-- the focus area (category, title, description, plan) or the target strength
-- at most 5 recent observation texts (each cut to 300 characters)
+- at most 3 sensitivity keys ("avoid"), and only those the teacher observed in the teacher observation (Domain 9: the effect is "affects" or "sometimes"). Sensitivities a parent reported, such as certain foods, are never sent.
+- the focus area (category, title, description, and the plan without "who is responsible"; for a focus promoted from a Domain 13 need, also without the copied "what exactly do we see" text) or the target strength
+- at most 5 observation texts linked to that focus (each cut to 300 characters)
+- the domain blocks (`domains`) of the AI domains the focus or strength concerns, and of no other domain: the teacher-observation item keys with the support needed (or the Domain 9 effect), help keys, and at most 3 recent observations tagged with that domain (date, context, support level, the stage-E result key "did anything change" (yes/partly/no) and the focus whose plan was applied, the masked text cut to 300 characters). The domains sent are stored with the content.
 - the approved current understanding (summary, adaptations, next steps)
 - the teacher's regenerate instruction
 
-**For a development-review suggestion:**
-- the child's first or preferred name and age
+**For a development-review suggestion and a functional-summary draft (analysis, de-identified):**
+- the child as `[child]`, never the first or preferred name, and the age; the answer gets the name back on the server
 - the same profile labels and the current understanding
-- the active focus areas (category, title, description)
-- the labels of the baseline items
-- up to 40 observations since the latest baseline: their ids, dates, context and support level, plus the text and note cut to 300 characters
+- the active focus areas (category, title, description; the summary draft also the plan without "who is responsible" and without a promoted need's text)
+- the labels of the baseline items (review only), without sensitivity support needs; independence levels only when the period has independence data
+- the domain blocks of the domains that have data in the period (item keys, levels, help keys)
+- up to 40 observations since the latest baseline: their ids, dates, context, support level and AI domains, the stage-E result key "did anything change" (yes/partly/no, never "what changed") and the focus whose plan was applied, plus the observation text (never the note) cut to 300 characters
+- every such call is stored in `ai_suggestions` with exactly this de-identified input, the output and the domains sent
 
 **Custom labels:** a label is a vocabulary label, or a custom entry (a short text typed instead of an option). A custom entry is sent only when staff entered or confirmed it (a teacher, an observation or a saved review). A custom entry only a parent gave is never sent, and the first summary written when the baseline is made leaves it out too.
 
-**Names are masked in every free text on both paths:** the observation texts and notes, the focus title, description and plan, the custom labels and baseline items, the current understanding and the regenerate instruction.
+**Names are masked in every free text on both paths:** the observation texts, the focus title, description and plan, the custom labels and baseline items, the current understanding and the regenerate instruction.
 - The child's names, including the surname, become `[child]`.
 - The names of the other children of the kindergarten and of children not yet in a class (of every other child when the child has no class) become `[friend]`.
-- The parent name on the child, the linked parent accounts and the teachers of the kindergarten become `[adult]`.
+- The parent name on the child, the linked parent accounts, the parents and guardians the family named in the questionnaire (with or without an account) and the teachers of the kindergarten become `[adult]`.
+- Phone numbers become `[phone]` and e-mail addresses `[email]`.
 - Matching tolerates the usual spelling variants: case and accents, Arabic hamza and alef forms, ta marbuta, alef maqsura, tashkeel and tatweel, Hebrew niqqud and geresh, and Hebrew and Arabic one-letter prefixes.
 - Only names KidSphere knows can be masked. A relative, a sibling or anyone else who is not in KidSphere (for example "Grandma Huda") is sent as written, so teachers should not write such names.
 - A given name that is also a common word (Will, May, אור, نور) is masked wherever that word appears. A name particle (bin, בן, عبد, de) is masked only together with the next word.
 - Vocabulary labels are not changed.
 
-**Never sent:** the birth date, the surname, the photo, the parent's name or contact, free-text parent answers, whole perspectives, user accounts and other children's data.
+**Never sent:** the birth date, the surname, the photo, the parent's name or contact, free-text parent answers (including the message from the heart), the health, medical and family answers, whole perspectives, observation notes and the other observation free texts (who was there, before, after, what changed, documentation), teacher-observation notes and texts, "who is responsible" in a plan, follow-up and summary texts, user accounts and other children's data. The source registries (`backend/app/data/source/*.json`) mark every question with `ai_policy`; anything marked `never` (or not listed) stays out, and `tests/test_ai_payload_policy.py` checks it.
 
 **Checks and logs:**
-- AI output is validated and safety-checked before it is saved, and it is always saved as a draft for teacher review.
+- AI output is validated and safety-checked before it is saved, and it is always saved as a draft for teacher review. AI output may never recommend a referral or a professional evaluation, and never uses deficit wording, also in text only the teacher sees; such output is replaced by the built-in template.
 - Each AI call logs one line of metadata (operation, model, duration, token usage). Prompt text is never logged.
 - The input used for each content item is stored with it as `generation_input`.
 

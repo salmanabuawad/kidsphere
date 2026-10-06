@@ -25,23 +25,26 @@ nginx ── /         → /var/www/kidsphere/frontend/dist   (try_files → ind
 | `main.py` | Builds the app. Installs the error handlers and a same-origin check: a POST/PUT/PATCH/DELETE whose `Origin` host differs from `Host` gets 403. Includes every module in `routers/` under `/api`. Serves a built SPA only when `SERVE_STATIC_DIR` is set. |
 | `config.py` | `settings`, read by pydantic-settings from the environment and `backend/.env`. |
 | `db.py` | Engine, `SessionLocal`, `get_db`. Nothing auto-commits: a service commits once at the end of its unit of work. |
-| `models.py` | All 14 tables. There are no ORM relationships; queries are explicit `select()`s. |
-| `errors.py` | `AppError(code)` turns into `{"error": {code, message, details}}`. Request validation errors become 400 VALIDATION with `details=[{path, message}]`. A unique violation becomes 409 DUPLICATE, and FK/CHECK/NOT NULL violations become 400. Anything else becomes 500 INTERNAL and is logged. |
+| `models.py` | All 20 tables, plus the value tuples that mirror the CHECKs (`AI_DOMAIN_VALUES`, `ASSESSMENT_DOMAIN_VALUES`, `SECTION_STATUS_VALUES`, `REPORT_TYPE_VALUES`, …). There are no ORM relationships; queries are explicit `select()`s. |
+| `errors.py` | `AppError(code)` turns into `{"error": {code, message, details}}`. Request validation errors become 400 VALIDATION with `details=[{path, message}]`. A unique violation becomes 409 DUPLICATE, and FK/CHECK/NOT NULL violations become 400; `CONSTRAINT_CODES` maps the named guards to their codes (`focus_areas_max_active` → FOCUS_LIMIT, `teacher_assessments_one_open_uq` → ASSESSMENT_OPEN, `teacher_assessments_closed` → ASSESSMENT_CLOSED, `functional_summaries_approved` → SUMMARY_APPROVED). Anything else becomes 500 INTERNAL and is logged. |
 | `deps.py` | `DB`, `CurrentUser` (401), `StaffUser` and `AdminUser` (403), `require_roles(...)`. |
 | `access.py` | Child scope inside the query: `child_scope`, `visible_children`, `scoped_child_ids`, `get_child_or_404`, `get_child_row_or_404` (with `write=` and `lock=`). |
 | `security.py` | bcrypt at cost 12, using the first 72 UTF-8 bytes so hashes from the legacy app still verify. Also a dummy hash for constant-time login, and the session-token helpers. |
 | `sessions.py` | Opaque token in the cookie `ks_session` (HttpOnly, SameSite=Lax, Secure, 7 days); only its sha256 is stored. Create, lookup and revoke. |
 | `audit.py` | `audit(db, actor, action, object_type, object_id, child_id=None, **meta)`. Meta holds primitives only. |
-| `vocab.py` + `data/options.json` | The shared vocabulary (option lists with en/ar/he labels, plus `banned_terms`). It is used for validation, for UI labels (`GET /api/options`) and for AI prompts. |
-| `schemas/` | Pydantic request models. `StrictModel` forbids extra fields and strips strings. `Literal`s mirror the DB CHECKs. |
-| `services/` | One module of plain functions per area: users, classes, children, uploads, profiles, baselines, focus_areas, observations, timeline, content, feedback, reviews, video_service. |
-| `routers/` | Thin modules (auth, me, health, options, users, classes, parents, children, profiles, baselines, focus_areas, observations, timeline, content, feedback, reviews). Endpoints are sync `def` functions that each call one service function. |
-| `ai/` | `context.py`, `prompts.py`, `claude_provider.py`, `template_provider.py` + `templates/*.json`, `schemas.py`, `safety.py`, `service.py` (section 6). |
+| `vocab.py` + `data/options.json` + `data/lists/*.json` | The shared vocabulary (option lists with en/ar/he labels, plus `banned_terms` and `allow_phrases`). `lists()` merges `options.json` with the list fragments (`common`, `parent_questionnaire`, `observation_model`, `plan`; a list may be defined once). It is used for validation, for UI labels (`GET /api/options`) and for AI prompts. |
+| `data/source/*.json` | The two source registries, `parent_questionnaire.json` and `observation_model.json` (`{meta, sections[], items[]}`; every item has an id matching COVERAGE-MATRIX.md, `storage`, `options`, `sensitivity`, `ai_policy`, `pdf`, en/ar/he `label` and the verbatim `source_he`, which is never rendered). `vocab.source_model()` / `source_registry(name)` serve them; the wizard, the Parent View, the Teacher Observation tab, the PDF builders and the AI payload policy are all driven by them. |
+| `provenance.py` | Pure functions: `derive(...)` / `badges(...)` turn sources, entry stamps, approvals and AI-suggestion outcomes into the labels parent_said, teacher_observed, ai_suggested, teacher_approved. |
+| `schemas/` | Pydantic request models. `StrictModel` forbids extra fields and strips strings. `Literal`s mirror the DB CHECKs. `profile.py` holds the 13 questionnaire sections and the quick baseline (bridge); `assessments.py` the 13 observation-domain documents. |
+| `services/` | One module of plain functions per area: users, classes, children, uploads, profiles (+ `questionnaire_projection`), baselines, focus_areas, observations, assessments, functional_summaries, history, timeline, content, feedback, reviews, video_service. |
+| `routers/` | Thin modules (auth, me, health, options, source_model, users, classes, parents, children, profiles, baselines, focus_areas, observations, assessments, functional_summaries, ai_suggestions, reports, timeline, content, feedback, reviews). Endpoints are sync `def` functions that each call one service function. |
+| `ai/` | `context.py`, `domains.py`, `gather.py`, `prompts.py`, `claude_provider.py`, `template_provider.py` + `templates/*.json`, `schemas.py`, `safety.py`, `suggestions.py`, `service.py` (section 6). |
+| `reports/` | PDF reports (section 8a): `service.py` (access, model, render, export log), `context.py`, `builders/` (one per report type), `templates/` (Jinja2), `static/` (CSS), `fonts/` (bundled Rubik, Noto Sans Hebrew, Noto Sans Arabic), `messages/{en,ar,he}.json`. It never imports `app.ai`. |
 | `cli.py` | `create-admin`, `set-password`, `import-users`, `audit --child`. |
 | `dev_seed.py` | Demo data for Adam and Maya. Refuses to run unless the DB name ends in `_test` or `_preview`, or `KIDSPHERE_ALLOW_DEMO=1` is set. |
-| `migrations/` | Alembic. `0001_initial` is hand-written DDL with the CHECKs, the indexes and the immutable-baseline trigger. |
+| `migrations/` | Alembic, hand-written DDL. `0001_initial` has the CHECKs, the indexes and the immutable-baseline trigger. `0002_source_documents` is additive: 6 tables with their guard triggers (`kidsphere_append_only` and friends), new columns, the deferred max-3-active-focus constraint trigger, and idempotent data steps (seq-1 `record_versions` for existing sections, observations, focus areas and content; `observations.domains` from `area`; `follow_up_on` from a dated `plan.review_on`; `questionnaire` / `section_status` keys added only when absent). |
 
-## 3. Data model (14 tables)
+## 3. Data model (20 tables)
 
 Every table has a UUID primary key (except `audit_log`) and `timestamptz` timestamps. Enumerations are TEXT + CHECK. Child-owned rows use `ON DELETE CASCADE`. Users are deactivated, never deleted. Children are archived (`archived_at`).
 
@@ -55,26 +58,35 @@ Every table has a UUID primary key (except `audit_log`) and `timestamptz` timest
 | `child_parents` | Links parent users to children, with an optional `relation`. |
 | `child_profiles` | One row per child: both perspectives, the merged lists, `current_understanding`, `wizard_step`, `wizard_completed_at`. |
 | `baselines` | `baseline_data` snapshot. **Immutable:** a trigger rejects UPDATE and any DELETE that is not part of the child's cascade. |
-| `focus_areas` | `category`, `suggestion_key`, `title`, `description`, `plan`, `status` active\|paused\|completed, `close_reason`, `closed_at`. At most 3 active per child. |
-| `generated_content` | `mode` strength_builder\|growth_support, `content_type` story\|video\|digital_game\|real_world_activity, `language`, `title`, `content`, `status` draft\|approved\|completed\|archived, `shared_with_parent`, `pack_id`, `generation_input`, `ai_provider`, `ai_model`, `is_template`, `variant`, `video_status` script_ready\|generating\|ready\|failed, `video_provider`, `video_external_job_id`, `video_url`, `approved_by`, `approved_at`. |
-| `observations` | `source` quick\|content_feedback, `focus_area_id`, `content_id`, `observed_at`, `area`, `context`, `observation` (NULL only for content_feedback), `support_level`, `what_helped`, `note`, `details`, `client_request_id` (unique per author). |
+| `focus_areas` | `category`, `suggestion_key`, `title`, `description`, `plan`, `follow_up_on` (date), `assessment_id` (the observation cycle, SET NULL), `source_need` (`{assessment_id, index, area}` when promoted from a Domain 13 need), `status` active\|paused\|completed, `close_reason`, `closed_at`. At most 3 active per child: the service locks the child row and returns 409 FOCUS_LIMIT; a deferred constraint trigger is the backstop at COMMIT. |
+| `generated_content` | `deleted_at`, `deleted_by` (soft delete; a CHECK allows it only for drafts), `mode` strength_builder\|growth_support, `content_type` story\|video\|digital_game\|real_world_activity, `language`, `title`, `content`, `status` draft\|approved\|completed\|archived, `shared_with_parent`, `pack_id`, `generation_input`, `ai_provider`, `ai_model`, `is_template`, `variant`, `video_status` script_ready\|generating\|ready\|failed, `video_provider`, `video_external_job_id`, `video_url`, `approved_by`, `approved_at`. |
+| `observations` | `source` quick\|content_feedback, `focus_area_id`, `content_id`, `observed_at`, `area`, `domains` (text[] of the 12 AI domains, GIN index), `context`, `observation` (NULL only for content_feedback), `support_level`, `what_helped`, `note`, `details`, `attributes`, `client_request_id` (unique per author). |
 | `content_feedback` | `content_id`, `result` worked_well\|partly\|did_not_work, `support_level`, `observation`, `what_helped`, `observation_id` (the mirrored observation). |
-| `development_reviews` | `review_date`, `summary`, `focus_review`, `baseline_validation`, `understanding`, `ai_suggested`. |
+| `development_reviews` | `review_date`, `summary`, `focus_review`, `baseline_validation`, `understanding`, `ai_suggested`, `ai_suggestion_id`, `follow_up` (Domain 16). |
+| `record_versions` | Append-only history (trigger): the full state of a profile section (`entity_key` `<perspective>:<section>`), observation, focus area or content row after each change, with `seq`, `changed_by`/`_name`/`_role`, `reported_by`, `via`, `review_id`, `ai_suggestion_id`. Written only through `services/history.record()`. |
+| `teacher_assessments` | One observation cycle (section א): `kind` initial|reassessment, `previous_id` (the cycle numbers are derived),\|reassessment, `number`, `previous_id`, `status` open\|closed, `filled_on`, `period_from`/`_to`/`_note`, `teacher_id`, `filled_by_text`, `child_snapshot`, `domains` (cache of the latest entry per domain). At most one open and one initial cycle per child; a closed cycle is immutable. |
+| `teacher_assessment_entries` | Append-only: one full domain document per save (`domain` of the 13, `status`, `data`, `entered_by`/`_name`/`_role`); inserts only into an open cycle. |
+| `functional_summaries` | Domain 17: `general_description`, `main_strengths`, `main_needs`, `adaptations`, `follow_up_with_parents`, `team_recommendations`, `source` manual\|ai_draft (+ `ai_suggestion_id`), `supersedes_id`, `review_id`, `assessment_id`, `status` draft\|approved. An edit inserts a new row; the only update is the approval. |
+| `ai_suggestions` | Every AI analysis call: `kind` understanding\|functional_summary\|observation_questions, the de-identified `input` that was sent, `output`, `domains`, provider/model, `outcome` pending\|accepted\|edited\|discarded and what used it. |
+| `report_exports` | One row per PDF export: `report_type`, `language`, `date_range`, `options` (flags only), `generated_by`, `generated_at`. Never the content; append-only. |
 | `audit_log` | `actor_id`, `action`, `object_type`, `object_id`, `child_id`, `metadata` (primitives only). It has no foreign keys, so rows outlive what they describe. |
 
 There is one support scale everywhere: `independent | some_support | significant_support | not_observed`.
 
 **JSONB shapes:**
 
-- **Perspectives** (`parent_perspective`, `teacher_perspective`): `{sections: {who, emotions, social, independence, environment, priorities}, entered: {section: [{by, by_name, role, reported_by, at}]}}`. The parent perspective also has `wizard: {step, completed_at}`. `entered` is append-only: `role` is who typed the answer, and `reported_by` is whose answer it is.
+- **Perspectives** (`parent_perspective`, `teacher_perspective`): `{sections: {...}, entered: {section: [{by, by_name, role, reported_by, at, mode, version_seq}]}, section_status: {section: {status, by, by_name, at}}}`. The parent sections are the 13 of the questionnaire (`who, joy, emotions, separation, social, communication, independence, health, behaviour, transitions, expectations, partnership, heart`; each may carry `not_answered[]`) plus the earlier-form keys, which are kept and projected from the new answers (COVERAGE-MATRIX §3.3.1–§3.3.2). The parent perspective also has `wizard: {step, completed_at}` and `questionnaire: {status draft|submitted, filled_at, submitted_at, submitted_by, school_year, entry_mode self|on_behalf|meeting, meeting?, migrated?}`. The teacher perspective has `sections.bridge` (the Teacher Quick Baseline: `main_strengths[≤3]`, `remember[≤3]`, `calms_helps`, `may_be_difficult`, `first_area_to_observe`, `question_for_parent`, `based_on`). `entered` is append-only: `role` is who typed the answer, `reported_by` is whose answer it is, and `mode` how it was entered. A missing `section_status` key means "not started".
 - **Merged lists** (`strengths`, `interests`, `motivators`, `what_helps`, `sensitivities`): `[{key | custom, sources: [parent|teacher|observation|review], added_by, added_at}]`. `what_helps` items also carry `list`. `sensitivities` items carry `what_happens` and `what_helps[]`. When the lists are recomputed from the perspectives, items whose sources include `observation` or `review` are kept.
 - **`current_understanding`:** `{summary, strengths[], interests[], what_helps[], areas_for_support[], adaptations, next_steps, source: baseline|review, ...}`. A review adds `review_id`, `approved_by`, `approved_by_name` and `approved_at`.
 - **`baseline_data`:** `{basics, parent_perspective, teacher_perspective, strengths, interests, motivators, what_helps, sensitivities, support_needs: {independence[], sensitivities[], emotions, parent_priorities}, focus_areas[], wizard_completed_at, created_by, created_at}`.
-- **`focus_areas.plan`:** `{strength_used, need, adaptation, what_we_will_do, frequency, who, review_on, success_looks_like}`. Every field is optional text, and nothing is a count.
+- **`focus_areas.plan`:** `{strength_used, need, adaptation, what_we_will_do, frequency, who, review_on, success_looks_like}`. Every field is optional text, and nothing is a count; the follow-up date is the `follow_up_on` column (`review_on` is the legacy text).
+- **`teacher_assessment_entries.data`:** per domain (`schemas/assessments.py`, COVERAGE-MATRIX §3.3.5): rated items `{items: {<item>: {level, note, seen_in?, observation_ids?}}, fields: {…}, strengths_here?}`; independence binary-first; sensory `{effect, reaction_text, helps}` (never a level); the day map `{stages: {…}}`; strengths `{items[≤5]}`; priority needs `{needs[≤3]}`. Unrated items are not stored.
+- **`observations.attributes`:** `{frequency, duration_minutes 1–90, intensity light|moderate|strong}` (descriptive, never a score).
+- **`development_reviews.follow_up`:** `{reassessment_on, improvement{level, note}, areas{domains[], focus_area_ids[], text}, what_worked, what_to_change, involvement{key, note}}`; the AI never fills it.
 - **`generated_content.content`:** the validated AI output for its type (section 6). The story row of a pack also carries `discussion_prompts[3]`.
 - **`generated_content.generation_input`:** the `AIContext` that was used.
 - **`observations.what_helped`:** `[{key} | {custom}]`.
-- **`observations.details`:** `{what_i_see, when, what_needed, what_we_did, did_it_change: yes|partly|no}`.
+- **`observations.details`:** the observation model's stages A–E: `{what_i_see, when, when_detail{time, activity, activity_text, with_whom, before_event, after_event}, what_needed, needs{helps[], text}, what_we_did, plan_ref{focus_area_id, version_seq}, did_it_change: yes|partly|no, what_changed, documentation}`.
 - **`development_reviews.focus_review`:** `[{focus_area_id, title, status, decision, what_worked, what_to_change, note}]`.
 - **`development_reviews.baseline_validation`:** `[{list, key, custom, label, status, note, observation_ids[]}]`.
 
@@ -86,8 +98,9 @@ There is one support scale everywhere: `independent | some_support | significant
 | Create a child | any class | own classes only | no |
 | Edit basics | yes | yes; can move a child only between own classes | only `preferred_name`, `additional_languages`, `parent_name`, `parent_contact` (anything else gets 403), audited |
 | `GET /children/{id}` | staff composite | staff composite | basics, plus the merged strengths and interests (`key`/`custom`/`sources` only) |
-| Profile (`/profile`) | both perspectives and lists | both perspectives and lists | own parent perspective only (read and write) |
+| Profile (`/profile`) | both perspectives and lists | both perspectives and lists | own parent perspective only, including its health answers (read and write); never the teacher perspective or the quick baseline |
 | Baseline, focus, observations, timeline, reviews | yes | yes | no: 403 for baseline and focus, 404 for the rest |
+| Profile history, teacher observation cycles, functional summaries, AI suggestions, content versions, PDF reports | yes | yes | no: 404 |
 | Generate, edit, approve or give feedback on content | yes | yes | no |
 | Read content | all | all for the child | only `shared_with_parent` content that is approved or completed, without `teacher_note`, generation data, focus area or feedback |
 | Photo | read and write | read and write | read |
@@ -115,37 +128,56 @@ An id outside the user's scope returns **404**, because the scope is part of the
 - `GET /children?class_id&q&include_archived`, `POST /children`, `GET /children/{id}`, `PUT /children/{id}`
 - `POST /children/{id}/archive`, `POST /children/{id}/unarchive` (admin)
 - `PUT /children/{id}/photo` (multipart), `GET /children/{id}/photo`, `DELETE /children/{id}/photo`
-- `GET /children/{id}/profile`, `PATCH /children/{id}/profile {perspective?, section?, data?, wizard_step?, complete?}`
+- `GET /children/{id}/profile` (staff also get `section_status`, `has_baseline` and `provenance[]` on every list item), `PATCH /children/{id}/profile {perspective?, section?, data?, status?, questionnaire?{filled_at?, school_year?, entry_mode?, meeting?, submit?}, wizard_step?, complete?}`. Every changed section writes one `record_versions` row.
+- `GET /children/{id}/profile/history?perspective&section` (staff): every version, with the state at the first submission marked `initial`.
+- `GET /source-model` (any signed-in user): the two source registries.
 
 **Baseline and current understanding**
 
-- `POST /children/{id}/baseline` (always inserts a new row), `GET /children/{id}/baseline` (`{latest, earlier[]}`)
+- `POST /children/{id}/baseline` (always inserts a new row), `GET /children/{id}/baseline` (`{latest, earlier[], original_id, count}`), `GET /children/{id}/baselines/{bid}`
 - `GET /children/{id}/current-understanding`
 
-**Focus areas**
+**Focus areas (plan goals)**
 
-- `GET /children/{id}/focus-areas?status`, `POST /children/{id}/focus-areas`
-- `PUT /focus-areas/{id}`, `POST /focus-areas/{id}/close {status: completed|paused, close_reason?}`
+- `GET /children/{id}/focus-areas?status&assessment_id` (also `periods`, `family_hopes`, `need_candidates`), `POST /children/{id}/focus-areas`
+- `PUT /focus-areas/{id}`, `POST /focus-areas/{id}/close {status: completed|paused, close_reason?}`, `GET /focus-areas/{id}/versions`
+
+**Teacher observation (observation model)**
+
+- `GET /children/{id}/teacher-assessments` (`{current, earlier[]}`), `POST /children/{id}/teacher-assessments {kind?, …, copy_forward?}` (409 ASSESSMENT_OPEN)
+- `GET`/`PATCH /teacher-assessments/{aid}` (header; 409 ASSESSMENT_CLOSED), `POST /teacher-assessments/{aid}/close`
+- `PUT /teacher-assessments/{aid}/domains/{domain} {status, data}` (appends an entry; wording `warnings` never block), `GET …/domains/{domain}/history`
+- `POST /teacher-assessments/{aid}/apply {list, domain, items}` (merge into the profile lists with source `observation`), `POST /teacher-assessments/{aid}/needs/{i}/focus` (Domain 13 need → Current Focus)
 
 **Observations and timeline**
 
-- `GET /children/{id}/observations?focus_area_id&limit&offset`
-- `POST /children/{id}/observations`. A repeated `client_request_id` returns the existing row with status 200.
-- `PUT /observations/{id}` (the author or an admin)
-- `GET /children/{id}/timeline?limit&offset`. Pagination is "load older"; there are no cursors.
+- `GET /children/{id}/observations?date_from&date_to&focus_area_id&domain&context&source&limit&offset`
+- `POST /children/{id}/observations` (`domains[]`, `attributes`, `details` A–E). A repeated `client_request_id` returns the existing row with status 200.
+- `PUT /observations/{id}` (the author or an admin), `GET /observations/{id}/versions`
+- `GET /children/{id}/timeline?limit&offset&date_from&date_to&focus_area_id&domain&content_type&result&type`. Pagination is "load older"; there are no cursors. Entry types: baseline, questionnaire_submitted, focus_opened, plan_changed, focus_closed, observation, content_feedback, content_approved, review, summary_approved, assessment_closed.
+
+**Functional summaries and AI suggestions**
+
+- `GET /children/{id}/functional-summaries`, `POST /children/{id}/functional-summaries` (a new row; `supersedes_id` for an edit), `POST …/functional-summaries/suggest`, `POST /functional-summaries/{sid}/approve` (409 SUMMARY_APPROVED)
+- `GET /children/{id}/ai-suggestions?kind`
+
+**PDF reports**
+
+- `POST /children/{id}/reports/pdf {report_type, language?, date_from?, date_to?, include_parent, include_teacher_observations, include_timeline, include_health, include_family, include_private_notes, assessment_id?}` → `application/pdf` attachment (503 REPORT_BUSY, 500 REPORT_FAILED)
+- `GET /children/{id}/reports` (the export log)
 
 **Content**
 
 - `POST /children/{id}/content/generate {mode, content_type, template?, focus_area_id?, target_strength?, language?, include_video?}`. `content_type` is story, video, digital_game, real_world_activity or pack.
 - `GET /children/{id}/content?status&pack_id`, `GET /packs/{pack_id}`
-- `GET /content/{id}`, `PUT /content/{id} {title?, content?}`, `DELETE /content/{id}`
+- `GET /content/{id}`, `PUT /content/{id} {title?, content?}`, `DELETE /content/{id}` (soft delete, drafts only), `GET /content/{id}/versions`
 - `POST /content/{id}/approve`, `/regenerate {instruction?}`, `/duplicate`, `/share {shared}`, `/archive`
 - `POST /content/{id}/feedback {result, support_level?, observation?, what_helped?, client_request_id?}`. A repeated `client_request_id` returns the existing feedback with status 200; one used for other content or for a quick observation returns 409 DUPLICATE.
 
 **Development reviews**
 
-- `POST /children/{id}/development-reviews/suggest` (writes nothing)
-- `POST /children/{id}/development-reviews`, `GET /children/{id}/development-reviews`
+- `POST /children/{id}/development-reviews/suggest` (stores only the `ai_suggestions` row; returns `suggestion_id`, `possible_patterns`, `next_observation_questions`)
+- `POST /children/{id}/development-reviews` (`follow_up`, `ai_suggestion_id`), `GET /children/{id}/development-reviews`
 
 **Error codes:**
 
@@ -153,12 +185,12 @@ An id outside the user's scope returns **404**, because the scope is part of the
 - FORBIDDEN 403
 - NOT_FOUND 404
 - VALIDATION 400
-- DUPLICATE, CONFLICT, FOCUS_LIMIT and INVALID_TRANSITION: 409
+- DUPLICATE, CONFLICT, FOCUS_LIMIT, INVALID_TRANSITION, ASSESSMENT_OPEN, ASSESSMENT_CLOSED and SUMMARY_APPROVED: 409
 - UNSAFE_CONTENT 422
 - UPLOAD_FAILED 400/413
 - RATE_LIMITED 429 (from nginx)
-- AI_UNAVAILABLE 503
-- INTERNAL 500
+- AI_UNAVAILABLE and REPORT_BUSY: 503
+- INTERNAL and REPORT_FAILED: 500
 
 **Key flows:**
 
@@ -173,16 +205,18 @@ An id outside the user's scope returns **404**, because the scope is part of the
   | duplicate | any status | a new draft |
   | share | approved, completed | shared with the parent; unsharing always works |
   | archive | any status | archived |
-  | delete | draft only | the row is removed |
+  | delete | draft only | soft delete (`deleted_at`); the draft disappears from every list (OQ-5) |
+
+  Every edit and regenerate first keeps the earlier state in `record_versions` (`via` generated, regenerated, edited).
 
   A pack is stored as 3–4 rows (story, activity, game, plus a video plan if requested) that share one `pack_id`.
 - **Feedback** is one transaction. It writes the mirrored `observations` row (`source=content_feedback`, with the text optional, so two taps are enough), the `content_feedback` row linked through `observation_id`, the status change and an audit row. The dialog sends one `client_request_id` per feedback, stored on the mirrored observation, so a retry or double tap saves once. It keeps the id (and the answers) until a save succeeds, also across Cancel and reopening after an error.
 - **Timeline:**
-  - It is built from observations, baselines, focus opened and closed events, approved or completed content, and reviews.
+  - It is built from observations, baselines, the questionnaire submission, focus opened and closed events and plan changes (from `record_versions`), approved or completed content, reviews, approved functional summaries and closed observation cycles.
   - Feedback appears through its mirrored observation, so each feedback shows up exactly once.
   - It contains no counts or percentages.
 - **Development review:**
-  - `suggest` asks the AI or the templates for a draft and saves nothing.
+  - `suggest` asks the AI or the templates for a draft and stores only the `ai_suggestions` row (input sent, output, outcome).
   - The teacher edits the draft and then saves it. The save is one transaction:
     - the focus decisions (`keep|pause|close|edit|create`)
     - the review row
@@ -233,6 +267,12 @@ An id outside the user's scope returns **404**, because the scope is part of the
   - `generate(kind, ctx)` uses Claude when a key is set, otherwise the templates. Claude output is checked with Pydantic, the semantic checks and safety.
   - On any problem it falls back to the templates and returns `fallback_reason` (also AI_UNSAFE_OUTPUT). There is no repair round-trip.
   - `suggest_understanding_result(...)` follows the same flow.
+- **Source-document policy (COVERAGE-MATRIX §7):**
+  - The payload follows each registry item's `ai_policy` (`never`, `label`, `domain`, `n/a`). Health, medical, family and third-party answers, parent free text, the heart message, teacher notes and private texts never leave; `avoid` holds only teacher-observed sensory keys.
+  - `domains.py` maps focus categories, strengths and need areas to the 12 AI domains and sends only the relevant ones; `AIContext.domains` = `{domain: {assessment[{item, level?, effect?, helps[]}], observations[], helps[]}}` from `gather.py` (current cycle, structured observations).
+  - Analysis calls (understanding, functional summary, observation questions) use `[child]` instead of the name (restored locally); content generation keeps the first or preferred name (OQ-4).
+  - Every analysis call is stored in `ai_suggestions` (`suggestions.py`: `persist`, `resolve` in one UPDATE). `draft_functional_summary` returns a de-identified Domain 17 draft without follow-up-with-parents, involvement, focus decisions or closing fields.
+  - `banned_terms.ai_only` (referral wording) and the child-deficit list are checked on every AI output field, never on teacher input.
 - **No-certainty rule:** after any suggestion, whatever the provider, a focus_review or baseline_validation status other than `needs_more_observation` needs at least 3 linked observations since the latest baseline. Otherwise the server downgrades it. When the teacher saves a review, their chosen statuses are kept, but low-evidence ones are reported in `warnings`.
 - **The AI never writes the profile.** Generation never changes the profile, and the current understanding changes only through a review saved by a teacher.
 
@@ -252,6 +292,14 @@ An id outside the user's scope returns **404**, because the scope is part of the
 - **Serving:** `GET .../photo` checks access, then returns the file with `Cache-Control: private, no-store` and `nosniff`. nginx returns 404 for `/uploads/`.
 - **systemd:** the unit can write only to the uploads directory.
 
+## 8a. PDF reports (`backend/app/reports`)
+
+- **Six reports:** full (R1), parent_questionnaire (R2), teacher_observation (R3), current_development (R4), intervention_plan (R5), timeline (R6), in en, ar or he (default: the user's language).
+- **Flow:** `staff_child()` (parents get 404) → `build_model(ctx)` (the builder of the type reads the DB and `vocab.source_registry(...)` only; question and item labels, section headings, table formats and guidance rows come from the registries) → Jinja2 HTML → WeasyPrint in memory under one render lock (20 s wait, else 503 REPORT_BUSY) → one `report_exports` row and one `report.export` audit row. Failures are logged without content (500 REPORT_FAILED).
+- **Privacy:** health/medical answers need `include_health`, family context `include_family`, the teacher's question for the family `include_private_notes`. Drafts and pending AI suggestions are never printed; approved AI-assisted text is labelled with the approver and date.
+- **RTL:** `dir` per document and per free-text block, logical CSS, bundled fonts only (KS Rubik, KS Noto Sans Hebrew, KS Noto Sans Arabic, loaded through a fetcher that serves only files inside `app/reports/`), Western digits, the verbatim disclaimer from `docs/terminology.md` in every running footer. Arrows of the registry sequences print as "›", which the bidi algorithm mirrors in RTL lines.
+- **Server:** `requirements.txt` adds WeasyPrint and Jinja2; the systemd unit gives fontconfig a cache directory (`/var/cache/kidsphere-mvp`).
+
 ## 9. Frontend (`frontend/src`)
 
 - **Boot:**
@@ -259,7 +307,9 @@ An id outside the user's scope returns **404**, because the scope is part of the
   2. `AuthProvider` calls `GET /api/me`.
   3. `I18nProvider` adopts the user's language.
   4. `OptionsProvider` loads `GET /api/options`.
-- **Feature folders:** auth, children (child list, profile), wizard (Add Child, edit steps, parent onboarding), focus, observations, timeline, content (create, list, review, present, pack, feedback), player (story, activity, video plan, read-aloud), games (7 templates), development (baseline vs current understanding, review), admin, parent. Shared code lives in `components/ui`, `components/layout`, `lib`, `auth` and `i18n`. Features that other features reuse (children, content, games, player) expose an `index.ts`.
+- **Feature folders:** auth, children (child list, `ChildLayout` with the 8 child tabs, Overview), wizard (Add Child, edit steps, the registry-driven 9-step parent questionnaire in `wizard/questionnaire`), parent-view (the complete questionnaire with history; staff fill it "on behalf" or in a meeting), quick-baseline, assessment (Teacher Observation tab: header, guide, 13 domain cards, cycles, next observation questions), focus (Plan tab), observations (quick/structured observation form A–E), observation-history (Observations tab), timeline (Development › Timeline, history filters), content (create, list, review, versions, present, pack, feedback), player (story, activity, video plan, read-aloud), games (7 templates), development (baselines, reviews with the follow-up step, functional summary), reports (Reports tab and export dialog), admin, parent. Shared code lives in `components/ui`, `components/source` (status pills, provenance chips, "not answered" markers), `components/layout`, `lib` (`paths`, `api` incl. `apiBlob`/`apiDownload`, `sourceModel`), `auth` and `i18n`. Features that other features reuse expose an `index.ts`.
+- **Child tabs** (`CHILD_TABS`): Overview, Parent View, Teacher Observation, Plan, Activities, Observations, Development, Reports (staff only; logical order, mirrored in RTL). The old `/children/:id/focus` and `/children/:id/timeline` redirect to the Plan tab and Development › Timeline.
+- **Source model:** `useSourceModel()` loads `GET /api/source-model` once; the questionnaire, Parent View, quick baseline, Teacher Observation tab and labels use the registries, never `source_he`.
 - **Routes:**
   - `routes.tsx` collects `features/*/routes.tsx` with `import.meta.glob`, so adding a feature never edits a shared file.
   - Each module exports `routes: AppRoute[] = [{path, element, roles?, public?, layout?: 'shell'|'bare', nav?}]`.
@@ -267,7 +317,7 @@ An id outside the user's scope returns **404**, because the scope is part of the
   - Every path is defined in `lib/paths.ts`.
 - **Data:** `api()` (same-origin, typed `ApiError`), `useFetch`, `useAction` and `toast`. There is no global store.
 - **i18n:**
-  - Messages live in `i18n/messages/{en,ar,he}/<namespace>.json`: account, admin, auth, children, common, content, development, errors, focus, nav, observations, parent, player, timeline, wizard.
+  - Messages live in `i18n/messages/{en,ar,he}/<namespace>.json`: account, admin, assessment, auth, children, common, content, development, errors, focus, history, nav, observations, parent, parentView, player, quickBaseline, reports, timeline, wizard.
   - Keys are `<ns>.<path>`, placeholders are `{var}`, and plurals use `Intl.PluralRules` suffixes (`_one`, `_two`, `_few`, `_many`, `_other`).
   - Arabic uses Western digits (`ar-u-nu-latn`).
 - **Options:** option labels (strengths, interests, support levels, …) come from `GET /api/options` through `useOptions()` and are never duplicated in the message files.
@@ -290,9 +340,12 @@ All tests run on the server through `bash deploy/ci/remote-test.sh <label> [back
   - The AI key is empty, so the templates are used. Claude is tested with a fake client.
   - There is one test file per area (access, auth, admin, children, uploads, profile wizard, baseline, focus, observations, timeline, content, feedback, reviews, migrations, CLI, vocabulary, AI context, schemas, safety, templates and service), plus `test_deploy_scripts.py` (the nightly backup script run against stub commands, the backup units and `.env.example`).
   - The spec examples are covered by `test_content.py::test_adam_spec_44_loop`, `test_adam_garage_game_loop` and `test_maya_spec_45_story_builder`.
+  - Source documents: `test_parent_questionnaire.py`, `test_quick_baseline.py`, `test_assessments.py`, `test_history.py`, `test_functional_summaries.py`, `test_ai_payload_policy.py` (no `never` item reaches any AI payload), `test_reports_builders.py`, `test_reports_rtl.py` (real PDFs: glyph order, joined Arabic letters, fonts), `test_reports_api.py`, plus:
+    - `test_coverage_matrix.py` walks every row of `docs/mvp-refocus/COVERAGE-MATRIX.md` (IDs = registry IDs + X-01..X-64, statuses, storage paths resolve to models or columns, AI policy, trilingual labels, every PDF-mapped item printed). `remote-test.sh` uploads that file for it.
+    - `test_source_docs_e2e.py` runs the whole flow through the API and exports all six reports in Hebrew and Arabic.
 - **Frontend:**
   - `tsc --noEmit`, eslint, vitest (jsdom) and `vite build`. The build fails if `index.html` contains an inline script.
-  - Cross-cutting tests: i18n key parity, the banned-terms scan of every message file, the RTL class ban, locale and `dir` handling, the API/auth client, formatting and the shell.
+  - Cross-cutting tests: i18n key parity, the banned-terms scan of every message file, the RTL class ban, locale and `dir` handling, the API/auth client and blob downloads, the token contrast guard, formatting, the shell, and `source-docs.test.tsx` (every route pattern is registered once, every child tab and cross-feature link lands on its page, staff tabs stay away from parents, the old addresses redirect).
   - Each feature folder has its own vitest file.
 
 ## 11. Server layout
@@ -321,7 +374,8 @@ All tests run on the server through `bash deploy/ci/remote-test.sh <label> [back
 - **Login throttling.** It is done by nginx `limit_req` only; failed logins are not counted in the audit log.
 - **Removed endpoints.** There are no `content/{id}/video-job` endpoints.
 - **Added endpoints.** `POST /children/{id}/unarchive`, `GET /packs/{id}` and `POST /content/{id}/duplicate` were added.
-- **Data.** No JSONB carries `schema_version`, and there is no `health.safety_note` field. Instead of a single CHECK, `observations` has two CHECKs (nullable text only for feedback, and a length of 1–4000).
+- **Data.** No JSONB carries `schema_version`. Instead of a single CHECK, `observations` has two CHECKs (nullable text only for feedback, and a length of 1–4000).
+- **Source documents (COVERAGE-MATRIX.md, OQ-1..OQ-8 defaults).** The parent questionnaire's sleep/eating/health section is stored (`PP.health`, supersedes PLAN A10; never sent to the AI, printed only with `include_health`). Draft content is soft-deleted (supersedes B9). Profile sections, observations, plans and content keep every version in `record_versions`.
 - **Game templates.** There are 7, with `story_builder` added for spec §45.
 - **No dictation.** Accordingly, `Permissions-Policy` sets `microphone=()`.
 - **Template provider.** It uses generic themes: per focus category for Growth Support (with a few phrase overrides for specific focus suggestions) and per target strength for Strength Builder, with slot filling. There are no phrase tables per focus suggestion × type.

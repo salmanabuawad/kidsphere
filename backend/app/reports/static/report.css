@@ -1,0 +1,247 @@
+/*
+ * KidSphere PDF reports (WeasyPrint). Logical properties only: the same rules
+ * serve dir=ltr and dir=rtl. Direction-specific @page boxes live in
+ * page-ltr.css / page-rtl.css.
+ *
+ * Brand colours (hard-coded for print; see frontend/src/index.css):
+ *   navy #0D3D72 (headings, "Kid"), teal #0A9EA3 (fills only) / #006E73 (teal text),
+ *   sky #44C2F2, green #4CC2A6, star orange #F99E3A, ink #1F2233, ground #FBF6EC.
+ * Chips are soft tints with ink text. No scores, no checkbox grids, nothing that
+ * looks like a clinical form.
+ */
+
+@font-face { font-family: "KS Rubik"; src: url(../fonts/Rubik-VF.ttf); font-style: normal; }
+@font-face { font-family: "KS Noto Sans Hebrew"; src: url(../fonts/NotoSansHebrew-VF.ttf); font-style: normal; }
+@font-face { font-family: "KS Noto Sans Arabic"; src: url(../fonts/NotoSansArabic-VF.ttf); font-style: normal; }
+
+@page {
+  size: A4;
+  margin: 22mm 16mm 20mm 16mm;
+  @top-center {
+    content: element(running-header);
+    vertical-align: bottom;
+    padding-bottom: 4mm;
+  }
+  @bottom-center {
+    content: element(running-footer);
+    vertical-align: top;
+    padding-top: 3mm;
+  }
+}
+@page :first {
+  margin-top: 14mm;
+  @top-center { content: none; }
+}
+
+html { color: #1F2233; background: #FFFFFF; }
+body {
+  margin: 0;
+  font-size: 9.5pt;
+  line-height: 1.45;
+  font-family: "KS Rubik", "KS Noto Sans Hebrew", "KS Noto Sans Arabic";
+}
+html[lang="he"] body { font-family: "KS Rubik", "KS Noto Sans Hebrew", "KS Noto Sans Arabic"; }
+html[lang="ar"] body { font-family: "KS Noto Sans Arabic", "KS Rubik", "KS Noto Sans Hebrew"; line-height: 1.6; }
+
+p, h1, h2, h3, h4 { margin: 0; }
+p, li, td, th { text-align: start; }
+
+/* ------------------------------------------------------------------ running header / footer */
+.running-header {
+  position: running(running-header);
+  font-size: 7.5pt;
+  color: #5B5F70;
+  border-block-end: 0.6pt solid #E3DCCD;
+  padding-block-end: 1.5mm;
+  width: 100%;
+}
+.running-header .rh-mark { width: 4mm; height: 4mm; vertical-align: -1mm; margin-inline-end: 1mm; }
+.running-header .rh-sep { margin-inline: 1.5mm; color: #9A9EAD; }
+.running-footer {
+  position: running(running-footer);
+  font-size: 6.8pt;
+  line-height: 1.35;
+  color: #5B5F70;
+  text-align: center;
+}
+.running-footer .disclaimer { text-align: center; }
+.running-footer .footer-note { text-align: center; }
+
+/* The wordmark keeps its left-to-right order inside RTL lines (WeasyPrint reorders inline boxes, so an
+   isolate inside the text is not enough). */
+.wm { display: inline-block; direction: ltr; }
+.kid { color: #0D3D72; font-weight: 700; }
+.sphere { color: #006E73; font-weight: 700; }
+
+/* ------------------------------------------------------------------ page 1 header */
+.cover {
+  border-block-end: 1.2pt solid #0A9EA3;
+  padding-block-end: 4mm;
+  margin-block-end: 5mm;
+}
+.brand-row { margin-block-end: 3mm; }
+.brand-row .mark { width: 13mm; height: 13mm; display: inline-block; vertical-align: middle; }
+.brand-text { display: inline-block; vertical-align: middle; margin-inline-start: 3mm; }
+.wordmark { font-size: 15pt; line-height: 1.1; }
+.report-label { font-size: 8.5pt; color: #5B5F70; }
+.report-title { font-size: 18pt; line-height: 1.25; color: #0D3D72; font-weight: 700; margin-block-end: 1mm; }
+.subtitle { color: #5B5F70; font-size: 9pt; margin-block-end: 2mm; }
+.facts { margin-block-start: 2mm; }
+.fact { display: inline-block; vertical-align: top; width: 32%; margin-block-end: 2mm; }
+.fact-k { font-size: 7.5pt; color: #5B5F70; }
+.fact-v { font-size: 10pt; font-weight: 600; }
+.cover-note { margin-block-start: 1mm; font-size: 8pt; color: #5B5F70; }
+
+/* ------------------------------------------------------------------ sections */
+.section { margin-block-end: 5mm; }
+.section.break-before { break-before: page; }
+.section-title {
+  font-size: 12.5pt;
+  line-height: 1.3;
+  color: #0D3D72;
+  font-weight: 700;
+  border-block-end: 0.8pt solid #E3DCCD;
+  padding-block-end: 1mm;
+  margin-block-end: 1.5mm;
+  break-after: avoid;
+}
+.section-meta { margin-block-end: 2mm; break-after: avoid; }
+.intro { color: #5B5F70; margin-block-end: 2mm; }
+.block-heading {
+  font-size: 10.5pt;
+  color: #0D3D72;
+  font-weight: 700;
+  margin-block: 3mm 1.5mm;
+  break-after: avoid;
+}
+.para { margin-block-end: 2mm; }
+.muted, .marker { color: #6A6E7E; font-style: italic; }
+.marker { font-size: 8.5pt; }
+
+/* ------------------------------------------------------------------ chips, tags, status */
+.chips, .cell-chips { margin-block-end: 0.8mm; }
+.chip {
+  display: inline-block;
+  padding: 0.3mm 2mm;
+  border-radius: 3mm;
+  background: #F1EEE7;
+  color: #1F2233;
+  font-size: 8.5pt;
+  line-height: 1.45;
+  margin-block-end: 0.6mm;
+}
+.tag {
+  display: inline-block;
+  padding: 0.2mm 1.6mm;
+  border-radius: 1.2mm;
+  font-size: 7pt;
+  line-height: 1.4;
+  color: #1F2233;
+  background: #F1EEE7;
+  font-weight: 400;
+}
+.tone-sky { background: #E1F4FC; }
+.tone-leaf { background: #E0F4EE; }
+.tone-sun { background: #FEEDD8; }
+.tone-navy { background: #E2E9F2; }
+.tone-teal { background: #DDF3F3; }
+.tone-muted { background: #F1EEE7; color: #5B5F70; }
+.tone-neutral { background: #F1EEE7; }
+.status {
+  display: inline-block;
+  padding: 0.2mm 1.6mm;
+  border-radius: 1.2mm;
+  border: 0.6pt solid #C9C2B2;
+  font-size: 7pt;
+  color: #1F2233;
+}
+.status-sufficient { border-color: #4CC2A6; }
+.status-in_progress { border-color: #44C2F2; }
+.status-review_later { border-color: #F99E3A; }
+.status-not_started { color: #5B5F70; }
+
+/* ------------------------------------------------------------------ question / answer */
+.qa-item { margin-block-end: 2.2mm; break-inside: avoid; }
+.q { font-size: 8.5pt; color: #4A4E5E; font-weight: 600; margin-block-end: 0.5mm; }
+.a .line { margin-block-end: 0.6mm; }
+.qa-heading { font-size: 9.5pt; color: #0D3D72; font-weight: 700; margin-block: 2.5mm 1mm; break-after: avoid; }
+
+/* ------------------------------------------------------------------ callout (message from the heart) */
+.callout {
+  background: #FBF6EC;
+  border-inline-start: 2.5pt solid #F99E3A;
+  border-radius: 2mm;
+  padding: 3mm 4mm;
+  margin-block-end: 3mm;
+  break-inside: avoid;
+}
+.callout-title { font-weight: 700; color: #0D3D72; margin-block-end: 1mm; }
+.callout-text { font-size: 10.5pt; line-height: 1.5; }
+
+/* ------------------------------------------------------------------ key / value */
+.kv { margin-block-end: 2mm; }
+.kv-item { display: inline-block; vertical-align: top; width: 32%; margin-block-end: 1.5mm; }
+.kv-k { font-size: 7.5pt; color: #5B5F70; }
+.kv-v { font-size: 9.5pt; font-weight: 600; }
+
+/* ------------------------------------------------------------------ tables */
+table.grid {
+  width: 100%;
+  border-collapse: collapse;
+  margin-block-end: 3mm;
+  font-size: 8.8pt;
+}
+table.grid thead { display: table-header-group; }
+table.grid tr { break-inside: avoid; }
+table.grid th {
+  background: #F4EFE4;
+  color: #0D3D72;
+  font-weight: 700;
+  font-size: 8pt;
+  padding: 1.6mm 2mm;
+  border-block-end: 0.8pt solid #D9D1BF;
+  vertical-align: bottom;
+}
+table.grid td {
+  padding: 1.4mm 2mm;
+  border-block-end: 0.5pt solid #E9E3D6;
+  vertical-align: top;
+}
+table.grid tr.sub td { background: #FBF6EC; font-weight: 700; color: #0D3D72; font-size: 8.5pt; }
+table.grid tr.detail td { background: #FCFAF5; font-size: 8.2pt; }
+.detail-part { margin-block-end: 0.8mm; }
+.detail-k { color: #5B5F70; font-size: 7.5pt; }
+.cell-line { margin-block-end: 0.5mm; }
+
+/* ------------------------------------------------------------------ entries and timeline */
+.entry { margin-block-end: 3mm; padding-block-end: 2mm; border-block-end: 0.5pt solid #EFE9DC; break-inside: avoid; }
+.entry-title { font-weight: 700; margin-block-end: 1mm; }
+.entry-meta { color: #5B5F70; font-weight: 400; margin-inline-end: 1.5mm; }
+.part { margin-block-end: 1mm; }
+.part-k { font-size: 8pt; color: #4A4E5E; font-weight: 600; }
+.month { font-size: 10.5pt; color: #0D3D72; margin-block: 3mm 1.5mm; break-after: avoid; }
+.tl-entry { margin-block-end: 2mm; padding-inline-start: 3mm; border-inline-start: 1.5pt solid #A6DDE0; break-inside: avoid; }
+.tl-date { color: #5B5F70; font-size: 8.5pt; margin-inline-end: 1mm; }
+.tl-title { font-weight: 600; }
+
+/* ------------------------------------------------------------------ lists */
+.plain-list { margin: 0 0 2mm 0; padding-inline-start: 5mm; padding-inline-end: 0; }
+.plain-list li { margin-block-end: 0.8mm; }
+.chip-list { margin-block-end: 2mm; }
+.chip-row { margin-block-end: 0.8mm; }
+.chip-note { color: #4A4E5E; }
+
+/* Free-text lines keep their own dir (correct bidi order) but align with the document, so an
+   answer that starts with a Latin word stays under its question in an RTL report. */
+html[dir="rtl"] .a .line, html[dir="rtl"] .cell-line, html[dir="rtl"] .para, html[dir="rtl"] .callout-text,
+html[dir="rtl"] .plain-list li, html[dir="rtl"] .kv-v, html[dir="rtl"] .fact-v { text-align: right; }
+html[dir="ltr"] .a .line, html[dir="ltr"] .cell-line, html[dir="ltr"] .para, html[dir="ltr"] .callout-text,
+html[dir="ltr"] .plain-list li, html[dir="ltr"] .kv-v, html[dir="ltr"] .fact-v { text-align: left; }
+
+/* Keep a heading, its intro and the first entry together. */
+.intro { break-after: avoid; }
+.entry-title { break-after: avoid; }
+.section-meta + .intro { break-after: avoid; }
+
+/* A chip never breaks in half inside a narrow table column. */
+table.grid .chip { white-space: nowrap; }

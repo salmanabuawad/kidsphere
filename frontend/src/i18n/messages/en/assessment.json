@@ -1,0 +1,143 @@
+{
+  "title": "Teacher observation",
+  "intro": "Fill it in gradually, one area at a time. Nothing has to be completed at once.",
+  "domains": "Observation areas",
+  "next": {
+    "title": "What to look for next",
+    "intro": "Questions from the latest AI suggestion. They are ideas, not conclusions.",
+    "observe": "Observe this"
+  },
+  "empty": {
+    "title": "No teacher observation yet",
+    "body": "Start when you are ready. You can fill in one area at a time and come back later.",
+    "start": "Start the teacher observation"
+  },
+  "cycle": {
+    "initial": "Initial observation",
+    "reassessment": "Reassessment {number}",
+    "open": "Open",
+    "closed": "Closed",
+    "switch": "Choose an observation"
+  },
+  "header": {
+    "title": "Child details",
+    "name": "Child's name",
+    "age": "Age on the fill date",
+    "birthDate": "Date of birth",
+    "kindergarten": "Kindergarten",
+    "teacher": "Teacher",
+    "filledOn": "Date filled in",
+    "period": "Observation period",
+    "periodFrom": "Period from",
+    "periodTo": "Period until",
+    "periodRange": "{from} – {to}",
+    "periodOrder": "The period ends before it starts.",
+    "periodNote": "About this period",
+    "filledBy": "Filled in by",
+    "notSet": "Not filled in",
+    "closedOn": "Closed on",
+    "edit": "Edit observation details",
+    "editTitle": "Observation details",
+    "save": "Save details",
+    "saved": "Details saved",
+    "close": "Close this observation",
+    "closeTitle": "Close this observation?",
+    "closeBody": "A closed observation is kept exactly as it is and can no longer be changed. You can start a reassessment later.",
+    "closeConfirm": "Close observation",
+    "closed": "Observation closed",
+    "closedNote": "This observation was closed on {date} and is kept as it was.",
+    "reassess": "Start a reassessment",
+    "reassessTitle": "Start a reassessment",
+    "reassessBody": "A new observation starts. The earlier one stays as it was.",
+    "copyForward": "Start from the earlier answers (you can change them)",
+    "started": "Observation started"
+  },
+  "guide": {
+    "title": "How to observe",
+    "notDiagnostic": "A tool for educational observation and planning. It is not a medical or clinical diagnosis."
+  },
+  "domain": {
+    "firstArea": "First area to observe",
+    "levelHeader": "How much support was needed?",
+    "note": "Note",
+    "addNote": "Add a note",
+    "hideNote": "Hide the note",
+    "noteFor": "Note: {item}",
+    "levelFor": "{item}: how much support was needed?",
+    "optionalLevel": "How much support was needed? (optional)",
+    "strengthsHere": "Strengths seen here",
+    "inYourWords": "In your words",
+    "save": "Save this area",
+    "saved": "Saved",
+    "status": "Where is this area now?",
+    "unsaved": "Unsaved changes",
+    "carried": "Carried over from the observation of {date}. Check it and save to confirm.",
+    "history": "Earlier versions",
+    "historyTitle": "Earlier versions: {name}",
+    "historyEmpty": "Nothing saved yet.",
+    "savedBy": "Saved by {name} on {date}",
+    "readOnly": "This observation is closed, so this area is read-only.",
+    "addedToProfile": "Added to the profile",
+    "addToWhatHelps": "Add to What helps",
+    "addToStrengths": "Add to strengths",
+    "addToInterests": "Add to interests"
+  },
+  "levels": {
+    "independent": "Independent",
+    "needsHelp": "Needs help",
+    "more": "More options",
+    "fewer": "Fewer options"
+  },
+  "sensory": {
+    "effectFor": "{item}: how does it affect the child?",
+    "reactionFor": "{item}: what happens?",
+    "reaction": "What happens?",
+    "helps": "What helps?"
+  },
+  "dayMap": {
+    "evidence": "Recent observations at this time of day",
+    "noEvidence": "No observations here yet.",
+    "filled": "Filled in"
+  },
+  "strengths": {
+    "choose": "Choose",
+    "strengthsGroup": "Strengths",
+    "interestsGroup": "Interests",
+    "custom": "Write it in my own words",
+    "customFor": "{slot}: in your words",
+    "noteFor": "{slot}: where did you see it?",
+    "note": "Where did you see it?"
+  },
+  "needs": {
+    "choose": "Mark up to 3 main areas",
+    "max": "You can mark up to 3 areas.",
+    "makeFocus": "Make it a Current Focus",
+    "focusMade": "Added as a Current Focus",
+    "isFocus": "Current Focus: {title}",
+    "titleTitle": "Name the focus",
+    "titleHint": "Describe what the child is learning, for example: waiting for a turn in line.",
+    "titleLabel": "Focus title",
+    "create": "Create the focus",
+    "saveFirst": "Save this area first."
+  },
+  "attention": {
+    "context": "Situation",
+    "minutes": "About how many minutes?",
+    "note": "Note",
+    "add": "Add a situation",
+    "remove": "Remove this situation"
+  },
+  "warnings": {
+    "title": "Saved, with a note",
+    "wording": "Some words may sound clinical. Describe what you saw instead.",
+    "strengths_below_3": "Try to name at least 3 strengths, abilities or interests."
+  },
+  "hints": {
+    "calming": "What helps to calm down",
+    "frustration": "When frustrated",
+    "social": "With other children",
+    "interests": "Interests",
+    "environment": "Things in the environment",
+    "strengths": "Strengths"
+  }
+}

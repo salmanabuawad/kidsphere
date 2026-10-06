@@ -6,7 +6,7 @@ import { createKidIcon, type KidIcon } from "./KidIcon";
  * Each is a drop-in for a lucide icon: <StoryIcon className="size-5" />.
  */
 
-// Navigation (paint: brand when active, via --icon-paint; outline only when inactive)
+// Navigation (paint: the logo teal `accent` when active, via --icon-paint; outline only when inactive)
 export const ChildrenIcon = createKidIcon("children");
 export const ObserveAddIcon = createKidIcon("observe-add");
 export const TimelineIcon = createKidIcon("timeline");

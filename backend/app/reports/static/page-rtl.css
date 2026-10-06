@@ -1,0 +1,13 @@
+/* Right-to-left reports (he, ar): the page number sits in the bottom-left margin box.
+   It is laid out left to right so it always reads "x / y" (never "y / x"). */
+@page {
+  @bottom-left {
+    content: counter(page) " / " counter(pages);
+    direction: ltr;
+    font-family: "KS Rubik";
+    font-size: 7.5pt;
+    color: #5B5F70;
+    vertical-align: top;
+    padding-top: 3mm;
+  }
+}

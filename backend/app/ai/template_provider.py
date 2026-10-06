@@ -2,6 +2,7 @@
 
     generate(kind, ctx, template=None) -> dict          (raw output, validated by service.py)
     suggest_understanding(ctx, observations, focus_areas, baseline_items) -> dict
+    functional_summary(ctx, observations, focus_areas) -> dict   (FunctionalSummaryDraft)
     pick_template(ctx) -> str                           (game template when none was chosen)
     frame_text(key, ctx, **vars) -> str                 (one understanding frame, e.g. "fr_few")
 
@@ -25,6 +26,7 @@ from functools import lru_cache
 from pathlib import Path
 
 from app.ai.context import AIContext
+from app.ai.domains import for_focus
 
 TEMPLATE_MODEL = "kidsphere-template-1"
 _DIR = Path(__file__).resolve().parent / "templates"
@@ -410,10 +412,12 @@ def _less_support(observations: list[dict]) -> bool:
     return sum(late) / len(late) < sum(early) / len(early)
 
 
-def suggest_understanding(ctx: AIContext, observations: list[dict], focus_areas: list[dict],
-                          baseline_items: list[dict]) -> dict:
-    """observations: [{id, focus_area_id, support_level, text}] since the latest baseline, oldest first."""
-    sep = "، " if ctx.language == "ar" else ", "
+def _sep(ctx: AIContext) -> str:
+    return "، " if ctx.language == "ar" else ", "
+
+
+def _summary_parts(ctx: AIContext, observations: list[dict], focus_areas: list[dict]) -> list[str]:
+    sep = _sep(ctx)
     n = len(observations)
     parts = []
     if ctx.interests:
@@ -427,6 +431,42 @@ def suggest_understanding(ctx: AIContext, observations: list[dict], focus_areas:
         parts.append(frame_text("few", ctx))
     if focus_areas:
         parts.append(frame_text("focus", ctx, focus=sep.join(fa["title"] for fa in focus_areas if fa.get("title"))))
+    return parts
+
+
+def possible_patterns(ctx: AIContext, observations: list[dict], focus_areas: list[dict]) -> list[str]:
+    """Hedged sentences only ("may", "appears"), and only with enough observations."""
+    out = []
+    for fa in focus_areas:
+        linked = [o for o in observations if o.get("focus_area_id") == fa.get("id")]
+        if len(linked) >= 3 and _less_support(linked) and fa.get("title"):
+            out.append(frame_text("pp_less_support", ctx, focus=fa["title"]))
+    if ctx.what_helps and len(observations) >= 3:
+        out.append(frame_text("pp_helps", ctx, helps=_sep(ctx).join(h.label for h in ctx.what_helps)))
+    return out[:5]
+
+
+def next_observation_questions(ctx: AIContext, focus_areas: list[dict]) -> list[dict]:
+    out = []
+    for fa in focus_areas[:3]:
+        if not fa.get("title"):
+            continue
+        domains = for_focus(fa.get("category"), fa.get("suggestion_key")) or ["social"]
+        out.append({"domain": domains[0], "question": frame_text("nq_focus", ctx, focus=fa["title"])})
+    if ctx.what_helps:
+        domain = next((d for d, b in ctx.domains.items() if b.helps), "daily_routine")
+        out.append({"domain": domain, "question": frame_text("nq_helps", ctx,
+                                                             helps=_sep(ctx).join(h.label for h in ctx.what_helps))})
+    if len(out) < 2:
+        out.append({"domain": "play", "question": frame_text("nq_play", ctx)})
+    return out[:5]
+
+
+def suggest_understanding(ctx: AIContext, observations: list[dict], focus_areas: list[dict],
+                          baseline_items: list[dict]) -> dict:
+    """observations: [{id, focus_area_id, support_level, text}] since the latest baseline, oldest first."""
+    sep = _sep(ctx)
+    parts = _summary_parts(ctx, observations, focus_areas)
 
     by_focus = Counter(o["focus_area_id"] for o in observations if o.get("focus_area_id"))
     focus_review = []
@@ -477,4 +517,30 @@ def suggest_understanding(ctx: AIContext, observations: list[dict], focus_areas:
         "next_steps": frame_text("next_steps", ctx, interest=interest),
         "baseline_validation": validation,
         "focus_review": focus_review,
+        "possible_patterns": possible_patterns(ctx, observations, focus_areas),
+        "next_observation_questions": next_observation_questions(ctx, focus_areas),
+    }
+
+
+# --------------------------------------------------------------------------- functional summary (Domain 17)
+
+
+def functional_summary(ctx: AIContext, observations: list[dict], focus_areas: list[dict]) -> dict:
+    """A FunctionalSummaryDraft from the profile labels, the current understanding and the focus
+    areas. Never anything about following up with the parents, involvement or goal decisions."""
+    sep = _sep(ctx)
+    helps = sep.join(h.label for h in ctx.what_helps)
+    cu = ctx.current_understanding
+    adaptations = (cu.adaptations if cu and cu.adaptations else None) or (
+        frame_text("adaptations", ctx, helps=helps) if helps else frame_text("adaptations_none", ctx))
+    strengths = [{"key": s.key, "custom": None, "label": s.label} if s.key
+                 else {"key": None, "custom": s.label[:120], "label": s.label[:120]} for s in ctx.strengths][:5]
+    return {
+        "general_description": " ".join(_summary_parts(ctx, observations, focus_areas))[:2000],
+        "main_strengths": {"items": strengths, "text": None},
+        "main_needs": {"items": [fa["title"][:300] for fa in focus_areas if fa.get("title")][:4], "text": None},
+        "adaptations": adaptations[:1000],
+        "team_recommendations": frame_text("fs_team", ctx, helps=helps) if helps else frame_text("fs_team_none", ctx),
+        "possible_patterns": possible_patterns(ctx, observations, focus_areas),
+        "next_observation_questions": next_observation_questions(ctx, focus_areas),
     }

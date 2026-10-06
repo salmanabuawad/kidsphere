@@ -1,0 +1,11 @@
+{% from "_macros.html" import tag, status %}
+<section class="section section-{{ section.key }}{% if section.break_before %} break-before{% endif %}">
+  <h2 class="section-title">{{ section.title }}</h2>
+  {% if section.source or section.status %}
+  <p class="section-meta">{{ status(section.status) }} {{ tag(section.source) }}</p>
+  {% endif %}
+  {% if section.intro %}<p class="intro">{{ section.intro }}</p>{% endif %}
+  {% for block in section.blocks %}
+  {% include "_blocks/" ~ block.type ~ ".html" %}
+  {% endfor %}
+</section>

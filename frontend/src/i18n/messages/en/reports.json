@@ -1,0 +1,67 @@
+{
+  "page": {
+    "title": "PDF reports",
+    "description": "Create a report to keep in the child's file or to share with the team or the family.",
+    "export": "Export PDF",
+    "exportOne": "Export PDF: {report}",
+    "privacy": "Reports are created on our server and downloaded straight to this device. Nothing is published and no link is kept. Every export is recorded below."
+  },
+  "types": {
+    "full": { "title": "Full Child Report", "description": "Everything in one place: the family's words, the teacher's observation, focus and plans, observations, reviews and the approved summary." },
+    "parent_questionnaire": { "title": "Parent Questionnaire", "description": "Every question of \"Getting to know my child\" in order, with the family's answers." },
+    "teacher_observation": { "title": "Teacher Observation Report", "description": "One observation cycle: all areas of development with notes, and the structured observations of the period." },
+    "current_development": { "title": "Current Development Report", "description": "The approved current understanding, strengths, current focus, recent observations, activities and next steps." },
+    "intervention_plan": { "title": "Intervention Plan", "description": "The current goals: what we will do, how often, who, how we will know it helps and the follow-up date." },
+    "timeline": { "title": "Timeline Report", "description": "What happened over a period of time, oldest first and grouped by month." }
+  },
+  "flags": {
+    "include_parent": "The family's input",
+    "include_teacher_observations": "Teacher observation",
+    "include_timeline": "Timeline",
+    "include_health": "Health & medical",
+    "include_family": "Family context",
+    "include_private_notes": "Private teacher notes"
+  },
+  "dialog": {
+    "title": "Export a PDF report",
+    "description": "Choose the report, its language and what it includes.",
+    "type": "Report",
+    "language": "Language of the report",
+    "languageHint": "Answers stay in the language they were written in.",
+    "range": "Period",
+    "rangeHint": "Leave empty to include everything.",
+    "rangeHintTimeline": "Leave empty to start from the first baseline.",
+    "from": "From",
+    "to": "To",
+    "rangeError": {
+      "order": "The start date must be before the end date.",
+      "future": "Dates cannot be in the future."
+    },
+    "cycle": "Observation cycle",
+    "cycleHint": "By default the open cycle, or the latest one.",
+    "cycleHintPlan": "Choose a cycle to print only the goals that came from it.",
+    "cycleDefault": "The open or latest cycle",
+    "cycleAllGoals": "All current goals",
+    "cycleInitial": "First observation · {date}",
+    "cycleReassessment": "Follow-up observation {number} · {date}",
+    "cycleOpen": "open",
+    "include": "Include",
+    "sensitiveHint": "Off by default. Include it only when it is needed.",
+    "personalTitle": "Contains personal details: store securely",
+    "personal": "The report shows the child's name, age, kindergarten and what the family shared. Keep it in a safe place and share it only with people who need it.",
+    "download": "Download PDF",
+    "preparing": "Preparing the PDF…",
+    "downloaded": "The PDF is ready in your downloads.",
+    "failed": "The PDF was not created"
+  },
+  "log": {
+    "title": "Export log",
+    "description": "Who exported which report, and when. The reports themselves are not kept.",
+    "empty": "No reports have been exported for this child yet.",
+    "exportedBy": "Exported on {date} by {name}",
+    "someone": "a former team member",
+    "rangeFromTo": "{from} – {to}",
+    "rangeSince": "since {from}",
+    "rangeUntil": "until {to}"
+  }
+}

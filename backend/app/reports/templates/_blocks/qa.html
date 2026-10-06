@@ -1,0 +1,13 @@
+{% from "_macros.html" import answer, tag %}
+<div class="qa">
+{% for item in block["items"] %}
+  {% if item.heading %}
+  <h4 class="qa-heading">{{ item.q }}</h4>
+  {% else %}
+  <div class="qa-item">
+    <p class="q">{{ item.q }}{% if item.source %} {{ tag(item.source) }}{% endif %}</p>
+    <div class="a">{{ answer(item.a, meta.dir) }}</div>
+  </div>
+  {% endif %}
+{% endfor %}
+</div>

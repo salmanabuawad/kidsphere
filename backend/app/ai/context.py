@@ -4,22 +4,46 @@
 first/preferred name, age in years, language, gender (only when set, for ar/he
 grammar), mode, content type, game template, at most 3 strength / interest /
 what-helps labels, at most 3 avoid (sensitivity) keys, the focus area
-(category, title, description, plan) or the target strength, at most 5 recent
-observations (each <= 300 characters), the current understanding (summary,
-adaptations, next_steps) when present, the regenerate instruction, the variant
-and include_video.
+(category, title, description, plan without ``who`` and ``review_on``) or the
+target strength, at most 5 recent observations (each <= 300 characters), the
+domain blocks, the current understanding (summary, adaptations, next_steps) when
+present, the regenerate instruction, the variant and include_video.
+
+``avoid`` holds ONLY sensitivity keys the teacher observed in the teacher
+assessment (Domain 9, ``app.ai.domains.teacher_avoid``). Parent-reported
+sensitivities (``child_profiles.sensitivities``, e.g. ``certain_foods``) are
+never sent (COVERAGE-MATRIX §7.2, X-26).
+
+``domains`` (COVERAGE-MATRIX §7.3, X-28) holds one block per RELEVANT AI domain
+only (``app.ai.domains``)::
+
+    {<ai_domain>: {"assessment": [{item, level?, effect?, helps?}],   keys and levels only
+                   "observations": [{id, observed_at, context, support_level, focus_area_id,
+                                     frequency?, duration_minutes?, intensity?, text<=300 masked}],
+                   "helps": [what-helps keys]}}
+
+Content generation fills it for the focus category / target strength; analysis
+calls (app.ai.service) fill it for the domains with data in the period (their
+observations travel in the observation list, tagged with ``domains``). The keys of
+``ctx.domains`` are the domains actually sent and are stored with
+``generation_input`` / ``ai_suggestions.domains``.
 
 Every free text in it (custom labels, the focus title, description and plan,
 the observations, the current understanding, the instruction) is masked: the
 child's names, including the surname, become [child], every other child of the
-kindergarten [friend], and the child's parents and the teachers [adult].
+kindergarten [friend], and the child's parents and the teachers [adult]. Phone
+numbers become [phone] and e-mail addresses [email].
 
-Never included: birth date, surname, photo, parent name/contact, health,
-free-text parent answers (a custom list entry is sent only once staff confirmed
-it, see ``staff_confirmed``), perspectives.
+Never included: birth date, surname, photo, parent name/contact, health and
+medical answers, family context, free-text parent answers (a custom list entry is
+sent only once staff confirmed it, see ``staff_confirmed``), perspectives,
+observation notes and the other observation free texts (who was there, before,
+after, what changed, documentation), teacher-assessment notes and texts.
 
 ``ctx.model_dump(mode="json")`` is what callers store as
-``generated_content.generation_input``.
+``generated_content.generation_input``. Content generation keeps the first or
+preferred name (SPEC §15, OQ-4); analysis payloads replace it with [child]
+(app.ai.service).
 
 For a development-review suggestion, ``mask_understanding_inputs`` masks every
 free text that goes to the AI (custom labels, the current understanding, focus
@@ -42,10 +66,14 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field
 
 from app import vocab
+from app.ai.domains import AI_DOMAINS, MAX_DOMAIN_HELPS, MAX_DOMAIN_ITEMS, NEVER_AVOID, is_key
+from app.ai.gather import observation_text
 
 CHILD_TOKEN = "[child]"
 FRIEND_TOKEN = "[friend]"
 ADULT_TOKEN = "[adult]"
+PHONE_TOKEN = "[phone]"
+EMAIL_TOKEN = "[email]"
 
 # Sources of a merged-list entry that mean staff entered or confirmed it.
 STAFF_SOURCES = frozenset({"teacher", "observation", "review"})
@@ -53,20 +81,57 @@ STAFF_SOURCES = frozenset({"teacher", "observation", "review"})
 MAX_LIST_ITEMS = 3
 MAX_OBSERVATIONS = 5
 MAX_OBSERVATION_CHARS = 300
+MAX_DOMAIN_OBSERVATIONS = 3
+MAX_PLAN_CHARS = 400
+# Focus plan keys that never reach the AI: who is responsible (names; OM-D15-04) and the
+# legacy follow-up date text (OM-D16-01).
+PLAN_EXCLUDED = frozenset({"who", "review_on"})
 
 # Lists a what_helps key may come from (the profile merges all of them).
 WHAT_HELPS_LISTS = ("what_helps", "calming_helps", "transition_helps", "sensitivity_helps", "sad_helps")
 STRENGTH_LISTS = ("strengths", "strength_targets")
 
 Mode = Literal["strength_builder", "growth_support"]
-ContentType = Literal["story", "video", "digital_game", "real_world_activity", "pack", "understanding"]
+ContentType = Literal["story", "video", "digital_game", "real_world_activity", "pack", "understanding",
+                      "functional_summary"]
 Template = Literal[
     "multiple_choice", "match_pairs", "sequence", "emotion_choice", "categorize", "what_happens_next", "story_builder"
 ]
+AiDomain = Literal[AI_DOMAINS]  # type: ignore[valid-type]
 
 
 class _M(BaseModel):
     model_config = ConfigDict(extra="forbid")
+
+
+class DomainItem(_M):
+    """One teacher-assessment value: an item key with its support level (or D9 effect), or a
+    day-map stage with its help keys. Keys only, never a note or text."""
+
+    item: str = Field(pattern=r"^[a-z0-9_]{1,40}$")
+    level: str | None = None
+    effect: str | None = None
+    helps: list[str] = Field(default_factory=list, max_length=MAX_DOMAIN_HELPS)
+
+
+class DomainObservation(_M):
+    id: str | None = None
+    observed_at: str | None = None
+    context: str | None = None
+    support_level: str | None = None
+    focus_area_id: str | None = None
+    frequency: str | None = None
+    duration_minutes: int | None = None
+    intensity: str | None = None
+    changed: Literal["yes", "partly", "no"] | None = None  # stage E key (OM-D14-10)
+    plan_focus_area_id: str | None = None
+    text: str | None = None
+
+
+class DomainBlock(_M):
+    assessment: list[DomainItem] = Field(default_factory=list, max_length=MAX_DOMAIN_ITEMS)
+    observations: list[DomainObservation] = Field(default_factory=list, max_length=MAX_DOMAIN_OBSERVATIONS)
+    helps: list[str] = Field(default_factory=list, max_length=MAX_DOMAIN_HELPS)
 
 
 class LabelItem(_M):
@@ -104,6 +169,7 @@ class AIContext(_M):
     focus: FocusContext | None = None
     target_strength: LabelItem | None = None
     recent_observations: list[str] = Field(default_factory=list, max_length=MAX_OBSERVATIONS)
+    domains: dict[AiDomain, DomainBlock] = Field(default_factory=dict)
     current_understanding: UnderstandingContext | None = None
     instruction: str | None = None
     variant: int = 0
@@ -281,15 +347,42 @@ def _compile(groups) -> tuple[re.Pattern | None, list[str]]:
     return re.compile(pattern, re.IGNORECASE), tokens
 
 
+_EMAIL_RE = re.compile(r"[\w.+-]+@[\w-]+(?:\.[\w-]+)+")
+# A run of digits with the usual phone separators; it is a phone number when it has at least
+# 9 digits (or 7 after a leading +). Dates (8 digits) and times stay.
+_PHONE_RE = re.compile(r"(?<![\w+])\+?\d[\d\s().\-/]{5,}\d")
+_DATE_START = re.compile(r"^\d{1,4}[./-]\d{1,2}[./-]\d{1,4}")
+
+
+def _phone(match: re.Match) -> str:
+    text = match.group(0)
+    digits = sum(c.isdigit() for c in text)
+    if text.startswith("+") and digits >= 7:
+        return PHONE_TOKEN
+    if digits >= 9 and not _DATE_START.match(text):
+        return PHONE_TOKEN
+    return text
+
+
+def scrub_contacts(text):
+    """E-mail addresses become [email] and phone numbers [phone] (X-27)."""
+    if not text:
+        return text
+    return _PHONE_RE.sub(_phone, _EMAIL_RE.sub(EMAIL_TOKEN, text))
+
+
 def name_masker(child_names=(), classmate_names=(), adult_names=()):
     """``mask(text)``: the child's names become [child], other children's names [friend] and the
-    adults' names (parents, teachers) [adult]. The pattern is compiled once; None and blank text
-    pass through."""
+    adults' names (parents, teachers) [adult]; e-mail addresses become [email] and phone numbers
+    [phone]. The pattern is compiled once; None and blank text pass through."""
     pattern, tokens = _compile(((child_names, CHILD_TOKEN), (classmate_names, FRIEND_TOKEN),
                                 (adult_names, ADULT_TOKEN)))
 
     def mask(text):
-        if not text or pattern is None:
+        if not text:
+            return text
+        text = scrub_contacts(text)
+        if pattern is None:
             return text
         return pattern.sub(lambda m: m.group(1) + tokens[m.lastindex - 2], text)
 
@@ -328,8 +421,9 @@ def mask_understanding_inputs(ctx: AIContext, focus_areas: list[dict], baseline_
     focus = []
     for f in focus_areas or []:
         item = {**f, "title": _clip(mask(f.get("title")), 200), "description": _clip(mask(f.get("description")), 500)}
+        item.pop("source_need", None)
         if isinstance(f.get("plan"), dict):
-            item["plan"] = {k: _clip(mask(str(v)), 400) for k, v in f["plan"].items() if v not in (None, "")} or None
+            item["plan"] = masked_plan(f["plan"], mask, plan_excluded(f))
         focus.append(item)
     baseline = []
     for it in baseline_items or []:
@@ -380,9 +474,89 @@ def _label_items(items, lists: tuple[str, ...], lang: str, limit: int = MAX_LIST
 
 
 def _observation_text(obs) -> str | None:
+    """The observation itself (or ``details.what_i_see``); never the note."""
     if isinstance(obs, str):
         return obs
-    return _get(obs, "observation") or _get(obs, "text") or _get(obs, "note")
+    if isinstance(obs, dict) and obs.get("text"):
+        return obs["text"]
+    return observation_text(obs)
+
+
+def plan_excluded(focus) -> frozenset:
+    """The plan keys never sent for this focus: ``who`` and ``review_on`` always, and ``need`` when
+    the focus was promoted from a Domain 13 need (its text is the need's "what exactly do we see",
+    AI policy never: OM-D13-02, COVERAGE-MATRIX 7.4)."""
+    return PLAN_EXCLUDED | {"need"} if _get(focus, "source_need") else PLAN_EXCLUDED
+
+
+def masked_plan(plan, mask, exclude=PLAN_EXCLUDED) -> dict | None:
+    """A focus plan for the AI: masked and clipped, without the ``exclude`` keys (``who`` and
+    ``review_on`` by default; see :func:`plan_excluded`)."""
+    if not isinstance(plan, dict):
+        return None
+    out = {k: _clip(mask(str(v)), MAX_PLAN_CHARS) for k, v in plan.items()
+           if k not in exclude and v not in (None, "")}
+    return {k: v for k, v in out.items() if v} or None
+
+
+def avoid_keys(keys) -> list[str]:
+    """Valid sensitivity keys (at most 3), never a health key such as ``certain_foods``."""
+    out: list[str] = []
+    for key in keys or ():
+        if is_key(key) and key not in NEVER_AVOID and key not in out and vocab.is_valid("sensitivities", key):
+            out.append(key)
+    return out[:MAX_LIST_ITEMS]
+
+
+def _domain_observation(raw, mask) -> DomainObservation | None:
+    text = _observation_text(raw)
+    text = _clip(mask(text), MAX_OBSERVATION_CHARS) if text else None
+    if not text:
+        return None
+    entry = {k: _get(raw, k) for k in ("observed_at", "context", "support_level", "frequency", "duration_minutes",
+                                       "intensity")}
+    for k in ("id", "focus_area_id", "plan_focus_area_id"):
+        value = _get(raw, k)
+        entry[k] = str(value) if value is not None else None
+    changed = _get(raw, "changed")
+    entry["changed"] = changed if changed in ("yes", "partly", "no") else None
+    if hasattr(entry["observed_at"], "isoformat"):
+        entry["observed_at"] = entry["observed_at"].isoformat()
+    for k in ("context", "support_level", "frequency", "intensity"):
+        if not is_key(entry[k]):
+            entry[k] = None
+    if not isinstance(entry["duration_minutes"], int) or isinstance(entry["duration_minutes"], bool):
+        entry["duration_minutes"] = None
+    return DomainObservation(**entry, text=text)
+
+
+def domain_blocks(raw: dict | None, mask=None) -> dict[str, DomainBlock]:
+    """Validated DomainBlocks from ``{domain: {assessment, observations, helps}}`` (app.ai.domains /
+    app.ai.gather); observation texts are masked and clipped, unknown domains and empty blocks dropped."""
+    mask = mask or (lambda text: text)
+    out: dict[str, DomainBlock] = {}
+    for domain in AI_DOMAINS:
+        block = (raw or {}).get(domain)
+        if isinstance(block, DomainBlock):
+            block = block.model_dump()
+        if not isinstance(block, dict):
+            continue
+        items = []
+        for it in block.get("assessment") or []:
+            if isinstance(it, dict) and is_key(it.get("item")):
+                items.append(DomainItem(
+                    item=it["item"],
+                    level=it.get("level") if is_key(it.get("level")) else None,
+                    effect=it.get("effect") if is_key(it.get("effect")) else None,
+                    helps=[h for h in it.get("helps") or [] if is_key(h)][:MAX_DOMAIN_HELPS],
+                ))
+        observations = [o for o in (_domain_observation(r, mask) for r in block.get("observations") or []) if o]
+        helps = [h for h in dict.fromkeys(block.get("helps") or []) if is_key(h)]
+        result = DomainBlock(assessment=items[:MAX_DOMAIN_ITEMS], observations=observations[:MAX_DOMAIN_OBSERVATIONS],
+                             helps=helps[:MAX_DOMAIN_HELPS])
+        if result.assessment or result.observations or result.helps:
+            out[domain] = result
+    return out
 
 
 # --------------------------------------------------------------------------- builder
@@ -407,12 +581,20 @@ def build_context(
     include_video: bool = False,
     today: date | None = None,
     mask_free_text: bool = True,
+    avoid=(),
+    domains: dict | None = None,
 ) -> AIContext:
     """Build the allow-listed AIContext. ``child``/``profile``/``focus`` may be rows or dicts.
 
     ``classmate_names``: the other children whose names may appear (masked as [friend]);
     ``adult_names``: the child's parents and the teachers (masked as [adult], like the child's
     own ``parent_name``).
+    ``avoid``: sensitivity keys the TEACHER observed (``app.ai.domains.teacher_avoid``); the
+    profile's sensitivities are never read.
+    ``domains``: raw blocks of the relevant AI domains (``app.ai.domains.assessment_blocks`` plus
+    observation entries from ``app.ai.gather``); see the module docstring.
+    ``recent_observations``: texts, rows or dicts; only the observation text (or
+    ``details.what_i_see``) is used, never the note.
     ``mask_free_text=False`` keeps the free texts as typed. Only the development-review
     suggestion uses it: ``app.ai.service`` masks every free text with
     ``mask_understanding_inputs`` right before the AI call, and the template provider and the
@@ -425,17 +607,9 @@ def build_context(
     mask = name_masker(child_names, classmate_names, adults) if mask_free_text else (lambda text: text)
 
     gender = _get(child, "gender")
-    avoid = []
-    for it in _get(profile, "sensitivities") or []:
-        key = it if isinstance(it, str) else _get(it, "key")
-        if key and vocab.is_valid("sensitivities", key) and key not in avoid:
-            avoid.append(key)
 
     focus_ctx = None
     if focus is not None:
-        plan = _get(focus, "plan") or None
-        if isinstance(plan, dict):
-            plan = {k: _clip(mask(str(v)), 400) for k, v in plan.items() if v not in (None, "")}
         fid = _get(focus, "id")
         focus_ctx = FocusContext(
             id=str(fid) if fid is not None else None,
@@ -443,7 +617,7 @@ def build_context(
             suggestion_key=_get(focus, "suggestion_key"),
             title=_clip(mask(_get(focus, "title") or ""), 200) or "",
             description=_clip(mask(_get(focus, "description") or ""), 500),
-            plan=plan or None,
+            plan=masked_plan(_get(focus, "plan"), mask, plan_excluded(focus)),
         )
 
     target = None
@@ -477,10 +651,11 @@ def build_context(
         strengths=_masked_label_items(_label_items(_get(profile, "strengths"), ("strengths",), lang), mask),
         interests=_masked_label_items(_label_items(_get(profile, "interests"), ("interests",), lang), mask),
         what_helps=_masked_label_items(_label_items(_get(profile, "what_helps"), WHAT_HELPS_LISTS, lang), mask),
-        avoid=avoid[:MAX_LIST_ITEMS],
+        avoid=avoid_keys(avoid),
         focus=focus_ctx,
         target_strength=target,
         recent_observations=observations,
+        domains=domain_blocks(domains, mask),
         current_understanding=understanding,
         instruction=_clip(mask(instruction), 500) if instruction else None,
         variant=max(int(variant or 0), 0),

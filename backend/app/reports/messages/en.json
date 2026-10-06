@@ -1,0 +1,384 @@
+{
+  "report_label": "Child Development Report",
+  "types": {
+    "full": "Full Child Report",
+    "parent_questionnaire": "Parent Questionnaire",
+    "teacher_observation": "Teacher Observation Report",
+    "current_development": "Current Development Report",
+    "intervention_plan": "Intervention Plan",
+    "timeline": "Timeline Report"
+  },
+  "header": {
+    "child": "Child",
+    "preferred_name": "Called",
+    "age": "Age",
+    "birth_date": "Date of birth",
+    "kindergarten": "Kindergarten",
+    "class": "Class",
+    "languages": "Languages",
+    "parent_name": "Parent or guardian",
+    "parent_contact": "How to reach the family",
+    "report_date": "Report date",
+    "prepared_by": "Prepared by",
+    "period": "Period",
+    "confidential": "Contains personal details about a child. Share only with people who work with the child, and store it securely."
+  },
+  "footer": {
+    "disclaimer": "This report is based on parent information, teacher observations and educational follow-up. It is not a medical or clinical diagnosis."
+  },
+  "sources": {
+    "parent_said": "Parent Input",
+    "teacher_observed": "Teacher Observation",
+    "teacher_approved": "Teacher-Approved Understanding",
+    "ai_suggested": "AI-Assisted Draft",
+    "ai_approved": "AI-assisted draft, approved by {name} on {date}",
+    "approved_by": "approved by {name} on {date}",
+    "entered_by": "entered by {name}",
+    "entered_by_on": "entered by {name} on {date}",
+    "in_meeting": "in a meeting with the family"
+  },
+  "markers": {
+    "not_answered": "Not answered",
+    "not_observed": "Not observed yet",
+    "nothing_yet": "Nothing recorded yet",
+    "other": "Other: {text}",
+    "yes": "Yes",
+    "no": "No",
+    "someone": "a team member",
+    "no_text": "No written note",
+    "no_kindergarten": "Not set",
+    "status_open": "Still open",
+    "status_clarified": "Clarified"
+  },
+  "age": {
+    "year_one": "{n} year",
+    "year_two": "{n} years",
+    "year_few": "{n} years",
+    "year_many": "{n} years",
+    "year_other": "{n} years",
+    "month_one": "{n} month",
+    "month_two": "{n} months",
+    "month_few": "{n} months",
+    "month_many": "{n} months",
+    "month_other": "{n} months",
+    "both": "{years}{join}{months}",
+    "join": ", ",
+    "join_digit": ", "
+  },
+  "date": {
+    "format": "{d} {mon} {y}",
+    "month_year": "{month} {year}",
+    "months": ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+    "months_short": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+  },
+  "range": {
+    "from_to": "{start} – {end}",
+    "since": "Since {start}",
+    "until": "Until {end}",
+    "all": "All dates"
+  },
+  "sections": {
+    "basics": "Basic details",
+    "parent_summary": "What the family told us",
+    "teacher_observation": "Teacher observation",
+    "teacher_profile": "Teacher's notes from the profile form",
+    "baselines": "Baseline: the first picture and the latest",
+    "lists": "Strengths, interests and what helps",
+    "focus": "Current focus and plan",
+    "observations": "Observation history",
+    "reviews": "Development reviews and follow-up",
+    "functional_summary": "Short functional summary",
+    "timeline": "Timeline",
+    "understanding": "Current understanding",
+    "recent_observations": "Recent observations",
+    "activities": "Activities and how they went",
+    "progress": "Progress",
+    "next": "Next steps"
+  },
+  "heart": {
+    "section": "In the family's words",
+    "title": "A message from the heart"
+  },
+  "r2": {
+    "about": "About this questionnaire",
+    "intro": "The family's answers in the order of the questionnaire. Every answer is optional; questions left empty show \"Not answered\".",
+    "status": "Status",
+    "status_submitted": "Sent by the family",
+    "status_draft": "Not sent yet (saved as a draft)",
+    "filled_on": "Filled in on",
+    "entry_mode": "How it was filled in",
+    "mode_self": "By the family",
+    "mode_on_behalf": "Entered by the team for the family",
+    "mode_meeting": "Together with the family at a meeting",
+    "attendees": "At the meeting",
+    "entered_by": "Entered by",
+    "school_year": "School year",
+    "not_started": "The family has not started the questionnaire yet.",
+    "nothing_answered": "No answers yet."
+  },
+  "legacy": {
+    "title": "From the earlier form",
+    "intro": "Answers given in the earlier version of the questionnaire, kept as they were written.",
+    "helps": "What helps",
+    "who": {
+      "describe_words": "Describe the child in a few words",
+      "appreciate": "What you love and appreciate most",
+      "strengths": "Strengths",
+      "interests": "Interests",
+      "motivators": "What motivates the child"
+    },
+    "emotions": {
+      "helps_when_sad": "What helps when the child is sad",
+      "frustration_reactions": "What usually happens when the child is frustrated",
+      "calming_helps": "What helps the child calm down",
+      "calming_notes": "Notes about calming down",
+      "transition_reaction": "Stopping an activity the child enjoys",
+      "transition_helps": "What helps with changes",
+      "morning_separation": "Saying goodbye in the morning",
+      "what_does_not_help": "What does not help"
+    },
+    "social": {
+      "social": "With other children",
+      "communication": "How the child communicates",
+      "comments": "Notes about friends and talking"
+    },
+    "independence": {
+      "levels": "Everyday independence",
+      "notes": "Notes about independence"
+    },
+    "environment": {
+      "items": "Things in the environment that may affect the child",
+      "notes": "Notes about the environment"
+    },
+    "priorities": {
+      "parent_priorities": "What the family hopes the child will develop",
+      "hope_child_feels": "How the family hopes the child will feel",
+      "one_thing_to_know": "The most important thing to know",
+      "priorities_note": "Notes about hopes"
+    }
+  },
+  "qb": {
+    "title": "Teacher's first reading (quick baseline)",
+    "main_strengths": "Three main strengths",
+    "remember": "Things to remember about this child",
+    "calms_helps": "What calms and helps the child",
+    "may_be_difficult": "What may make things harder",
+    "first_area_to_observe": "First area to observe",
+    "question_for_parent": "A question to clarify with the family"
+  },
+  "r3": {
+    "cycle_title": "Observation details",
+    "no_cycle": "No teacher observation has been started yet.",
+    "principles_title": "How we observe",
+    "principles": [
+      "Observe in natural, varied situations.",
+      "Describe what you see, not how you interpret it.",
+      "Note how often, how strongly, how long and in which situation.",
+      "Tell apart what the child does alone and what they do with support.",
+      "Note strengths and interests next to every area for support.",
+      "Do not compare children with each other.",
+      "Read what you see in light of the child's context and development."
+    ],
+    "not_a_test": "A whole picture of the child built from everyday observation, play and activity. It is not a test.",
+    "col_item": "What we looked at",
+    "col_support": "How much support was needed?",
+    "col_notes": "Notes",
+    "col_task": "Everyday task",
+    "independent": "Independent",
+    "needs_help": "Needs help",
+    "col_stimulus": "In the environment",
+    "col_happens": "What happens",
+    "col_helps": "What helps",
+    "col_stage": "Part of the day",
+    "col_succeeds": "What goes well",
+    "col_difficult": "What is still hard",
+    "col_support_needed": "Support needed",
+    "col_what_helps": "What helps",
+    "seen_in": "Seen during: {place}",
+    "play_not_test": "Observed through play and daily activity, not a test.",
+    "no_score": "Described in words only; nothing here is measured.",
+    "strengths_guidance": "Aim for three to five strengths and interests, in order.",
+    "strengths_here": "Strengths seen here",
+    "carried_from": "Carried over from the earlier observation cycle and reviewed again.",
+    "need_seeing": "What exactly do we see?",
+    "need_how_often": "How often?",
+    "need_situations": "In which situations?",
+    "need_what_seems_harder": "What seems to make it harder?",
+    "need_already_tried": "What have we already tried?",
+    "need_what_helped": "What helped?",
+    "need_focus": "Became a current focus",
+    "need_untitled": "Area to focus on",
+    "kind_initial": "First observation",
+    "kind_reassessment": "Follow-up observation",
+    "cycle_open": "in progress",
+    "cycle_closed": "closed on {date}",
+    "age_at_fill": "Age when filled in",
+    "cycle": "Observation cycle",
+    "filled_on": "Filled in on",
+    "period_note": "About the period",
+    "teacher": "Teacher",
+    "filled_by": "Filled in by",
+    "d14_title": "Observe, understand, act",
+    "d14_a": "What I see",
+    "d14_b": "When it happens",
+    "d14_c": "What the child may need",
+    "d14_d": "What we will do",
+    "d14_e": "Did anything change?",
+    "d14_doc": "Documentation",
+    "when_time": "Time",
+    "when_activity": "Activity",
+    "when_activity_text": "About the activity",
+    "when_with_whom": "With whom",
+    "when_before_event": "Before",
+    "when_after_event": "After",
+    "linked_focus": "Linked to the focus: {title}",
+    "change_yes": "Yes",
+    "change_partly": "Partly",
+    "change_no": "Not yet",
+    "observation": "Observation"
+  },
+  "lists": {
+    "strengths": "Strengths",
+    "interests": "Interests",
+    "what_helps": "What helps",
+    "main": "Main strength"
+  },
+  "baseline": {
+    "original": "The first baseline",
+    "latest": "The latest baseline",
+    "created": "Created on {date} by {name}",
+    "focus": "Focus at the time",
+    "independence": "Everyday independence at the time"
+  },
+  "plan": {
+    "goal": "Goal",
+    "method": "What we will do",
+    "frequency": "How often",
+    "who": "Who",
+    "success": "How we will know it helps",
+    "follow_up": "Follow-up date",
+    "strength_used": "Strength we build on",
+    "need": "Need",
+    "adaptation": "Adaptation",
+    "none": "No active goals right now.",
+    "closed": "Goals closed or paused"
+  },
+  "obs": {
+    "date": "Date",
+    "where": "Where",
+    "what": "What was seen",
+    "support": "Support",
+    "helped": "What helped",
+    "feedback_on": "About the activity: {title}",
+    "focus": "Focus: {title}",
+    "none": "No observations in this period."
+  },
+  "activities": {
+    "approved": "Approved by the teacher",
+    "no_feedback": "No feedback recorded yet.",
+    "none": "No approved activities in this period."
+  },
+  "review": {
+    "title": "Development review",
+    "focus": "Focus",
+    "reassessment_on": "Next review date",
+    "improvement": "Has anything improved?",
+    "areas": "In which areas?",
+    "what_worked": "What worked well",
+    "what_to_change": "What needs to change",
+    "note": "Note",
+    "involvement": "Next step with the family or the team",
+    "none": "No development review yet."
+  },
+  "understanding": {
+    "none": "No current understanding has been approved yet.",
+    "summary": "Summary",
+    "strengths": "Strengths",
+    "interests": "Interests",
+    "what_helps": "What helps",
+    "areas_for_support": "Areas for support",
+    "adaptations": "Adaptations",
+    "next_steps": "Next steps"
+  },
+  "summary": {
+    "general_description": "General description",
+    "main_strengths": "Main strengths",
+    "main_needs": "Areas for support",
+    "adaptations": "Recommended adaptations in the kindergarten",
+    "follow_up_with_parents": "Continued follow-up and work with the family",
+    "team_recommendations": "Recommendations for the team"
+  },
+  "hopes": {
+    "title": "The family's hopes",
+    "intro": "What the family hopes for. These ideas suggest the plan; the teacher decides the goals.",
+    "develop": "What the family hopes the child will develop this year",
+    "feels": "How the family hopes the child will feel",
+    "other_area": "Another area"
+  },
+  "r5": {
+    "period_title": "Plan period",
+    "goals_title": "Goals",
+    "guidance": "Choose two to three goals for each period, so each one gets enough time and attention."
+  },
+  "tl": {
+    "baseline": "Baseline updated",
+    "baseline_original": "First baseline",
+    "questionnaire": "Family questionnaire sent",
+    "focus_opened": "Focus opened",
+    "plan_changed": "Plan updated",
+    "focus_closed": "Goal completed",
+    "focus_paused": "Goal paused",
+    "focus_reopened": "Goal opened again",
+    "content": "Activity approved",
+    "observation": "Observation",
+    "changed": "Did anything change: {value}",
+    "feedback": "Activity feedback",
+    "review": "Development review",
+    "summary": "Functional summary approved",
+    "assessment_started": "Teacher observation started",
+    "assessment_closed": "Teacher observation closed",
+    "none": "Nothing happened in this period.",
+    "truncated": "Only the most recent entries are shown. Choose a shorter period to see everything."
+  },
+  "options": {
+    "improvement_levels": {
+      "significant": "Clear improvement",
+      "partial": "Partial improvement",
+      "no_change": "No clear change yet"
+    },
+    "involvement_steps": {
+      "none": "No",
+      "consultation": "Talk it over with the education team",
+      "joint_plan": "A shared plan with the family",
+      "referral_as_needed": "Involve a specialist if needed"
+    },
+    "sensory_effects": {
+      "affects": "Affects the child",
+      "sometimes": "Sometimes",
+      "no_visible_effect": "No visible effect",
+      "not_observed": "Not observed yet"
+    },
+    "need_areas": {
+      "emotional": "Emotional",
+      "social": "Social",
+      "language": "Language",
+      "communication": "Communication",
+      "attention": "Focus and persistence",
+      "motor": "Movement",
+      "cognitive": "Learning and thinking",
+      "independence": "Independence",
+      "sensory": "Things in the environment",
+      "behaviour": "Coping in everyday situations",
+      "adapting_to_setting": "Settling into the kindergarten"
+    },
+    "sensitivities": {
+      "light": "Light",
+      "smells": "Smells",
+      "creative_activities": "Creative activities"
+    },
+    "om_subgroups": {
+      "receptive": "Understanding language",
+      "expressive_social": "Expressing and conversation"
+    }
+  }
+}

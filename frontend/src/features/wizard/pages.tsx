@@ -1,17 +1,12 @@
-import { Navigate, useNavigate, useParams, useSearchParams } from "react-router";
-import { Check } from "lucide-react";
-import { ParentHomeIcon } from "@/icons";
-import { Alert } from "@/components/ui/Alert";
-import { Button } from "@/components/ui/Button";
-import { Card, CardBody } from "@/components/ui/Card";
+import { Navigate, useNavigate, useParams } from "react-router";
 import { PageSkeleton } from "@/components/ui/Spinner";
 import { useI18n } from "@/i18n/I18nProvider";
 import { paths } from "@/lib/paths";
 import { BasicsStep } from "./BasicsStep";
-import { FIRST_SECTION_STEP, LAST_STEP, STEPS, TOTAL_STEPS } from "./definition";
+import { FIRST_SECTION_STEP, LAST_STEP, TOTAL_STEPS } from "./definition";
+import { QuestionnaireWizard } from "./questionnaire";
 import { ReviewStep } from "./ReviewStep";
 import { useWizardProfile, WizardStep } from "./WizardEngine";
-import { WizardActions, WizardProgress } from "./WizardFrame";
 
 const REVIEW = TOTAL_STEPS + 1;
 
@@ -21,8 +16,9 @@ export function NewChildPage() {
 }
 
 /**
- * /children/:id/edit/:step — staff wizard. `step` is 1–7, "review", or
- * anything else (e.g. "continue") to resume at the saved wizard step.
+ * /children/:id/edit/:step — staff wizard (the teacher's own answers). `step` is 1–7,
+ * "review", or anything else (e.g. "continue") to resume at the saved wizard step.
+ * The family's answers are entered from the Parent View (on behalf / in a meeting).
  */
 export function ChildEditPage() {
   const { id = "", step: raw = "" } = useParams();
@@ -72,93 +68,20 @@ function StaffWizard({ childId, raw }: { childId: string; raw: string }) {
 }
 
 /**
- * /parent/children/:id/onboarding — the same steps 2–7 for a parent (parent
- * questions only). The step lives in ?step= so a reload resumes in place;
- * without it the parent's saved step is used.
+ * /parent/children/:id/onboarding(/:step) — the family's questionnaire (PW1–PW9) for the
+ * parent. Without a step it resumes where they stopped (or shows "sent" once it was sent).
  */
 export function ParentOnboardingPage() {
-  const { id = "" } = useParams();
-  return <ParentWizard key={id} childId={id} />;
-}
-
-function ParentWizard({ childId }: { childId: string }) {
-  const { t } = useI18n();
-  const navigate = useNavigate();
-  const [search, setSearch] = useSearchParams();
-  const wiz = useWizardProfile(childId);
-  const parentSteps = STEPS.map((s) => s.step);
-  const total = parentSteps.length;
-
-  if (wiz.error && !wiz.data) return <Alert tone="error">{t("wizard.loadError")}</Alert>;
-  if (!wiz.data) return <PageSkeleton />;
-
-  const fromUrl = Number(search.get("step"));
-  const saved = wiz.data.wizard.step;
-  let step = Number.isInteger(fromUrl) && fromUrl >= FIRST_SECTION_STEP && fromUrl <= REVIEW ? fromUrl : saved;
-  if (step < FIRST_SECTION_STEP) step = FIRST_SECTION_STEP;
-  if (step > REVIEW) step = REVIEW;
-  const index = step - FIRST_SECTION_STEP + 1;
-  const go = (s: number) => setSearch({ step: String(s) }, { replace: false });
-  const saveAndGo = async (target: number) => {
-    if (await wiz.persist({ wizard_step: target })) go(target);
-  };
-
-  if (step === REVIEW) {
-    return (
-      <div className="mx-auto max-w-2xl space-y-5">
-        <WizardProgress current={total + 1} total={total} onPick={(k) => go(k + FIRST_SECTION_STEP - 1)} />
-        <Card>
-          <CardBody className="space-y-4 py-8 text-center">
-            <ParentHomeIcon className="mx-auto size-16" aria-hidden />
-            <h1 className="font-display text-display-lg font-semibold text-ink">{t("wizard.parent.doneTitle")}</h1>
-            <p className="text-ink-muted">{t("wizard.parent.doneIntro")}</p>
-            {wiz.data.wizard.completed_at && (
-              <p className="inline-flex items-center gap-2 rounded-md border-[1.5px] border-success px-3 py-1.5 text-sm font-semibold text-success">
-                <Check className="size-4" strokeWidth={2.5} aria-hidden />
-                {t("wizard.parent.alreadySent")}
-              </p>
-            )}
-          </CardBody>
-        </Card>
-        <WizardActions>
-          <Button variant="ghost" onClick={() => go(LAST_STEP)}>
-            {t("common.back")}
-          </Button>
-          <Button
-            size="lg"
-            loading={wiz.saving}
-            data-testid="parent-finish"
-            onClick={async () => {
-              if (await wiz.persist({ wizard_step: REVIEW, complete: true })) navigate(paths.parentHome());
-            }}
-          >
-            {t("wizard.parent.send")}
-          </Button>
-        </WizardActions>
-      </div>
-    );
-  }
-
+  const { id = "", step } = useParams();
+  const n = step === undefined ? null : Number(step);
   return (
-    <div className="space-y-4">
-      {index === 1 && (
-        <Alert tone="tip" className="mx-auto max-w-3xl">
-          {t("wizard.parent.intro")}
-        </Alert>
-      )}
-      <WizardStep
-        key={step}
-        childId={childId}
-        mode="parent"
-        step={step}
-        wiz={wiz}
-        progress={{ current: index, total, onPick: (k) => void saveAndGo(k + FIRST_SECTION_STEP - 1) }}
-        onBack={() => (step === FIRST_SECTION_STEP ? navigate(paths.parentHome()) : void saveAndGo(step - 1))}
-        onNext={() => void saveAndGo(step + 1)}
-        onSaveExit={async () => {
-          if (await wiz.persist({ wizard_step: step })) navigate(paths.parentHome());
-        }}
-      />
-    </div>
+    <QuestionnaireWizard
+      key={id}
+      childId={id}
+      mode="self"
+      step={n === null || Number.isNaN(n) ? null : n}
+      pathFor={(s) => paths.parentOnboardingStep(id, s)}
+      exitTo={paths.parentHome()}
+    />
   );
 }

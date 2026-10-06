@@ -76,7 +76,7 @@ button { font: inherit; }
 .ks-ico--56 { width: 56px; height: 56px; }
 /*
   Nav icons are drawn inline (.ks-glyph with currentColor), like the app: an ink-muted outline with no paint
-  when inactive, and the brand paint under the outline when active.
+  when inactive, and the accent (logo teal) paint under the outline when active.
 */
 /* Directional icons mirror under RTL; never rotate. :dir() follows the nearest dir, so an LTR island stays unmirrored. */
 .ks-ico--mirror:dir(rtl), .ks-ico--flip { transform: scaleX(-1); }
@@ -103,6 +103,7 @@ button { font: inherit; }
 .ks-p-tangerine { fill: var(--paint-tangerine); }
 .ks-p-sky { fill: var(--paint-sky); }
 .ks-p-brand { fill: var(--brand); }
+.ks-p-accent { fill: var(--accent); }
 .ks-p-surface { fill: var(--surface); }
 .ks-p-ground { fill: var(--ground); }
 .ks-p-none { fill: none; }
@@ -458,7 +459,7 @@ button { font: inherit; }
 .ks-bbar__pill { display: grid; place-items: center; width: 48px; height: 28px; border-radius: var(--radius-md); }
 .ks-bbar__item[aria-current="page"] { color: var(--brand); font-weight: 600; }
 .ks-bbar__item[aria-current="page"] .ks-bbar__pill { background: var(--brand-soft); }
-/* Active nav icon: an ink outline over its brand paint (the label stays brand). */
+/* Active nav icon: an ink outline over its accent paint (the label stays brand). */
 .ks-bbar__item[aria-current="page"] .ks-glyph, .ks-navitem[aria-current="page"] .ks-glyph { color: var(--ink); }
 .ks-bbar__item--observe { justify-content: flex-start; color: var(--brand); font-weight: 600; }
 .ks-observe { display: grid; place-items: center; box-sizing: border-box; width: 56px; height: 56px; flex: none; margin-block-start: -24px; border-radius: var(--radius-md); background: var(--brand); color: var(--on-brand); box-shadow: 0 0 0 4px var(--ground), var(--shadow-lip-brand); transition: background-color 120ms, transform 90ms ease-out; }

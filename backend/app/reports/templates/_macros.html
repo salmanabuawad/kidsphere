@@ -1,0 +1,19 @@
+{% macro tag(source) -%}
+{% if source %}<span class="tag tone-{{ source.tone }}">{{ source.text | iso }}</span>{% endif %}
+{%- endmacro %}
+
+{% macro status(st) -%}
+{% if st %}<span class="status status-{{ st.key }}">{{ st.label }}</span>{% endif %}
+{%- endmacro %}
+
+{% macro answer(a, base_dir) -%}
+{% if a.chips %}<p class="chips">{% for c in a.chips %}<span class="chip tone-{{ c.tone }}">{{ c.text | iso }}</span> {% endfor %}</p>{% endif %}
+{% for line in a.lines %}<p class="line" dir="{{ line | autodir(base_dir) }}">{{ line | iso }}</p>{% endfor %}
+{% if a.marker %}<p class="marker">{{ a.marker }}</p>{% endif %}
+{%- endmacro %}
+
+{% macro cell(a, base_dir) -%}
+{% if a.chips %}<p class="cell-chips">{% for c in a.chips %}<span class="chip tone-{{ c.tone }}">{{ c.text | iso }}</span> {% endfor %}</p>{% endif %}
+{% for line in a.lines %}<p class="cell-line" dir="{{ line | autodir(base_dir) }}">{{ line | iso }}</p>{% endfor %}
+{% if a.marker %}<p class="marker">{{ a.marker }}</p>{% endif %}
+{%- endmacro %}

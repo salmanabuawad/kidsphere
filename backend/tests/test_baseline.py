@@ -1,4 +1,4 @@
-"""WP-06: baselines (immutable snapshots), current understanding and the demo seed."""
+"""WP-06 / WP2-PLAN: baselines (immutable snapshots, original vs latest), current understanding and the demo seed."""
 import json
 
 import pytest
@@ -120,7 +120,8 @@ def test_db_trigger_rejects_update(teacher_client, child, db):
 
 
 def test_empty_profile_baseline_and_current_understanding(teacher_client, child):
-    assert teacher_client.get(f"/api/children/{child.id}/baseline").json() == {"latest": None, "earlier": []}
+    assert teacher_client.get(f"/api/children/{child.id}/baseline").json() == {
+        "latest": None, "earlier": [], "original_id": None, "count": 0}
     cu = teacher_client.get(f"/api/children/{child.id}/current-understanding").json()
     assert cu == {"current_understanding": None, "baseline": None}
 
@@ -199,3 +200,34 @@ def test_dev_seed_creates_adam_and_maya(db):
     assert again["children"]["Adam"] == (str(adam.id), False)
     db.expire_all()
     assert len(db.scalars(select(Child)).all()) == 2
+
+
+# --------------------------------------------------------------------------- WP2-PLAN: original vs latest (X-12)
+
+
+def test_get_one_baseline_flags_the_original(teacher_client, parent_client, other_teacher_client, admin_client,
+                                             client, child):
+    fill_profile(teacher_client, parent_client, child)
+    first = teacher_client.post(f"/api/children/{child.id}/baseline").json()["baseline"]
+    parent_client.patch(f"/api/children/{child.id}/profile", json={"section": "who", "data": {"strengths": ["humor"]}})
+    second = teacher_client.post(f"/api/children/{child.id}/baseline").json()["baseline"]
+
+    listed = teacher_client.get(f"/api/children/{child.id}/baseline").json()
+    assert listed["original_id"] == first["id"] and listed["count"] == 2
+    assert listed["latest"]["original"] is False and listed["earlier"][0]["original"] is True
+
+    r = teacher_client.get(f"/api/children/{child.id}/baselines/{first['id']}")
+    assert r.status_code == 200, r.text
+    b = r.json()["baseline"]
+    assert b["original"] is True and b["latest"] is False and b["number"] == 1 and b["count"] == 2
+    assert b["baseline_data"] == first["baseline_data"]  # the full snapshot
+    assert b["summary"] and "Adam" in b["summary"]
+    latest = admin_client.get(f"/api/children/{child.id}/baselines/{second['id']}").json()["baseline"]
+    assert latest["original"] is False and latest["latest"] is True and latest["number"] == 2
+    assert "humor" in {i["key"] for i in latest["baseline_data"]["strengths"]}
+
+    assert parent_client.get(f"/api/children/{child.id}/baselines/{first['id']}").status_code == 404
+    assert other_teacher_client.get(f"/api/children/{child.id}/baselines/{first['id']}").status_code == 404
+    assert client.get(f"/api/children/{child.id}/baselines/{first['id']}").status_code == 401
+    assert teacher_client.get(f"/api/children/{child.id}/baselines/not-a-uuid").status_code == 404
+    assert teacher_client.get(f"/api/children/{child.id}/baselines/{child.id}").status_code == 404

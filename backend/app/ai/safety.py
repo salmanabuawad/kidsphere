@@ -4,15 +4,24 @@ Rules (docs/terminology.md, "How banned_terms is matched"):
 - Lowercase the text, remove every ``allow_phrases`` entry (all languages), then
   substring-search every term of all three languages.
 - ``clinical`` terms are banned in every string field (teacher_note, summaries too).
-- ``child_deficit`` terms are banned in child-facing fields.
+- ``child_deficit`` terms are banned in child-facing fields, and in EVERY field of
+  AI output (``ai=True``: teacher-facing AI text too; COVERAGE-MATRIX §7.8, X-30).
+- ``ai_only`` terms (referral and professional-evaluation wording) are banned in
+  every field of AI output (``ai=True``) and never checked on teacher input: the
+  teacher may choose the follow-up option ``referral_as_needed`` herself (OQ-2).
 - URLs are rejected everywhere.
-- ``/\\d+\\s*%|\\bscore\\b|\\bpoints\\b/i`` is rejected in child-facing text.
+- ``/\\d+\\s*%|\\bscore\\b|\\bpoints\\b/i`` is rejected in child-facing text and in
+  every field of AI output.
+
+``ai=True`` is for what the AI provider wrote (Claude output). Teacher edits and
+teacher input use the default ``ai=False``.
 
 Public functions:
-    find_unsafe_text(data, child_facing) -> list[str]
+    text_issues(text, child_facing, ai=False) -> list[str]
+    find_unsafe_text(data, child_facing, ai=False) -> list[str]
         Every string inside ``data`` (str, list or dict, nested) is checked;
         ``child_facing`` decides whether the child-facing rules apply.
-    check_content(obj, child_facing_fields) -> list[str]
+    check_content(obj, child_facing_fields, ai=False) -> list[str]
         ``obj`` is a model or a dict. A string is child-facing when its dotted
         path (list indices dropped, e.g. ``story.questions``) equals or starts
         with one of ``child_facing_fields``. Issues are prefixed with the path.
@@ -38,14 +47,15 @@ def _flat(group: dict) -> list[str]:
     return sorted(set(out), key=len, reverse=True)
 
 
-def _term_lists() -> tuple[list[str], list[str], list[str]]:
+def _term_lists() -> tuple[list[str], list[str], list[str], list[str]]:
     banned = vocab.banned_terms()
-    return _flat(banned.get("clinical")), _flat(banned.get("child_deficit")), _flat(banned.get("allow_phrases"))
+    return (_flat(banned.get("clinical")), _flat(banned.get("child_deficit")), _flat(banned.get("ai_only")),
+            _flat(banned.get("allow_phrases")))
 
 
-def text_issues(text: str, child_facing: bool) -> list[str]:
+def text_issues(text: str, child_facing: bool, ai: bool = False) -> list[str]:
     """Issues for one string (no path prefix)."""
-    clinical, deficit, allow = _term_lists()
+    clinical, deficit, ai_only, allow = _term_lists()
     issues: list[str] = []
     cleaned = text.lower()
     for phrase in allow:
@@ -53,12 +63,16 @@ def text_issues(text: str, child_facing: bool) -> list[str]:
     for term in clinical:
         if term in cleaned:
             issues.append(f'uses the clinical term "{term}"')
-    if child_facing:
+    if child_facing or ai:
         for term in deficit:
             if term in cleaned:
-                issues.append(f'child-facing text uses "{term}"')
+                issues.append(f'{"child-facing" if child_facing else "AI"} text uses "{term}"')
         if NUMERIC_RE.search(text):
-            issues.append("child-facing text uses a score, points or a percentage")
+            issues.append(f'{"child-facing" if child_facing else "AI"} text uses a score, points or a percentage')
+    if ai:
+        for term in ai_only:
+            if term in cleaned:
+                issues.append(f'AI text uses the referral or evaluation wording "{term}"')
     if URL_RE.search(text):
         issues.append("contains a link or web address")
     return issues
@@ -79,22 +93,22 @@ def _dedupe(items: list[str]) -> list[str]:
     return list(dict.fromkeys(items))
 
 
-def find_unsafe_text(data, child_facing: bool) -> list[str]:
+def find_unsafe_text(data, child_facing: bool, ai: bool = False) -> list[str]:
     issues: list[str] = []
     for path, s in _strings(data):
         prefix = f"{'.'.join(path)}: " if path else ""
-        issues.extend(prefix + i for i in text_issues(s, child_facing))
+        issues.extend(prefix + i for i in text_issues(s, child_facing, ai))
     return _dedupe(issues)
 
 
-def check_content(obj, child_facing_fields) -> list[str]:
+def check_content(obj, child_facing_fields, ai: bool = False) -> list[str]:
     data = obj.model_dump(mode="json") if isinstance(obj, BaseModel) else obj
     prefixes = set(child_facing_fields or ())
     issues: list[str] = []
     for path, s in _strings(data):
         dotted = ".".join(path)
         child = any(dotted == p or dotted.startswith(p + ".") for p in prefixes)
-        issues.extend(f"{dotted}: {i}" for i in text_issues(s, child))
+        issues.extend(f"{dotted}: {i}" for i in text_issues(s, child, ai))
     return _dedupe(issues)
 
 
@@ -118,4 +132,4 @@ def child_facing_fields(kind: str, template: str | None = None) -> set[str]:
         for sub, fields in (("story", _STORY), ("activity", _ACTIVITY), ("game", _GAME), ("video", _VIDEO)):
             out |= {f"{sub}.{f}" for f in fields}
         return out
-    return set()  # understanding and anything teacher-only
+    return set()  # understanding, functional_summary and anything teacher-only

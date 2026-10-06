@@ -1,6 +1,6 @@
 # RoundButton
 
-A 72px round, icon-only button for present mode: by default a `paint-sun` ball with a 3px graphite outline and a chunky arrow, the second bright crayon beside the brand blue.
+A 72px round, icon-only button for present mode: by default a `paint-sun` ball with a 3px graphite outline and a chunky arrow, the second bright crayon beside the brand navy.
 
 ## When to use
 

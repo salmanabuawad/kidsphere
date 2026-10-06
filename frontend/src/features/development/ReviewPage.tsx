@@ -56,6 +56,7 @@ import {
   type UnderstandingList,
   type ValidationStatus,
 } from "./api";
+import { emptyFollowUp, followUpPayload, FollowUpStep, type FollowUpDraft } from "./FollowUpStep";
 import { EvidenceText, isLimited, REVIEW_ICON, VALIDATION_ICON } from "./parts";
 
 type KeptDecision = (typeof DECISIONS)[number];
@@ -87,11 +88,15 @@ export type UnderstandingDraft = {
 export type Draft = {
   source: "suggestion" | "blank";
   isTemplate: boolean;
+  /** The stored AI suggestion this draft started from (sent back as ai_suggestion_id). */
+  suggestionId?: string;
   ctx: DraftContext;
   focus: FocusDraft[];
   added: NewFocus[];
   validation: ValidationDraft[];
   understanding: UnderstandingDraft;
+  /** Domain 16: always starts empty; only the teacher fills it in. */
+  followUp: FollowUpDraft;
 };
 
 // --------------------------------------------------------------------------- draft helpers
@@ -141,6 +146,7 @@ export function blankDraft(ctx: DraftContext, cu: CurrentUnderstanding | null): 
       adaptations: cu?.adaptations ?? "",
       next_steps: cu?.next_steps ?? "",
     },
+    followUp: emptyFollowUp(),
   };
 }
 
@@ -152,6 +158,7 @@ export function suggestedDraft(res: SuggestResponse): Draft {
   return {
     source: "suggestion",
     isTemplate: res.is_template,
+    suggestionId: res.suggestion_id,
     ctx: res,
     focus: res.focus_areas.map((f) => {
       const sf = byFocus.get(f.id);
@@ -171,6 +178,7 @@ export function suggestedDraft(res: SuggestResponse): Draft {
       adaptations: s.adaptations ?? "",
       next_steps: s.next_steps ?? "",
     },
+    followUp: emptyFollowUp(),
   };
 }
 
@@ -178,6 +186,7 @@ const opt = (s: string) => s.trim() || undefined;
 
 export function buildPayload(d: Draft): ReviewInput {
   const u = d.understanding;
+  const followUp = followUpPayload(d.followUp);
   const items = (list: Item[], helps = false): Item[] =>
     uniqueItems(list).map((it) => (it.key ? (helps && it.list ? { key: it.key, list: it.list } : { key: it.key }) : { custom: (it.custom ?? "").trim() }));
   const summary = u.summary.trim();
@@ -216,7 +225,9 @@ export function buildPayload(d: Draft): ReviewInput {
         create: n.suggestion_key ? { suggestion_key: n.suggestion_key, title: n.title } : { category: n.category, title: n.title },
       })),
     ],
+    ...(followUp ? { follow_up: followUp } : {}),
     ai_suggested: d.source === "suggestion",
+    ...(d.source === "suggestion" && d.suggestionId ? { ai_suggestion_id: d.suggestionId } : {}),
   };
 }
 
@@ -384,6 +395,11 @@ function ReviewFlow({ childId, context, current }: { childId: string; context: D
             }}
             summaryError={summaryError}
             summaryRef={summaryRef}
+          />
+          <FollowUpStep
+            value={draft.followUp}
+            focusAreas={draft.ctx.focus_areas}
+            onChange={(patch) => update((d) => ({ ...d, followUp: { ...d.followUp, ...patch } }))}
           />
           <Card>
             <CardBody className="space-y-3">

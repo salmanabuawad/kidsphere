@@ -27,12 +27,58 @@
     "languages": "Languages",
     "editBasics": "Edit details",
     "parents": "Parents",
+    "kindergarten": "Kindergarten",
+    "exportPdf": "Export PDF",
     "tabs": {
       "label": "Child pages",
-      "profile": "Profile",
-      "timeline": "Timeline",
-      "content": "Content",
-      "development": "Development"
+      "overview": "Overview",
+      "parentView": "Parent view",
+      "teacherObservation": "Teacher observation",
+      "plan": "Plan",
+      "activities": "Activities",
+      "observations": "Observations",
+      "development": "Development",
+      "reports": "Reports"
+    }
+  },
+  "overview": {
+    "heart": {
+      "title": "From the heart",
+      "intro": "What the family wanted you to know before meeting {name}",
+      "private": "Only the kindergarten team sees this"
+    },
+    "familyWords": "In the family's words",
+    "appreciate": "What the family loves most",
+    "mainStrengths": "Main strengths",
+    "goodToKnow": {
+      "title": "Good to know",
+      "mostImportant": "Most important to know",
+      "routines": "Routines to keep",
+      "overwhelm": "Situations that may feel like too much",
+      "overwhelmKnow": "What the team should know in those moments",
+      "transitionObject": "Comfort object or goodbye routine",
+      "mayBeDifficult": "What may make things harder",
+      "remember": "Remember",
+      "notes": "Notes on file",
+      "foodNote": "Food note on file",
+      "medicalNote": "Medical note on file",
+      "openParentView": "open in the parent view",
+      "reach": "How to reach the family",
+      "communication": "What matters to the family",
+      "contact": "Contact"
+    },
+    "nextReview": "Next review: {date}",
+    "allObservations": "All observations",
+    "prompts": {
+      "title": "Next steps",
+      "familyAnswersTitle": "Family answers received",
+      "familyAnswersBody": "Read what the family shared about {name} and fill in the quick baseline.",
+      "quickBaselineAction": "Quick baseline",
+      "quickBaseline": "Quick baseline",
+      "openQuestion": "A question to clarify with the family",
+      "openQuestionAction": "Open the quick baseline",
+      "reviewLater": "Marked to review later",
+      "parentSection": "Family answers"
     }
   },
   "profile": {

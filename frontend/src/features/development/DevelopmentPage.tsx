@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router";
 import { ClipboardCheck, Flag, History, Lightbulb, ListChecks, Plus, Sparkles } from "lucide-react";
-import { CurrentFocusIcon, DevelopmentIcon } from "@/icons";
+import { CurrentFocusIcon, DevelopmentIcon, TimelineIcon } from "@/icons";
 import { Alert, Badge, Button, ButtonLink, Card, CardBody, CardHeader, Chip, Dialog, EmptyState, Skeleton } from "@/components/ui";
 import { pick } from "@/i18n/config";
 import { useI18n } from "@/i18n/I18nProvider";
@@ -13,9 +13,12 @@ import { useFetch } from "@/lib/useFetch";
 import { ChildLayout, ProfileItemChips, type ProfileItem } from "@/features/children";
 import {
   baselinesUrl,
+  baselineUrl,
   createBaseline,
   currentUnderstandingUrl,
   reviewsUrl,
+  type BaselineData,
+  type BaselineDetail,
   type BaselineSummary,
   type BaselinesResponse,
   type CurrentUnderstanding,
@@ -24,13 +27,17 @@ import {
   type ReviewsResponse,
   type ReviewWarning,
 } from "./api";
+import { BaselineCompare } from "./BaselineCompare";
 import { EvidenceText, ReviewStatusBadge, Section, useEvidence, ValidationBadge } from "./parts";
+import { SummaryCard } from "./SummaryCard";
+import { UnderstandingTimeline } from "./UnderstandingTimeline";
 
 /**
  * /children/:id/development — the initial baseline next to the current
- * understanding (stacked on phones), how the first picture holds up (latest
- * review), past reviews and earlier baselines. Descriptive only: no charts,
- * no scores (spec §22–26).
+ * understanding (stacked on phones), how the understanding developed (original
+ * baseline → each approved review → today), the short functional summary (Domain 17),
+ * the original-vs-latest baseline viewer, how the first picture holds up (latest
+ * review) and past reviews. Descriptive only: no charts, no scores (spec §22–26).
  */
 export function DevelopmentPage() {
   const { id = "" } = useParams();
@@ -51,7 +58,11 @@ function Development({ childId }: { childId: string }) {
   const reviews = useFetch<ReviewsResponse>(reviewsUrl(childId));
   const { pending, run } = useAction();
   const [confirming, setConfirming] = useState(false);
-  const warnings = ((location.state as { warnings?: ReviewWarning[] } | null)?.warnings ?? []).filter((w) => w.code === "LIMITED_OBSERVATIONS");
+  const saved = (location.state as { warnings?: ReviewWarning[] } | null)?.warnings ?? [];
+  const warnings = saved.filter((w) => w.code === "LIMITED_OBSERVATIONS");
+  const wording = saved.some((w) => w.code === "WORDING");
+  const originalId = baselines.data?.original_id ?? null;
+  const original = useFetch<{ baseline: BaselineDetail }>(originalId ? baselineUrl(childId, originalId) : null);
 
   async function newBaseline() {
     const r = await run(() => createBaseline(childId), { success: t("development.baseline.createdToast") });
@@ -100,10 +111,14 @@ function Development({ childId }: { childId: string }) {
           <Button variant="outline" icon={<Flag className="size-4" aria-hidden />} disabled={!cu.data} onClick={() => setConfirming(true)}>
             {baseline ? t("development.actions.newBaseline") : t("development.actions.firstBaseline")}
           </Button>
+          <ButtonLink variant="ghost" to={paths.childDevelopmentTimeline(childId)} icon={<TimelineIcon className="size-4" paint={false} aria-hidden />}>
+            {t("development.actions.timeline")}
+          </ButtonLink>
         </div>
       </div>
 
       {warnings.length > 0 && <SavedWarnings warnings={warnings} onClose={() => navigate(".", { replace: true, state: null })} />}
+      {wording && <Alert tone="warning">{t("development.review.wordingSaved")}</Alert>}
 
       {!cu.data ? (
         <div className="grid gap-4 md:grid-cols-2">
@@ -119,6 +134,20 @@ function Development({ childId }: { childId: string }) {
           />
           <UnderstandingCard understanding={cu.data.current_understanding} />
         </div>
+      )}
+
+      {cu.data && reviews.data && (
+        <UnderstandingTimeline original={original.data?.baseline ?? null} reviews={reviews.data.reviews} current={cu.data.current_understanding} />
+      )}
+
+      <SummaryCard childId={childId} />
+
+      {original.data && baselines.data?.latest && !baselines.data.latest.original && (
+        <BaselineCompare
+          original={original.data.baseline}
+          latest={(baselines.data.latest.baseline_data ?? {}) as BaselineData}
+          latestDate={baselines.data.latest.created_at}
+        />
       )}
 
       {latest && latest.baseline_validation.length > 0 && <ValidationCard review={latest} />}
@@ -164,7 +193,7 @@ function SavedWarnings({ warnings, onClose }: { warnings: ReviewWarning[]; onClo
           <li key={w.path}>
             <span dir="auto">{w.title ?? w.label}</span>
             {" — "}
-            {evidence(w.observation_count)}
+            {evidence(w.observation_count ?? 0)}
           </li>
         ))}
       </ul>

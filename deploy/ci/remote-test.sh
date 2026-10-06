@@ -9,7 +9,8 @@
 #   deploy/ci/remote-test.sh wp03 frontend
 #
 # Uploads the working tree (tracked + untracked, minus ignored files) of
-# backend/, frontend/ and deploy/ to /var/lib/kidsphere-ci/runs/<label> and
+# backend/, frontend/ and deploy/ (plus docs/mvp-refocus/COVERAGE-MATRIX.md,
+# which backend/tests/test_coverage_matrix.py walks) to /var/lib/kidsphere-ci/runs/<label> and
 # runs deploy/ci/server-run.sh there. Runs are serialised on the server with
 # flock, so several callers can use this at once. If the frontend has no
 # package-lock.json yet, the one npm generates on the server is copied back.
@@ -30,7 +31,7 @@ cd "$ROOT"
 TMP=$(mktemp -d)
 trap 'rm -rf "$TMP"' EXIT
 
-git ls-files -co --exclude-standard -- backend frontend deploy \
+git ls-files -co --exclude-standard -- backend frontend deploy docs/mvp-refocus/COVERAGE-MATRIX.md \
   | while IFS= read -r f; do [ -f "$f" ] && printf '%s\n' "$f"; done > "$TMP/files"
 tar -czf "$TMP/src.tgz" -T "$TMP/files"
 

@@ -1,0 +1,5 @@
+<div class="kv">
+{% for item in block["items"] %}
+  <div class="kv-item"><p class="kv-k">{{ item.k }}</p><p class="kv-v">{{ item.v | iso }}</p></div>
+{% endfor %}
+</div>

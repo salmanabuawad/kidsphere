@@ -101,7 +101,8 @@ def test_all_themes_suggestions_and_strengths_are_valid():
                                         today=TODAY)
                     template = template_provider.pick_template(ctx) if kind in ("digital_game", "pack") else None
                     data = template_provider.generate(kind, ctx, template)
-                    content, issues = validate_output(kind, data, template, include_video=True)
+                    # Template text passes even the stricter AI-output rules (deficit and referral wording).
+                    content, issues = validate_output(kind, data, template, include_video=True, ai=True)
                     if content is None:
                         problems.append((lang, mode, focus and focus.get("suggestion_key") or focus and
                                          focus["category"], target, kind, issues[:3]))
@@ -121,9 +122,12 @@ def test_variant_rotates_hero_and_choices():
 
 
 def test_avoid_list_skips_hero():
+    # "avoid" holds what the teacher observed (Domain 9); a parent-reported sensitivity alone does not count.
     profile = {**ADAM_PROFILE, "interests": [{"key": "music"}], "sensitivities": [{"key": "noise"}]}
-    ctx = ctx_for("growth_support", "en", profile=profile)
+    ctx = ctx_for("growth_support", "en", profile=profile, avoid=["noise"])
     assert "drum" not in json.dumps(generate("story", ctx).content).lower()
+    ctx = ctx_for("growth_support", "en", profile=profile)
+    assert ctx.avoid == [] and "drum" in json.dumps(generate("story", ctx).content).lower()
 
 
 @pytest.mark.parametrize("gender", ["girl", "boy", None])
@@ -248,3 +252,41 @@ def test_template_understanding_with_enough_observations():
            for i, level in enumerate(["significant_support", "some_support", "independent", "independent"])]
     data = template_provider.suggest_understanding(ctx, obs, [{"id": "f-adam", "title": "הצטרפות למשחק"}], [])
     assert data["focus_review"][0]["status"] == "some_improvement"
+
+
+# --------------------------------------------------------------------------- analysis templates (WP2-AI)
+
+
+@pytest.mark.parametrize("lang", LANGS)
+@pytest.mark.parametrize("gender", ("girl", "boy", None))
+def test_template_understanding_and_summary_in_every_language(lang, gender):
+    from app.ai.safety import check_content
+    from app.ai.schemas import FunctionalSummaryDraft, UnderstandingSuggestion
+
+    child = {**ADAM, "gender": gender}
+    ctx = build_context(child=child, profile=ADAM_PROFILE, mode=None, content_type="understanding", language=lang,
+                        current_understanding={"summary": "Builds with one friend.", "adaptations": None},
+                        today=TODAY)
+    obs = [{"id": f"o{i}", "focus_area_id": "f-adam", "support_level": level, "text": "x"}
+           for i, level in enumerate(["significant_support", "some_support", "independent"])]
+    focus = [{"id": "f-adam", "category": "social", "suggestion_key": "joining_group_play", "title": "Joining group play"}]
+    understanding = UnderstandingSuggestion.model_validate(template_provider.suggest_understanding(ctx, obs, focus, []))
+    summary = FunctionalSummaryDraft.model_validate(template_provider.functional_summary(ctx, obs, focus))
+    for data in (understanding, summary):
+        assert check_content(data, set(), ai=True) == []
+        assert_clean(data.model_dump(), lang, gender)
+    assert understanding.possible_patterns and understanding.next_observation_questions
+    assert summary.main_needs.items == ["Joining group play"]
+    assert [i.key for i in summary.main_strengths.items] == ["imagination", "building", "vocabulary"]
+    assert summary.team_recommendations and summary.adaptations
+    assert "Adam" in summary.general_description
+
+
+def test_template_summary_without_data():
+    from app.ai.schemas import FunctionalSummaryDraft
+
+    ctx = build_context(child={"name": "Lina", "birth_date": None}, profile=None, mode=None,
+                        content_type="functional_summary", language="ar", today=TODAY)
+    summary = FunctionalSummaryDraft.model_validate(template_provider.functional_summary(ctx, [], []))
+    assert summary.main_needs.items == [] and summary.main_strengths.items == []
+    assert summary.next_observation_questions[0].domain == "play"

@@ -1,0 +1,6 @@
+{% from "_macros.html" import tag %}
+<div class="chip-list">
+{% for c in block["items"] %}
+  <p class="chip-row"><span class="chip tone-{{ c.tone or 'neutral' }}">{{ c.text | iso }}</span>{% if c.tag %} {{ tag(c.tag) }}{% endif %}{% if c.note %} <span class="chip-note">{{ c.note | iso }}</span>{% endif %}</p>
+{% endfor %}
+</div>

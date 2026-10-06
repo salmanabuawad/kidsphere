@@ -1,11 +1,13 @@
 {
   "title": "Quick observation",
   "intro": "Write what you saw. Everything else is optional.",
+  "lookFor": "Looking for",
   "back": "Back to profile",
   "context": "Where?",
   "focus": "Current Focus",
   "what": "What happened?",
   "whatPlaceholder": "For example: asked a friend to build together",
+  "tip": "Describe what you saw, not what it might mean.",
   "required": "Please write what happened.",
   "support": "How much support was needed?",
   "supportLevels": {
@@ -34,6 +36,54 @@
     "yes": "Yes",
     "partly": "Partly",
     "no": "Not yet"
+  },
+  "stepper": {
+    "title": "Observe → Understand → Act",
+    "sequence": "Strength → Need → Adaptation → What we will do → Follow-up",
+    "letters": {
+      "a": "A",
+      "b": "B",
+      "c": "C",
+      "d": "D",
+      "e": "E"
+    },
+    "steps": {
+      "a": "What do I see?",
+      "b": "When does it happen?",
+      "c": "What might the child need?",
+      "d": "What will we do?",
+      "e": "Did anything change?"
+    },
+    "stepOf": "Step {letter}: {name}",
+    "next": "Next",
+    "back": "Back",
+    "aHelper": "Describe the facts without interpreting. For example: during group time the child got up after about 5 minutes.",
+    "dHelper": "Write down the step you chose.",
+    "domains": "Which areas does it touch?",
+    "frequency": "How often?",
+    "duration": "About how long? (minutes)",
+    "intensity": "How strongly?",
+    "intensities": {
+      "light": "Lightly",
+      "moderate": "Moderately",
+      "strong": "Strongly"
+    },
+    "time": "At what time?",
+    "activity": "During which activity?",
+    "activityText": "Which activity exactly?",
+    "withWhom": "With whom?",
+    "before": "Before which event?",
+    "after": "After which event?",
+    "needsOther": "Something else the child may need",
+    "linkFocus": "Linked to a Current Focus",
+    "whatChanged": "What changed?",
+    "documentation": "Documentation"
+  },
+  "view": {
+    "areas": "Areas",
+    "earlier": "Written before the stepper",
+    "edited": "Edited",
+    "versions": "Earlier versions"
   },
   "save": "Save observation",
   "saved": "Observation saved",

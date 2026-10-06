@@ -45,7 +45,7 @@ The Logos asset group (`assets/Logos/README.md`) holds five transparent PNGs:
 
 ### The block tower is not the logo
 
-The block tower (a blue arch with a sunflower ball and a berry cube) was the first brand mark. It is retired as the logo and survives only as play: the present-mode finish motif that the FinishScreen builds for a child at the end of a game. Never use it as the logo, an app icon or a favicon. `assets/Icons/brand-mark.svg` is kept as a legacy record of it and is not part of the icon set.
+The block tower (a `brand` arch with a sunflower ball and a berry cube) was the first brand mark. It is retired as the logo and survives only as play: the present-mode finish motif that the FinishScreen builds for a child at the end of a game. Never use it as the logo, an app icon or a favicon. `assets/Icons/brand-mark.svg` is kept as a legacy record of it and is not part of the icon set.
 
 ## Content fundamentals
 
@@ -105,7 +105,7 @@ Colour works on three layers, and each layer has one job.
 About 80% of every teacher screen is ground, surface and ink, so a long list reads like plain text.
 
 - Set the page on `ground`. Put cards, inputs and the bottom bar on `surface`, always with a 1px `line` border. Put dialogs, sheets and menus on `surface-raised`. Recess wells, tracks, the search field and avatars into `tray`.
-- Set primary text and every icon outline in `ink`; secondary text (ages, dates, helper text, counts, inactive nav) in `ink-muted`. Both read on `ground`, `surface`, `surface-raised`, `tray`, `brand-soft` and every `-soft` tint in both themes (lowest 5.02:1).
+- Set primary text and every icon outline in `ink`; secondary text (ages, dates, helper text, counts, inactive nav) in `ink-muted`. Both read on `ground`, `surface`, `surface-raised`, `tray`, `brand-soft`, `accent-soft` and every `-soft` tint in both themes (lowest 5.02:1).
 - Use `line` only as decoration (card edges, dividers). Every control boundary is `line-strong`, which holds at least 3:1 on every ground.
 
 ### 2. Tints: meaning
@@ -114,7 +114,7 @@ Each profile meaning has a pastel `-soft` fill and a dark `-ink`, and is always 
 
 | Meaning | Tint / ink | Paint in its icon | Icon | Word always shown |
 |---|---|---|---|---|
-| Act, "you are here" | `brand-soft` / `brand` | `brand` | the active nav icon | the button or nav label |
+| Act, "you are here" | `brand-soft` / `brand` | `accent` (the logo teal) | the active nav icon | the button or nav label |
 | Strengths | `strength-soft` / `strength-ink` | `paint-sun` | `strengths` (gold star) | Strengths |
 | Interests | `interest-soft` / `interest-ink` | `paint-berry` | `interests` (heart) or the option emoji | Interests |
 | What helps | `helps-soft` / `helps-ink` | `paint-leaf` | `what-helps` (ticked block) | What helps |
@@ -123,7 +123,7 @@ Each profile meaning has a pastel `-soft` fill and a dark `-ink`, and is always 
 | Content, play, everyday | `tray` | `paint-sky` | the content-type icons | the type name |
 | System error only | `surface` + `danger` border | none | the lucide CircleAlert glyph | the error sentence |
 
-- Keep labels on tints in `ink`. Tone inks are for 2px selected borders, single-select fills (with `on-brand`), numeral blocks and short tone words. The one coloured-text-on-tint pair is `brand` on `brand-soft` (5.16:1 light, 5.89:1 dark).
+- Keep labels on tints in `ink`. Tone inks are for 2px selected borders, single-select fills (with `on-brand`), numeral blocks and short tone words. The coloured-text-on-tint pairs are `brand` on `brand-soft` (8.44:1 light, 6.12:1 dark) and its teal twin, `accent-strong` on `accent-soft` (5.29:1 light, 8.03:1 dark).
 - Use attention (tangerine) for "keep an eye on", needs and sensitivities. Never use red, or an X, for anything about a child. `danger` is only for system errors and delete confirms, and there is no `danger-soft`: an error alert is `surface` with a `danger` border.
 - `success` is an alias of `helps-ink` and `warning` an alias of `attention-ink`. Show success as text or a border on `surface`, always with a check and a word, never on a `helps-soft` fill.
 - Never colour-code the support scale or feedback outcomes by level. Every option gets the same neutral selection.
@@ -136,18 +136,23 @@ Each profile meaning has a pastel `-soft` fill and a dark `-ink`, and is always 
 - Put any glyph or label on paint in `on-paint` (graphite in both themes, 4.56:1 or better on every paint).
 - Never use paint as text, as a large background, or as a chip fill on teacher screens.
 - `paint-sky` is the non-meaning paint for everyday things: content types, the observation bead, the info toast.
+- `paint-sky`, `paint-leaf` and `paint-tangerine` are the logo's sky, green and star orange; `paint-sun`, `paint-berry` and `paint-grape` complete the block set.
 - In present mode, paints are pure play colours with no meaning, because no meaning chip, icon or word appears there.
 
-### Action and focus
+### Action and focus: the logo's navy and teal
+
+The two accents come straight from the wordmark: navy "Kid" is `brand`, teal "Sphere" is `accent`. Navy acts; teal is the second voice, used sparingly.
 
 - Fill the one primary action per view with `brand` and label it `on-brand`; hover and press go to `brand-strong`.
 - `on-brand` is white in light and near-black in dark: never hard-code white on `brand`.
 - Use `brand-soft` for the active nav pill, soft buttons, info alerts, and the selected fill of neutral choices.
-- Keyboard focus is always `ring` (see States).
+- Navy text is close to graphite `ink` (1.44:1), so a link inside running text is always underlined, and an active nav icon is coloured in with `accent`, never `brand`.
+- Use `accent` only as a fill: the paint of the active nav icon and, when a second highlight helps, a teal block labelled `on-accent` (graphite in both themes; never white, which is 3.26:1 on the logo teal). Teal text and borders use `accent-strong`; the teal tint is `accent-soft`. Teal never carries a profile meaning and never marks selection.
+- Keyboard focus is always `ring`, the `accent-strong` teal, so a focused control never looks like a navy selected one (see States).
 
 ### Dark theme
 
-The dark theme is a warm walnut night playroom, not a navy-grey. The token names are the same; the tints darken, the inks lighten, and the paints stay saturated (5.42 to 9.87:1 against dark `surface`), so the kid colour survives at night. Depth comes from the 1px `line` border (2.05:1 on `ground`) and the surface steps, not from shadows.
+The dark theme is a warm walnut night playroom, not a navy-grey. The token names are the same; the tints darken, the inks lighten, `brand` and `accent` become a pale navy-blue and a bright teal with near-black or graphite labels, and the paints stay saturated (5.42 to 9.87:1 against dark `surface`), so the kid colour survives at night. Depth comes from the 1px `line` border (2.05:1 on `ground`) and the surface steps, not from shadows.
 
 Fills are flat in both themes: no gradients, glows, glassmorphism or backdrop blur. The top bar is solid `ground`. The only blend in the system is the globe inside the logo, which is artwork, never a fill to copy.
 
@@ -248,7 +253,7 @@ Under `prefers-reduced-motion: reduce`, remove every translate, scale and rotate
 | Loading | A spinner replaces the icon, the label stays, `aria-busy` |
 | Invalid | 2px `danger` border and a `caption` message in `danger` with a CircleAlert glyph |
 
-`ring` measures 6.19:1 or better on every ground and on `brand-soft` in both themes. Never remove an outline. The one exception is the toast: its fill is `ink`, so the focus ring on its buttons is `ground` (14.60:1 light, 16.13:1 dark).
+`ring` is the `accent-strong` teal (`#006E73` light, `#7EDDE1` dark) and measures 4.01:1 or better on every ground and every tint in both themes (the lowest is `focus-soft` in light). Never remove an outline. The one exception is the toast: its fill is `ink`, so the focus ring on its buttons is `ground` (14.60:1 light, 16.13:1 dark).
 
 ## Right-to-left
 
@@ -265,10 +270,10 @@ Under `prefers-reduced-motion: reduce`, remove every translate, scale and rotate
 KidSphere draws its own icons: 27 painted block glyphs, made only from blocks, balls, roofs and arches on a 24px grid. Each has a 2px `ink` outline with round caps and joins, and exactly one primitive painted in its meaning paint. The paint slips 1.5 units downward (1.5px at 24px, none at 16px), like a hand-painted block. The full set, its construction and per-icon notes are in the Iconography section and the Icons asset group (`assets/Icons/README.md`). The logo is artwork, not one of these icons: see Logo.
 
 - **Meaning icons** (`strengths`, `interests`, `what-helps`, `current-focus`, `attention`, `strength-builder`, `growth-support`) always carry their meaning paint. Content and play icons carry `paint-sky`. The three feedback towers share one `paint-sun` ball.
-- **Nav icons** are outline-only in `ink-muted` when inactive, and get their `brand` paint when active. At 48px and up (empty states) they take `paint-sky`.
+- **Nav icons** are outline-only in `ink-muted` when inactive, and get their `accent` paint (the logo teal) when active; a navy `brand` paint would vanish against the graphite outline. At 48px and up (empty states) they take `paint-sky`.
 - **On a solid fill** (the primary button, the Observe block, a single-select chip) draw the icon in one colour, `on-brand`; on a paint fill, `on-paint`.
 - **Sizes:** 16 in chips and badges, 20 in buttons, tiles and alerts, 24 in nav, 28 in the Observe block and content tiles, 40 in feedback and picker tiles, 48 to 96 in empty states and present mode.
-- **Files:** `assets/Icons/<name>.svg` are baked with the light values (outline `#1F2233`, light paints, nav icons in their active state) because `<img>` cannot inherit colour, and `assets/Icons/dark/<name>.svg` with the dark values (outline `#F3EEE6`, dark paints). Place both and let the theme show one; never filter a light file to fake the dark theme. In the app, render them inline with `stroke: var(--ink)` and `fill: var(--paint-…)` so they follow the theme, and mark them `aria-hidden`: the word next to them is the label.
+- **Files:** `assets/Icons/<name>.svg` are baked with the light values (outline `#1F2233`, light paints, nav icons in their active state with the `accent` paint) because `<img>` cannot inherit colour, and `assets/Icons/dark/<name>.svg` with the dark values (outline `#F3EEE6`, dark paints). Place both and let the theme show one; never filter a light file to fake the dark theme. In the app, render them inline with `stroke: var(--ink)` and `fill: var(--paint-…)` so they follow the theme, and mark them `aria-hidden`: the word next to them is the label.
 - **Utility glyphs** stay lucide at stroke 2 with round caps and joins: chevrons, X, Search, More, Pencil, Trash2, Check, Calendar, Mic, Menu, LogOut, RotateCcw, CircleAlert, Info, Languages and Loader2. Never use lucide for a concept the custom set covers.
 - **Emoji** are content. They sit in a 24px `surface` pod on chips, and in a 64 to 88px pod on kid picture blocks. An emoji and a custom icon never share a slot.
 
@@ -299,7 +304,7 @@ KidSphere is phone-first: teachers carry it around the room.
 | Do | Don't |
 |---|---|
 | Pair every tone with its icon and its word | Use colour alone for meaning, selection or status |
-| Keep labels on tints in `ink` | Put tone-coloured text on tints (only `brand` on `brand-soft` is allowed) |
+| Keep labels on tints in `ink` | Put tone-coloured text on tints (only `brand` on `brand-soft` and `accent-strong` on `accent-soft` are allowed) |
 | Use attention (tangerine) for needs and sensitivities | Use red, or an X, for anything about a child |
 | Keep the support scale and feedback neutral | Colour-code levels or outcomes like a traffic light |
 | Keep paint inside outlined icons, picture blocks, stickers, the finish tower and empty-state scenes | Use paint as text, as a large background, or as a chip fill on teacher screens |
@@ -308,7 +313,7 @@ KidSphere is phone-first: teachers carry it around the room.
 | Use logical properties and `scaleX(-1)` for mirrored icons | Use physical margins, padding or radii, or `rotate(180deg)` to mirror |
 | Give every control the 3px `ring` at a 2px offset | Remove outlines, or let the ring sit on the control's own fill |
 | Keep avatars neutral: `tray` with `ink` initials, or a photo | Hash avatar colours from the meaning tints |
-| Use one decorative block cluster per screen at most | Use gradients, glows, glassmorphism, backdrop blur, accent side borders, or Inter or Roboto |
+| Use one decorative block cluster per screen at most | Use gradients, glows, glassmorphism, backdrop blur, coloured side-stripe borders, or Inter or Roboto |
 | Keep motion short, once-only, and static under reduced motion | Use idle, looping or bouncing animation on teacher screens |
 | Celebrate the child with a tower and a sticker | Show points, counts of stars, scores, percentages or progress bars |
 | Use the logo files as drawn, with clear space, on plain `ground` or `surface` | Recolour, stretch, rotate, mirror or rebuild the logo, put it on busy paint, or use the block tower as the logo |

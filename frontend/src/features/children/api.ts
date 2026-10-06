@@ -9,6 +9,10 @@ export const MAX_PHOTO_BYTES = 8 * 1024 * 1024;
 export const PHOTO_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
 export const childUrl = (id: string) => `/api/children/${encodeURIComponent(id)}`;
+/** GET: both perspectives, the merged lists (with provenance[]) and the section statuses (staff). */
+export const profileUrl = (id: string) => `${childUrl(id)}/profile`;
+/** GET: the current teacher observation cycle and the earlier ones (WP2-TO). */
+export const assessmentsUrl = (id: string) => `${childUrl(id)}/teacher-assessments`;
 
 /** The photo endpoint; `version` (e.g. updated_at) changes the URL after an upload. */
 export function photoUrl(id: string, version?: string | null): string {

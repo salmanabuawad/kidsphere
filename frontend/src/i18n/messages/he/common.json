@@ -62,5 +62,25 @@
   },
   "minutes_one": "דקה",
   "minutes_two": "שתי דקות",
-  "minutes_other": "{count} דקות"
+  "minutes_other": "{count} דקות",
+  "sectionStatus": {
+    "label": "סטטוס החלק",
+    "not_started": "טרם התחיל",
+    "in_progress": "בתהליך",
+    "sufficient": "תצפית מספקת",
+    "sufficientAnswers": "מספיק לעת עתה",
+    "review_later": "לחזור לזה בהמשך"
+  },
+  "provenance": {
+    "label": "מקור",
+    "parent_said": "ההורים סיפרו",
+    "teacher_observed": "תצפית הגננת",
+    "ai_suggested": "הצעת בינה מלאכותית",
+    "teacher_approved": "אושר על ידי הגננת",
+    "enteredBy": "הוזן על ידי {name}",
+    "enteredByOn": "הוזן על ידי {name} בתאריך {date}",
+    "inMeeting": "בפגישה עם המשפחה"
+  },
+  "notAnswered": "לא נענה",
+  "notObserved": "טרם נצפה"
 }

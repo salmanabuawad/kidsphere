@@ -82,3 +82,68 @@ def test_understanding_has_no_child_facing_fields_but_clinical_still_checked():
     assert child_facing_fields("understanding") == set()
     assert check_content({"summary": "may need support"}, set()) == []
     assert check_content({"summary": "looks like a disorder"}, set())
+
+
+# --------------------------------------------------------------------------- AI output rules (X-30)
+
+
+@pytest.mark.parametrize("text", [
+    "We recommend a referral to a specialist.",
+    "Consider a specialist evaluation.",
+    "מומלץ על הפניה לגורם מקצועי",
+    "כדאי להפנות את הילד",
+    "نوصي بإحالة الطفل",
+    "ينصح بتحويله إلى أخصائي",
+])
+def test_referral_wording_is_banned_in_ai_output_only(text):
+    assert find_unsafe_text(text, child_facing=False, ai=True)
+    # Teacher input is never checked against ai_only: the teacher may choose referral_as_needed.
+    assert find_unsafe_text(text, child_facing=False) == []
+
+
+def test_prefer_and_preferences_are_not_referral_wording():
+    assert find_unsafe_text("Adam prefers blocks; his preferences are clear.", child_facing=False, ai=True) == []
+
+
+@pytest.mark.parametrize("term", ["weakness", "failure", "ضعيف", "חולשה"])
+def test_deficit_terms_are_banned_in_teacher_facing_ai_text(term):
+    data = story(teacher_note=f"Notice the {term} here.")
+    assert check_content(data, STORY_FIELDS) == []  # a teacher's own note
+    issues = check_content(data, STORY_FIELDS, ai=True)
+    assert issues and issues[0].startswith("teacher_note:")
+
+
+def test_percentages_are_banned_in_teacher_facing_ai_text():
+    assert find_unsafe_text("Joined in 80% of the time", child_facing=False, ai=True)
+    assert find_unsafe_text("Joined in 80% of the time", child_facing=False) == []
+
+
+def test_ai_rules_keep_the_disclaimer_and_allow_phrases():
+    assert find_unsafe_text("Problem solving with blocks.", child_facing=False, ai=True) == []
+    assert find_unsafe_text("نقاط القوة عند الطفل", child_facing=False, ai=True) == []
+
+
+@pytest.mark.parametrize("text", [
+    # The teacher-only involvement_steps.referral_as_needed labels (OQ-2, X-30).
+    "Involve a specialist if needed",
+    "שיתוף גורם מקצועי לפי הצורך",
+    "إشراك مختص عند الحاجة",
+    # Suggesting a professional in other words.
+    "Consider a speech therapist",
+    "consult a psychologist",
+    "Occupational therapy may help",
+    "כדאי לפנות לקלינאית תקשורת",
+    "يُنصح بأخصائي نطق",
+])
+def test_involving_a_professional_is_banned_in_ai_output_only(text):
+    from app.ai.safety import text_issues
+
+    assert text_issues(text, False, ai=True)
+    assert text_issues(text, False, ai=False) == []
+
+
+@pytest.mark.parametrize("text", ["وصف مختصر", "המטפלת בגן עזרה לו"])
+def test_short_summary_and_caregiver_are_not_professional_wording(text):
+    from app.ai.safety import text_issues
+
+    assert text_issues(text, False, ai=True) == []

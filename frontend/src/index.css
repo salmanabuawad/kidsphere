@@ -19,6 +19,10 @@
  *      blocks, stickers, the present-mode finish tower and empty-state scenes. Never text,
  *      never a big fill. (The logo is artwork with its own inks: components/brand/Logo.tsx.)
  *
+ * The accents come from the logo (2026-10-06): `brand` is its navy "Kid" (act, you-are-here),
+ * `accent` its teal "Sphere", used sparingly (the active nav icon's paint; `ring` is the
+ * accent-strong teal), and paint-sky / paint-leaf / paint-tangerine are its sky, green and star.
+ *
  * Light values on :root; dark values ("walnut night playroom") under prefers-color-scheme
  * unless <html data-theme="light">, and under <html data-theme="dark">.
  * Layout uses logical properties only (ms/me/ps/pe/start/end), so RTL is native.
@@ -34,10 +38,14 @@
   --line-strong: #8a7e6c;
   --ink: #1f2233;
   --ink-muted: #57525f;
-  --brand: #005dbd;
-  --brand-strong: #004a9c;
-  --brand-soft: #d1ebff;
+  --brand: #0d3d72;
+  --brand-strong: #032b56;
+  --brand-soft: #d4e4fa;
   --on-brand: #ffffff;
+  --accent: #0a9ea3;
+  --accent-strong: #006e73;
+  --accent-soft: #b8fcff;
+  --on-accent: #1f2233;
   --strength-soft: #fbe794;
   --strength-ink: #735603;
   --interest-soft: #ffc9d5;
@@ -49,13 +57,13 @@
   --attention-soft: #ffd1aa;
   --attention-ink: #984500;
   --danger: #be2323;
-  --ring: #004fb1;
+  --ring: #006e73;
   --paint-sun: #fdc010;
   --paint-berry: #ee4e89;
-  --paint-leaf: #4db956;
+  --paint-leaf: #4cc2a6;
   --paint-grape: #bc6ece;
-  --paint-tangerine: #fa8927;
-  --paint-sky: #33a7e0;
+  --paint-tangerine: #f99e3a;
+  --paint-sky: #44c2f2;
   --on-paint: #1f2233;
   /* Aliases (tokens.json writes them as "{helps-ink}" and "{attention-ink}"). */
   --success: var(--helps-ink);
@@ -64,8 +72,8 @@
   /* Hard "block lips"; blur only on sheets. */
   --lip: 0 2px 0 0 rgb(31 34 51 / 0.14);
   --lip-lg: 0 4px 0 0 rgb(31 34 51 / 0.18);
-  --lip-brand: 0 3px 0 0 #033b7a;
-  --lip-brand-pressed: 0 1px 0 0 #033b7a;
+  --lip-brand: 0 3px 0 0 #011a3a;
+  --lip-brand-pressed: 0 1px 0 0 #011a3a;
   --sheet: 0 12px 32px -12px rgb(31 34 51 / 0.3), 0 -6px 20px -14px rgb(31 34 51 / 0.2);
   --backdrop: rgb(31 34 51 / 0.45);
 
@@ -90,10 +98,14 @@
     --line-strong: #8f847a;
     --ink: #f3eee6;
     --ink-muted: #c0b8ad;
-    --brand: #8cb4fe;
-    --brand-strong: #aecbff;
-    --brand-soft: #1f3559;
+    --brand: #90baf1;
+    --brand-strong: #b5d4fc;
+    --brand-soft: #1a3658;
     --on-brand: #0c121a;
+    --accent: #35b9be;
+    --accent-strong: #7edde1;
+    --accent-soft: #003940;
+    --on-accent: #1f2233;
     --strength-soft: #433706;
     --strength-ink: #f7d471;
     --interest-soft: #4c222d;
@@ -105,19 +117,19 @@
     --attention-soft: #4e270c;
     --attention-ink: #fab27b;
     --danger: #f47c6b;
-    --ring: #98c7ff;
+    --ring: #7edde1;
     --paint-sun: #f9c635;
     --paint-berry: #f56696;
-    --paint-leaf: #61c568;
+    --paint-leaf: #5fceb3;
     --paint-grape: #c77dd8;
-    --paint-tangerine: #fa9947;
-    --paint-sky: #43b5e8;
+    --paint-tangerine: #fca953;
+    --paint-sky: #5dcdfa;
     --on-paint: #1f2233;
 
     --lip: 0 2px 0 0 rgb(0 0 0 / 0.55);
     --lip-lg: 0 4px 0 0 rgb(0 0 0 / 0.6);
-    --lip-brand: 0 3px 0 0 #4d70b2;
-    --lip-brand-pressed: 0 1px 0 0 #4d70b2;
+    --lip-brand: 0 3px 0 0 #4c73a5;
+    --lip-brand-pressed: 0 1px 0 0 #4c73a5;
     --sheet: 0 12px 32px -12px rgb(0 0 0 / 0.7), 0 -6px 20px -14px rgb(0 0 0 / 0.5);
     --backdrop: rgb(0 0 0 / 0.6);
 
@@ -181,10 +193,14 @@
   --line-strong: #8f847a;
   --ink: #f3eee6;
   --ink-muted: #c0b8ad;
-  --brand: #8cb4fe;
-  --brand-strong: #aecbff;
-  --brand-soft: #1f3559;
+  --brand: #90baf1;
+  --brand-strong: #b5d4fc;
+  --brand-soft: #1a3658;
   --on-brand: #0c121a;
+  --accent: #35b9be;
+  --accent-strong: #7edde1;
+  --accent-soft: #003940;
+  --on-accent: #1f2233;
   --strength-soft: #433706;
   --strength-ink: #f7d471;
   --interest-soft: #4c222d;
@@ -196,19 +212,19 @@
   --attention-soft: #4e270c;
   --attention-ink: #fab27b;
   --danger: #f47c6b;
-  --ring: #98c7ff;
+  --ring: #7edde1;
   --paint-sun: #f9c635;
   --paint-berry: #f56696;
-  --paint-leaf: #61c568;
+  --paint-leaf: #5fceb3;
   --paint-grape: #c77dd8;
-  --paint-tangerine: #fa9947;
-  --paint-sky: #43b5e8;
+  --paint-tangerine: #fca953;
+  --paint-sky: #5dcdfa;
   --on-paint: #1f2233;
 
   --lip: 0 2px 0 0 rgb(0 0 0 / 0.55);
   --lip-lg: 0 4px 0 0 rgb(0 0 0 / 0.6);
-  --lip-brand: 0 3px 0 0 #4d70b2;
-  --lip-brand-pressed: 0 1px 0 0 #4d70b2;
+  --lip-brand: 0 3px 0 0 #4c73a5;
+  --lip-brand-pressed: 0 1px 0 0 #4c73a5;
   --sheet: 0 12px 32px -12px rgb(0 0 0 / 0.7), 0 -6px 20px -14px rgb(0 0 0 / 0.5);
   --backdrop: rgb(0 0 0 / 0.6);
 
@@ -254,7 +270,7 @@
   --color-rose-700: var(--danger);
 }
 
-/* Colour utilities: bg-ground, bg-surface, text-ink-muted, border-line-strong, bg-paint-sun, outline-ring... */
+/* Colour utilities: bg-ground, bg-surface, text-ink-muted, border-line-strong, bg-paint-sun, fill-accent, outline-ring... */
 @theme inline {
   --color-ground: var(--ground);
   --color-surface: var(--surface);
@@ -268,6 +284,10 @@
   --color-brand-strong: var(--brand-strong);
   --color-brand-soft: var(--brand-soft);
   --color-on-brand: var(--on-brand);
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
+  --color-accent-soft: var(--accent-soft);
+  --color-on-accent: var(--on-accent);
   --color-strength-soft: var(--strength-soft);
   --color-strength-ink: var(--strength-ink);
   --color-interest-soft: var(--interest-soft);

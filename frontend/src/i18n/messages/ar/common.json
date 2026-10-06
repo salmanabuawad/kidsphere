@@ -71,5 +71,25 @@
   "minutes_two": "دقيقتان",
   "minutes_few": "{count} دقائق",
   "minutes_many": "{count} دقيقة",
-  "minutes_other": "{count} دقيقة"
+  "minutes_other": "{count} دقيقة",
+  "sectionStatus": {
+    "label": "حالة القسم",
+    "not_started": "لم يبدأ بعد",
+    "in_progress": "قيد العمل",
+    "sufficient": "ملاحظة كافية",
+    "sufficientAnswers": "كافٍ حاليًا",
+    "review_later": "للمراجعة لاحقًا"
+  },
+  "provenance": {
+    "label": "المصدر",
+    "parent_said": "قال الأهل",
+    "teacher_observed": "ملاحظة المعلّمة",
+    "ai_suggested": "اقتراح الذكاء الاصطناعي",
+    "teacher_approved": "اعتمدته المعلّمة",
+    "enteredBy": "أُدخل بواسطة {name}",
+    "enteredByOn": "أُدخل بواسطة {name} في {date}",
+    "inMeeting": "في لقاء مع العائلة"
+  },
+  "notAnswered": "لم تتم الإجابة",
+  "notObserved": "لم يُلاحَظ بعد"
 }

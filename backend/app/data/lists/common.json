@@ -1,0 +1,54 @@
+{
+  "lists": {
+    "section_statuses": [
+      {"key": "not_started", "label": {"en": "Not started", "ar": "لم يبدأ بعد", "he": "טרם התחיל"}, "short": {"en": "Not started", "ar": "لم يبدأ", "he": "טרם התחיל"}},
+      {"key": "in_progress", "label": {"en": "In progress", "ar": "قيد العمل", "he": "בתהליך"}, "short": {"en": "In progress", "ar": "قيد العمل", "he": "בתהליך"}},
+      {"key": "sufficient", "label": {"en": "Sufficient observation", "ar": "ملاحظة كافية", "he": "תצפית מספקת"}, "short": {"en": "Enough for now", "ar": "كافٍ حالياً", "he": "מספיק לעת עתה"}},
+      {"key": "review_later", "label": {"en": "Review later", "ar": "للمراجعة لاحقاً", "he": "לחזור לזה בהמשך"}, "short": {"en": "Later", "ar": "لاحقاً", "he": "בהמשך"}}
+    ],
+    "provenance": [
+      {"key": "parent_said", "icon": "🏠", "label": {"en": "Parent said", "ar": "قال الأهل", "he": "ההורים סיפרו"}},
+      {"key": "teacher_observed", "icon": "👀", "label": {"en": "Teacher observed", "ar": "ملاحظة المعلّمة", "he": "תצפית הגננת"}},
+      {"key": "ai_suggested", "icon": "✨", "label": {"en": "AI suggested", "ar": "اقتراح الذكاء الاصطناعي", "he": "הצעת בינה מלאכותית"}},
+      {"key": "teacher_approved", "icon": "✅", "label": {"en": "Teacher approved", "ar": "اعتمدته المعلّمة", "he": "אושר על ידי הגננת"}}
+    ],
+    "ai_domains": [
+      {"key": "emotional", "icon": "💛", "label": {"en": "Emotional", "ar": "الجانب العاطفي", "he": "רגשי"}},
+      {"key": "social", "icon": "🤝", "label": {"en": "Social", "ar": "الجانب الاجتماعي", "he": "חברתי"}},
+      {"key": "communication", "icon": "💬", "label": {"en": "Communication", "ar": "التواصل", "he": "תקשורת"}},
+      {"key": "language", "icon": "🗣️", "label": {"en": "Language", "ar": "اللغة", "he": "שפה"}},
+      {"key": "executive_function", "icon": "🎯", "label": {"en": "Focus, persistence & organizing", "ar": "التركيز والمثابرة والتنظيم", "he": "ריכוז, התמדה וארגון"}},
+      {"key": "play", "icon": "🧸", "label": {"en": "Play", "ar": "اللعب", "he": "משחק"}},
+      {"key": "gross_motor", "icon": "🤸", "label": {"en": "Gross motor", "ar": "المهارات الحركية الكبرى", "he": "מוטוריקה גסה"}},
+      {"key": "fine_motor", "icon": "✏️", "label": {"en": "Fine motor & drawing skills", "ar": "المهارات الحركية الدقيقة والرسم", "he": "מוטוריקה עדינה וציור"}},
+      {"key": "independence", "icon": "🧭", "label": {"en": "Independence", "ar": "الاستقلالية", "he": "עצמאות"}},
+      {"key": "sensory", "icon": "🌤️", "label": {"en": "Things in the environment that may affect the child", "ar": "أشياء في البيئة قد تؤثر على الطفل", "he": "דברים בסביבה שעשויים להשפיע על הילד/ה"}, "short": {"en": "The environment", "ar": "البيئة", "he": "הסביבה"}},
+      {"key": "cognitive", "icon": "🧩", "label": {"en": "Learning & thinking", "ar": "التعلّم والتفكير", "he": "למידה וחשיבה"}},
+      {"key": "daily_routine", "icon": "🕘", "label": {"en": "Participation through the day", "ar": "المشاركة خلال اليوم", "he": "השתלבות בסדר היום"}, "short": {"en": "Through the day", "ar": "خلال اليوم", "he": "במהלך היום"}}
+    ],
+    "observation_domains": [
+      {"key": "emotional", "icon": "💛", "label": {"en": "Emotional", "ar": "الجانب العاطفي", "he": "רגשי"}},
+      {"key": "social", "icon": "🤝", "label": {"en": "Social", "ar": "الجانب الاجتماعي", "he": "חברתי"}},
+      {"key": "language", "icon": "🗣️", "label": {"en": "Language & communication", "ar": "اللغة والتواصل", "he": "שפה ותקשורת"}},
+      {"key": "executive_function", "icon": "🎯", "label": {"en": "Focus, persistence & organizing", "ar": "التركيز والمثابرة والتنظيم", "he": "ריכוז, התמדה וארגון"}},
+      {"key": "play", "icon": "🧸", "label": {"en": "Play", "ar": "اللعب", "he": "משחק"}},
+      {"key": "gross_motor", "icon": "🤸", "label": {"en": "Gross motor", "ar": "المهارات الحركية الكبرى", "he": "מוטוריקה גסה"}},
+      {"key": "fine_motor", "icon": "✏️", "label": {"en": "Fine motor & drawing skills", "ar": "المهارات الحركية الدقيقة والرسم", "he": "מוטוריקה עדינה וציור"}},
+      {"key": "independence", "icon": "🧭", "label": {"en": "Independence & everyday routines", "ar": "الاستقلالية والمهام اليومية", "he": "עצמאות ושגרת יום־יום"}},
+      {"key": "sensory", "icon": "🌤️", "label": {"en": "Things in the environment that may affect the child", "ar": "أشياء في البيئة قد تؤثر على الطفل", "he": "דברים בסביבה שעשויים להשפיע על הילד/ה"}, "short": {"en": "The environment", "ar": "البيئة", "he": "הסביבה"}},
+      {"key": "cognitive", "icon": "🧩", "label": {"en": "Learning & thinking", "ar": "التعلّم والتفكير", "he": "למידה וחשיבה"}},
+      {"key": "daily_routine", "icon": "🕘", "label": {"en": "Participation through the day", "ar": "المشاركة خلال اليوم", "he": "השתלבות בסדר היום"}, "short": {"en": "Through the day", "ar": "خلال اليوم", "he": "במהלך היום"}},
+      {"key": "strengths", "icon": "⭐", "label": {"en": "Strengths", "ar": "نقاط القوة", "he": "חוזקות"}},
+      {"key": "priority_needs", "icon": "🌱", "label": {"en": "Where to focus next", "ar": "أين نركّز لاحقاً", "he": "במה נתמקד בהמשך"}}
+    ],
+    "yes_no": [
+      {"key": "yes", "label": {"en": "Yes", "ar": "نعم", "he": "כן"}},
+      {"key": "no", "label": {"en": "No", "ar": "لا", "he": "לא"}}
+    ],
+    "yes_no_sometimes": [
+      {"key": "yes", "label": {"en": "Yes", "ar": "نعم", "he": "כן"}},
+      {"key": "no", "label": {"en": "No", "ar": "لا", "he": "לא"}},
+      {"key": "sometimes", "label": {"en": "Sometimes", "ar": "أحياناً", "he": "לפעמים"}}
+    ]
+  }
+}

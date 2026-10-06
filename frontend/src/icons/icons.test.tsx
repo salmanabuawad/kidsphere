@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { render } from "@testing-library/react";
 import { createRef, type ReactElement } from "react";
 import type { LucideIcon } from "lucide-react";
@@ -11,8 +13,10 @@ import {
   StoryIcon,
   StrengthsIcon,
   WhatHelpsIcon,
+  PAINTS,
   iconDefs,
   kidIcons,
+  type KidIconDef,
   type KidIconName,
 } from "@/icons";
 
@@ -51,6 +55,9 @@ const SPEC_NAMES: KidIconName[] = [
   "arrow-next",
 ];
 
+/** Spec 5.4: the nav icons, coloured in with the accent when active. */
+const NAV: KidIconName[] = ["children", "observe-add", "timeline", "development", "content", "account", "users", "classes", "parent-home"];
+
 /** Spec 5.3: these flip under RTL; the star, heart, check, play triangle and lens never do. */
 const MIRRORED: KidIconName[] = ["timeline", "development", "story", "current-focus", "note-quote", "partly", "did-not-work", "arrow-next"];
 
@@ -87,13 +94,29 @@ describe("KidSphere icon set", () => {
     const paint = svg.querySelector("g[stroke='none']") as SVGGElement;
     expect(paint).not.toBeNull();
     expect(svg.firstElementChild).toBe(paint);
-    expect(paint.style.fill).toBe("var(--icon-paint, var(--paint-sky, #33A7E0))");
+    expect(paint.style.fill).toBe("var(--icon-paint, var(--paint-sky, #44C2F2))");
     expect(paint.getAttribute("transform")).toBe("translate(0 1.5)");
 
     const star = svgOf(<StrengthsIcon />).querySelector("g[stroke='none']") as SVGGElement;
     expect(star.style.fill).toBe("var(--icon-paint, var(--paint-sun, #FDC010))");
+    // Nav icons are coloured in with the logo teal: a navy brand paint would vanish against the graphite outline.
     const nav = svgOf(<ChildrenIcon />).querySelector("g[stroke='none']") as SVGGElement;
-    expect(nav.style.fill).toBe("var(--icon-paint, var(--brand, #005DBD))");
+    expect(nav.style.fill).toBe("var(--icon-paint, var(--accent, #0A9EA3))");
+  });
+
+  it("paints every nav icon with the accent by default", () => {
+    for (const name of NAV) expect((iconDefs[name] as KidIconDef).paint, name).toBe("accent");
+  });
+
+  it("keeps each paint fallback equal to the light token in index.css", () => {
+    const css = readFileSync(resolve(process.cwd(), "src/index.css"), "utf8");
+    const root = css.slice(css.indexOf("\n:root {"), css.indexOf("\n}", css.indexOf("\n:root {")));
+    for (const [key, value] of Object.entries(PAINTS)) {
+      const [, token, fallback] = /^var\(--([\w-]+), (#[0-9A-F]{6})\)$/.exec(value) ?? [];
+      expect(token, key).toBeTruthy();
+      const declared = new RegExp(`--${token}: (#[0-9a-f]{6});`).exec(root)?.[1];
+      expect(declared?.toUpperCase(), `--${token}`).toBe(fallback);
+    }
   });
 
   it("supports outline-only, a custom paint, and no slip at small sizes", () => {

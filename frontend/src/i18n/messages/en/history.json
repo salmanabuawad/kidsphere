@@ -1,0 +1,65 @@
+{
+  "filters": {
+    "label": "Filters",
+    "toggle": "Filter",
+    "clear": "Clear filters",
+    "any": "All",
+    "from": "From",
+    "to": "To",
+    "fromDate": "From {date}",
+    "toDate": "Until {date}",
+    "focus": "Focus",
+    "domain": "Domain",
+    "context": "Situation",
+    "source": "Kind",
+    "contentType": "Activity type",
+    "result": "How it went",
+    "remove": "Remove filter: {label}"
+  },
+  "sources": {
+    "quick": "Quick observation",
+    "content_feedback": "After an activity"
+  },
+  "observations": {
+    "title": "Observations",
+    "intro": "Quick and structured observations, newest first. Each one keeps its earlier versions.",
+    "add": "Add observation",
+    "empty": "No observations yet",
+    "emptyHint": "Add the first one after today's activities.",
+    "emptyFiltered": "No observations match these filters",
+    "loadOlder": "Load older",
+    "edited": "Edited",
+    "structured": "Observe, understand, act",
+    "details": "Details",
+    "resultOnly": "Feedback without a note",
+    "after": "After “{title}”",
+    "focus": "Focus: {title}",
+    "timeline": "See the development timeline"
+  },
+  "detail": {
+    "title": "Observation",
+    "back": "All observations",
+    "notFound": "This observation could not be found.",
+    "whatISee": "What I saw",
+    "when": "When",
+    "whatNeeded": "What the child may need",
+    "whatWeDid": "What we did",
+    "didItChange": "Did anything change?",
+    "whatChanged": "What changed",
+    "documentation": "Notes and documentation",
+    "whatHelped": "What helped",
+    "note": "Note",
+    "changeValues": {
+      "yes": "Yes",
+      "partly": "Partly",
+      "no": "Not yet"
+    },
+    "versions": "Earlier versions",
+    "versionsHint": "Observations are never overwritten: every edit is kept.",
+    "noVersions": "This observation has not been edited.",
+    "current": "Current version",
+    "first": "First version",
+    "savedBy": "{name} · {date}",
+    "empty": "No text in this version"
+  }
+}

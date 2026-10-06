@@ -9,7 +9,9 @@
  *  - `fill`: the ONE painted primitive, drawn under the outline (fill only).
  *  - `line`: the outline (stroke only). A third tuple item is a stroke-weight multiplier.
  *  - `ink`: small solid details in the outline colour (pupil, antenna balls).
- *  - `paint`: which paint token the `fill` uses by default.
+ *  - `paint`: which paint token the `fill` uses by default. Nav icons use `accent`, the
+ *    logo teal: the navy `brand` sits at 1.44:1 against the graphite outline, so a navy
+ *    paint would not read as "coloured in" (teal: 4.82:1).
  *  - `mirror`: flips under RTL (spec 5.3).
  *
  * The design-system SVGs (assets/Icons/*.svg) are exported from this same geometry. The set
@@ -19,7 +21,7 @@
 
 export type IconTag = "path" | "circle" | "rect" | "polygon";
 export type IconElement = readonly [tag: IconTag, attrs: Readonly<Record<string, string | number>>, weight?: number];
-export type PaintKey = "brand" | "sky" | "sun" | "berry" | "leaf" | "grape" | "tangerine";
+export type PaintKey = "brand" | "accent" | "sky" | "sun" | "berry" | "leaf" | "grape" | "tangerine";
 
 export interface KidIconDef {
   readonly paint?: PaintKey;
@@ -32,7 +34,7 @@ export interface KidIconDef {
 export const iconDefs = {
   /** Nav: Children (teacher home). Two block kids; paint on the smaller body. */
   children: {
-    paint: "brand",
+    paint: "accent",
     fill: [
       ["path", { d: "M13.39 15.98A4 4 0 0 1 20.5 18.5V20H13.5V17A5 5 0 0 0 13.39 15.98Z" }],
     ],
@@ -45,7 +47,7 @@ export const iconDefs = {
   },
   /** Centre action: Add observation. Lens with a bold plus; paint on the lens. */
   "observe-add": {
-    paint: "brand",
+    paint: "accent",
     fill: [
       ["circle", { cx: 10.5, cy: 10.5, r: 6.5 }],
     ],
@@ -57,7 +59,7 @@ export const iconDefs = {
   },
   /** Nav: Development timeline. Beads on a string (baseline, observation, activity result); paint on the newest bead. */
   timeline: {
-    paint: "brand",
+    paint: "accent",
     mirror: true,
     fill: [
       ["rect", { x: 16, y: 9.5, width: 5, height: 5, rx: 1.5 }],
@@ -71,7 +73,7 @@ export const iconDefs = {
   },
   /** Nav / button: View development. Block steps with a ball on the top step; paint on the ball. */
   development: {
-    paint: "brand",
+    paint: "accent",
     mirror: true,
     fill: [
       ["circle", { cx: 18, cy: 5.25, r: 2.25 }],
@@ -84,7 +86,7 @@ export const iconDefs = {
   },
   /** Nav: Content library / Create content. Open toy box; paint on the box. */
   content: {
-    paint: "brand",
+    paint: "accent",
     fill: [
       ["rect", { x: 3, y: 11, width: 18, height: 9.5, rx: 2.5 }],
     ],
@@ -97,7 +99,7 @@ export const iconDefs = {
   },
   /** Nav: My account. Name block with a head and shoulders; paint on the shoulders. */
   account: {
-    paint: "brand",
+    paint: "accent",
     fill: [
       ["path", { d: "M6.5 21V20A5.5 5.5 0 0 1 17.5 20V21Z" }],
     ],
@@ -109,7 +111,7 @@ export const iconDefs = {
   },
   /** Admin nav: Users. Two fanned ID cards; paint on the front card. */
   users: {
-    paint: "brand",
+    paint: "accent",
     fill: [
       ["rect", { x: 3, y: 6, width: 13, height: 16, rx: 2.5 }],
     ],
@@ -122,7 +124,7 @@ export const iconDefs = {
   },
   /** Admin nav: Classes. Kindergarten house; paint on the roof. */
   classes: {
-    paint: "brand",
+    paint: "accent",
     fill: [
       ["path", { d: "M3 11.5L12 3.5L21 11.5Z" }],
     ],
@@ -135,7 +137,7 @@ export const iconDefs = {
   },
   /** Parent nav: Home. House with a heart; paint on the heart. */
   "parent-home": {
-    paint: "brand",
+    paint: "accent",
     fill: [
       ["path", { d: "M12 18.5L8.95 16.34A2.25 2.25 0 1 1 12 13.09A2.25 2.25 0 1 1 15.05 16.34Z" }],
     ],

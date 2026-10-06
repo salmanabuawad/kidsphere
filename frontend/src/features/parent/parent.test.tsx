@@ -70,6 +70,53 @@ describe("ParentHomePage", () => {
   });
 });
 
+describe("ParentHomePage: the questionnaire", () => {
+  const listed = { children: [{ id: "k1", name: "Adam Haddad", preferred_name: "Adam", birth_date: "2022-08-05" }] };
+  const answers = (questionnaire: unknown, step: number) => ({
+    child_id: "k1",
+    perspective: "parent",
+    parent_perspective: { sections: {}, entered: {} },
+    questionnaire,
+    wizard: { step, completed_at: null },
+  });
+
+  it("shows where the family is and continues at the saved step", async () => {
+    mockFetch({
+      "GET /api/children": { body: listed },
+      "GET /api/children/k1": { body: { child: adam } },
+      "GET /api/children/k1/profile": { body: answers({ status: "draft" }, 4) },
+    });
+    renderApp({ routes, url: "/parent", user: parent, options });
+    const card = await screen.findByTestId("parent-child-k1");
+    expect(await within(card).findByText("You are on step 4 of 9. Your answers are saved.")).toBeTruthy();
+    expect(within(card).getByRole("link", { name: /Continue the questionnaire/ }).getAttribute("href")).toBe("/parent/children/k1/onboarding/4");
+  });
+
+  it("shows that the answers were sent", async () => {
+    mockFetch({
+      "GET /api/children": { body: listed },
+      "GET /api/children/k1": { body: { child: adam } },
+      "GET /api/children/k1/profile": { body: answers({ status: "submitted", submitted_at: "2026-10-02T08:00:00Z" }, 10) },
+    });
+    renderApp({ routes, url: "/parent", user: parent, options });
+    const card = await screen.findByTestId("parent-child-k1");
+    expect(await within(card).findByText("Sent to the kindergarten")).toBeTruthy();
+    expect(within(card).getByRole("link", { name: /View or update my answers/ }).getAttribute("href")).toBe("/parent/children/k1/onboarding/10");
+  });
+
+  it("invites the family to start", async () => {
+    mockFetch({
+      "GET /api/children": { body: listed },
+      "GET /api/children/k1": { body: { child: adam } },
+      "GET /api/children/k1/profile": { body: answers(null, 1) },
+    });
+    renderApp({ routes, url: "/parent", user: parent, options });
+    const card = await screen.findByTestId("parent-child-k1");
+    expect(await within(card).findByText("The getting-to-know questionnaire is waiting for you.")).toBeTruthy();
+    expect(within(card).getByRole("link", { name: /Tell us about your child/ }).getAttribute("href")).toBe("/parent/children/k1/onboarding");
+  });
+});
+
 describe("shared content placeholders", () => {
   it("lists shared titles", async () => {
     mockFetch({

@@ -2,15 +2,22 @@
  * Development reviews (WP-12 backend) and the baseline endpoints the Development tab reads (WP-06):
  *
  *   GET  /api/children/{id}/development-reviews          → {reviews, context}
- *   POST /api/children/{id}/development-reviews/suggest  {language?} → Suggestion & DraftContext (writes nothing)
- *   POST /api/children/{id}/development-reviews          ReviewInput → 201 {review, current_understanding, warnings}
+ *   POST /api/children/{id}/development-reviews/suggest  {language?} → Suggestion & DraftContext & {suggestion_id, …}
+ *        (stores only the AI suggestion; the Domain 16 follow-up is never suggested)
+ *   POST /api/children/{id}/development-reviews          ReviewInput (+ follow_up, ai_suggestion_id) → 201 {review, current_understanding, warnings}
  *   GET  /api/children/{id}/current-understanding        → {current_understanding, baseline}
- *   GET  /api/children/{id}/baseline                     → {latest, earlier}
+ *   GET  /api/children/{id}/baseline                     → {latest, earlier, original_id, count}
+ *   GET  /api/children/{id}/baselines/{bid}              → {baseline: full, original, latest, number, summary}
+ *   GET  /api/children/{id}/functional-summaries         → {latest_approved, drafts, history, ai_drafts}
+ *   POST /api/children/{id}/functional-summaries         SummaryInput → 201 {summary}   (every save is a new row)
+ *   POST /api/children/{id}/functional-summaries/suggest {language?} → {draft, suggestion_id, …}
+ *   POST /api/functional-summaries/{sid}/approve          → {summary}   (409 SUMMARY_APPROVED the second time)
  *   POST /api/children/{id}/baseline                     → 201 {baseline}   ("Create new baseline", always a new row)
  *
  * Counts are plain numbers of observations; the UI only ever puts them into words (spec §26).
  */
 import { api } from "@/lib/api";
+import type { ProvenanceEntry } from "@/components/source";
 import type { FocusPlan, ProfileItem } from "@/features/children";
 
 export const REVIEW_STATUSES = ["improving", "some_improvement", "no_clear_change", "needs_more_observation", "no_longer_needed"] as const;
@@ -66,7 +73,17 @@ export type Suggestion = {
   focus_review: { focus_area_id: string; status: ReviewStatus; note: string }[];
 };
 
-export type SuggestResponse = DraftContext & { suggestion: Suggestion; provider: "claude" | "template"; is_template: boolean };
+export type ObservationQuestion = { domain: string; question: string };
+
+export type SuggestResponse = DraftContext & {
+  suggestion: Suggestion;
+  provider: "claude" | "template";
+  is_template: boolean;
+  /** The stored ai_suggestions row; send it back as `ai_suggestion_id` when saving the review. */
+  suggestion_id?: string;
+  possible_patterns?: string[];
+  next_observation_questions?: ObservationQuestion[];
+};
 
 export type Understanding = {
   summary?: string | null;
@@ -109,7 +126,11 @@ export type Review = {
   understanding: Understanding;
   focus_review: FocusReviewEntry[];
   baseline_validation: ValidationEntry[];
+  /** Domain 16 (null when nothing was filled in). */
+  follow_up?: FollowUp | null;
   ai_suggested: boolean;
+  ai_suggestion_id?: string | null;
+  provenance?: ProvenanceEntry[];
   created_by: UserRef | null;
   created_at: string;
 };
@@ -117,9 +138,11 @@ export type Review = {
 export type ReviewsResponse = { reviews: Review[]; context: DraftContext };
 
 export type ReviewWarning = {
-  code: "LIMITED_OBSERVATIONS";
+  /** LIMITED_OBSERVATIONS: a status rests on few observations (B6). WORDING: the involvement note uses words to avoid (a warning only). */
+  code: "LIMITED_OBSERVATIONS" | "WORDING";
+  message?: string;
   path: string;
-  observation_count: number;
+  observation_count?: number;
   focus_area_id?: string;
   title?: string;
   list?: BaselineList;
@@ -153,7 +176,10 @@ export type ReviewInput = {
   };
   baseline_validation: { list: BaselineList; key?: string | null; custom?: string | null; label: string; status: ValidationStatus; note?: string | null; observation_ids: string[] }[];
   focus_review: FocusReviewInput[];
+  /** Domain 16, only when something was filled in. Teacher-only: no suggestion fills it. */
+  follow_up?: FollowUpInput;
   ai_suggested: boolean;
+  ai_suggestion_id?: string;
 };
 
 export type SaveResponse = { review: Review; current_understanding: CurrentUnderstanding; warnings: ReviewWarning[] };
@@ -179,8 +205,15 @@ export type CurrentUnderstandingResponse = {
   baseline: { id: string; created_at: string; created_by: UserRef | null; summary: BaselineSummary } | null;
 };
 
-export type BaselineRef = { id: string; created_at: string; created_by: UserRef | null };
-export type BaselinesResponse = { latest: (BaselineRef & { baseline_data: unknown }) | null; earlier: BaselineRef[] };
+type BaselineRefBase = { id: string; created_at: string; created_by: UserRef | null };
+export type BaselineRef = BaselineRefBase & { original?: boolean };
+export type BaselinesResponse = {
+  latest: (BaselineRef & { baseline_data: unknown }) | null;
+  earlier: BaselineRef[];
+  /** The first baseline ever (X-12). */
+  original_id?: string | null;
+  count?: number;
+};
 
 const child = (id: string) => `/api/children/${encodeURIComponent(id)}`;
 export const reviewsUrl = (childId: string) => `${child(childId)}/development-reviews`;
@@ -207,4 +240,121 @@ export function itemId(it: Item): string {
 /** A baseline item is identified by its list plus its key (else its custom text / label). */
 export function baselineItemId(it: { list: string; key?: string | null; custom?: string | null; label?: string }): string {
   return it.key ? `${it.list}|k:${it.key}` : `${it.list}|c:${(it.custom ?? it.label ?? "").trim().toLowerCase()}`;
+}
+
+// --------------------------------------------------------------------------- Domain 16: review follow-up
+
+export const IMPROVEMENT_LEVELS = ["significant", "partial", "no_change", "needs_more_observation"] as const;
+export const INVOLVEMENT_STEPS = ["none", "consultation", "joint_plan", "referral_as_needed"] as const;
+export type ImprovementLevel = (typeof IMPROVEMENT_LEVELS)[number];
+export type InvolvementStep = (typeof INVOLVEMENT_STEPS)[number];
+
+/** development_reviews.follow_up as stored (every field present, empty ones null). */
+export type FollowUp = {
+  reassessment_on: string | null;
+  improvement: { level: ImprovementLevel | null; note: string | null };
+  areas: { domains: string[]; focus_area_ids: string[]; text: string | null };
+  what_worked: string | null;
+  what_to_change: string | null;
+  involvement: { key: InvolvementStep | null; note: string | null };
+};
+
+export type FollowUpInput = Partial<{
+  reassessment_on: string;
+  improvement: { level?: ImprovementLevel; note?: string };
+  areas: { domains?: string[]; focus_area_ids?: string[]; text?: string };
+  what_worked: string;
+  what_to_change: string;
+  involvement: { key?: InvolvementStep; note?: string };
+}>;
+
+// --------------------------------------------------------------------------- baselines (original vs latest)
+
+export type BaselineDetail = BaselineRef & {
+  child_id: string;
+  baseline_data: BaselineData;
+  original: boolean;
+  latest: boolean;
+  number: number;
+  count: number;
+  /** The first-picture summary, worded as when the baseline was created. */
+  summary: string | null;
+};
+
+/** The parts of baseline_data the original-vs-latest viewer compares. */
+export type BaselineData = {
+  strengths?: ProfileItem[];
+  interests?: ProfileItem[];
+  what_helps?: ProfileItem[];
+  focus_areas?: { id: string; title: string; category: string }[];
+  support_needs?: SupportNeeds;
+};
+
+export const baselineUrl = (childId: string, baselineId: string) => `${child(childId)}/baselines/${encodeURIComponent(baselineId)}`;
+
+// --------------------------------------------------------------------------- Domain 17: functional summary
+
+export type SummaryItem = { key?: string | null; custom?: string | null };
+
+export type SummaryFields = {
+  general_description: string | null;
+  main_strengths: { items: SummaryItem[]; text: string | null };
+  main_needs: { items: string[]; text: string | null };
+  adaptations: string | null;
+  follow_up_with_parents: string | null;
+  team_recommendations: string | null;
+};
+
+export type FunctionalSummary = SummaryFields & {
+  id: string;
+  child_id: string;
+  supersedes_id: string | null;
+  superseded_by: string | null;
+  review_id: string | null;
+  assessment_id: string | null;
+  source: "manual" | "ai_draft";
+  ai_suggestion_id: string | null;
+  status: "draft" | "approved";
+  approved_by: UserRef | null;
+  approved_at: string | null;
+  created_by: UserRef | null;
+  created_at: string;
+  provenance: ProvenanceEntry[];
+};
+
+export type SummariesResponse = {
+  latest_approved: FunctionalSummary | null;
+  drafts: FunctionalSummary[];
+  history: FunctionalSummary[];
+  /** The AI drafts the rows started from (by ai_suggestion_id), for "compare with the AI draft". */
+  ai_drafts: Record<string, SummaryFields>;
+};
+
+export type SummaryInput = Partial<SummaryFields> & {
+  supersedes_id?: string;
+  source: "manual" | "ai_draft";
+  ai_suggestion_id?: string;
+};
+
+export type SummarySuggestResponse = {
+  draft: SummaryFields;
+  suggestion_id: string;
+  provider: "claude" | "template";
+  is_template: boolean;
+  possible_patterns: string[];
+  next_observation_questions: ObservationQuestion[];
+};
+
+export const summariesUrl = (childId: string) => `${child(childId)}/functional-summaries`;
+
+export function saveSummary(childId: string, body: SummaryInput) {
+  return api<{ summary: FunctionalSummary }>(summariesUrl(childId), { method: "POST", body });
+}
+
+export function suggestSummary(childId: string, language: string) {
+  return api<SummarySuggestResponse>(`${summariesUrl(childId)}/suggest`, { method: "POST", body: { language } });
+}
+
+export function approveSummary(summaryId: string) {
+  return api<{ summary: FunctionalSummary }>(`/api/functional-summaries/${encodeURIComponent(summaryId)}/approve`, { method: "POST", body: {} });
 }

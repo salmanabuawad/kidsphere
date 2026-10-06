@@ -1,0 +1,65 @@
+{
+  "filters": {
+    "label": "סינון",
+    "toggle": "סינון",
+    "clear": "ניקוי הסינון",
+    "any": "הכול",
+    "from": "מתאריך",
+    "to": "עד תאריך",
+    "fromDate": "מ-{date}",
+    "toDate": "עד {date}",
+    "focus": "מיקוד",
+    "domain": "תחום",
+    "context": "מצב",
+    "source": "סוג",
+    "contentType": "סוג פעילות",
+    "result": "איך הלך",
+    "remove": "הסרת הסינון: {label}"
+  },
+  "sources": {
+    "quick": "תצפית מהירה",
+    "content_feedback": "אחרי פעילות"
+  },
+  "observations": {
+    "title": "תצפיות",
+    "intro": "תצפיות מהירות ומובנות, מהחדשה לישנה. כל תצפית שומרת את הגרסאות הקודמות שלה.",
+    "add": "הוספת תצפית",
+    "empty": "עדיין אין תצפיות",
+    "emptyHint": "הוסיפו את הראשונה אחרי הפעילויות של היום.",
+    "emptyFiltered": "אין תצפיות שמתאימות לסינון",
+    "loadOlder": "הצגת ישנות יותר",
+    "edited": "נערכה",
+    "structured": "רואים, מבינים, פועלים",
+    "details": "פרטים",
+    "resultOnly": "משוב בלי הערה כתובה",
+    "after": "אחרי „{title}”",
+    "focus": "מיקוד: {title}",
+    "timeline": "לציר ההתפתחות"
+  },
+  "detail": {
+    "title": "תצפית",
+    "back": "כל התצפיות",
+    "notFound": "לא מצאנו את התצפית הזו.",
+    "whatISee": "מה ראיתי",
+    "when": "מתי",
+    "whatNeeded": "מה הילד/ה אולי צריך/ה",
+    "whatWeDid": "מה עשינו",
+    "didItChange": "האם משהו השתנה?",
+    "whatChanged": "מה השתנה",
+    "documentation": "הערות ותיעוד",
+    "whatHelped": "מה עזר",
+    "note": "הערה",
+    "changeValues": {
+      "yes": "כן",
+      "partly": "חלקית",
+      "no": "עדיין לא"
+    },
+    "versions": "גרסאות קודמות",
+    "versionsHint": "תצפיות אף פעם לא נמחקות: כל עריכה נשמרת.",
+    "noVersions": "התצפית הזו לא נערכה.",
+    "current": "הגרסה הנוכחית",
+    "first": "הגרסה הראשונה",
+    "savedBy": "{name} · {date}",
+    "empty": "אין טקסט בגרסה הזו"
+  }
+}

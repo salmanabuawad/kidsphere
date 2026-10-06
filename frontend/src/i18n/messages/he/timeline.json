@@ -3,20 +3,61 @@
   "intro": "מה קרה, מהחדש לישן.",
   "empty": "עדיין אין כלום בציר הזמן",
   "emptyHint": "כאן יופיעו תצפיות, שינויים במיקוד ומשוב על תוכן.",
+  "emptyFiltered": "אין פריטים שמתאימים לסינון",
   "addObservation": "הוספת תצפית",
   "loadOlder": "הצגת ישנים יותר",
+  "backToDevelopment": "התפתחות",
+  "show": "הצגה",
+  "groups": {
+    "start": "תמונת פתיחה",
+    "plans": "תוכניות ויעדים",
+    "activities": "פעילויות",
+    "observations": "תצפיות",
+    "reviews": "סקירות",
+    "approved": "עדכונים מאושרים"
+  },
   "types": {
     "baseline": "נוצרה תמונת פתיחה",
+    "questionnaire_submitted": "שאלון המשפחה התקבל",
     "focus_opened": "מיקוד חדש",
+    "plan_changed": "התוכנית עודכנה",
+    "focus_reopened": "המיקוד חזר לפעול",
     "focus_closed_completed": "המיקוד הושלם",
     "focus_closed_paused": "המיקוד הושהה",
     "observation": "תצפית",
     "content_feedback": "משוב",
     "content_approved": "תוכן אושר",
-    "review": "סקירת התפתחות"
+    "review": "סקירת התפתחות",
+    "summary_approved": "הסיכום התפקודי אושר",
+    "assessment_closed": "מחזור התצפית נסגר"
+  },
+  "changes": {
+    "title": "היעד",
+    "description": "התיאור",
+    "category": "התחום",
+    "plan": "התוכנית",
+    "follow_up_on": "מועד המעקב"
+  },
+  "changed": "מה השתנה: {fields}",
+  "viaReview": "הוחלט בסקירת התפתחות",
+  "entryMode": {
+    "self": "מולא על ידי המשפחה",
+    "on_behalf": "הוזן על ידי הצוות עבור המשפחה",
+    "meeting": "מולא יחד עם המשפחה בפגישה"
+  },
+  "summarySource": {
+    "manual": "נכתב על ידי הצוות",
+    "ai_draft": "טיוטה בעזרת בינה מלאכותית, אושרה על ידי הצוות"
+  },
+  "cycle": {
+    "initial": "מחזור תצפית ראשון",
+    "reassessment": "מחזור תצפית חוזר"
   },
   "feedbackOn": "אחרי „{title}”",
   "focusLink": "מיקוד: {title}",
   "baselineText": "נשמרה תמונת הפתיחה של החוזקות, תחומי העניין ומה שעוזר.",
-  "openReview": "מעבר להתפתחות"
+  "openReview": "מעבר להתפתחות",
+  "openPlan": "מעבר לתוכנית",
+  "openParentView": "מעבר למבט ההורים",
+  "openCycle": "מעבר לתצפית הגננת"
 }

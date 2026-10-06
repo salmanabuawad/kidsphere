@@ -1,0 +1,384 @@
+{
+  "report_label": "تقرير تطوّر الطفل",
+  "types": {
+    "full": "التقرير الكامل عن الطفل",
+    "parent_questionnaire": "استبيان الأهل",
+    "teacher_observation": "تقرير ملاحظة المعلّمة",
+    "current_development": "تقرير التطور الحالي",
+    "intervention_plan": "خطة العمل الفردية",
+    "timeline": "تقرير الخط الزمني"
+  },
+  "header": {
+    "child": "الطفل",
+    "preferred_name": "يُنادى",
+    "age": "العمر",
+    "birth_date": "تاريخ الميلاد",
+    "kindergarten": "الروضة",
+    "class": "المجموعة",
+    "languages": "اللغات",
+    "parent_name": "ولي الأمر",
+    "parent_contact": "طريقة التواصل مع العائلة",
+    "report_date": "تاريخ التقرير",
+    "prepared_by": "أعدّه",
+    "period": "الفترة",
+    "confidential": "يحتوي التقرير على معلومات شخصية عن طفل. شاركوه فقط مع من يعمل مع الطفل، واحفظوه في مكان آمن."
+  },
+  "footer": {
+    "disclaimer": "يستند هذا التقرير إلى معلومات من الأهل وملاحظات المعلّمة والمتابعة التربوية. وهو ليس تشخيصاً طبياً أو سريرياً."
+  },
+  "sources": {
+    "parent_said": "معلومات من الأهل",
+    "teacher_observed": "ملاحظة المعلّمة",
+    "teacher_approved": "فهم اعتمدته المعلّمة",
+    "ai_suggested": "مسودة بمساعدة الذكاء الاصطناعي",
+    "ai_approved": "مسودة بمساعدة الذكاء الاصطناعي، اعتمدها {name} بتاريخ {date}",
+    "approved_by": "اعتمده {name} بتاريخ {date}",
+    "entered_by": "أدخله {name}",
+    "entered_by_on": "أدخله {name} بتاريخ {date}",
+    "in_meeting": "في لقاء مع العائلة"
+  },
+  "markers": {
+    "not_answered": "لم تتم الإجابة",
+    "not_observed": "لم تتم ملاحظته بعد",
+    "nothing_yet": "لم يُسجَّل شيء بعد",
+    "other": "أخرى: {text}",
+    "yes": "نعم",
+    "no": "لا",
+    "someone": "أحد أفراد الطاقم",
+    "no_text": "لا توجد ملاحظة مكتوبة",
+    "no_kindergarten": "غير محدد",
+    "status_open": "ما زال مفتوحاً",
+    "status_clarified": "تم توضيحه"
+  },
+  "age": {
+    "year_one": "سنة واحدة",
+    "year_two": "سنتان",
+    "year_few": "{n} سنوات",
+    "year_many": "{n} سنة",
+    "year_other": "{n} سنة",
+    "month_one": "شهر واحد",
+    "month_two": "شهران",
+    "month_few": "{n} أشهر",
+    "month_many": "{n} شهرًا",
+    "month_other": "{n} شهر",
+    "both": "{years} {join}{months}",
+    "join": "و",
+    "join_digit": "و"
+  },
+  "date": {
+    "format": "{d}.{m}.{y}",
+    "month_year": "{month} {year}",
+    "months": ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"],
+    "months_short": ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"]
+  },
+  "range": {
+    "from_to": "{start} – {end}",
+    "since": "منذ {start}",
+    "until": "حتى {end}",
+    "all": "كل التواريخ"
+  },
+  "sections": {
+    "basics": "المعلومات الأساسية",
+    "parent_summary": "ما أخبرتنا به العائلة",
+    "teacher_observation": "ملاحظة المعلّمة",
+    "teacher_profile": "ملاحظات المعلّمة من استمارة الملف",
+    "baselines": "نقطة البداية: الأولى والأحدث",
+    "lists": "نقاط القوة والاهتمامات وما يساعد",
+    "focus": "التركيز الحالي والخطة",
+    "observations": "سجل الملاحظات",
+    "reviews": "مراجعات التطور والمتابعة",
+    "functional_summary": "ملخص وظيفي قصير",
+    "timeline": "الخط الزمني",
+    "understanding": "الفهم الحالي",
+    "recent_observations": "ملاحظات حديثة",
+    "activities": "الأنشطة وكيف جرت",
+    "progress": "التقدّم",
+    "next": "الخطوات التالية"
+  },
+  "heart": {
+    "section": "بكلمات العائلة",
+    "title": "كلمة من القلب"
+  },
+  "r2": {
+    "about": "عن الاستبيان",
+    "intro": "إجابات العائلة بترتيب الاستبيان. الإجابة على كل سؤال اختيارية؛ السؤال الذي بقي فارغاً مكتوب بجانبه \"لم تتم الإجابة\".",
+    "status": "الحالة",
+    "status_submitted": "أرسلته العائلة",
+    "status_draft": "لم يُرسَل بعد (محفوظ كمسودة)",
+    "filled_on": "تاريخ التعبئة",
+    "entry_mode": "طريقة التعبئة",
+    "mode_self": "عبّأته العائلة",
+    "mode_on_behalf": "أدخله الطاقم نيابة عن العائلة",
+    "mode_meeting": "عُبّئ مع العائلة في لقاء",
+    "attendees": "حضر اللقاء",
+    "entered_by": "أدخله",
+    "school_year": "السنة الدراسية",
+    "not_started": "لم تبدأ العائلة تعبئة الاستبيان بعد.",
+    "nothing_answered": "لا توجد إجابات بعد."
+  },
+  "legacy": {
+    "title": "من الاستمارة السابقة",
+    "intro": "إجابات أُعطيت في النسخة السابقة من الاستبيان، كما كُتبت.",
+    "helps": "ما يساعد",
+    "who": {
+      "describe_words": "وصف الطفل ببضع كلمات",
+      "appreciate": "أكثر ما تحبونه وتقدّرونه",
+      "strengths": "نقاط القوة",
+      "interests": "الاهتمامات",
+      "motivators": "ما يحفّز الطفل"
+    },
+    "emotions": {
+      "helps_when_sad": "ما يساعد عندما يحزن الطفل",
+      "frustration_reactions": "ما يحدث عادة عند الإحباط",
+      "calming_helps": "ما يساعد الطفل على الهدوء",
+      "calming_notes": "ملاحظات عن الهدوء",
+      "transition_reaction": "إيقاف نشاط يحبه الطفل",
+      "transition_helps": "ما يساعد عند التغيير",
+      "morning_separation": "الوداع في الصباح",
+      "what_does_not_help": "ما لا يساعد"
+    },
+    "social": {
+      "social": "مع الأطفال الآخرين",
+      "communication": "كيف يتواصل الطفل",
+      "comments": "ملاحظات عن الأصدقاء والحديث"
+    },
+    "independence": {
+      "levels": "الاستقلالية في الحياة اليومية",
+      "notes": "ملاحظات عن الاستقلالية"
+    },
+    "environment": {
+      "items": "أشياء في البيئة قد تؤثر على الطفل",
+      "notes": "ملاحظات عن البيئة"
+    },
+    "priorities": {
+      "parent_priorities": "ما تأمل العائلة أن يطوّره الطفل",
+      "hope_child_feels": "كيف تأمل العائلة أن يشعر الطفل",
+      "one_thing_to_know": "أهم شيء يجب معرفته",
+      "priorities_note": "ملاحظات عن التوقعات"
+    }
+  },
+  "qb": {
+    "title": "القراءة الأولى للمعلّمة (نقطة بداية سريعة)",
+    "main_strengths": "ثلاث نقاط قوة رئيسية",
+    "remember": "أمور مهم تذكّرها عن الطفل",
+    "calms_helps": "ما يهدّئ الطفل ويساعده",
+    "may_be_difficult": "ما قد يصعّب الأمور",
+    "first_area_to_observe": "أول مجال للملاحظة",
+    "question_for_parent": "سؤال للتوضيح مع العائلة"
+  },
+  "r3": {
+    "cycle_title": "تفاصيل الملاحظة",
+    "no_cycle": "لم تبدأ ملاحظة المعلّمة بعد.",
+    "principles_title": "كيف نلاحظ",
+    "principles": [
+      "الملاحظة في مواقف طبيعية ومتنوعة.",
+      "وصف ما نراه، لا تفسيرنا له.",
+      "الانتباه إلى عدد المرات والشدة والمدة والموقف.",
+      "التمييز بين ما يفعله الطفل وحده وما يفعله بمساعدة.",
+      "ذكر نقاط القوة والاهتمامات إلى جانب كل مجال للدعم.",
+      "تجنّب المقارنة بين الأطفال.",
+      "فهم ما نلاحظه في ضوء سياق الطفل وتطوره."
+    ],
+    "not_a_test": "صورة كاملة عن الطفل من الملاحظة اليومية واللعب والنشاط. هذا ليس اختباراً.",
+    "col_item": "ما الذي لاحظناه",
+    "col_support": "كم من الدعم كان مطلوباً؟",
+    "col_notes": "ملاحظات",
+    "col_task": "المهمة اليومية",
+    "independent": "مستقل",
+    "needs_help": "يحتاج إلى مساعدة",
+    "col_stimulus": "ما في البيئة",
+    "col_happens": "ماذا يحدث",
+    "col_helps": "ما الذي يساعد",
+    "col_stage": "جزء من اليوم",
+    "col_succeeds": "ما الذي ينجح",
+    "col_difficult": "ما الذي ما زال صعباً",
+    "col_support_needed": "الدعم المطلوب",
+    "col_what_helps": "ما الذي يساعد",
+    "seen_in": "لوحظ خلال: {place}",
+    "play_not_test": "تمت الملاحظة من خلال اللعب والنشاط اليومي، وليس كاختبار.",
+    "no_score": "موصوف بالكلمات فقط؛ لا شيء هنا يُقاس.",
+    "strengths_guidance": "يُفضّل تسجيل من ثلاث إلى خمس نقاط قوة واهتمامات، بالترتيب.",
+    "strengths_here": "نقاط القوة التي ظهرت هنا",
+    "carried_from": "نُقل من دورة الملاحظة السابقة وتمت مراجعته من جديد.",
+    "need_seeing": "ما الذي نراه بالضبط؟",
+    "need_how_often": "كم مرة؟",
+    "need_situations": "في أي مواقف؟",
+    "need_what_seems_harder": "ما الذي يبدو أنه يصعّب الأمر؟",
+    "need_already_tried": "ماذا جرّبنا حتى الآن؟",
+    "need_what_helped": "ما الذي ساعد؟",
+    "need_focus": "أصبح تركيزاً حالياً",
+    "need_untitled": "مجال للتركيز",
+    "kind_initial": "الملاحظة الأولى",
+    "kind_reassessment": "ملاحظة متابعة",
+    "cycle_open": "قيد العمل",
+    "cycle_closed": "أُغلقت بتاريخ {date}",
+    "age_at_fill": "العمر عند التعبئة",
+    "cycle": "دورة الملاحظة",
+    "filled_on": "تاريخ التعبئة",
+    "period_note": "عن الفترة",
+    "teacher": "المعلّمة",
+    "filled_by": "عبّأها",
+    "d14_title": "نلاحظ، نفهم، نتصرّف",
+    "d14_a": "ما أراه",
+    "d14_b": "متى يحدث ذلك",
+    "d14_c": "ما الذي قد يحتاجه الطفل",
+    "d14_d": "ما سنفعله",
+    "d14_e": "هل تغيّر شيء؟",
+    "d14_doc": "التوثيق",
+    "when_time": "الوقت",
+    "when_activity": "النشاط",
+    "when_activity_text": "عن النشاط",
+    "when_with_whom": "مع من",
+    "when_before_event": "قبل",
+    "when_after_event": "بعد",
+    "linked_focus": "مرتبط بالتركيز: {title}",
+    "change_yes": "نعم",
+    "change_partly": "جزئياً",
+    "change_no": "ليس بعد",
+    "observation": "ملاحظة"
+  },
+  "lists": {
+    "strengths": "نقاط القوة",
+    "interests": "الاهتمامات",
+    "what_helps": "ما يساعد",
+    "main": "نقطة قوة رئيسية"
+  },
+  "baseline": {
+    "original": "نقطة البداية الأولى",
+    "latest": "أحدث نقطة بداية",
+    "created": "أُنشئت بتاريخ {date} بواسطة {name}",
+    "focus": "التركيز في ذلك الوقت",
+    "independence": "الاستقلالية اليومية في ذلك الوقت"
+  },
+  "plan": {
+    "goal": "الهدف",
+    "method": "ما سنفعله",
+    "frequency": "كم مرة",
+    "who": "المسؤول",
+    "success": "كيف سنعرف أن ذلك يساعد",
+    "follow_up": "موعد المتابعة",
+    "strength_used": "نقطة القوة التي نبني عليها",
+    "need": "الحاجة",
+    "adaptation": "التكييف",
+    "none": "لا توجد أهداف نشطة الآن.",
+    "closed": "أهداف أُنجزت أو أُوقفت مؤقتاً"
+  },
+  "obs": {
+    "date": "التاريخ",
+    "where": "أين",
+    "what": "ما الذي لوحظ",
+    "support": "الدعم",
+    "helped": "ما الذي ساعد",
+    "feedback_on": "عن النشاط: {title}",
+    "focus": "التركيز: {title}",
+    "none": "لا توجد ملاحظات في هذه الفترة."
+  },
+  "activities": {
+    "approved": "اعتمدته المعلّمة",
+    "no_feedback": "لم تُسجَّل ملاحظات بعد.",
+    "none": "لا توجد أنشطة معتمدة في هذه الفترة."
+  },
+  "review": {
+    "title": "مراجعة التطور",
+    "focus": "التركيز",
+    "reassessment_on": "موعد المراجعة التالية",
+    "improvement": "هل حدث تحسّن؟",
+    "areas": "في أي مجالات؟",
+    "what_worked": "ما الذي نجح",
+    "what_to_change": "ما الذي يحتاج إلى تغيير",
+    "note": "ملاحظة",
+    "involvement": "الخطوة التالية مع العائلة أو الطاقم",
+    "none": "لا توجد مراجعة تطور بعد."
+  },
+  "understanding": {
+    "none": "لم يُعتمد فهم حالي بعد.",
+    "summary": "الملخص",
+    "strengths": "نقاط القوة",
+    "interests": "الاهتمامات",
+    "what_helps": "ما يساعد",
+    "areas_for_support": "مجالات الدعم",
+    "adaptations": "التكييفات",
+    "next_steps": "الخطوات التالية"
+  },
+  "summary": {
+    "general_description": "وصف عام",
+    "main_strengths": "نقاط القوة الرئيسية",
+    "main_needs": "مجالات الدعم",
+    "adaptations": "التكييفات المقترحة في الروضة",
+    "follow_up_with_parents": "استمرار المتابعة والعمل مع العائلة",
+    "team_recommendations": "توصيات للطاقم"
+  },
+  "hopes": {
+    "title": "آمال العائلة",
+    "intro": "ما تأمله العائلة. هذه الأفكار تقترح اتجاهاً للخطة؛ والمعلّمة هي من تحدد الأهداف.",
+    "develop": "ما تأمل العائلة أن يطوّره الطفل هذه السنة",
+    "feels": "كيف تأمل العائلة أن يشعر الطفل",
+    "other_area": "مجال آخر"
+  },
+  "r5": {
+    "period_title": "فترة الخطة",
+    "goals_title": "الأهداف",
+    "guidance": "نختار هدفين إلى ثلاثة أهداف لكل فترة، ليحصل كل هدف على ما يكفي من الوقت والاهتمام."
+  },
+  "tl": {
+    "baseline": "تحديث نقطة البداية",
+    "baseline_original": "نقطة البداية الأولى",
+    "questionnaire": "أُرسل استبيان العائلة",
+    "focus_opened": "فُتح تركيز",
+    "plan_changed": "تحديث الخطة",
+    "focus_closed": "أُنجز الهدف",
+    "focus_paused": "أُوقف الهدف مؤقتاً",
+    "focus_reopened": "أُعيد فتح الهدف",
+    "content": "اعتماد نشاط",
+    "observation": "ملاحظة",
+    "changed": "هل تغيّر شيء: {value}",
+    "feedback": "ملاحظات على نشاط",
+    "review": "مراجعة التطور",
+    "summary": "اعتماد الملخص الوظيفي",
+    "assessment_started": "بدء ملاحظة المعلّمة",
+    "assessment_closed": "إغلاق ملاحظة المعلّمة",
+    "none": "لم يحدث شيء في هذه الفترة.",
+    "truncated": "تظهر أحدث السجلات فقط. لرؤية كل شيء، اختاروا فترة أقصر."
+  },
+  "options": {
+    "improvement_levels": {
+      "significant": "تحسّن واضح",
+      "partial": "تحسّن جزئي",
+      "no_change": "لا تغيير واضح بعد"
+    },
+    "involvement_steps": {
+      "none": "لا",
+      "consultation": "التشاور مع الطاقم التربوي",
+      "joint_plan": "خطة مشتركة مع العائلة",
+      "referral_as_needed": "إشراك مختص عند الحاجة"
+    },
+    "sensory_effects": {
+      "affects": "يؤثر على الطفل",
+      "sometimes": "أحياناً",
+      "no_visible_effect": "لا أثر ظاهر",
+      "not_observed": "لم تتم ملاحظته بعد"
+    },
+    "need_areas": {
+      "emotional": "الجانب العاطفي",
+      "social": "الجانب الاجتماعي",
+      "language": "اللغة",
+      "communication": "التواصل",
+      "attention": "التركيز والمثابرة",
+      "motor": "الحركة",
+      "cognitive": "التعلّم والتفكير",
+      "independence": "الاستقلالية",
+      "sensory": "أشياء في البيئة",
+      "behaviour": "التعامل مع المواقف اليومية",
+      "adapting_to_setting": "التأقلم مع الروضة"
+    },
+    "sensitivities": {
+      "light": "الضوء",
+      "smells": "الروائح",
+      "creative_activities": "الأنشطة الفنية"
+    },
+    "om_subgroups": {
+      "receptive": "فهم اللغة",
+      "expressive_social": "التعبير والمحادثة"
+    }
+  }
+}

@@ -85,7 +85,8 @@ def list_children(db: Session, user: User, class_id: uuid.UUID | None = None, q:
     )
     drafts = (
         select(func.count()).select_from(GeneratedContent)
-        .where(GeneratedContent.child_id == Child.id, GeneratedContent.status == "draft")
+        .where(GeneratedContent.child_id == Child.id, GeneratedContent.status == "draft",
+               GeneratedContent.deleted_at.is_(None))
         .correlate(Child).scalar_subquery()
     )
     stmt = (
@@ -245,6 +246,8 @@ def child_detail(db: Session, user: User, child: Child) -> dict:
             "description": f.description,
             "plan": f.plan,
             "created_at": _iso(f.created_at),
+            # 0002: the goal's follow-up date (Overview "next review"; WP2-NAV).
+            "follow_up_on": f.follow_up_on.isoformat() if f.follow_up_on else None,
         }
         for f in focus
     ]
@@ -277,7 +280,8 @@ def child_detail(db: Session, user: User, child: Child) -> dict:
     out["baseline"] = {"exists": latest_baseline is not None, "latest_created_at": _iso(latest_baseline)}
     out["draft_content_count"] = int(db.scalar(
         select(func.count()).select_from(GeneratedContent)
-        .where(GeneratedContent.child_id == child.id, GeneratedContent.status == "draft")
+        .where(GeneratedContent.child_id == child.id, GeneratedContent.status == "draft",
+               GeneratedContent.deleted_at.is_(None))
     ) or 0)
     return out
 

@@ -1,0 +1,12 @@
+{% from "_macros.html" import answer, tag %}
+<div class="timeline">
+{% for group in block.groups %}
+  <h3 class="month">{{ group.title }}</h3>
+  {% for e in group["items"] %}
+  <div class="tl-entry">
+    <p class="tl-head"><span class="tl-date">{{ e.date | ltr }}</span> <span class="chip tone-{{ e.tone or 'neutral' }}">{{ e.type }}</span>{% if e.title %} <span class="tl-title">{{ e.title | iso }}</span>{% endif %}{% if e.source %} {{ tag(e.source) }}{% endif %}</p>
+    {% if e.answer %}<div class="a">{{ answer(e.answer, meta.dir) }}</div>{% endif %}
+  </div>
+  {% endfor %}
+{% endfor %}
+</div>

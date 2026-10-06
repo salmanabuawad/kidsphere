@@ -41,7 +41,7 @@ OBS = [
 
 DOCUMENTED_KEYS = {
     "mode", "content_type", "template", "language", "name", "age_years", "gender", "strengths", "interests",
-    "what_helps", "avoid", "focus", "target_strength", "recent_observations", "current_understanding",
+    "what_helps", "avoid", "focus", "target_strength", "recent_observations", "domains", "current_understanding",
     "instruction", "variant", "include_video",
 }
 
@@ -82,7 +82,8 @@ def test_lists_capped_and_labelled_in_language():
     assert all(s.key for s in ctx.strengths)
     assert [i.key for i in ctx.interests] == ["cars_transportation", "animals", "blocks"]
     assert len(ctx.what_helps) == 3 and ctx.what_helps[1].label == "פינה שקטה"
-    assert ctx.avoid == ["noise", "touch", "bright_lights"]
+    # Parent-reported sensitivities never become "avoid" (only what the teacher observed does).
+    assert ctx.avoid == []
 
 
 def test_custom_labels_only_when_staff_confirmed_and_masked():
@@ -187,12 +188,14 @@ def test_first_name_drops_a_surname_in_the_preferred_name():
 
 def test_focus_and_current_understanding_mask_the_childs_own_names():
     focus = {**FOCUS, "title": "Adam Haddad joins Noa", "description": "Adam Haddad starts next to Yusuf",
-             "plan": {"who": "Mum Rana and teacher Dana with Adam"}}
+             "plan": {"who": "Mum Rana and teacher Dana with Adam", "need": "Joining Noa with Adam",
+                      "review_on": "next week"}}
     ctx = make(focus=focus, adult_names=["Dana Cohen"],
                current_understanding={"summary": "Adam Haddad enjoys building with Noa."})
     assert ctx.focus.title == "[child] joins [friend]"
     assert ctx.focus.description == "[child] starts next to [friend]"
-    assert ctx.focus.plan["who"] == "Mum [adult] and teacher [adult] with [child]"
+    # Who is responsible (names) and the legacy follow-up date never reach the AI (OM-D15-04, OM-D16-01).
+    assert ctx.focus.plan == {"need": "Joining [friend] with [child]"}
     assert ctx.current_understanding.summary == "[child] enjoys building with [friend]."
     prompt = user_prompt("real_world_activity", ctx)
     for name in ("Haddad", "Rana", "Dana", "Noa", "Yusuf"):
@@ -218,3 +221,89 @@ def test_rows_with_missing_profile_still_work():
                         content_type="digital_game", template="story_builder", language="he",
                         target_strength="storytelling", today=TODAY)
     assert ctx.name == "Maya" and ctx.age_years == 4 and ctx.strengths == [] and ctx.template == "story_builder"
+
+
+# --------------------------------------------------------------------------- source-document policy (WP2-AI)
+
+
+def test_avoid_only_from_the_teacher_and_never_health_keys():
+    """COVERAGE-MATRIX §7.2: ``avoid`` comes only from teacher-observed Domain 9 items."""
+    ctx = make(avoid=["noise", "certain_foods", "touch", "not_a_key", "noise", "crowded_spaces", "bright_lights"])
+    assert ctx.avoid == ["noise", "touch", "crowded_spaces"]
+    assert make().avoid == []  # the profile's (parent-reported) sensitivities are never read
+
+
+def test_phone_numbers_and_emails_are_scrubbed():
+    obs = [{"observation": "Mum (050-123 4567, rana.haddad@example.com) said Adam slept well. +972 50 765 4321"},
+           {"observation": "On 2026-10-05 at 10:30 Adam counted 3, 2, 1 and built 12 towers."}]
+    ctx = make(recent_observations=obs, instruction="Call 0501234567 or write to dana@kg.example.org")
+    first, second = ctx.recent_observations
+    assert first == "Mum ([phone], [email]) said [child] slept well. [phone]"
+    assert second == "On 2026-10-05 at 10:30 [child] counted 3, 2, 1 and built 12 towers."  # dates stay
+    assert ctx.instruction == "Call [phone] or write to [email]"
+    assert mask_names("rana@example.com 03-1234567", []) == "[email] [phone]"
+
+
+def test_observation_notes_are_never_sent():
+    obs = [{"observation": None, "note": "secret note", "details": {"what_i_see": "Adam sorted the cars"}},
+           {"observation": "Adam waited for a turn", "note": "another secret"}]
+    ctx = make(recent_observations=obs)
+    assert ctx.recent_observations == ["[child] sorted the cars", "[child] waited for a turn"]
+    assert "secret" not in json.dumps(ctx.model_dump(mode="json"))
+
+
+def test_domain_blocks_are_validated_masked_and_capped():
+    raw = {
+        "independence": {"assessment": [{"item": "dressing", "level": "some_support", "note": "secret"},
+                                        {"item": "Not A Key", "level": "x"}],
+                         "observations": [{"id": "o1", "observed_at": "2026-10-01T09:00:00+00:00", "context": "arrival",
+                                           "support_level": "some_support", "text": "Adam put on his coat with Noa",
+                                           "note": "never sent", "duration_minutes": 5, "frequency": "Often!"}] * 5,
+                         "helps": ["visual_support", "visual_support", "free text here"]},
+        "not_a_domain": {"helps": ["visual_support"]},
+        "social": {"assessment": [], "observations": [], "helps": []},
+    }
+    ctx = make(domains=raw)
+    assert list(ctx.domains) == ["independence"]
+    block = ctx.domains["independence"]
+    assert [i.model_dump(exclude_none=True) for i in block.assessment] == [
+        {"item": "dressing", "level": "some_support", "helps": []}]
+    assert len(block.observations) == 3
+    assert block.observations[0].text == "[child] put on his coat with [friend]"
+    assert block.observations[0].duration_minutes == 5 and block.observations[0].frequency is None
+    assert block.helps == ["visual_support"]
+    dumped = json.dumps(ctx.model_dump(mode="json"))
+    assert "secret" not in dumped and "never sent" not in dumped and "free text" not in dumped
+
+
+def test_domain_relevance_map():
+    from app.ai.domains import AI_DOMAINS, FOCUS_CATEGORY_DOMAINS, for_focus, for_need_area, for_strength
+    from app import vocab
+
+    assert for_focus("independence") == ["independence"]
+    assert for_focus("social", "joining_group_play") == ["social", "play"]
+    assert for_focus("motor", "using_scissors") == ["fine_motor"]
+    assert for_focus("other") == [] and for_focus(None) == []
+    assert for_strength("vocabulary") == ["language"] and for_strength("unknown") == []
+    assert for_need_area("adapting_to_setting") == ["daily_routine"]
+    assert set(vocab.keys("priority_categories")) == set(FOCUS_CATEGORY_DOMAINS)
+    for key in set(vocab.keys("strengths")) | set(vocab.keys("strength_targets")):
+        assert set(for_strength(key)) <= set(AI_DOMAINS)
+    assert set(AI_DOMAINS) == set(vocab.keys("ai_domains"))
+
+
+def test_assessment_blocks_follow_the_registry_order_and_drop_notes():
+    from app.ai.domains import assessment_blocks, teacher_avoid
+
+    cache = {
+        "independence": {"data": {"items": {
+            "dressing": {"level": "some_support", "note": "NOTE-1"}, "eating": {"level": "independent"},
+            "toilet": {"level": "not_observed"}}}},
+        "sensory": {"data": {"items": {"smells": {"effect": "sometimes"}, "noise": {"effect": "affects"},
+                                       "light": {"effect": "no_visible_effect"}}}},
+    }
+    blocks = assessment_blocks(cache, ["independence"])
+    assert list(blocks) == ["independence"]
+    assert [i["item"] for i in blocks["independence"]["assessment"]] == ["eating", "dressing"]
+    assert "NOTE-1" not in json.dumps(blocks)
+    assert teacher_avoid(cache) == ["noise", "strong_smells"]

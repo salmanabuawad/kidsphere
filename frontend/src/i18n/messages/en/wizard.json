@@ -167,5 +167,31 @@
     "photoInvalid": "Please choose a JPEG, PNG or WebP image up to 8 MB.",
     "photoFailed": "The photo could not be saved. You can add it later.",
     "required": "Required"
+  },
+  "questionnaire": {
+    "other": "Other",
+    "skip": "Skip this question",
+    "answer": "Answer this question",
+    "private": "Private",
+    "unavailable": "The questionnaire could not be loaded. Please try again.",
+    "onBehalfBanner": "You are entering the answers of {name}'s family for them. They are saved as the parents' answers, entered by you.",
+    "meetingBanner": "Filling in together with the family",
+    "meetingDate": "Meeting date",
+    "meetingAttendees": "Who came",
+    "saveForFamily": "Save the family's answers",
+    "staffDoneTitle": "The family's answers are saved",
+    "staffDoneIntro": "Every answer is kept with its history. Next, read them in the Parent View and fill in the quick baseline for {name}.",
+    "reviewAnswers": "Review the answers",
+    "backHome": "Back to my home page",
+    "backToParentView": "Back to the Parent View",
+    "parentName": "Name",
+    "relation": "Relation",
+    "addParent": "Add another parent or guardian",
+    "howMuchHelp": "How much help?"
+  },
+  "familyAnswers": {
+    "note": "These steps hold your own answers as the teacher. The family's answers are in the Parent View.",
+    "onBehalf": "Enter the family's answers",
+    "meeting": "Fill in together with the family"
   }
 }

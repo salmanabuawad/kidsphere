@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { MessageCircleHeart } from "lucide-react";
+import { Check, MessageCircleHeart } from "lucide-react";
 import { useUser } from "@/auth/AuthProvider";
 import { Alert } from "@/components/ui/Alert";
 import { Avatar } from "@/components/ui/Avatar";
@@ -7,6 +7,7 @@ import { Button, ButtonLink } from "@/components/ui/Button";
 import { Card, CardBody, CardFooter } from "@/components/ui/Card";
 import { Chip, toneGlyph } from "@/components/ui/Chip";
 import { BlockCluster, EmptyState } from "@/components/ui/EmptyState";
+import { DONE_STEP, LAST_STEP, profileUrl, type QProfile } from "@/features/wizard/questionnaire";
 import { PageSkeleton } from "@/components/ui/Spinner";
 import { ContentIcon, InterestsIcon, ParentHomeIcon, StrengthsIcon } from "@/icons";
 import { useI18n } from "@/i18n/I18nProvider";
@@ -50,6 +51,47 @@ function ItemChips({ items, list, tone, title, icon }: { items: ProfileItem[]; l
   );
 }
 
+type QState = { state: "unknown" | "not_started" | "draft" | "sent"; step: number };
+
+/** Where the family is in the questionnaire (GET /profile; a parent sees only their own answers). */
+function useQuestionnaireState(childId: string): QState {
+  const { data } = useFetch<QProfile>(profileUrl(childId));
+  if (!data) return { state: "unknown", step: 1 };
+  const record = data.questionnaire ?? data.parent_perspective?.questionnaire;
+  const step = Math.min(Math.max(data.wizard?.step ?? 1, 1), LAST_STEP);
+  if (record?.status === "submitted") return { state: "sent", step };
+  if (record) return { state: "draft", step };
+  return { state: "not_started", step: 1 };
+}
+
+function QuestionnaireStatus({ q }: { q: QState }) {
+  const { t } = useI18n();
+  if (q.state === "unknown") return null;
+  if (q.state === "sent")
+    return (
+      <p className="inline-flex items-center gap-2 rounded-md border-[1.5px] border-success px-3 py-1.5 text-sm font-semibold text-success" data-questionnaire="sent">
+        <Check className="size-4" strokeWidth={2.5} aria-hidden />
+        {t("parent.home.questionnaire.sent")}
+      </p>
+    );
+  return (
+    <p className="text-sm text-ink-muted" data-questionnaire={q.state}>
+      {q.state === "draft" ? t("parent.home.questionnaire.draft", { step: q.step, total: LAST_STEP }) : t("parent.home.questionnaire.notStarted")}
+    </p>
+  );
+}
+
+function QuestionnaireLink({ childId, q }: { childId: string; q: QState }) {
+  const { t } = useI18n();
+  const to = q.state === "draft" ? paths.parentOnboardingStep(childId, q.step) : q.state === "sent" ? paths.parentOnboardingStep(childId, DONE_STEP) : paths.parentOnboarding(childId);
+  const label = q.state === "draft" ? t("parent.home.questionnaire.continue") : q.state === "sent" ? t("parent.home.questionnaire.review") : t("parent.home.tellUs");
+  return (
+    <ButtonLink to={to} className="flex-1 sm:flex-none" icon={<MessageCircleHeart aria-hidden />}>
+      {label}
+    </ButtonLink>
+  );
+}
+
 function ChildCard({ child: listed }: { child: ParentChild }) {
   const { t } = useI18n();
   // The list rows carry basics only; the detail (GET /api/children/{id}) adds strengths and interests.
@@ -66,6 +108,7 @@ function ChildCard({ child: listed }: { child: ParentChild }) {
   const cls = className(child);
   const strengths = child.strengths ?? [];
   const interests = child.interests ?? [];
+  const questionnaire = useQuestionnaireState(listed.id);
 
   return (
     <Card className="overflow-hidden" data-testid={`parent-child-${child.id}`}>
@@ -93,11 +136,10 @@ function ChildCard({ child: listed }: { child: ParentChild }) {
           <ItemChips items={interests} list="interests" tone="interest" title={t("parent.home.interests")} icon={<InterestsIcon />} />
         )}
         {strengths.length === 0 && interests.length === 0 && <p className="text-sm text-ink-muted">{t("parent.home.noProfileYet", { name })}</p>}
+        <QuestionnaireStatus q={questionnaire} />
       </CardBody>
       <CardFooter className="justify-stretch bg-tray sm:justify-end">
-        <ButtonLink to={paths.parentOnboarding(child.id)} className="flex-1 sm:flex-none" icon={<MessageCircleHeart aria-hidden />}>
-          {t("parent.home.tellUs")}
-        </ButtonLink>
+        <QuestionnaireLink childId={child.id} q={questionnaire} />
         <ButtonLink to={paths.parentChildContent(child.id)} variant="secondary" className="flex-1 sm:flex-none" icon={<ContentIcon aria-hidden />}>
           {t("parent.home.shared")}
         </ButtonLink>

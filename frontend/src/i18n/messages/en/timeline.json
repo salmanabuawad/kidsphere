@@ -3,20 +3,61 @@
   "intro": "What happened, newest first.",
   "empty": "Nothing on the timeline yet",
   "emptyHint": "Observations, focus changes and feedback on content will appear here.",
+  "emptyFiltered": "Nothing matches these filters",
   "addObservation": "Add observation",
   "loadOlder": "Load older",
+  "backToDevelopment": "Development",
+  "show": "Show",
+  "groups": {
+    "start": "Starting picture",
+    "plans": "Plans and goals",
+    "activities": "Activities",
+    "observations": "Observations",
+    "reviews": "Reviews",
+    "approved": "Approved updates"
+  },
   "types": {
     "baseline": "Baseline created",
+    "questionnaire_submitted": "Family questionnaire received",
     "focus_opened": "New focus",
+    "plan_changed": "Plan updated",
+    "focus_reopened": "Focus active again",
     "focus_closed_completed": "Focus completed",
     "focus_closed_paused": "Focus paused",
     "observation": "Observation",
     "content_feedback": "Feedback",
     "content_approved": "Content approved",
-    "review": "Development review"
+    "review": "Development review",
+    "summary_approved": "Functional summary approved",
+    "assessment_closed": "Observation cycle closed"
+  },
+  "changes": {
+    "title": "goal",
+    "description": "description",
+    "category": "area",
+    "plan": "plan",
+    "follow_up_on": "follow-up date"
+  },
+  "changed": "Changed: {fields}",
+  "viaReview": "Decided in a development review",
+  "entryMode": {
+    "self": "Filled in by the family",
+    "on_behalf": "Entered by the team for the family",
+    "meeting": "Filled in together with the family"
+  },
+  "summarySource": {
+    "manual": "Written by the team",
+    "ai_draft": "AI-assisted draft, approved by the team"
+  },
+  "cycle": {
+    "initial": "First observation cycle",
+    "reassessment": "Follow-up observation cycle"
   },
   "feedbackOn": "After “{title}”",
   "focusLink": "Focus: {title}",
   "baselineText": "The starting picture of strengths, interests and what helps was saved.",
-  "openReview": "Open development"
+  "openReview": "Open development",
+  "openPlan": "Open the plan",
+  "openParentView": "Open the parent view",
+  "openCycle": "Open the teacher observation"
 }

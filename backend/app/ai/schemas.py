@@ -12,11 +12,14 @@ Kinds and their models:
     video                -> VideoPlanOut
     pack                 -> PackOut (story with exactly 3 questions, activity, game,
                             3 discussion prompts, optional video)
-    understanding        -> UnderstandingSuggestion
+    understanding        -> UnderstandingSuggestion (+ possible_patterns, next_observation_questions)
+    functional_summary   -> FunctionalSummaryDraft (no parent follow-up, involvement or closing fields)
 """
 from typing import Annotated, Literal, Union
 
 from pydantic import BaseModel, ConfigDict, Field, StringConstraints, TypeAdapter, create_model, model_validator
+
+from app.models import AI_DOMAIN_VALUES
 
 
 def Text(max_length: int):  # noqa: N802 - reads like a type in field annotations
@@ -307,6 +310,18 @@ class FocusReviewItem(Out):
     note: Text(400)
 
 
+class NextObservationQuestion(Out):
+    """A question to look at next, in one of the 12 AI domains (X-29). Never a test item."""
+
+    domain: Literal[AI_DOMAIN_VALUES]  # type: ignore[valid-type]
+    question: Text(300)
+
+
+# Hedged wording only ("may", "appears to"): a pattern is never presented as a fact.
+PossiblePatterns = Annotated[list[Text(300)], Field(default_factory=list, max_length=5)]
+NextQuestions = Annotated[list[NextObservationQuestion], Field(default_factory=list, max_length=5)]
+
+
 class UnderstandingSuggestion(Out):
     summary: Text(1500)
     strengths: list[ProfileItem] = Field(max_length=8)
@@ -317,6 +332,54 @@ class UnderstandingSuggestion(Out):
     next_steps: Text(800)
     baseline_validation: list[BaselineValidationItem] = Field(max_length=40)
     focus_review: list[FocusReviewItem] = Field(max_length=10)
+    possible_patterns: PossiblePatterns
+    next_observation_questions: NextQuestions
+
+
+# --------------------------------------------------------------------------- functional summary (Domain 17)
+
+
+class SummaryStrengthItem(Out):
+    """A main strength: a vocabulary ``key`` (strengths) or a ``custom`` text, with its label."""
+
+    key: Key | None = None
+    custom: Text(120) | None = None
+    label: Text(120)
+
+    @model_validator(mode="after")
+    def _key_or_custom(self):
+        if (self.key is None) == (self.custom is None):
+            raise ValueError("exactly one of key or custom is required")
+        return self
+
+
+class SummaryStrengths(Out):
+    items: list[SummaryStrengthItem] = Field(max_length=6)
+    text: Text(1000) | None = None
+
+
+class SummaryNeeds(Out):
+    """Areas for support (UI wording; never a deficit list)."""
+
+    items: list[Text(300)] = Field(max_length=6)
+    text: Text(1000) | None = None
+
+
+class FunctionalSummaryDraft(Out):
+    """A de-identified AI draft of the short functional summary (COVERAGE-MATRIX §7.7, X-25).
+
+    Deliberately NO follow-up-with-parents, involvement (referral), focus-decision or
+    closing fields: the teacher writes those herself. The draft is never saved as a
+    summary; the teacher edits and approves it (app/services/functional_summaries.py).
+    """
+
+    general_description: Text(2000)
+    main_strengths: SummaryStrengths
+    main_needs: SummaryNeeds
+    adaptations: Text(1000)
+    team_recommendations: Text(1000) | None = None
+    possible_patterns: PossiblePatterns
+    next_observation_questions: NextQuestions
 
 
 # --------------------------------------------------------------------------- lookup
@@ -327,4 +390,5 @@ KIND_MODELS: dict[str, type[Out]] = {
     "video": VideoPlanOut,
     "pack": PackOut,
     "understanding": UnderstandingSuggestion,
+    "functional_summary": FunctionalSummaryDraft,
 }

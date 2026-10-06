@@ -1,0 +1,16 @@
+{
+  "lists": {
+    "improvement_levels": [
+      {"key": "significant", "icon": "🌱", "label": {"en": "Significant improvement", "ar": "تحسّن واضح", "he": "שיפור משמעותי"}, "short": {"en": "Significant", "ar": "واضح", "he": "משמעותי"}},
+      {"key": "partial", "icon": "🌤️", "label": {"en": "Partial improvement", "ar": "تحسّن جزئي", "he": "שיפור חלקי"}, "short": {"en": "Partial", "ar": "جزئي", "he": "חלקי"}},
+      {"key": "no_change", "icon": "➖", "label": {"en": "No change yet", "ar": "لا تغيير بعد", "he": "ללא שינוי עדיין"}, "short": {"en": "No change yet", "ar": "لا تغيير بعد", "he": "ללא שינוי"}},
+      {"key": "needs_more_observation", "icon": "👀", "label": {"en": "Needs more observation", "ar": "يحتاج إلى مزيد من الملاحظة", "he": "נדרשת תצפית נוספת"}, "short": {"en": "More observation", "ar": "ملاحظة إضافية", "he": "עוד תצפית"}}
+    ],
+    "involvement_steps": [
+      {"key": "none", "label": {"en": "No", "ar": "لا", "he": "לא"}},
+      {"key": "consultation", "label": {"en": "Consultation", "ar": "استشارة", "he": "התייעצות"}},
+      {"key": "joint_plan", "label": {"en": "Shared plan", "ar": "خطة مشتركة", "he": "תוכנית משותפת"}},
+      {"key": "referral_as_needed", "label": {"en": "Involve a specialist if needed", "ar": "إشراك مختص عند الحاجة", "he": "שיתוף גורם מקצועי לפי הצורך"}}
+    ]
+  }
+}

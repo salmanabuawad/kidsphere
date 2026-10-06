@@ -1,0 +1,384 @@
+{
+  "report_label": "דוח התפתחות הילד/ה",
+  "types": {
+    "full": "דוח מלא על הילד/ה",
+    "parent_questionnaire": "שאלון ההורים",
+    "teacher_observation": "דוח תצפית הגננת",
+    "current_development": "דוח התפתחות עדכני",
+    "intervention_plan": "תוכנית עבודה אישית",
+    "timeline": "דוח ציר זמן"
+  },
+  "header": {
+    "child": "הילד/ה",
+    "preferred_name": "נקרא/ת",
+    "age": "גיל",
+    "birth_date": "תאריך לידה",
+    "kindergarten": "גן",
+    "class": "קבוצה",
+    "languages": "שפות",
+    "parent_name": "הורה או אפוטרופוס",
+    "parent_contact": "איך ליצור קשר עם המשפחה",
+    "report_date": "תאריך הדוח",
+    "prepared_by": "הוכן על ידי",
+    "period": "תקופה",
+    "confidential": "הדוח כולל פרטים אישיים על ילד/ה. יש לשתף רק עם מי שעובד עם הילד/ה ולשמור במקום מאובטח."
+  },
+  "footer": {
+    "disclaimer": "דוח זה מבוסס על מידע מההורים, על תצפיות של הגננת ועל מעקב חינוכי. הוא אינו מהווה אבחנה רפואית או קלינית."
+  },
+  "sources": {
+    "parent_said": "מידע מההורים",
+    "teacher_observed": "תצפית הגננת",
+    "teacher_approved": "הבנה שאושרה על ידי הגננת",
+    "ai_suggested": "טיוטה בסיוע בינה מלאכותית",
+    "ai_approved": "טיוטה בסיוע בינה מלאכותית, אושרה על ידי {name} ב־{date}",
+    "approved_by": "אושר על ידי {name} ב־{date}",
+    "entered_by": "הוזן על ידי {name}",
+    "entered_by_on": "הוזן על ידי {name} ב־{date}",
+    "in_meeting": "בפגישה עם המשפחה"
+  },
+  "markers": {
+    "not_answered": "לא נענה",
+    "not_observed": "עוד לא נצפה",
+    "nothing_yet": "עדיין לא נרשם דבר",
+    "other": "אחר: {text}",
+    "yes": "כן",
+    "no": "לא",
+    "someone": "איש/אשת צוות",
+    "no_text": "ללא הערה כתובה",
+    "no_kindergarten": "לא הוגדר",
+    "status_open": "עדיין פתוח",
+    "status_clarified": "הובהר"
+  },
+  "age": {
+    "year_one": "שנה",
+    "year_two": "שנתיים",
+    "year_few": "{n} שנים",
+    "year_many": "{n} שנים",
+    "year_other": "{n} שנים",
+    "month_one": "חודש",
+    "month_two": "חודשיים",
+    "month_few": "{n} חודשים",
+    "month_many": "{n} חודשים",
+    "month_other": "{n} חודשים",
+    "both": "{years} {join}{months}",
+    "join": "ו",
+    "join_digit": "ו-"
+  },
+  "date": {
+    "format": "{d}.{m}.{y}",
+    "month_year": "{month} {year}",
+    "months": ["ינואר", "פברואר", "מרץ", "אפריל", "מאי", "יוני", "יולי", "אוגוסט", "ספטמבר", "אוקטובר", "נובמבר", "דצמבר"],
+    "months_short": ["ינואר", "פברואר", "מרץ", "אפריל", "מאי", "יוני", "יולי", "אוגוסט", "ספטמבר", "אוקטובר", "נובמבר", "דצמבר"]
+  },
+  "range": {
+    "from_to": "{start} – {end}",
+    "since": "מ־{start}",
+    "until": "עד {end}",
+    "all": "כל התאריכים"
+  },
+  "sections": {
+    "basics": "פרטים בסיסיים",
+    "parent_summary": "מה המשפחה סיפרה לנו",
+    "teacher_observation": "תצפית הגננת",
+    "teacher_profile": "הערות הגננת מטופס הפרופיל",
+    "baselines": "תמונת פתיחה: הראשונה והעדכנית",
+    "lists": "חוזקות, תחומי עניין ומה עוזר",
+    "focus": "מיקוד נוכחי ותוכנית",
+    "observations": "היסטוריית תצפיות",
+    "reviews": "סקירות התפתחות ומעקב",
+    "functional_summary": "סיכום תפקודי קצר",
+    "timeline": "ציר זמן",
+    "understanding": "ההבנה הנוכחית",
+    "recent_observations": "תצפיות אחרונות",
+    "activities": "פעילויות ואיך הן עברו",
+    "progress": "התקדמות",
+    "next": "הצעדים הבאים"
+  },
+  "heart": {
+    "section": "במילים של המשפחה",
+    "title": "משפט מהלב"
+  },
+  "r2": {
+    "about": "על השאלון",
+    "intro": "תשובות המשפחה לפי סדר השאלון. אין חובה לענות על כל שאלה; שאלה שלא נענתה מסומנת \"לא נענה\".",
+    "status": "מצב",
+    "status_submitted": "נשלח על ידי המשפחה",
+    "status_draft": "עוד לא נשלח (נשמר כטיוטה)",
+    "filled_on": "תאריך המילוי",
+    "entry_mode": "איך מולא",
+    "mode_self": "על ידי המשפחה",
+    "mode_on_behalf": "הוזן על ידי הצוות עבור המשפחה",
+    "mode_meeting": "יחד עם המשפחה בפגישה",
+    "attendees": "השתתפו בפגישה",
+    "entered_by": "הוזן על ידי",
+    "school_year": "שנת לימודים",
+    "not_started": "המשפחה עוד לא התחילה למלא את השאלון.",
+    "nothing_answered": "עדיין אין תשובות."
+  },
+  "legacy": {
+    "title": "מהטופס הקודם",
+    "intro": "תשובות שניתנו בגרסה הקודמת של השאלון, כפי שנכתבו.",
+    "helps": "מה עוזר",
+    "who": {
+      "describe_words": "תיאור הילד/ה בכמה מילים",
+      "appreciate": "מה אתם הכי אוהבים ומעריכים",
+      "strengths": "חוזקות",
+      "interests": "תחומי עניין",
+      "motivators": "מה מניע את הילד/ה"
+    },
+    "emotions": {
+      "helps_when_sad": "מה עוזר כשהילד/ה עצוב/ה",
+      "frustration_reactions": "מה קורה בדרך כלל ברגעי תסכול",
+      "calming_helps": "מה עוזר להירגע",
+      "calming_notes": "הערות על הרגעה",
+      "transition_reaction": "הפסקת פעילות אהובה",
+      "transition_helps": "מה עוזר בשינויים",
+      "morning_separation": "הפרידה בבוקר",
+      "what_does_not_help": "מה לא עוזר"
+    },
+    "social": {
+      "social": "עם ילדים אחרים",
+      "communication": "איך הילד/ה מתקשר/ת",
+      "comments": "הערות על חברים ושיחה"
+    },
+    "independence": {
+      "levels": "עצמאות בשגרת היום",
+      "notes": "הערות על עצמאות"
+    },
+    "environment": {
+      "items": "דברים בסביבה שעשויים להשפיע על הילד/ה",
+      "notes": "הערות על הסביבה"
+    },
+    "priorities": {
+      "parent_priorities": "מה המשפחה מקווה שהילד/ה יפתח/תפתח",
+      "hope_child_feels": "איך המשפחה מקווה שהילד/ה ירגיש/תרגיש",
+      "one_thing_to_know": "הדבר החשוב ביותר לדעת",
+      "priorities_note": "הערות על הציפיות"
+    }
+  },
+  "qb": {
+    "title": "קריאה ראשונה של הגננת (תמונת פתיחה מהירה)",
+    "main_strengths": "שלוש חוזקות מרכזיות",
+    "remember": "דברים שחשוב לזכור על הילד/ה",
+    "calms_helps": "מה מרגיע ומסייע לילד/ה",
+    "may_be_difficult": "מה עשוי להקשות",
+    "first_area_to_observe": "תחום ראשון להתבוננות",
+    "question_for_parent": "שאלה לברר עם המשפחה"
+  },
+  "r3": {
+    "cycle_title": "פרטי התצפית",
+    "no_cycle": "עדיין לא התחילה תצפית של הגננת.",
+    "principles_title": "איך אנחנו מתבוננים",
+    "principles": [
+      "להתבונן במצבים טבעיים ומגוונים.",
+      "לתאר את מה שרואים, ולא את הפרשנות.",
+      "לשים לב לתדירות, לעוצמה, למשך ולמצב.",
+      "להבחין בין מה שהילד/ה עושה לבד לבין מה שעושה עם תמיכה.",
+      "לצד כל תחום לתמיכה, לרשום גם חוזקות ותחומי עניין.",
+      "לא להשוות בין ילדים.",
+      "להבין את מה שנצפה לאור ההקשר וההתפתחות של הילד/ה."
+    ],
+    "not_a_test": "תמונה שלמה של הילד/ה מתוך התבוננות יומיומית, משחק ופעילות. זה אינו מבחן.",
+    "col_item": "במה התבוננו",
+    "col_support": "כמה תמיכה נדרשה?",
+    "col_notes": "הערות",
+    "col_task": "פעולה יומיומית",
+    "independent": "עצמאי/ת",
+    "needs_help": "זקוק/ה לעזרה",
+    "col_stimulus": "מה בסביבה",
+    "col_happens": "מה קורה",
+    "col_helps": "מה עוזר",
+    "col_stage": "חלק מהיום",
+    "col_succeeds": "מה מצליח",
+    "col_difficult": "מה עדיין קשה",
+    "col_support_needed": "איזו תמיכה נדרשת",
+    "col_what_helps": "מה עוזר",
+    "seen_in": "נצפה בזמן: {place}",
+    "play_not_test": "נצפה דרך משחק ופעילות יומיומית, לא כמבחן.",
+    "no_score": "מתואר במילים בלבד; שום דבר כאן אינו נמדד.",
+    "strengths_guidance": "כדאי לרשום שלוש עד חמש חוזקות ותחומי עניין, לפי הסדר.",
+    "strengths_here": "חוזקות שנראו כאן",
+    "carried_from": "הועבר ממחזור התצפית הקודם ונבדק שוב.",
+    "need_seeing": "מה בדיוק אנחנו רואים?",
+    "need_how_often": "באיזו תדירות?",
+    "need_situations": "באילו מצבים?",
+    "need_what_seems_harder": "מה נראה שמקשה?",
+    "need_already_tried": "מה כבר ניסינו?",
+    "need_what_helped": "מה עזר?",
+    "need_focus": "הפך למיקוד נוכחי",
+    "need_untitled": "תחום להתמקדות",
+    "kind_initial": "תצפית ראשונה",
+    "kind_reassessment": "תצפית המשך",
+    "cycle_open": "בתהליך",
+    "cycle_closed": "נסגר ב־{date}",
+    "age_at_fill": "גיל בזמן המילוי",
+    "cycle": "מחזור תצפית",
+    "filled_on": "תאריך המילוי",
+    "period_note": "על התקופה",
+    "teacher": "גננת",
+    "filled_by": "מולא על ידי",
+    "d14_title": "לראות, להבין, לפעול",
+    "d14_a": "מה אני רואה",
+    "d14_b": "מתי זה קורה",
+    "d14_c": "מה הילד/ה עשוי/ה להצטרך",
+    "d14_d": "מה נעשה",
+    "d14_e": "האם משהו השתנה?",
+    "d14_doc": "תיעוד",
+    "when_time": "שעה",
+    "when_activity": "פעילות",
+    "when_activity_text": "על הפעילות",
+    "when_with_whom": "עם מי",
+    "when_before_event": "לפני",
+    "when_after_event": "אחרי",
+    "linked_focus": "קשור למיקוד: {title}",
+    "change_yes": "כן",
+    "change_partly": "חלקית",
+    "change_no": "עוד לא",
+    "observation": "תצפית"
+  },
+  "lists": {
+    "strengths": "חוזקות",
+    "interests": "תחומי עניין",
+    "what_helps": "מה עוזר",
+    "main": "חוזקה מרכזית"
+  },
+  "baseline": {
+    "original": "תמונת הפתיחה הראשונה",
+    "latest": "תמונת הפתיחה העדכנית",
+    "created": "נוצרה ב־{date} על ידי {name}",
+    "focus": "המיקוד באותו זמן",
+    "independence": "עצמאות בשגרת היום באותו זמן"
+  },
+  "plan": {
+    "goal": "יעד",
+    "method": "מה נעשה",
+    "frequency": "באיזו תדירות",
+    "who": "מי אחראי/ת",
+    "success": "איך נדע שזה עוזר",
+    "follow_up": "תאריך מעקב",
+    "strength_used": "החוזקה שעליה נשענים",
+    "need": "הצורך",
+    "adaptation": "ההתאמה",
+    "none": "אין כרגע יעדים פעילים.",
+    "closed": "יעדים שהושלמו או הושהו"
+  },
+  "obs": {
+    "date": "תאריך",
+    "where": "איפה",
+    "what": "מה נראה",
+    "support": "תמיכה",
+    "helped": "מה עזר",
+    "feedback_on": "על הפעילות: {title}",
+    "focus": "מיקוד: {title}",
+    "none": "אין תצפיות בתקופה הזאת."
+  },
+  "activities": {
+    "approved": "אושר על ידי הגננת",
+    "no_feedback": "עוד לא נרשם משוב.",
+    "none": "אין פעילויות מאושרות בתקופה הזאת."
+  },
+  "review": {
+    "title": "סקירת התפתחות",
+    "focus": "מיקוד",
+    "reassessment_on": "מועד הסקירה הבאה",
+    "improvement": "האם חל שיפור?",
+    "areas": "באילו תחומים?",
+    "what_worked": "מה עבד היטב",
+    "what_to_change": "מה צריך לשנות",
+    "note": "הערה",
+    "involvement": "הצעד הבא עם המשפחה או הצוות",
+    "none": "עדיין אין סקירת התפתחות."
+  },
+  "understanding": {
+    "none": "עדיין לא אושרה הבנה נוכחית.",
+    "summary": "סיכום",
+    "strengths": "חוזקות",
+    "interests": "תחומי עניין",
+    "what_helps": "מה עוזר",
+    "areas_for_support": "תחומים לתמיכה",
+    "adaptations": "התאמות",
+    "next_steps": "הצעדים הבאים"
+  },
+  "summary": {
+    "general_description": "תיאור כללי",
+    "main_strengths": "חוזקות מרכזיות",
+    "main_needs": "תחומים לתמיכה",
+    "adaptations": "התאמות מומלצות בגן",
+    "follow_up_with_parents": "המשך מעקב ועבודה עם המשפחה",
+    "team_recommendations": "המלצות לצוות"
+  },
+  "hopes": {
+    "title": "התקוות של המשפחה",
+    "intro": "מה המשפחה מקווה. הרעיונות האלה מציעים כיוון לתוכנית; את היעדים קובעת הגננת.",
+    "develop": "מה המשפחה מקווה שהילד/ה יפתח/תפתח השנה",
+    "feels": "איך המשפחה מקווה שהילד/ה ירגיש/תרגיש",
+    "other_area": "תחום נוסף"
+  },
+  "r5": {
+    "period_title": "תקופת התוכנית",
+    "goals_title": "יעדים",
+    "guidance": "בוחרים שניים עד שלושה יעדים לכל תקופה, כדי שכל יעד יקבל מספיק זמן ותשומת לב."
+  },
+  "tl": {
+    "baseline": "תמונת הפתיחה עודכנה",
+    "baseline_original": "תמונת פתיחה ראשונה",
+    "questionnaire": "שאלון המשפחה נשלח",
+    "focus_opened": "נפתח מיקוד",
+    "plan_changed": "התוכנית עודכנה",
+    "focus_closed": "היעד הושלם",
+    "focus_paused": "היעד הושהה",
+    "focus_reopened": "היעד נפתח מחדש",
+    "content": "פעילות אושרה",
+    "observation": "תצפית",
+    "changed": "האם חל שינוי: {value}",
+    "feedback": "משוב על פעילות",
+    "review": "סקירת התפתחות",
+    "summary": "סיכום תפקודי אושר",
+    "assessment_started": "תצפית הגננת התחילה",
+    "assessment_closed": "תצפית הגננת נסגרה",
+    "none": "לא קרה דבר בתקופה הזאת.",
+    "truncated": "מוצגות רק הרשומות האחרונות. כדי לראות הכול, בחרו תקופה קצרה יותר."
+  },
+  "options": {
+    "improvement_levels": {
+      "significant": "שיפור ניכר",
+      "partial": "שיפור חלקי",
+      "no_change": "עדיין ללא שינוי ברור"
+    },
+    "involvement_steps": {
+      "none": "לא",
+      "consultation": "התייעצות עם הצוות החינוכי",
+      "joint_plan": "תוכנית משותפת עם המשפחה",
+      "referral_as_needed": "שיתוף גורם מקצועי לפי הצורך"
+    },
+    "sensory_effects": {
+      "affects": "משפיע על הילד/ה",
+      "sometimes": "לפעמים",
+      "no_visible_effect": "ללא השפעה נראית",
+      "not_observed": "עוד לא נצפה"
+    },
+    "need_areas": {
+      "emotional": "רגשי",
+      "social": "חברתי",
+      "language": "שפה",
+      "communication": "תקשורת",
+      "attention": "ריכוז והתמדה",
+      "motor": "תנועה",
+      "cognitive": "למידה וחשיבה",
+      "independence": "עצמאות",
+      "sensory": "דברים בסביבה",
+      "behaviour": "התמודדות במצבים יומיומיים",
+      "adapting_to_setting": "הסתגלות לגן"
+    },
+    "sensitivities": {
+      "light": "אור",
+      "smells": "ריחות",
+      "creative_activities": "פעילויות יצירה"
+    },
+    "om_subgroups": {
+      "receptive": "הבנת שפה",
+      "expressive_social": "הבעה ושיחה"
+    }
+  }
+}

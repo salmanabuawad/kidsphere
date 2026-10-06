@@ -8,13 +8,14 @@ import { iconDefs, type IconElement, type KidIconDef, type KidIconName, type Pai
  * fallback so an icon still paints before (or without) the token sheet.
  */
 export const PAINTS: Record<PaintKey, string> = {
-  brand: "var(--brand, #005DBD)",
-  sky: "var(--paint-sky, #33A7E0)",
+  brand: "var(--brand, #0D3D72)",
+  accent: "var(--accent, #0A9EA3)",
+  sky: "var(--paint-sky, #44C2F2)",
   sun: "var(--paint-sun, #FDC010)",
   berry: "var(--paint-berry, #EE4E89)",
-  leaf: "var(--paint-leaf, #4DB956)",
+  leaf: "var(--paint-leaf, #4CC2A6)",
   grape: "var(--paint-grape, #BC6ECE)",
-  tangerine: "var(--paint-tangerine, #FA8927)",
+  tangerine: "var(--paint-tangerine, #F99E3A)",
 };
 
 /**
@@ -31,7 +32,7 @@ export const PAINT_SLIP = 1.5;
 export interface KidIconProps extends LucideProps {
   /**
    * The painted primitive. `true` (default): the icon's own paint, which a parent
-   * can override with the CSS variable `--icon-paint` (e.g. `[--icon-paint:var(--brand)]`
+   * can override with the CSS variable `--icon-paint` (e.g. `[--icon-paint:var(--accent)]`
    * on an active nav link, `[--icon-paint:transparent]` on an inactive one).
    * `false`: outline only, for icons on a solid fill. A string: any CSS colour.
    */

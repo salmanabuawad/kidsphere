@@ -14,7 +14,8 @@ See app/services/content.py for the row JSON, the pack storage and the status tr
 - POST   /content/{id}/duplicate           → 201 {"content"}  a new draft copy
 - POST   /content/{id}/share  {shared}     → {"content"}   sharing needs approved|completed
 - POST   /content/{id}/archive             → {"content"}
-- DELETE /content/{id}                     → 204   drafts only, else 409
+- GET    /content/{id}/versions            → {"content_id", "versions": [version]}  staff only (parents 404)
+- DELETE /content/{id}                     → 204   drafts only, else 409; a soft delete (deleted_at)
 """
 import uuid
 
@@ -83,3 +84,8 @@ def archive_content(content_id: str, db: DB, user: CurrentUser) -> dict:
 def delete_content(content_id: str, db: DB, user: CurrentUser) -> Response:
     svc.delete_content(db, user, content_id)
     return Response(status_code=204)
+
+
+@router.get("/content/{content_id}/versions")
+def content_versions(content_id: str, db: DB, user: CurrentUser) -> dict:
+    return svc.list_versions(db, user, content_id)

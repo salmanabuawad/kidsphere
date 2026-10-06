@@ -1,0 +1,5 @@
+{% from "_macros.html" import tag %}
+<div class="callout">
+  <p class="callout-title">{{ block.title }}{% if block.source %} {{ tag(block.source) }}{% endif %}</p>
+  <p class="callout-text" dir="{{ block.text | autodir(meta.dir) }}">{{ block.text | iso }}</p>
+</div>

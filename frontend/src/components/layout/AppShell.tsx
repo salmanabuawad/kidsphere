@@ -17,11 +17,12 @@ const BOTTOM_MAX = 4;
 
 /*
  * Nav icon states (spec 5.2): inactive = an `ink-muted` outline with no paint; active =
- * an `ink` outline with its designated primitive "coloured in" with `brand`. Custom
- * KidSphere icons read the paint from --icon-paint; lucide icons simply ignore it.
+ * an `ink` outline with its designated primitive "coloured in" with the logo teal `accent`
+ * (the navy `brand` would barely show against the outline). Custom KidSphere icons read
+ * the paint from --icon-paint; lucide icons simply ignore it.
  */
 const ICON_IDLE = "[--icon-paint:transparent]";
-const ICON_ACTIVE = "[--icon-paint:var(--brand)]";
+const ICON_ACTIVE = "[--icon-paint:var(--accent)]";
 
 /**
  * The primary action always draws the observe-add lens block (spec kid signal 6), whatever

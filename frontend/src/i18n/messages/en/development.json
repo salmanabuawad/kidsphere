@@ -4,7 +4,8 @@
   "actions": {
     "review": "Review development",
     "newBaseline": "Create new baseline",
-    "firstBaseline": "Create the baseline"
+    "firstBaseline": "Create the baseline",
+    "timeline": "Timeline"
   },
   "baseline": {
     "title": "Initial baseline",
@@ -115,7 +116,23 @@
     "steps": {
       "focus": "1. Current focus",
       "validation": "2. The first picture",
-      "understanding": "3. Current understanding"
+      "understanding": "3. Current understanding",
+      "followUp": "4. Follow-up"
+    },
+    "followUp": {
+      "hint": "When we will look again, what changed and the next step. Only you fill this in: a suggestion never does.",
+      "reassessment": "When we will look again",
+      "reassessmentHint": "The date of the next look at the plan.",
+      "improvement": "Has anything changed overall?",
+      "improvementNote": "Tell a bit more (optional)",
+      "areas": "In which areas?",
+      "areasGoals": "Goals",
+      "areasText": "In your own words (optional)",
+      "whatWorked": "What worked well?",
+      "whatToChange": "What needs to change?",
+      "involvement": "Next step with the family or the team",
+      "involvementHint": "Only you choose this. A suggestion never fills it in.",
+      "involvementNote": "Details (optional)"
     },
     "focus": {
       "hint": "How has each focus gone since the baseline, and what happens next?",
@@ -165,6 +182,77 @@
     "summaryRequired": "Please write a short summary first.",
     "warningsTitle": "Saved. Some choices rest on only a few observations",
     "warningsBody": "That is fine. Keep observing and look again at the next review.",
-    "warningsClose": "OK"
+    "warningsClose": "OK",
+    "wordingSaved": "Saved. The details of the next step use words we usually avoid. You may want to reword them."
+  },
+  "overTime": {
+    "title": "Understanding over time",
+    "hint": "From the first picture to today. Every step is kept, and each review was approved by a teacher.",
+    "original": "First picture (original baseline)",
+    "review": "Development review",
+    "current": "Current",
+    "approvedBy": "Approved by {name}",
+    "savedBy": "Saved by {name}",
+    "aiStarted": "Started from a suggestion"
+  },
+  "compare": {
+    "title": "Original and latest baseline",
+    "hint": "Every baseline is kept as it was. Compare the first picture with the latest one.",
+    "original": "Original · {date}",
+    "latest": "Latest · {date}",
+    "new": "New since the original",
+    "notInLatest": "Not in the latest",
+    "focus": "Current focus"
+  },
+  "summary": {
+    "title": "Short summary",
+    "intro": "A general description, main strengths, areas for support, adaptations, follow-up with the family and recommendations for the team.",
+    "none": "No summary yet",
+    "noneHint": "Write it yourself or start from a draft. It counts only once you approve it.",
+    "write": "Write",
+    "edit": "Edit",
+    "draftWithAi": "Draft with AI",
+    "approve": "Approve",
+    "approvedBadge": "Approved",
+    "approvedBy": "Approved by {name} on {date}",
+    "draftBy": "Draft saved by {name} on {date}",
+    "draft": "Draft",
+    "fromAi": "Started from an AI draft",
+    "latestApproved": "Approved summary",
+    "pendingDraft": "Draft waiting for approval",
+    "history": "Earlier versions",
+    "historyHint": "Every version is kept. Nothing is overwritten.",
+    "fields": {
+      "general_description": "General description",
+      "main_strengths": "Main strengths",
+      "main_needs": "Areas for support",
+      "adaptations": "Recommended adaptations in the kindergarten",
+      "follow_up_with_parents": "Continued follow-up and working with the family",
+      "team_recommendations": "Recommendations for the team"
+    },
+    "editor": {
+      "title": "Short summary",
+      "aiNote": "This draft was made from the observations without the child's name. Check and change everything before you approve it.",
+      "compare": "Compare with the AI draft",
+      "hideCompare": "Hide the AI draft",
+      "aiText": "AI draft",
+      "chooseStrength": "Add a strength…",
+      "customStrength": "Or type your own",
+      "add": "Add",
+      "remove": "Remove {label}",
+      "addArea": "Add an area",
+      "areaPlaceholder": "For example: starting shared play",
+      "removeArea": "Remove this area",
+      "notes": "More in your words (optional)",
+      "save": "Save draft",
+      "saveApprove": "Save and approve",
+      "cancel": "Cancel",
+      "unsafe": "Please describe what you see in everyday, observational words, without labels.",
+      "empty": "Write at least one part of the summary first."
+    },
+    "toasts": {
+      "saved": "Draft saved",
+      "approved": "Summary approved"
+    }
   }
 }

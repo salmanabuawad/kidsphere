@@ -25,7 +25,8 @@
       {"key": "personal_conversation", "icon": "🗣️", "label": {"en": "Personal conversation", "ar": "محادثة شخصية", "he": "שיחה אישית"}},
       {"key": "phone", "icon": "📞", "label": {"en": "Phone call", "ar": "مكالمة هاتفية", "he": "שיחת טלפון"}},
       {"key": "message", "icon": "✉️", "label": {"en": "Message", "ar": "رسالة", "he": "הודעה"}},
-      {"key": "meeting", "icon": "📅", "label": {"en": "Planned meeting", "ar": "لقاء مخطط", "he": "פגישה מתוכננת"}}
+      {"key": "meeting", "icon": "📅", "label": {"en": "Planned meeting", "ar": "لقاء مخطط", "he": "פגישה מסודרת"}},
+      {"key": "other", "label": {"en": "Other", "ar": "طريقة أخرى", "he": "אחר"}}
     ],
     "describe_words": [
       {"key": "curious", "label": {"en": "Curious", "ar": "محب للاستطلاع", "he": "סקרן/ית"}},
@@ -200,9 +201,10 @@
       {"key": "drinking", "icon": "🥤", "label": {"en": "Drinking", "ar": "الشرب", "he": "שתייה"}},
       {"key": "toilet", "icon": "🚽", "label": {"en": "Using the toilet", "ar": "استخدام المرحاض", "he": "שימוש בשירותים"}},
       {"key": "washing_hands", "icon": "🧼", "label": {"en": "Washing hands", "ar": "غسل اليدين", "he": "רחיצת ידיים"}},
-      {"key": "dressing", "icon": "👕", "label": {"en": "Dressing", "ar": "ارتداء الملابس", "he": "לבוש והתלבשות"}},
+      {"key": "dressing", "icon": "👕", "label": {"en": "Dressing / undressing", "ar": "ارتداء الملابس وخلعها", "he": "לבוש והפשטה"}},
       {"key": "shoes", "icon": "👟", "label": {"en": "Putting on shoes", "ar": "لبس الحذاء", "he": "נעילת נעליים"}},
       {"key": "tidying_toys", "icon": "🧺", "label": {"en": "Tidying toys", "ar": "ترتيب الألعاب", "he": "סידור משחקים"}},
+      {"key": "organizing_belongings", "icon": "🗂️", "label": {"en": "Organizing belongings", "ar": "ترتيب الأغراض", "he": "סידור חפצים"}},
       {"key": "keeping_belongings", "icon": "🎒", "label": {"en": "Keeping belongings", "ar": "الحفاظ على أغراضه", "he": "שמירה על חפצים"}},
       {"key": "starting_activity", "icon": "▶️", "label": {"en": "Starting an activity", "ar": "البدء بنشاط", "he": "התחלת פעילות"}},
       {"key": "finishing_activity", "icon": "🏁", "label": {"en": "Finishing an activity", "ar": "إنهاء نشاط", "he": "סיום פעילות"}}
@@ -296,7 +298,7 @@
       {"key": "other", "label": {"en": "Other", "ar": "أخرى", "he": "אחר"}}
     ],
     "hope_child_feels": [
-      {"key": "safe", "icon": "🛡️", "label": {"en": "Safe", "ar": "آمن", "he": "מוגן/ת"}},
+      {"key": "safe", "icon": "🛡️", "label": {"en": "Safe", "ar": "آمن", "he": "בטוח/ה"}},
       {"key": "loved", "icon": "❤️", "label": {"en": "Loved", "ar": "محبوب", "he": "אהוב/ה"}},
       {"key": "belonging", "icon": "🏡", "label": {"en": "A sense of belonging", "ar": "منتمٍ", "he": "שייך/ת"}},
       {"key": "independent", "icon": "🧭", "label": {"en": "Independent", "ar": "مستقل", "he": "עצמאי/ת"}},
@@ -429,10 +431,30 @@
         "טיפש", "תשובה שגויה", "הפסדת", "עונש"
       ]
     },
+    "ai_only": {
+      "en": [
+        "referral", "refer the child", "refer to a specialist", "refer to a professional",
+        "refer to a therapist", "be referred", "specialist evaluation", "specialist assessment",
+        "professional evaluation", "therapist assessment",
+        "specialist", "therapist", "therapy", "psychologist", "involve a professional", "consult a professional"
+      ],
+      "ar": [
+        "إحالة", "احالة", "إحالته", "إحالتها", "تحويل إلى أخصائي", "تحويله إلى أخصائي",
+        "تحويلها إلى أخصائي", "تقييم من أخصائي", "تقييم من مختص", "تقييم متخصص",
+        "إشراك مختص", "مختص عند الحاجة", "أخصائي", "اخصائي", "أخصائية", "معالج نطق", "طبيب نفسي"
+      ],
+      "he": [
+        "הפניה", "הפנייה", "הפניות", "הפנייתו", "הפנייתה", "להפנות", "הערכה מקצועית",
+        "גורם מקצועי", "איש מקצוע", "אנשי מקצוע", "קלינאית", "ריפוי בעיסוק", "פסיכולוג"
+      ]
+    },
     "allow_phrases": {
-      "en": ["problem solving", "problem-solving", "appoint", "checkpoint", "viewpoint", "underscore"],
-      "ar": ["حل المشكلات", "حل المشاكل", "نقاط القوة", "نقاط قوة", "معجز", "مقصورة"],
-      "he": ["פתרון בעיות", "לפתור בעיות", "מחלקות", "חלקות"]
+      "en": ["problem solving", "problem-solving", "appoint", "checkpoint", "viewpoint", "underscore",
+             "it is not a medical or clinical diagnosis"],
+      "ar": ["حل المشكلات", "حل المشاكل", "نقاط القوة", "نقاط قوة", "معجز", "مقصورة",
+             "ليس تشخيصاً طبياً أو سريرياً"],
+      "he": ["פתרון בעיות", "לפתור בעיות", "מחלקות", "חלקות",
+             "אינו מהווה אבחנה רפואית או קלינית"]
     }
   }
 }

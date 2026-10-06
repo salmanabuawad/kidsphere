@@ -4,7 +4,8 @@
  *   POST /api/children/{id}/content/generate → {content} | {items, pack_id} (+ fallback_reason)
  *   GET  /api/children/{id}/content?status&pack_id → {content: ContentSummary[]}
  *   GET  /api/packs/{packId} → {pack_id, child_id, items: ContentDetail[]}
- *   GET/PUT /api/content/{id}; POST …/approve | regenerate | duplicate | share | archive | feedback; DELETE (drafts)
+ *   GET/PUT /api/content/{id}; POST …/approve | regenerate | duplicate | share | archive | feedback; DELETE (drafts, a soft delete)
+ *   GET  /api/content/{id}/versions → {content_id, versions: ContentVersion[]} (staff; every AI draft and edit, newest first)
  *   POST …/feedback → 201 {feedback, content}; 200 with the first save for a repeated client_request_id
  *
  * Parents get only shared, approved/completed rows and none of the staff fields.
@@ -31,6 +32,13 @@ export const PACK_ORDER: Record<ContentType, number> = { story: 0, real_world_ac
 
 export type LabelItem = { key?: string | null; label: string };
 
+/** One AI domain block of the minimised input (keys and levels only; texts are masked). */
+export type DomainBlock = {
+  assessment?: { item: string; level?: string | null; effect?: string | null; helps?: string[] }[];
+  observations?: { id?: string | null; text?: string | null }[];
+  helps?: string[];
+};
+
 /** The allow-listed AI input stored with the row (staff only). */
 export type GenerationInput = {
   mode?: Mode | null;
@@ -40,11 +48,38 @@ export type GenerationInput = {
   strengths?: LabelItem[];
   interests?: LabelItem[];
   what_helps?: LabelItem[];
+  avoid?: string[];
   focus?: { title?: string | null; category?: string | null } | null;
   target_strength?: LabelItem | null;
+  /** The AI domains sent (only those the focus or strength concerns; COVERAGE-MATRIX X-28). */
+  domains?: Record<string, DomainBlock> | null;
   instruction?: string | null;
   variant?: number;
 };
+
+/** How a saved state came about (record_versions.via). */
+export type VersionVia = "generated" | "regenerated" | "edited" | "manual" | "system" | "backfill";
+
+/** One saved state of a content row (GET /api/content/{id}/versions, staff only; newest first). */
+export type ContentVersion = {
+  id: number;
+  seq: number;
+  via: VersionVia | string;
+  data: {
+    title?: string;
+    content?: Record<string, unknown> | null;
+    status?: string;
+    is_template?: boolean;
+    ai_provider?: string | null;
+    variant?: number;
+    language?: string | null;
+    content_type?: string;
+  } | null;
+  changed_by_name: string | null;
+  changed_role: string | null;
+  created_at: string | null;
+};
+export type ContentVersionsResponse = { content_id: string; versions: ContentVersion[] };
 
 export type ContentSummary = {
   id: string;
@@ -120,6 +155,16 @@ const enc = encodeURIComponent;
 export const contentListUrl = (childId: string) => `/api/children/${enc(childId)}/content`;
 export const contentUrl = (id: string) => `/api/content/${enc(id)}`;
 export const packUrl = (packId: string) => `/api/packs/${enc(packId)}`;
+export const contentVersionsUrl = (id: string) => `${contentUrl(id)}/versions`;
+
+/** A machine-made draft (the first draft or a new version), as opposed to a teacher edit or copy. */
+export const isGeneratedVersion = (via?: string | null) => via === "generated" || via === "regenerated";
+
+/** The AI domain keys sent with a content draft, in their stored order. */
+export function domainsUsed(gi?: GenerationInput | null): string[] {
+  const d = gi?.domains;
+  return d && typeof d === "object" ? Object.keys(d) : [];
+}
 
 export const generateContent = (childId: string, body: GenerateBody) =>
   api<GenerateResponse>(`/api/children/${enc(childId)}/content/generate`, { method: "POST", body });

@@ -1,0 +1,17 @@
+{% from "_macros.html" import cell %}
+{# Columns are written in DOM order; with dir=rtl the first column renders on the right. #}
+<table class="grid grid-{{ block.kind }}">
+  {% if block.widths %}<colgroup>{% for w in block.widths %}<col style="width: {{ w }}">{% endfor %}</colgroup>{% endif %}
+  <thead><tr>{% for col in block.columns %}<th>{{ col }}</th>{% endfor %}</tr></thead>
+  <tbody>
+  {% for row in block.rows %}
+    {% if row.sub %}
+    <tr class="sub"><td colspan="{{ block.columns | length }}">{{ row.sub }}</td></tr>
+    {% elif row.detail %}
+    <tr class="detail"><td colspan="{{ block.columns | length }}">{% for part in row.detail %}<div class="detail-part"><p class="detail-k">{{ part.k }}</p>{{ cell(part.v, meta.dir) }}</div>{% endfor %}</td></tr>
+    {% else %}
+    <tr>{% for c in row.cells %}<td>{{ cell(c, meta.dir) }}</td>{% endfor %}</tr>
+    {% endif %}
+  {% endfor %}
+  </tbody>
+</table>

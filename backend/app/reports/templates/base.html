@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="{{ meta.lang }}" dir="{{ meta.dir }}">
+<head>
+<meta charset="utf-8">
+<title>{{ meta.title }} · {{ meta.child.name }}</title>
+<meta name="author" content="KidSphere">
+<meta name="generator" content="KidSphere">
+<link rel="stylesheet" href="static/report.css">
+<link rel="stylesheet" href="static/page-{{ meta.dir }}.css">
+</head>
+<body class="lang-{{ meta.lang }} report-{{ meta.report_type }}">
+{% include "_header.html" %}
+{% include "_footer.html" %}
+<main>
+{% block intro %}{% endblock %}
+{% for section in sections %}
+{% include "_section.html" %}
+{% endfor %}
+{% if not sections %}
+<p class="marker">{{ t.nothing_yet }}</p>
+{% endif %}
+</main>
+</body>
+</html>
