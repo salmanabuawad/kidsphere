@@ -447,3 +447,14 @@ def test_template_understanding_has_hedged_patterns_and_next_questions():
     assert s.next_observation_questions
     assert s.next_observation_questions[0].domain in ("social", "play")
     assert "Joining group play" in s.next_observation_questions[0].question
+
+
+def test_content_generation_never_sends_the_real_name_and_restores_it_locally():
+    ctx = ctx_for("story")
+    data = valid_output("story", ctx)
+    data["story"][0] = "[child] and the little lion built a tower."
+    fake = FakeClaude(data)
+    result = generate("story", ctx, client=fake)
+    prompt = fake.calls[0]["messages"][0]["content"]
+    assert '"name": "[child]"' in prompt and "Adam" not in prompt
+    assert result.provider == "claude" and result.content["story"][0] == "Adam and the little lion built a tower."

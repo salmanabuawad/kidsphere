@@ -80,6 +80,7 @@ from app.ai import build_context, find_unsafe_text, for_focus, for_strength, gen
 from app.ai import gather as ai_gather
 from app.ai.gather import adult_names, classmate_names  # noqa: F401  (re-exported: reviews use them)
 from app.ai.safety import placeholder_issues
+from app.ai.service import pseudonymous_context
 from app.audit import audit
 from app.config import settings
 from app.errors import AppError
@@ -435,7 +436,8 @@ def generate_content(db: Session, user: User, child_id, body: GenerateIn) -> dic
         "focus_area_id": focus.id if focus is not None else None,
         "mode": body.mode,
         "language": language,
-        "generation_input": ctx.model_dump(mode="json"),
+        # What the provider saw: the child as [child], never the real name.
+        "generation_input": pseudonymous_context(ctx).model_dump(mode="json"),
         "ai_provider": result.provider,
         "ai_model": result.model,
         "is_template": result.is_template,
@@ -619,7 +621,7 @@ def regenerate_content(db: Session, user: User, content_id, body: RegenerateIn) 
     row.content = content
     row.title = content["title"]
     row.variant = variant
-    row.generation_input = ctx.model_dump(mode="json")
+    row.generation_input = pseudonymous_context(ctx).model_dump(mode="json")
     row.ai_provider = result.provider
     row.ai_model = result.model
     row.is_template = result.is_template

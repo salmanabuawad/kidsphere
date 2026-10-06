@@ -1,6 +1,7 @@
 {
   "theChild": "הילד/ה",
   "stepOf": "שלב {current} מתוך {total}",
+  "pageOf": "עמוד שאלות {current} מתוך {total}",
   "reviewStep": "סיכום",
   "progress": "התקדמות",
   "saveLater": "שמירה והמשך מאוחר יותר",

@@ -404,8 +404,10 @@ def test_identity_and_contact_details_never_reach_any_payload(db, teacher_client
     assert len(analysis) >= 4
     for doc in analysis:
         assert "[child]" in doc and FIRST not in doc and PREFERRED not in doc
-    # Content generation keeps the preferred name (OQ-4).
-    assert all(f'"name": "{PREFERRED}"' in doc for doc in texts["generation_input"])
+    # No AI payload ever gets the child's real name: content generation sends [child] too.
+    assert texts["generation_input"]
+    for doc in texts["generation_input"]:
+        assert '"name": "[child]"' in doc and FIRST not in doc and PREFERRED not in doc
 
     # The teacher sees the name back.
     assert understanding.suggestion.summary == "Adi appears to enjoy building with a friend."

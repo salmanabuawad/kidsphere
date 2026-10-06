@@ -13,7 +13,8 @@ import { ParentHomeIcon } from "@/icons";
 import { useI18n } from "@/i18n/I18nProvider";
 import { useFormat } from "@/lib/format";
 import { useOptions } from "@/lib/options";
-import type { RegistryItem, RegistrySection } from "@/lib/sourceModel";
+import type { Registry, RegistryItem, RegistrySection } from "@/lib/sourceModel";
+import { useFitPages } from "@/lib/useFitPages";
 import { useSourceModel } from "@/lib/sourceModel";
 import { useFetch } from "@/lib/useFetch";
 import { cn } from "@/lib/utils";
@@ -39,6 +40,7 @@ import {
   str,
   type EntryMode,
   type Meeting,
+  type StepMeta,
 } from "./model";
 import { SectionStatusControl } from "./SectionStatusControl";
 import { useQuestionnaire, type QuestionnaireState } from "./useQuestionnaire";
@@ -98,6 +100,48 @@ export function QuestionnaireWizard({
   const meta = allSteps.find((s) => s.step === current) ?? allSteps[0]!;
   const sectionKeys = [...new Set(meta.sections)];
 
+  const parts = sectionKeys
+    .map((key) => ({ key, section: sm.section(QUESTIONNAIRE, key), items: questions(reg, key, current) }))
+    .filter((x): x is { key: string; section: RegistrySection; items: RegistryItem[] } => !!x.section);
+  return (
+    <StepView
+      key={current}
+      {...{ current, total, allSteps, meta, reg, mode, name, record, meeting, setMeeting, q, child: child.data?.child, childId, go, exitTo, pathFor, meetingPatch, parts }}
+    />
+  );
+}
+
+type Part = { key: string; section: RegistrySection; items: RegistryItem[] };
+
+/** One questionnaire step, split into screen-sized pages of questions (no vertical scrolling). */
+function StepView({
+  current, total, allSteps, meta, reg, mode, name, record, meeting, setMeeting, q, child, childId, go, exitTo, pathFor, meetingPatch, parts,
+}: {
+  current: number;
+  total: number;
+  allSteps: StepMeta[];
+  meta: StepMeta;
+  reg: Registry;
+  mode: EntryMode;
+  name: string;
+  record: { meeting?: Meeting | null } | null;
+  meeting: Meeting | null;
+  setMeeting: (m: Meeting) => void;
+  q: QuestionnaireState;
+  child: ChildBasics | undefined;
+  childId: string;
+  go: (target: number) => Promise<void>;
+  exitTo: string;
+  pathFor: (step: number) => string;
+  meetingPatch: { meeting: Meeting } | undefined;
+  parts: Part[];
+}) {
+  const { t } = useI18n();
+  const navigate = useNavigate();
+  const sm = useSourceModel();
+  const offsets = parts.reduce<number[]>((acc, _p, i) => [...acc, i === 0 ? 0 : acc[i - 1]! + parts[i - 1]!.items.length], []);
+  // Reserve: the sticky action bar, the section card header and padding, the page line.
+  const fit = useFitPages(parts.reduce((n, p) => n + p.items.length, 0), { reserve: 250 });
   return (
     <div className="mx-auto max-w-5xl space-y-4" data-step={current}>
       <div className="flex flex-col gap-3 lg:flex-row-reverse lg:items-end lg:justify-between lg:gap-8">
@@ -119,29 +163,34 @@ export function QuestionnaireWizard({
         <MeetingCard value={meeting ?? record?.meeting ?? null} onChange={setMeeting} compact={current !== 1} />
       )}
 
-      {sectionKeys.map((key, i) => {
-        const section = sm.section(QUESTIONNAIRE, key);
-        if (!section) return null;
-        return (
+      <div ref={fit.containerRef} className="space-y-4">
+        {parts.map((part, i) => (
           <SectionCard
-            key={key}
-            section={section}
-            step={current}
+            key={part.key}
+            section={part.section}
+            items={part.items}
+            offset={offsets[i]!}
+            fit={fit}
             q={q}
-            child={child.data?.child}
-            collapsible={mode === "meeting" && sectionKeys.length > 1}
+            child={child}
+            collapsible={mode === "meeting" && parts.length > 1}
             defaultOpen={i === 0}
             staffChildId={mode === "self" ? undefined : childId}
           />
-        );
-      })}
+        ))}
+        {fit.pages > 1 && (
+          <p className="tabular text-caption text-center text-ink-muted" data-testid="question-page">
+            {t("wizard.pageOf", { current: fit.page + 1, total: fit.pages })}
+          </p>
+        )}
+      </div>
 
       <WizardActions>
         <Button
           variant="ghost"
           icon={<ArrowLeft className="rtl:-scale-x-100" aria-hidden />}
           disabled={q.saving}
-          onClick={() => (current === 1 ? navigate(exitTo) : void go(current - 1))}
+          onClick={() => (fit.hasPrev ? fit.prev() : current === 1 ? navigate(exitTo) : void go(current - 1))}
         >
           {t("common.back")}
         </Button>
@@ -158,8 +207,8 @@ export function QuestionnaireWizard({
           >
             <SaveLaterLabel label={t("wizard.saveLater")} />
           </Button>
-          {current < LAST_STEP ? (
-            <Button loading={q.saving} onClick={() => void go(current + 1)} data-testid="questionnaire-next">
+          {current < LAST_STEP || fit.hasNext ? (
+            <Button loading={q.saving} onClick={() => (fit.hasNext ? fit.next() : void go(current + 1))} data-testid="questionnaire-next">
               {t("common.next")}
               <ArrowRight className="rtl:-scale-x-100" aria-hidden />
             </Button>
@@ -184,7 +233,9 @@ export function QuestionnaireWizard({
 
 function SectionCard({
   section,
-  step,
+  items,
+  offset,
+  fit,
   q,
   child,
   collapsible,
@@ -192,7 +243,9 @@ function SectionCard({
   staffChildId,
 }: {
   section: RegistrySection;
-  step: number;
+  items: RegistryItem[];
+  offset: number;
+  fit: ReturnType<typeof useFitPages>;
   q: QuestionnaireState;
   child: ChildBasics | undefined;
   collapsible: boolean;
@@ -204,12 +257,12 @@ function SectionCard({
   const sm = useSourceModel();
   const [open, setOpen] = useState(defaultOpen);
   const ds = dataSection(section);
-  const items = questions(sm.registry(QUESTIONNAIRE), section.key, step);
+  const shown = items.map((_, i) => fit.visible(offset + i));
   const status = sectionStatus(q.data?.parent_perspective, ds);
   const notice = sm.label({ label: localized(section.notice) });
   const body = (
-    <CardBody className="space-y-8 py-6">
-      {notice && (
+    <CardBody className="space-y-6 py-5">
+      {notice && shown[0] && (
         <Alert tone="tip">
           <span className="inline-flex items-start gap-2">
             <Lock className="mt-0.5 size-4 shrink-0" aria-hidden />
@@ -217,14 +270,16 @@ function SectionCard({
           </span>
         </Alert>
       )}
-      {items.map((item) => (
-        <QuestionBlock key={item.id} item={item} section={ds} q={q} child={child} />
+      {items.map((item, i) => (
+        <div key={item.id} ref={fit.itemRef(offset + i)} hidden={!shown[i]}>
+          <QuestionBlock item={item} section={ds} q={q} child={child} />
+        </div>
       ))}
-      {staffChildId && <SectionStatusControl childId={staffChildId} section={ds} value={status} onSaved={q.setData} />}
+      {staffChildId && shown[shown.length - 1] && <SectionStatusControl childId={staffChildId} section={ds} value={status} onSaved={q.setData} />}
     </CardBody>
   );
   return (
-    <Card data-section={section.key}>
+    <Card data-section={section.key} hidden={!shown.some(Boolean)}>
       <CardHeader
         title={
           collapsible ? (

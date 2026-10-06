@@ -1,6 +1,7 @@
 {
   "theChild": "the child",
   "stepOf": "Step {current} of {total}",
+  "pageOf": "Questions {current} of {total}",
   "reviewStep": "Review",
   "progress": "Progress",
   "saveLater": "Save & finish later",

@@ -1,6 +1,7 @@
 {
   "theChild": "الطفل",
   "stepOf": "الخطوة {current} من {total}",
+  "pageOf": "صفحة الأسئلة {current} من {total}",
   "reviewStep": "المراجعة",
   "progress": "مراحل التعبئة",
   "saveLater": "حفظ والإكمال لاحقاً",

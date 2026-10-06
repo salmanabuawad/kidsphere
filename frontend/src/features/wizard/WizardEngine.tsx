@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ArrowLeft, ArrowRight, ChevronDown, Save, Users } from "lucide-react";
 import { Alert } from "@/components/ui/Alert";
 import { Button, ButtonLink } from "@/components/ui/Button";
@@ -9,6 +9,7 @@ import { useFormat } from "@/lib/format";
 import { paths } from "@/lib/paths";
 import { useAction } from "@/lib/useAction";
 import { useFetch } from "@/lib/useFetch";
+import { useFitPages } from "@/lib/useFitPages";
 import {
   asItems,
   asKeys,
@@ -114,6 +115,12 @@ export function WizardStep({
   const perspective: PerspectiveName = mode === "parent" ? "parent" : "teacher";
   const def = stepDef(step);
   const name = childFirstName(child.data?.child, t("wizard.theChild"));
+  // The step's questions in screen-sized pages (no vertical scrolling); the optional extras
+  // (more questions, the focus picker) are the last block.
+  const mainCount = def ? fieldsFor(def, perspective).filter((f) => !f.collapsed).length : 0;
+  const fit = useFitPages(mainCount + 1, { reserve: 200 });
+  const { reset } = fit;
+  useEffect(() => reset(), [step, reset]);
 
   if (wiz.error && !wiz.data) return <Alert tone="error">{t("wizard.loadError")}</Alert>;
   if (!wiz.data || !def) return <PageSkeleton />;
@@ -137,12 +144,14 @@ export function WizardStep({
       {mode === "staff" && <FamilyAnswersNote childId={childId} />}
       <EnteredNote stamps={(perspective === "parent" ? wiz.data.parent_perspective : wiz.data.teacher_perspective)?.entered?.[def.section]} perspective={perspective} />
 
+      <div ref={fit.containerRef}>
       <Card>
         <CardBody className="space-y-6 py-5">
           {/* Questions sit side by side on wide screens, one under another on phones. */}
           <div className="grid gap-x-8 gap-y-6 xl:grid-cols-2">
-            <StepFields def={def} fields={fields.filter((f) => !f.collapsed)} perspective={perspective} wiz={wiz} name={name} />
+            <StepFields def={def} fields={fields.filter((f) => !f.collapsed)} perspective={perspective} wiz={wiz} name={name} fit={fit} />
           </div>
+          <div ref={fit.itemRef(mainCount)} hidden={!fit.visible(mainCount)} className="space-y-6">
           {fields.some((f) => f.collapsed) && (
             <details className="group rounded-md border border-line">
               <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between rounded-md px-4 text-sm font-semibold text-brand hover:bg-tray">
@@ -156,18 +165,25 @@ export function WizardStep({
           )}
           {showFocus && <FocusPicker childId={childId} parentPriorities={parentPriorities} strengths={merged} />}
           {fields.length === 0 && !showFocus && <p className="text-sm text-ink-muted">{t("wizard.nothingHere")}</p>}
+          </div>
+          {fit.pages > 1 && (
+            <p className="tabular text-caption text-center text-ink-muted" data-testid="question-page">
+              {t("wizard.pageOf", { current: fit.page + 1, total: fit.pages })}
+            </p>
+          )}
         </CardBody>
       </Card>
+      </div>
 
       <WizardActions>
-        <Button variant="ghost" icon={<ArrowLeft className="rtl:-scale-x-100" aria-hidden />} disabled={wiz.saving} onClick={onBack}>
+        <Button variant="ghost" icon={<ArrowLeft className="rtl:-scale-x-100" aria-hidden />} disabled={wiz.saving} onClick={() => (fit.hasPrev ? fit.prev() : onBack())}>
           {t("common.back")}
         </Button>
         <div className="flex gap-2">
           <Button variant="secondary" icon={<Save aria-hidden />} disabled={wiz.saving} onClick={onSaveExit} aria-label={t("wizard.saveLater")} title={t("wizard.saveLater")}>
             <SaveLaterLabel label={t("wizard.saveLater")} />
           </Button>
-          <Button loading={wiz.saving} onClick={onNext} data-testid="wizard-next">
+          <Button loading={wiz.saving} onClick={() => (fit.hasNext ? fit.next() : onNext())} data-testid="wizard-next">
             {nextLabel ?? t("common.next")}
             <ArrowRight className="rtl:-scale-x-100" aria-hidden />
           </Button>
@@ -209,12 +225,27 @@ function EnteredNote({ stamps, perspective }: { stamps?: EnteredStamp[]; perspec
   return <p className="text-caption text-ink-muted">{t(key, vars)}</p>;
 }
 
-function StepFields({ def, fields, perspective, wiz, name }: { def: StepDef; fields: FieldDef[]; perspective: PerspectiveName; wiz: WizardProfile; name: string }) {
+function StepFields({
+  def,
+  fields,
+  perspective,
+  wiz,
+  name,
+  fit,
+}: {
+  def: StepDef;
+  fields: FieldDef[];
+  perspective: PerspectiveName;
+  wiz: WizardProfile;
+  name: string;
+  /** Page-fitting of the main questions (the optional ones are not paged). */
+  fit?: ReturnType<typeof useFitPages>;
+}) {
   const { t, has } = useI18n();
   const data = wiz.sectionData(perspective, def.section);
   return (
     <>
-      {fields.map((f) => {
+      {fields.map((f, i) => {
         const key = storedName(f);
         const set = (v: unknown) => wiz.setField(perspective, def.section, key, v);
         const label = t(`wizard.fields.${f.name}.label`, { name });
@@ -243,9 +274,11 @@ function StepFields({ def, fields, perspective, wiz, name }: { def: StepDef; fie
             break;
         }
         return (
-          <Question key={f.name} label={label} hint={hint}>
-            {control}
-          </Question>
+          <div key={f.name} ref={fit?.itemRef(i)} hidden={fit ? !fit.visible(i) : undefined}>
+            <Question label={label} hint={hint}>
+              {control}
+            </Question>
+          </div>
         );
       })}
     </>

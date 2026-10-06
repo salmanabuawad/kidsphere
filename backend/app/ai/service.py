@@ -132,6 +132,11 @@ def _use_claude(client, cfg: EffectiveAI) -> bool:
     return client is not None or bool(cfg.api_key)
 
 
+def pseudonymous_context(ctx: AIContext) -> AIContext:
+    """The context as a provider may see it: the child is [child], never the real name."""
+    return ctx.model_copy(update={"name": CHILD_TOKEN})
+
+
 def resolve_template(kind: str, ctx: AIContext) -> str | None:
     if kind in ("digital_game", "pack"):
         return ctx.template or template_provider.pick_template(ctx)
@@ -202,8 +207,12 @@ def generate(kind: str, ctx: AIContext, *, client=None) -> GenerationResult:
     cfg = effective_ai()
     if _use_claude(client, cfg):
         try:
-            data = call_claude(kind, SYSTEM_PROMPT, user_prompt(kind, ctx, template),
+            # The provider never gets the child's real name: it writes [child] and the name is put
+            # back here, on our side (pseudonymous_context).
+            data = call_claude(kind, SYSTEM_PROMPT, user_prompt(kind, pseudonymous_context(ctx), template),
                                provider_model(kind, template, ctx.include_video), client=client, config=cfg)
+            if isinstance(data, dict):
+                data = restore_names(data, ctx.name, ctx.language)
             content, issues = validate_output(kind, data, template, ctx.include_video, ai=True, tokens=tokens)
             if content is not None:
                 return GenerationResult(title=_title(kind, content), content=content, provider="claude",

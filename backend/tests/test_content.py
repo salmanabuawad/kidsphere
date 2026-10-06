@@ -119,7 +119,7 @@ def test_generate_each_type_and_mode_with_templates(teacher_client, adam, db, ki
     if kind == "digital_game":
         assert c["template"] == c["content"]["template"]
     gi = c["generation_input"]
-    assert gi["content_type"] == kind and gi["mode"] == mode and gi["name"] == "Adam"
+    assert gi["content_type"] == kind and gi["mode"] == mode and gi["name"] == "[child]"
     dumped = json.dumps(gi)
     assert "birth_date" not in dumped and "2022-08-05" not in dumped and "health" not in dumped
     assert out["fallback_reason"] is None
@@ -582,7 +582,7 @@ def test_generate_edit_and_regenerate_each_add_a_version(teacher_client, adam, d
     (v1,) = versions(teacher_client, c["id"])
     assert (v1["seq"], v1["via"], v1["entity_type"], v1["changed_by_name"]) == (1, "generated", "content", "Teacher")
     assert v1["data"]["title"] == first_title and v1["data"]["content"]["title"] == first_title
-    assert v1["data"]["is_template"] is True and v1["data"]["generation_input"]["name"] == "Adam"
+    assert v1["data"]["is_template"] is True and v1["data"]["generation_input"]["name"] == "[child]"
 
     r = teacher_client.put(f"/api/content/{c['id']}", json={"title": "A garage for everyone"})
     assert r.status_code == 200, r.text
