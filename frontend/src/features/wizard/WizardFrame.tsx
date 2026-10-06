@@ -81,7 +81,9 @@ export function WizardHeader({
 /** Sticky action bar for Back / Save & finish later / Next (above the phone bottom bar). */
 export function WizardActions({ children }: { children: ReactNode }) {
   return (
-    <div className="sticky bottom-20 z-10 flex flex-nowrap items-center justify-between gap-2 rounded-lg border border-line bg-surface p-2 shadow-sheet sm:p-3 lg:bottom-4">
+    // Phones and tablets: in the flow under the questions (pages fit the screen, so it is always
+    // visible and never covers a question or the bottom bar). Desktop: floating at the bottom.
+    <div className="z-10 flex flex-nowrap items-center justify-between gap-2 rounded-lg border border-line bg-surface p-2 shadow-sheet sm:p-3 lg:sticky lg:bottom-4">
       {children}
     </div>
   );

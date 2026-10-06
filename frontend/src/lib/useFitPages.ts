@@ -39,7 +39,9 @@ export function useFitPages(count: number, { reserve = 120 }: { reserve?: number
   useLayoutEffect(() => {
     if (!measuring) return;
     const top = containerRef.current ? containerRef.current.getBoundingClientRect().top + window.scrollY : 0;
-    const available = Math.max(200, window.innerHeight - top - reserve);
+    // Below lg the page keeps 128px under it for the bottom bar (and its raised Observe block).
+    const bottomBar = window.innerWidth < 1024 ? 136 : 0;
+    const available = Math.max(200, window.innerHeight - top - reserve - bottomBar);
     // Positions, not just heights, so grids (cards side by side) page by rows.
     const out: number[][] = [];
     let current: number[] = [];
