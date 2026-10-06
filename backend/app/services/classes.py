@@ -17,6 +17,7 @@ from app.audit import audit
 from app.errors import AppError
 from app.models import Child, ChildParent, Class, ClassTeacher, User
 from app.schemas.admin import ClassIn, ClassUpdateIn, ParentLinkIn, TeachersIn, class_out, parent_link_out
+from app.services import kindergartens
 
 
 def _uuid_or_404(value, what: str = "Class") -> uuid.UUID:
@@ -43,7 +44,8 @@ def _class_rows(db: Session, classes: list[Class]) -> list[dict]:
         .where(Child.class_id.in_(ids), Child.archived_at.is_(None))
         .group_by(Child.class_id)
     ).all())
-    return [class_out(c, teachers[c.id], counts.get(c.id, 0)) for c in classes]
+    themes = kindergartens.themes_for(db, (c.kindergarten for c in classes))
+    return [class_out(c, teachers[c.id], counts.get(c.id, 0), themes.get(c.kindergarten)) for c in classes]
 
 
 def list_classes(db: Session, user: User) -> list[dict]:
@@ -94,8 +96,12 @@ def update_class(db: Session, actor: User, class_id, body: ClassUpdateIn) -> dic
     changes = {k: v for k, v in body.model_dump(exclude_unset=True).items() if v is not None and getattr(cls, k) != v}
     if changes:
         _check_unique(db, changes.get("name", cls.name), changes.get("kindergarten", cls.kindergarten), exclude=cls.id)
+        old_kindergarten = cls.kindergarten
         for field, value in changes.items():
             setattr(cls, field, value)
+        if "kindergarten" in changes:
+            db.flush()
+            kindergartens.rename(db, old_kindergarten, cls.kindergarten)
         audit(db, actor, "class.update", "class", cls.id, fields=sorted(changes), name=cls.name)
         db.commit()
     return class_row(db, cls)

@@ -261,7 +261,7 @@ def test_class_list_shapes_and_counts(admin_client, klass, other_class, child, t
     assert rows["Class A"]["child_count"] == 2
     assert rows["Class A"]["teachers"] == [{"id": str(teacher.id), "name": "Teacher"}]
     assert rows["Class B"]["child_count"] == 0
-    assert set(rows["Class A"]) == {"id", "name", "kindergarten", "teachers", "child_count"}
+    assert set(rows["Class A"]) == {"id", "name", "kindergarten", "theme", "teachers", "child_count"}
 
 
 def test_teacher_sees_only_own_classes(teacher_client, other_teacher_client, klass, other_class, make_class):

@@ -97,6 +97,8 @@ EXACT_KEYS = {
         "mother", "father", "grandmother", "grandfather", "sister", "brother", "aunt", "uncle", "cousin",
         "friend", "pet", "other",
     ],
+    # A kindergarten's look (services/kindergartens.py; the frontend maps each to a play paint).
+    "kindergarten_themes": ["flowers", "sun", "sea", "forest", "butterflies", "rainbow"],
     # lists/common.json (COVERAGE-MATRIX §3.3.7)
     "section_statuses": ["not_started", "in_progress", "sufficient", "review_later"],
     "provenance": ["parent_said", "teacher_observed", "ai_suggested", "teacher_approved"],

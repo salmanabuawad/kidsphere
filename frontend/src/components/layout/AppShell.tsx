@@ -7,6 +7,7 @@ import { Avatar } from "@/components/ui/Avatar";
 import { Dialog } from "@/components/ui/Dialog";
 import { AccountIcon, ObserveAddIcon } from "@/icons";
 import { useI18n } from "@/i18n/I18nProvider";
+import { KindergartenChip, KindergartenTile, themeLook, useMyKindergartens, type Kindergarten } from "@/lib/kindergarten";
 import { paths } from "@/lib/paths";
 import { navFor, type NavItem } from "@/lib/routing";
 import { cn } from "@/lib/utils";
@@ -111,6 +112,33 @@ function CentreAction({ item, label }: { item: NavItem; label: string }) {
   );
 }
 
+/** The user's kindergarten(s) under the logo: the theme tile, the name and the classes. */
+function KindergartenBlock({ kindergartens }: { kindergartens: Kindergarten[] }) {
+  const { t } = useI18n();
+  if (kindergartens.length === 0) return null;
+  return (
+    <div className="space-y-2" data-testid="kindergarten-block">
+      {kindergartens.slice(0, 3).map((k) => (
+        <div key={k.name} className={cn("flex items-center gap-3 rounded-md p-2", themeLook(k.theme).soft)} data-theme={k.theme ?? "default"}>
+          <KindergartenTile theme={k.theme} />
+          <div className="min-w-0">
+            <p className="text-caption text-ink-muted">{t("common.kindergarten")}</p>
+            <p className="truncate text-sm font-semibold text-ink" dir="auto">
+              {k.name}
+            </p>
+            {k.classes.length > 0 && !(k.classes.length === 1 && k.classes[0]!.name === k.name) && (
+              <p className="text-caption truncate text-ink-muted" dir="auto">
+                {k.classes.map((c) => c.name).join(" · ")}
+              </p>
+            )}
+          </div>
+        </div>
+      ))}
+      {kindergartens.length > 3 && <p className="text-caption px-2 text-ink-muted">{t("common.moreKindergartens", { count: kindergartens.length - 3 })}</p>}
+    </div>
+  );
+}
+
 /**
  * Signed-in layout (spec 6.13).
  * - lg and up: a side nav on `ground` (brand, the primary action, nav, user block,
@@ -137,6 +165,10 @@ export function AppShell({ nav, children }: { nav: NavItem[]; children: ReactNod
   const split = Math.ceil(bottom.length / 2);
   const hasBottomBar = bottom.length > 0 || !!action;
   const roleLabel = user ? t(`common.roles.${user.role}`) : "";
+  // Admins manage every kindergarten: the shell shows only the kindergartens of teachers and parents.
+  const allKindergartens = useMyKindergartens();
+  const kindergartens = user?.role === "admin" ? [] : allKindergartens;
+  const band = kindergartens[0]?.theme ? themeLook(kindergartens[0].theme).paint : null;
   const onAccount = isActivePath(pathname, paths.account());
 
   async function signOut() {
@@ -173,11 +205,14 @@ export function AppShell({ nav, children }: { nav: NavItem[]; children: ReactNod
 
   return (
     <div className="min-h-dvh bg-ground lg:flex">
+      {/* The kindergarten's colour, a thin band along the top of the page. */}
+      {band && <div aria-hidden className={cn("fixed inset-x-0 top-0 z-40 h-1.5", band)} data-testid="kindergarten-band" />}
       {/* Desktop side nav */}
       <aside className="sticky top-0 hidden h-dvh w-64 shrink-0 flex-col gap-4 border-e border-line bg-ground p-3 lg:flex">
         <div className="pt-1">
           <Brand size={40} />
         </div>
+        <KindergartenBlock kindergartens={kindergartens} />
         {action && (
           <Link
             to={action.to}
@@ -203,6 +238,7 @@ export function AppShell({ nav, children }: { nav: NavItem[]; children: ReactNod
       <header className="sticky top-0 z-30 border-b border-line bg-ground pt-[env(safe-area-inset-top)] lg:hidden">
         <div className="mx-auto flex h-14 max-w-3xl items-center justify-between gap-2 px-3">
           <Brand />
+          {kindergartens[0] && <KindergartenChip kindergarten={kindergartens[0]} className="hidden min-w-0 truncate sm:inline-flex" />}
           <div className="flex items-center gap-1">
             <LocaleSwitcher variant="compact" />
             <button
@@ -257,6 +293,7 @@ export function AppShell({ nav, children }: { nav: NavItem[]; children: ReactNod
       <Dialog open={menuOpen} onClose={() => setMenuOpen(false)} title={t("nav.menu")} size="sm">
         <div className="space-y-4">
           {userBlock}
+          <KindergartenBlock kindergartens={kindergartens} />
           {links.length > 0 && (
             <nav className="space-y-1" aria-label={t("nav.main")}>
               {links.map((item) => (

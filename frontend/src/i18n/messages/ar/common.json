@@ -91,5 +91,7 @@
     "inMeeting": "في لقاء مع العائلة"
   },
   "notAnswered": "لم تتم الإجابة",
-  "notObserved": "لم يُلاحَظ بعد"
+  "notObserved": "لم يُلاحَظ بعد",
+  "kindergarten": "الروضة",
+  "moreKindergartens": "و{count} أخرى"
 }

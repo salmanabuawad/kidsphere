@@ -91,12 +91,13 @@ def admin_user_out(user: User) -> dict:
     }
 
 
-def class_out(cls: Class, teachers: list[User], child_count: int) -> dict:
-    """{id, name, kindergarten, teachers:[{id, name}], child_count}"""
+def class_out(cls: Class, teachers: list[User], child_count: int, theme: str | None = None) -> dict:
+    """{id, name, kindergarten, theme, teachers:[{id, name}], child_count} (theme: the kindergarten's, or None)"""
     return {
         "id": str(cls.id),
         "name": cls.name,
         "kindergarten": cls.kindergarten,
+        "theme": theme,
         "teachers": [{"id": str(t.id), "name": t.name} for t in teachers],
         "child_count": child_count,
     }

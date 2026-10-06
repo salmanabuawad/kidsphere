@@ -82,5 +82,7 @@
     "inMeeting": "בפגישה עם המשפחה"
   },
   "notAnswered": "לא נענה",
-  "notObserved": "טרם נצפה"
+  "notObserved": "טרם נצפה",
+  "kindergarten": "גן",
+  "moreKindergartens": "ועוד {count}"
 }

@@ -1,7 +1,7 @@
-"""All 22 tables as SQLAlchemy 2 models.
+"""All 23 tables as SQLAlchemy 2 models.
 
 The schema itself is created by the hand-written Alembic revisions in
-``migrations/versions/`` (``0001_initial.py`` … ``0004_child_people.py``); these
+``migrations/versions/`` (``0001_initial.py`` … ``0005_kindergarten_themes.py``); these
 models must mirror them (tests/test_migrations.py checks that every column
 exists in both).
 
@@ -535,3 +535,18 @@ class ChildPerson(Base):
     created_by: Mapped[uuid.UUID | None] = _user_fk()
     created_at: Mapped[datetime] = _created()
     updated_at: Mapped[datetime] = _updated()
+
+
+# --------------------------------------------------------------------------- 0005: kindergarten themes
+
+
+class KindergartenTheme(Base):
+    """The look of one kindergarten (classes share it through ``classes.kindergarten``): a
+    ``kindergarten_themes`` vocabulary key. Set by an admin (services/kindergartens.py)."""
+
+    __tablename__ = "kindergarten_themes"
+
+    kindergarten: Mapped[str] = mapped_column(Text, primary_key=True)
+    theme: Mapped[str] = mapped_column(Text, nullable=False)
+    updated_by: Mapped[uuid.UUID | None] = _user_fk()
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())

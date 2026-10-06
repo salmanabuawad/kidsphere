@@ -19,6 +19,8 @@ export type ClassRow = {
   id: string;
   name: string;
   kindergarten: string;
+  /** The kindergarten's theme (kindergarten_themes key), or null for the default look. */
+  theme?: string | null;
   teachers: { id: string; name: string }[];
   child_count: number;
 };

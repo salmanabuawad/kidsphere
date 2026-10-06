@@ -79,5 +79,7 @@
     "inMeeting": "In a meeting with the family"
   },
   "notAnswered": "Not answered",
-  "notObserved": "Not observed yet"
+  "notObserved": "Not observed yet",
+  "kindergarten": "Kindergarten",
+  "moreKindergartens": "and {count} more"
 }

@@ -80,7 +80,10 @@
     "deleteTitle": "حذف {name}؟",
     "deleteBody": "سيُحذف الصف وتعيينات المعلمات فيه.",
     "deleteBlocked": "ما زال في هذا الصف أطفال. انقلهم إلى صف آخر أولًا.",
-    "deleted": "تم حذف {name}."
+    "deleted": "تم حذف {name}.",
+    "theme": "مظهر {name}",
+    "themeNone": "الافتراضي",
+    "themeSaved": "تم حفظ المظهر"
   },
   "parents": {
     "title": "حسابات الأهل",

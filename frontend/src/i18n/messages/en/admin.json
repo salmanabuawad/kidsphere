@@ -76,7 +76,10 @@
     "deleteTitle": "Delete {name}?",
     "deleteBody": "The class and its teacher assignments will be removed.",
     "deleteBlocked": "This class still has children. Move them to another class first.",
-    "deleted": "{name} was deleted."
+    "deleted": "{name} was deleted.",
+    "theme": "Theme of {name}",
+    "themeNone": "Default",
+    "themeSaved": "Theme saved"
   },
   "parents": {
     "title": "Parent accounts",

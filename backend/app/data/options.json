@@ -35,6 +35,14 @@
       {"key": "pet", "icon": "🐾", "label": {"en": "Pet", "ar": "حيوان أليف", "he": "חיית מחמד"}},
       {"key": "other", "icon": "💛", "label": {"en": "Someone special", "ar": "شخص عزيز", "he": "מישהו קרוב"}}
     ],
+    "kindergarten_themes": [
+      {"key": "flowers", "icon": "🌸", "label": {"en": "Flowers", "ar": "الأزهار", "he": "פרחים"}},
+      {"key": "sun", "icon": "☀️", "label": {"en": "Sun", "ar": "الشمس", "he": "שמש"}},
+      {"key": "sea", "icon": "🌊", "label": {"en": "Sea", "ar": "البحر", "he": "ים"}},
+      {"key": "forest", "icon": "🌳", "label": {"en": "Forest", "ar": "الغابة", "he": "יער"}},
+      {"key": "butterflies", "icon": "🦋", "label": {"en": "Butterflies", "ar": "الفراشات", "he": "פרפרים"}},
+      {"key": "rainbow", "icon": "🌈", "label": {"en": "Rainbow", "ar": "قوس قزح", "he": "קשת בענן"}}
+    ],
     "contact_preferences": [
       {"key": "personal_conversation", "icon": "🗣️", "label": {"en": "Personal conversation", "ar": "محادثة شخصية", "he": "שיחה אישית"}},
       {"key": "phone", "icon": "📞", "label": {"en": "Phone call", "ar": "مكالمة هاتفية", "he": "שיחת טלפון"}},

@@ -6,6 +6,7 @@ import { Alert, Badge, Button, ButtonLink, cardTappable, Checkbox, Chip, EmptySt
 import { AttentionIcon, ChildrenIcon, ContentIcon, StrengthsIcon } from "@/icons";
 import { useI18n } from "@/i18n/I18nProvider";
 import { useFormat } from "@/lib/format";
+import { KindergartenChip, useMyKindergartens } from "@/lib/kindergarten";
 import { paths } from "@/lib/paths";
 import { useFetch } from "@/lib/useFetch";
 import { useErrorMessage } from "@/lib/useAction";
@@ -43,6 +44,7 @@ export function ChildListPage() {
   const drafts = inClass.filter((c) => (c.draft_content_count ?? 0) > 0);
   const notObserved = inClass.filter((c) => notObservedRecently(c.last_observation_at));
   const filtering = !!q.trim() || !!classId;
+  const kindergartens = useMyKindergartens();
 
   return (
     <div>
@@ -50,6 +52,15 @@ export function ChildListPage() {
         icon={<ChildrenIcon />}
         title={t("children.list.title")}
         description={t("children.list.description")}
+        eyebrow={
+          kindergartens.length > 0 && (
+            <span className="flex flex-wrap gap-2">
+              {kindergartens.map((k) => (
+                <KindergartenChip key={k.name} kindergarten={k} />
+              ))}
+            </span>
+          )
+        }
         actions={
           <ButtonLink to={paths.newChild()} size="lg" icon={<Plus className="size-5" aria-hidden />}>
             {t("children.list.add")}

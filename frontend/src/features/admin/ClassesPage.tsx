@@ -5,12 +5,14 @@ import { Alert } from "@/components/ui/Alert";
 import { Avatar } from "@/components/ui/Avatar";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { Card, CardBody } from "@/components/ui/Card";
-import { Chip } from "@/components/ui/Chip";
+import { Chip, ToggleChip } from "@/components/ui/Chip";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader, SectionTitle } from "@/components/ui/PageHeader";
 import { PageSkeleton, Spinner } from "@/components/ui/Spinner";
 import { useI18n } from "@/i18n/I18nProvider";
 import { api, isApiError } from "@/lib/api";
+import { KindergartenTile } from "@/lib/kindergarten";
+import { useOptions } from "@/lib/options";
 import { paths } from "@/lib/paths";
 import { useAction, useErrorMessage } from "@/lib/useAction";
 import { useFetch } from "@/lib/useFetch";
@@ -122,6 +124,31 @@ function ClassCard({
   );
 }
 
+/** The kindergarten's theme: an emoji and a play colour its teachers and families see in the app. */
+function ThemePicker({ kindergarten, theme, onChanged }: { kindergarten: string; theme: string | null; onChanged: () => void }) {
+  const { t } = useI18n();
+  const { list, labelOf } = useOptions();
+  const { pending, run } = useAction();
+  const choose = (next: string | null) =>
+    run(() => api("/api/kindergartens/theme", { method: "PUT", body: next ? { kindergarten, theme: next } : { kindergarten } }), {
+      success: t("admin.classes.themeSaved"),
+      onSuccess: onChanged,
+    });
+  return (
+    <div className="mb-4 flex flex-wrap items-center gap-2" role="radiogroup" aria-label={t("admin.classes.theme", { name: kindergarten })} data-testid={`theme-${kindergarten}`}>
+      <span className="text-sm font-medium text-ink">{t("admin.classes.theme", { name: kindergarten })}</span>
+      <ToggleChip single selected={!theme} disabled={pending} onToggle={() => void choose(null)}>
+        {t("admin.classes.themeNone")}
+      </ToggleChip>
+      {list("kindergarten_themes").map((o) => (
+        <ToggleChip key={o.key} single icon={o.icon} selected={theme === o.key} disabled={pending} onToggle={() => void choose(o.key)}>
+          {labelOf(o)}
+        </ToggleChip>
+      ))}
+    </div>
+  );
+}
+
 export function ClassesPage() {
   const { t } = useI18n();
   const toMessage = useErrorMessage();
@@ -183,9 +210,10 @@ export function ClassesPage() {
         <div className="space-y-8">
           {groups.map((g) => (
             <section key={g.kindergarten} aria-label={g.kindergarten}>
-              <SectionTitle icon={<ClassesIcon className="size-5" />}>
+              <SectionTitle icon={<KindergartenTile theme={g.classes[0]?.theme} className="size-8 text-base" />}>
                 <span dir="auto">{g.kindergarten}</span>
               </SectionTitle>
+              <ThemePicker kindergarten={g.kindergarten} theme={g.classes[0]?.theme ?? null} onChanged={reload} />
               <div className="grid gap-4 md:grid-cols-2">
                 {g.classes.map((c) => (
                   <ClassCard

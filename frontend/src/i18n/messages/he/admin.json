@@ -77,7 +77,10 @@
     "deleteTitle": "למחוק את {name}?",
     "deleteBody": "הכיתה ושיוכי הצוות שלה יוסרו.",
     "deleteBlocked": "יש עדיין ילדים בכיתה הזו. העבירו אותם לכיתה אחרת קודם.",
-    "deleted": "{name} נמחקה."
+    "deleted": "{name} נמחקה.",
+    "theme": "ערכת עיצוב של {name}",
+    "themeNone": "ברירת מחדל",
+    "themeSaved": "ערכת העיצוב נשמרה"
   },
   "parents": {
     "title": "חשבונות הורים",
