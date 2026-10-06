@@ -56,6 +56,7 @@ export function ChoiceRounds({ game, lang, dir, onDone }: TemplateProps<ChoiceGa
               key={i}
               label={c.label}
               emoji={c.emoji}
+              photo={c.photo}
               size={big ? "lg" : "md"}
               state={stateOf(i)}
               paint={i + index}

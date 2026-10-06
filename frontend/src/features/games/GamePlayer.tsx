@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import type { AppLocale } from "@/i18n/config";
+import { castDeep, useCast } from "@/features/player/cast";
 import { contentDir, type Dir } from "@/features/player/content-locale";
 import { parseGame } from "@/features/player/parse";
 import { PlayerFallback } from "@/features/player/PlayerFallback";
@@ -40,10 +41,18 @@ function Template({ game, ...rest }: TemplateProps<Game>) {
   }
 }
 
-/** Renders one of the 7 game templates (switching on `template`), then the shared finish screen. */
+/**
+ * Renders one of the 7 game templates (switching on `template`), then the shared finish screen.
+ * People of the child's life (CastProvider) appear by name, and a card that names one shows
+ * their photo instead of the emoji.
+ */
 export function GamePlayer({ game: raw, lang, dir: dirProp, onFinish }: GamePlayerProps) {
   const dir = contentDir(lang, dirProp);
-  const game = useMemo(() => parseGame(raw), [raw]);
+  const cast = useCast();
+  const game = useMemo(() => {
+    const parsed = parseGame(raw);
+    return parsed ? castDeep(parsed, cast) : null;
+  }, [raw, cast]);
   const [replay, setReplay] = useState(0);
   const [finished, setFinished] = useState(false);
 

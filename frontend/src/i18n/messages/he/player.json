@@ -31,12 +31,15 @@
     "duration_two": "כשתי שניות",
     "duration_other": "כ־{count} שניות",
     "learningGoal": "מטרת למידה",
-    "providerNotConnected": "שירות הפקת הווידאו עדיין לא מחובר. התסריט והסצנות מוכנים לשימוש.",
+    "providerNotConnected": "הסרטון מוצג כאן כמצגת עם קריינות. שירות הפקת וידאו עדיין לא מחובר.",
     "script": "תסריט",
     "scenes": "סצנות",
     "scene": "סצנה {n}",
     "narration": "קריינות",
-    "visualPrompt": "תיאור התמונה"
+    "visualPrompt": "תיאור התמונה",
+    "play": "הפעלה",
+    "pause": "השהיה",
+    "watchAgain": "לצפות שוב"
   },
   "present": {
     "exit": "יציאה",

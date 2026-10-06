@@ -120,6 +120,7 @@ export function DomainCard({
           parentSections={parentSections}
           onSaved={onSaved}
           onFocusCreated={onFocusCreated}
+          activeFocusCount={activeFocusCount}
         />
       )}
     </Card>
@@ -134,6 +135,7 @@ function DomainEditor({
   parentSections,
   onSaved,
   onFocusCreated,
+  activeFocusCount,
 }: {
   domain: Domain;
   cycle: Assessment;
@@ -142,6 +144,7 @@ function DomainEditor({
   parentSections: ParentSections;
   onSaved: (saved: DomainSaved) => void;
   onFocusCreated: () => void;
+  activeFocusCount: number;
 }) {
   const { t } = useI18n();
   const sm = useSourceModel();

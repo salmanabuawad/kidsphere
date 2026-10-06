@@ -3,6 +3,7 @@ import { Clock, ListChecks, Printer } from "lucide-react";
 import { ActivityIcon, AttentionIcon, CurrentFocusIcon, PackIcon, WhatHelpsIcon } from "@/icons";
 import type { AppLocale } from "@/i18n/config";
 import { cn } from "@/lib/utils";
+import { castDeep, useCast } from "./cast";
 import { contentDir, usePlayerText, type Dir } from "./content-locale";
 import { parseActivity } from "./parse";
 import { PlayerFallback } from "./PlayerFallback";
@@ -42,7 +43,11 @@ function Section({ icon, title, children, tile = "bg-tray" }: { icon: ReactNode;
 export function ActivityCard({ activity: raw, lang, dir: dirProp, printable = true, className }: ActivityCardProps) {
   const t = usePlayerText(lang);
   const dir = contentDir(lang, dirProp);
-  const activity = useMemo(() => parseActivity(raw), [raw]);
+  const cast = useCast();
+  const activity = useMemo(() => {
+    const parsed = parseActivity(raw);
+    return parsed ? castDeep(parsed, cast) : null;
+  }, [raw, cast]);
 
   if (!activity)
     return (

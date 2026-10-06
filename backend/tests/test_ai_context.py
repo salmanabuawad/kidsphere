@@ -42,7 +42,7 @@ OBS = [
 DOCUMENTED_KEYS = {
     "mode", "content_type", "template", "language", "name", "age_years", "gender", "strengths", "interests",
     "what_helps", "avoid", "focus", "target_strength", "recent_observations", "domains", "current_understanding",
-    "instruction", "variant", "include_video",
+    "instruction", "variant", "include_video", "cast",
 }
 
 

@@ -1,7 +1,7 @@
 """AI service: generate content, suggest a current understanding, draft a functional summary.
 
     generate(kind, ctx, *, client=None) -> GenerationResult
-    validate_output(kind, data, template=None, include_video=False, ai=False) -> (content | None, issues)
+    validate_output(kind, data, template=None, include_video=False, ai=False, tokens=()) -> (content | None, issues)
 
     suggest_understanding_result(ctx, observations, focus_areas, baseline_items, *, client=None,
                                  child_names=(), classmate_names=(), adult_names=(), baseline_at=None,
@@ -78,7 +78,7 @@ from app.ai.prompts import (
     understanding_prompt,
     user_prompt,
 )
-from app.ai.safety import check_content, child_facing_fields
+from app.ai.safety import check_content, child_facing_fields, placeholder_issues
 from app.ai.schemas import (
     GAME_MODELS,
     KIND_MODELS,
@@ -151,11 +151,14 @@ def _error_list(e: ValidationError) -> list[str]:
     return [f"{'.'.join(str(p) for p in err.get('loc', ()))}: {err.get('msg')}" for err in e.errors()][:20]
 
 
-def validate_output(kind: str, data, template: str | None = None, include_video: bool = False, ai: bool = False):
+def validate_output(kind: str, data, template: str | None = None, include_video: bool = False, ai: bool = False,
+                    tokens=()):
     """Return (content, issues). content is None when anything is wrong.
 
     issues start with "schema:" (shape/semantic problems) or "safety:" (wording).
     ``ai=True`` applies the AI-output wording rules (deficit and referral wording in every field).
+    ``tokens``: the person placeholders the content may use (``{grandfather}``, ...; the context's cast);
+    any other placeholder is a schema issue.
     """
     if not isinstance(data, dict):
         return None, ["schema: output is not an object"]
@@ -177,6 +180,7 @@ def validate_output(kind: str, data, template: str | None = None, include_video:
             issues.append("schema: the pack must include a video plan")
         if not include_video:
             content["video"] = None
+    issues += [f"schema: {i}" for i in placeholder_issues(content, tokens)]
     issues += [f"safety: {i}" for i in check_content(content, child_facing_fields(kind), ai=ai)]
     return (None, issues) if issues else (content, [])
 
@@ -193,13 +197,14 @@ def generate(kind: str, ctx: AIContext, *, client=None) -> GenerationResult:
     if kind not in KINDS:
         raise ValueError(f"unknown kind {kind!r}")
     template = resolve_template(kind, ctx)
+    tokens = {c.token for c in ctx.cast}
     fallback_reason = None
     cfg = effective_ai()
     if _use_claude(client, cfg):
         try:
             data = call_claude(kind, SYSTEM_PROMPT, user_prompt(kind, ctx, template),
                                provider_model(kind, template, ctx.include_video), client=client, config=cfg)
-            content, issues = validate_output(kind, data, template, ctx.include_video, ai=True)
+            content, issues = validate_output(kind, data, template, ctx.include_video, ai=True, tokens=tokens)
             if content is not None:
                 return GenerationResult(title=_title(kind, content), content=content, provider="claude",
                                         model=cfg.model, is_template=False)
@@ -213,7 +218,7 @@ def generate(kind: str, ctx: AIContext, *, client=None) -> GenerationResult:
             fallback_reason = "AI_UNAVAILABLE"
 
     data = template_provider.generate(kind, ctx, template)
-    content, issues = validate_output(kind, data, template, ctx.include_video)
+    content, issues = validate_output(kind, data, template, ctx.include_video, tokens=tokens)
     if content is None:
         log.error("template output invalid op=%s issues=%s", kind, issues[:5])
         raise AppError("AI_UNAVAILABLE", details={"issues": issues[:20]})

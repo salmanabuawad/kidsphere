@@ -21,6 +21,20 @@
       {"key": "guardian", "label": {"en": "Guardian", "ar": "وليّ الأمر", "he": "אפוטרופוס/ית"}},
       {"key": "other", "label": {"en": "Other", "ar": "صلة أخرى", "he": "קרבה אחרת"}}
     ],
+    "person_relations": [
+      {"key": "mother", "icon": "👩", "label": {"en": "Mother", "ar": "الأم", "he": "אמא"}},
+      {"key": "father", "icon": "👨", "label": {"en": "Father", "ar": "الأب", "he": "אבא"}},
+      {"key": "grandmother", "icon": "👵", "label": {"en": "Grandmother", "ar": "الجدّة", "he": "סבתא"}},
+      {"key": "grandfather", "icon": "👴", "label": {"en": "Grandfather", "ar": "الجدّ", "he": "סבא"}},
+      {"key": "sister", "icon": "👧", "label": {"en": "Sister", "ar": "الأخت", "he": "אחות"}},
+      {"key": "brother", "icon": "👦", "label": {"en": "Brother", "ar": "الأخ", "he": "אח"}},
+      {"key": "aunt", "icon": "👩", "label": {"en": "Aunt", "ar": "العمّة أو الخالة", "he": "דודה"}},
+      {"key": "uncle", "icon": "👨", "label": {"en": "Uncle", "ar": "العمّ أو الخال", "he": "דוד"}},
+      {"key": "cousin", "icon": "🧒", "label": {"en": "Cousin", "ar": "ابن العمّ أو الخال", "he": "בן או בת דודים"}},
+      {"key": "friend", "icon": "🧒", "label": {"en": "Friend", "ar": "صديق أو صديقة", "he": "חבר או חברה"}},
+      {"key": "pet", "icon": "🐾", "label": {"en": "Pet", "ar": "حيوان أليف", "he": "חיית מחמד"}},
+      {"key": "other", "icon": "💛", "label": {"en": "Someone special", "ar": "شخص عزيز", "he": "מישהו קרוב"}}
+    ],
     "contact_preferences": [
       {"key": "personal_conversation", "icon": "🗣️", "label": {"en": "Personal conversation", "ar": "محادثة شخصية", "he": "שיחה אישית"}},
       {"key": "phone", "icon": "📞", "label": {"en": "Phone call", "ar": "مكالمة هاتفية", "he": "שיחת טלפון"}},

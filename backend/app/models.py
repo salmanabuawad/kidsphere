@@ -1,7 +1,7 @@
-"""All 20 tables as SQLAlchemy 2 models.
+"""All 22 tables as SQLAlchemy 2 models.
 
-The schema itself is created by the hand-written Alembic revisions
-``migrations/versions/0001_initial.py`` and ``0002_source_documents.py``; these
+The schema itself is created by the hand-written Alembic revisions in
+``migrations/versions/`` (``0001_initial.py`` … ``0004_child_people.py``); these
 models must mirror them (tests/test_migrations.py checks that every column
 exists in both).
 
@@ -278,6 +278,9 @@ class GeneratedContent(Base):
     # 0002: soft delete of drafts (OQ-5); a CHECK allows it only while status = 'draft'.
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     deleted_by: Mapped[uuid.UUID | None] = _user_fk()
+    # 0004: the people of the child's life in this content, [{token, person_id, relation}]
+    # (services/people.py). Never their names: the client puts those in for each token.
+    people: Mapped[list] = _jsonb_list()
 
 
 class Observation(Base):
@@ -511,3 +514,24 @@ class AppSetting(Base):
     value: Mapped[dict] = mapped_column(JSONB, nullable=False)
     updated_by: Mapped[uuid.UUID | None] = _user_fk()
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())
+
+
+# --------------------------------------------------------------------------- 0004: people in the child's life
+
+
+class ChildPerson(Base):
+    """Someone from the child's life (grandfather, sister, a friend, a pet) whom stories, games
+    and videos may include. ``relation`` is a ``person_relations`` key, ``display_name`` what the
+    child calls them. The AI only ever sees the relation as a placeholder token; the name and the
+    photo stay in KidSphere (services/people.py)."""
+
+    __tablename__ = "child_people"
+
+    id: Mapped[uuid.UUID] = _pk()
+    child_id: Mapped[uuid.UUID] = _child_fk()
+    relation: Mapped[str] = mapped_column(Text, nullable=False)
+    display_name: Mapped[str] = mapped_column(Text, nullable=False)
+    photo_path: Mapped[str | None] = mapped_column(Text)
+    created_by: Mapped[uuid.UUID | None] = _user_fk()
+    created_at: Mapped[datetime] = _created()
+    updated_at: Mapped[datetime] = _updated()

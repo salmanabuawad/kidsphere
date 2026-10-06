@@ -14,8 +14,11 @@ Content is built from the phrase tables in templates/*.json:
   things to build, pairs and groups for the games.
 - frames.json: generic sentence frames shared by every theme.
 Slots: {name}, {hero}/{Hero}/{HeroTitle}, {thing}, {phrase}, {interest},
-{strength}, {focus}, {helper}, ... ``ctx.variant`` rotates the hero (when the
+{strength}, {focus}, {helper}, {people}, ... ``ctx.variant`` rotates the hero (when the
 child has several interests), the story opening and the order of choices.
+People of the child's life (``ctx.cast``) appear by their placeholder only
+(``{grandfather}``; the client shows the name and photo): one more story / video
+paragraph ("cast_line") and, in story_builder, a "Who comes along?" step.
 Hebrew slash forms (יכול/ה) follow ``ctx.gender`` when set; Arabic uses the
 ``ar_f`` variant for a girl where a line addresses the child.
 """
@@ -25,6 +28,7 @@ from collections import Counter
 from functools import lru_cache
 from pathlib import Path
 
+from app import vocab
 from app.ai.context import AIContext
 from app.ai.domains import for_focus
 
@@ -133,6 +137,8 @@ class _Kit:
             "focus": (ctx.focus.title if ctx.focus and ctx.focus.title else t(self.frames["default_focus"])),
             "helper": ctx.what_helps[0].label if ctx.what_helps else "",
         }
+        self.cast = list(ctx.cast)
+        self.vars["people"] = self.people()
         self.vars["phrase"] = self.say(theme["phrase"])
         self.vars["goal_child"] = self.say(theme["goal_child"])
         self.vars["helper_line"] = self.say(self.frames["helpers"][helper_key])
@@ -151,6 +157,18 @@ class _Kit:
 
     def choice(self, entry, **extra) -> dict:
         return {"label": self.say(entry, **extra), "emoji": entry.get("emoji")}
+
+    def people(self) -> str:
+        """The cast placeholders as one phrase: "{grandfather}", "{grandfather} and {mother}", ..."""
+        tokens = [c.token for c in self.cast]
+        if len(tokens) < 2:
+            return "".join(tokens)
+        return self.t(self.frames["cast_comma"]).join(tokens[:-1]) + self.t(self.frames["cast_and"]) + tokens[-1]
+
+
+def relation_icon(relation: str) -> str:
+    item = vocab.item("person_relations", relation) or {}
+    return item.get("icon") or "💛"
 
 
 # --------------------------------------------------------------------------- selection
@@ -216,13 +234,24 @@ def _story_parts(kit: _Kit) -> list[str]:
         close = kit.say(f["close_growth"])
     else:
         close = kit.say(th.get("praise") or f["praise_default"])
-    return [
+    parts = [
         kit.say(f["story_open"][kit.v % len(f["story_open"])]),
         kit.say(th["situation"]),
         action,
         kit.say(th["ending"]),
         close,
     ]
+    if kit.cast:
+        parts.insert(1, kit.say(f["cast_line"]))
+    return parts
+
+
+def _pictures(kit: _Kit) -> list[str]:
+    """One emoji per story paragraph / video scene (the cast line gets the first person's icon)."""
+    pictures = [kit.hero["emoji"], kit.theme["sequence"][0]["emoji"], "💬", "🌟", "😊"]
+    if kit.cast:
+        pictures.insert(1, relation_icon(kit.cast[0].relation))
+    return pictures
 
 
 def _goal(kit: _Kit) -> str:
@@ -241,7 +270,7 @@ def story(kit: _Kit) -> dict:
             kit.say(th["question"]),
         ],
         "teacher_note": kit.say(f["note_growth" if kit.growth else "note_strength"]),
-        "illustrations": [kit.hero["emoji"], th["sequence"][0]["emoji"], "💬", "🌟", "😊"],
+        "illustrations": _pictures(kit),
     }
 
 
@@ -330,6 +359,12 @@ def game(kit: _Kit, template: str) -> dict:
             {"prompt": kit.say(step["prompt"]), "choices": _rotate([kit.choice(c) for c in step["choices"]], v)}
             for step in f["story_builder"]
         ]
+        if kit.cast:
+            # "Who comes along?": the chosen people (their photos on the cards), plus the hero for one person.
+            choices = [{"label": c.token, "emoji": relation_icon(c.relation)} for c in kit.cast]
+            if len(choices) < 2:
+                choices.append({"label": kit.vars["Hero"], "emoji": kit.hero["emoji"]})
+            out["steps"].insert(1, {"prompt": kit.say(f["story_builder_cast"]), "choices": choices})
         out["closing_prompt"] = kit.say(f["story_builder_closing"])
     else:
         raise ValueError(f"unknown game template {template!r}")
@@ -339,12 +374,14 @@ def game(kit: _Kit, template: str) -> dict:
 def video(kit: _Kit) -> dict:
     f = kit.frames
     parts = _story_parts(kit)
+    pictures = _pictures(kit)
     scenes = []
     for i, narration in enumerate(parts, start=1):
         scenes.append({
             "description": kit.say(f["video_scene"], n=i),
             "narration": narration,
             "visual_prompt": kit.say(f["video_visual"], n=i, beat=f["video_beats"][(i - 1) % len(f["video_beats"])]),
+            "emoji": pictures[(i - 1) % len(pictures)],
         })
     return {
         "title": kit.say(kit.theme["story_title"]),

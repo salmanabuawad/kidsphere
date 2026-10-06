@@ -86,7 +86,7 @@
     "templateAuto": "Choose for me",
     "includeVideo": "Include a video plan",
     "includeVideoHint": "Off unless you switch it on. A video plan is a script and scenes; no video file is made yet.",
-    "videoNote": "This creates a script and a list of scenes. A video file is not made yet.",
+    "videoNote": "This creates a script and a list of scenes. It plays as a narrated slideshow; a video file is not made.",
     "languageStep": "Language",
     "languageHint": "The child sees and hears the content in this language.",
     "generate": "Create draft",
@@ -96,7 +96,12 @@
     "pickFocus": "Choose a focus area.",
     "pickStrength": "Choose a strength.",
     "pickType": "Choose what to create.",
-    "ready": "The draft is ready. Please review it."
+    "ready": "The draft is ready. Please review it.",
+    "peopleStep": "Who is in it? (optional)",
+    "peopleHint": "Choose up to {count} people from the child's life. Their names and photos appear in the story, game or video.",
+    "peopleNone": "No people added for {name} yet.",
+    "peopleAdd": "Add people on the Overview",
+    "peoplePrivacy": "The AI never sees their names or photos, only who they are to the child."
   },
   "review": {
     "back": "Back to content",
@@ -162,7 +167,8 @@
     "noFeedback": "No feedback yet.",
     "notFound": "This content was not found",
     "supportLine": "Support needed: {level}",
-    "helpedLine": "What helped: {items}"
+    "helpedLine": "What helped: {items}",
+    "whyPeople": "People included"
   },
   "editor": {
     "title": "Title",
@@ -225,7 +231,10 @@
     "unsafeTitle": "Some wording needs to change",
     "unsafeHint": "Children's content can't include clinical words, scores, percentages or web links.",
     "invalid": "Some parts are empty or too long. Check the fields and try again.",
-    "cancel": "Discard changes"
+    "cancel": "Discard changes",
+    "peopleTitle": "People in this content",
+    "peopleHint": "Keep each placeholder in curly braces exactly as it is: it shows the person's name and photo.",
+    "sceneEmoji": "Scene picture (emoji)"
   },
   "feedback": {
     "title": "How did it go?",

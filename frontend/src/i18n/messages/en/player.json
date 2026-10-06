@@ -29,12 +29,15 @@
     "duration_one": "About {count} second",
     "duration_other": "About {count} seconds",
     "learningGoal": "Learning goal",
-    "providerNotConnected": "The video provider is not connected yet. The script and scenes are ready to use.",
+    "providerNotConnected": "This video plays here as a narrated slideshow. A video provider is not connected yet.",
     "script": "Script",
     "scenes": "Scenes",
     "scene": "Scene {n}",
     "narration": "Narration",
-    "visualPrompt": "Picture description"
+    "visualPrompt": "Picture description",
+    "play": "Play",
+    "pause": "Pause",
+    "watchAgain": "Watch again"
   },
   "present": {
     "exit": "Exit",

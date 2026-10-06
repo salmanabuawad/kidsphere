@@ -7,7 +7,12 @@ what-helps labels, at most 3 avoid (sensitivity) keys, the focus area
 (category, title, description, plan without ``who`` and ``review_on``) or the
 target strength, at most 5 recent observations (each <= 300 characters), the
 domain blocks, the current understanding (summary, adaptations, next_steps) when
-present, the regenerate instruction, the variant and include_video.
+present, the regenerate instruction, the variant, include_video and the cast.
+
+``cast`` holds the people of the child's life the teacher chose for this content (at most
+3; services/people.py): a placeholder token (``{grandfather}``), the relation key and its
+label. Never a name, a photo or an id: the AI writes the token and the client shows the
+person's name and photo in its place.
 
 ``avoid`` holds ONLY sensitivity keys the teacher observed in the teacher
 assessment (Domain 9, ``app.ai.domains.teacher_avoid``). Parent-reported
@@ -79,6 +84,7 @@ EMAIL_TOKEN = "[email]"
 STAFF_SOURCES = frozenset({"teacher", "observation", "review"})
 
 MAX_LIST_ITEMS = 3
+MAX_CAST = 3
 MAX_OBSERVATIONS = 5
 MAX_OBSERVATION_CHARS = 300
 MAX_DOMAIN_OBSERVATIONS = 3
@@ -148,6 +154,14 @@ class FocusContext(_M):
     plan: dict | None = None
 
 
+class CastMember(_M):
+    """One person of the child's life in this content: only the placeholder and the relation."""
+
+    token: str = Field(pattern=r"^\{[a-z][a-z0-9_]{0,40}\}$")
+    relation: str = Field(pattern=r"^[a-z0-9_]{1,40}$")
+    label: str = Field(min_length=1, max_length=80)
+
+
 class UnderstandingContext(_M):
     summary: str | None = None
     adaptations: str | None = None
@@ -174,6 +188,7 @@ class AIContext(_M):
     instruction: str | None = None
     variant: int = 0
     include_video: bool = False
+    cast: list[CastMember] = Field(default_factory=list, max_length=MAX_CAST)
 
 
 # --------------------------------------------------------------------------- helpers
@@ -583,6 +598,7 @@ def build_context(
     mask_free_text: bool = True,
     avoid=(),
     domains: dict | None = None,
+    cast=(),
 ) -> AIContext:
     """Build the allow-listed AIContext. ``child``/``profile``/``focus`` may be rows or dicts.
 
@@ -595,6 +611,7 @@ def build_context(
     observation entries from ``app.ai.gather``); see the module docstring.
     ``recent_observations``: texts, rows or dicts; only the observation text (or
     ``details.what_i_see``) is used, never the note.
+    ``cast``: ``[{token, relation, label}]`` (``services/people.ai_cast``); names never travel.
     ``mask_free_text=False`` keeps the free texts as typed. Only the development-review
     suggestion uses it: ``app.ai.service`` masks every free text with
     ``mask_understanding_inputs`` right before the AI call, and the template provider and the
@@ -660,4 +677,5 @@ def build_context(
         instruction=_clip(mask(instruction), 500) if instruction else None,
         variant=max(int(variant or 0), 0),
         include_video=bool(include_video),
+        cast=[CastMember(**c) for c in cast or ()][:MAX_CAST],
     )

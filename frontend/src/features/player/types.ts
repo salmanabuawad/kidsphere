@@ -5,8 +5,11 @@
  * VideoPlanOut). All values are plain text: nothing is ever rendered as HTML.
  */
 
-/** A card with a short label and an optional emoji picture. */
-export type Choice = { label: string; emoji?: string | null };
+/**
+ * A card with a short label and an optional emoji picture. `photo` is added on the client
+ * only (cast.tsx) when the label names a person of the child's life who has a photo.
+ */
+export type Choice = { label: string; emoji?: string | null; photo?: string | null };
 
 /** StoryOut: 2–6 short paragraphs, 2–4 discussion questions, one optional emoji per paragraph. */
 export type Story = {
@@ -29,7 +32,8 @@ export type Activity = {
   adaptation: string;
 };
 
-export type VideoScene = { description: string; narration: string; visual_prompt: string };
+/** `emoji` pictures the scene in the narrated slideshow (plans made before it have none). */
+export type VideoScene = { description: string; narration: string; visual_prompt: string; emoji?: string | null };
 
 /** VideoPlanOut: the script and scene list (30–90 seconds). */
 export type VideoPlan = {
@@ -80,7 +84,7 @@ export type MatchPairsGame = GameBase & { template: "match_pairs"; pairs: Pair[]
 /** `items` are in the correct order; the player shuffles them. */
 export type SequenceGame = GameBase & { template: "sequence"; items: Choice[] };
 
-export type Category = { key: string; label: string; emoji?: string | null };
+export type Category = { key: string; label: string; emoji?: string | null; photo?: string | null };
 export type CategorizeItem = Choice & { category: string };
 export type CategorizeGame = GameBase & { template: "categorize"; categories: Category[]; items: CategorizeItem[] };
 

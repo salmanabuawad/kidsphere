@@ -5,6 +5,19 @@ export { useNarration } from "./useNarration";
 export { StoryPlayer, type StoryPlayerProps } from "./StoryPlayer";
 export { ActivityCard, type ActivityCardProps } from "./ActivityCard";
 export { VideoPlanView, type VideoPlanViewProps } from "./VideoPlanView";
+export { VideoSlideshow, type VideoSlideshowProps } from "./VideoSlideshow";
+export {
+  CastProvider,
+  NO_CAST,
+  castDeep,
+  castResolver,
+  personPhotoUrl,
+  useCast,
+  type CastMember,
+  type CastPerson,
+  type CastResolver,
+  type ContentCast,
+} from "./cast";
 export { PresentFrame, type PresentFrameProps } from "./PresentFrame";
 export { PlayerFallback } from "./PlayerFallback";
-export { BackArrow, ChoiceCard, Dots, Feedback, KidButton, KidHeading, NextArrow, Pic, RoundButton, type CardState } from "./kid-ui";
+export { BackArrow, ChoiceCard, Dots, Feedback, KidButton, KidHeading, NextArrow, PhotoStack, Pic, RoundButton, type CardState } from "./kid-ui";

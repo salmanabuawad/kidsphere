@@ -5,13 +5,14 @@
  * check (400 VALIDATION / 422 UNSAFE_CONTENT are shown inline).
  */
 import { useState, type ReactNode } from "react";
-import { ArrowDown, ArrowUp, Plus, Save, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowUp, Plus, Save, Trash2, Users } from "lucide-react";
 import { Alert, Button, Field, IconButton, Input, Label, Select, Textarea } from "@/components/ui";
 import { isGameTemplate, parseActivity, parseGame, parseStory, parseVideoPlan, toContentLocale } from "@/features/player";
 import { useI18n } from "@/i18n/I18nProvider";
 import { isApiError } from "@/lib/api";
 import { useAction } from "@/lib/useAction";
 import { unsafeIssues, updateContent, type ContentDetail } from "./api";
+import { useContentCast } from "./ContentPreview";
 
 type Obj = Record<string, unknown>;
 
@@ -47,6 +48,7 @@ export function ContentEditor({
   const [draft, setDraft] = useState<Obj>(() => clone(item.content ?? {}));
   const [problem, setProblem] = useState<{ kind: "invalid" | "unsafe"; issues: string[] } | null>(null);
   const lang = toContentLocale(item.language);
+  const cast = useContentCast(item);
   const set = (key: string, value: unknown) => setDraft((d) => ({ ...d, [key]: value }));
 
   async function save() {
@@ -85,6 +87,25 @@ export function ContentEditor({
   return (
     <div className="space-y-6" data-testid="content-editor" lang={lang}>
       {item.status === "approved" && <Alert tone="warning">{t("content.editor.approvedWarning")}</Alert>}
+      {cast.members.length > 0 && (
+        <div className="rounded-md bg-tray p-3 text-sm text-ink" data-testid="cast-legend">
+          <p className="flex items-center gap-2 font-semibold">
+            <Users className="size-4" aria-hidden />
+            {t("content.editor.peopleTitle")}
+          </p>
+          <ul className="mt-1.5 flex flex-wrap gap-x-4 gap-y-1">
+            {cast.members.map((m) => (
+              <li key={m.token}>
+                <code dir="ltr" className="rounded-sm bg-surface px-1.5 py-0.5">
+                  {m.token}
+                </code>{" "}
+                <span dir="auto">{m.name}</span>
+              </li>
+            ))}
+          </ul>
+          <p className="text-caption mt-1.5 text-ink-muted">{t("content.editor.peopleHint")}</p>
+        </div>
+      )}
       <TextField label={t("content.editor.title")} value={str(draft.title)} max={120} onChange={(v) => set("title", v)} />
       {fields}
       {problem && (
@@ -431,6 +452,7 @@ function VideoFields({ draft, set }: { draft: Obj; set: SetFn }) {
               <TextField label={t("content.editor.sceneDescription")} value={str(s.description)} max={300} multiline rows={2} onChange={(x) => update({ ...s, description: x })} />
               <TextField label={t("content.editor.narration")} value={str(s.narration)} max={400} multiline rows={2} onChange={(x) => update({ ...s, narration: x })} />
               <TextField label={t("content.editor.visualPrompt")} value={str(s.visual_prompt)} max={300} multiline rows={2} onChange={(x) => update({ ...s, visual_prompt: x })} />
+              <TextField label={t("content.editor.sceneEmoji")} value={str(s.emoji)} max={16} onChange={(x) => update({ ...s, emoji: x.trim() ? x : null })} />
             </div>
           );
         }}

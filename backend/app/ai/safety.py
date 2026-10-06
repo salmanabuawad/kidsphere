@@ -27,6 +27,8 @@ Public functions:
         with one of ``child_facing_fields``. Issues are prefixed with the path.
     child_facing_fields(kind, template=None) -> set[str]
         The child-facing paths for an output kind.
+    placeholder_issues(data, allowed) -> list[str]
+        Person placeholders ({grandfather}) in ``data`` that are not in ``allowed``.
 """
 import re
 
@@ -110,6 +112,18 @@ def check_content(obj, child_facing_fields, ai: bool = False) -> list[str]:
         child = any(dotted == p or dotted.startswith(p + ".") for p in prefixes)
         issues.extend(f"{dotted}: {i}" for i in text_issues(s, child, ai))
     return _dedupe(issues)
+
+
+# A person placeholder in content: {relation} or {relation_N} (services/people.py). The client puts
+# the display name in its place; any other placeholder would show as raw text to a child.
+PLACEHOLDER_RE = re.compile(r"\{([a-z][a-z0-9_]{0,40})\}")
+
+
+def placeholder_issues(data, allowed=()) -> list[str]:
+    """Placeholders in ``data`` (any nested str/list/dict) that are not one of the ``allowed`` tokens
+    (``{grandfather}``, ...)."""
+    found = {"{" + m + "}" for _, s in _strings(data) for m in PLACEHOLDER_RE.findall(s)}
+    return [f"unknown person placeholder {t}" for t in sorted(found - set(allowed or ()))]
 
 
 _STORY = {"title", "story", "questions", "illustrations"}

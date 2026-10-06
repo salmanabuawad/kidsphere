@@ -50,7 +50,7 @@ export function Sequence({ game, lang, dir, replay, onDone }: TemplateProps<Sequ
             >
               {item && (
                 <>
-                  <Pic emoji={item.emoji} className="text-4xl" />
+                  <Pic emoji={item.emoji} photo={item.photo} className="text-4xl" />
                   <span dir="auto" className="font-display text-lg font-semibold text-ink">
                     {item.label}
                   </span>
@@ -69,6 +69,7 @@ export function Sequence({ game, lang, dir, replay, onDone }: TemplateProps<Sequ
               key={i}
               label={game.items[i]!.label}
               emoji={game.items[i]!.emoji}
+              photo={game.items[i]!.photo}
               state={hint === i ? "hint" : "idle"}
               paint={i}
               onClick={() => tap(i)}

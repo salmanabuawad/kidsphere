@@ -121,6 +121,10 @@
     }
   ],
   "story_builder_closing": {"en": "Now tell your story!", "ar": "والآن احكِ قصتك!", "ar_f": "والآن احكي قصتك!", "he": "עכשיו ספר/י את הסיפור שלך!"},
+  "story_builder_cast": {"en": "Who comes along on the adventure?", "ar": "مَن يأتي معنا في المغامرة؟", "he": "מי מצטרף להרפתקה?"},
+  "cast_line": {"en": "Today {people} came along with {name} too!", "ar": "و{people} هنا اليوم مع {name} أيضاً!", "he": "גם {people} כאן היום עם {name}!"},
+  "cast_comma": {"en": ", ", "ar": "، ", "he": ", "},
+  "cast_and": {"en": " and ", "ar": " و", "he": " ו"},
   "discussion": [
     {"en": "When could you say “{phrase}”?", "ar": "متى يمكنك أن تقول «{phrase}»؟", "ar_f": "متى يمكنكِ أن تقولي «{phrase}»؟", "he": "מתי אפשר להגיד ״{phrase}״?"},
     {"en": "{Hero} loved {love}. What do you love to do?", "ar": "كان {hero} يحبّ {love}. وماذا تحبّ أنت أن تفعل؟", "ar_f": "كان {hero} يحبّ {love}. وماذا تحبّين أنتِ أن تفعلي؟", "he": "{hero} אהב {love}. מה את/ה אוהב/ת לעשות?"},

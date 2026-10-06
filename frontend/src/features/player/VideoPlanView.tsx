@@ -3,7 +3,9 @@ import { Clock, Film, Info, Mic, Sparkles } from "lucide-react";
 import { CurrentFocusIcon, VideoIcon } from "@/icons";
 import type { AppLocale } from "@/i18n/config";
 import { cn } from "@/lib/utils";
+import { castDeep, useCast } from "./cast";
 import { contentDir, usePlayerText, type Dir } from "./content-locale";
+import { Pic } from "./kid-ui";
 import { parseVideoPlan } from "./parse";
 import { PlayerFallback } from "./PlayerFallback";
 import type { VideoPlan, VideoStatus } from "./types";
@@ -30,11 +32,17 @@ const STATUS_TONE: Record<VideoStatus, string> = {
   failed: "bg-attention-soft text-ink",
 };
 
-/** Teacher-facing video plan: learning goal, script and the scene list. */
+/**
+ * Teacher-facing video plan: learning goal, script and the scene list. People of the
+ * child's life (CastProvider) appear by name, with their photos on the scenes that mention them.
+ */
 export function VideoPlanView({ plan: raw, lang, dir: dirProp, status = "script_ready", notice }: VideoPlanViewProps) {
   const t = usePlayerText(lang);
   const dir = contentDir(lang, dirProp);
-  const plan = useMemo(() => parseVideoPlan(raw), [raw]);
+  const cast = useCast();
+  const parsed = useMemo(() => parseVideoPlan(raw), [raw]);
+  const photos = useMemo(() => parsed?.scenes.map((sc) => cast.photos(sc.narration)) ?? [], [parsed, cast]);
+  const plan = useMemo(() => (parsed ? castDeep(parsed, cast) : null), [parsed, cast]);
 
   if (!plan)
     return (
@@ -100,7 +108,13 @@ export function VideoPlanView({ plan: raw, lang, dir: dirProp, status = "script_
         <ol className="space-y-3">
           {plan.scenes.map((s, i) => (
             <li key={i} className="space-y-2 rounded-lg border border-line p-4" data-testid="video-scene">
-              <p className="tabular text-sm font-semibold text-brand">{t("player.video.scene", { n: i + 1 })}</p>
+              <div className="flex items-center gap-2">
+                {s.emoji && <Pic emoji={s.emoji} className="text-2xl" />}
+                <p className="tabular text-sm font-semibold text-brand">{t("player.video.scene", { n: i + 1 })}</p>
+                {(photos[i] ?? []).map((src) => (
+                  <Pic key={src} photo={src} className="text-3xl" />
+                ))}
+              </div>
               <p dir="auto" className="font-medium">
                 {s.description}
               </p>

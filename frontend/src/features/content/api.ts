@@ -10,7 +10,7 @@
  *
  * Parents get only shared, approved/completed rows and none of the staff fields.
  */
-import type { GameTemplate, VideoStatus } from "@/features/player";
+import type { ContentCast, GameTemplate, VideoStatus } from "@/features/player";
 import { api } from "@/lib/api";
 
 export type ContentType = "story" | "video" | "digital_game" | "real_world_activity";
@@ -55,6 +55,8 @@ export type GenerationInput = {
   domains?: Record<string, DomainBlock> | null;
   instruction?: string | null;
   variant?: number;
+  /** The people of the child's life in it: a placeholder and the relation only (never a name). */
+  cast?: { token: string; relation: string; label: string }[];
 };
 
 /** How a saved state came about (record_versions.via). */
@@ -122,6 +124,8 @@ export type ContentFeedback = {
 
 export type ContentDetail = ContentSummary & {
   content?: Record<string, unknown> | null;
+  /** The child's name and photo flag, and each person placeholder with its display name and photo flag. */
+  cast?: ContentCast | null;
   generation_input?: GenerationInput | null;
   approved_by?: { id: string; name: string | null } | null;
   created_by?: { id: string; name: string | null } | null;
@@ -136,6 +140,8 @@ export type GenerateBody = {
   target_strength?: string;
   language?: string;
   include_video?: boolean;
+  /** Up to 3 people of the child's life (child_people ids). */
+  people?: string[];
 };
 
 export type GenerateResponse = { content?: ContentDetail; items?: ContentDetail[]; pack_id?: string; fallback_reason?: string | null };

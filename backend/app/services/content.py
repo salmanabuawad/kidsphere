@@ -24,6 +24,15 @@ Pack storage (content_type has no 'pack' value)
     Regenerating a story that carries discussion prompts regenerates story +
     prompts together (one 'pack' call; the game/activity parts are discarded).
 
+People of the child's life (0004; services/people.py)
+    ``GenerateIn.people`` (at most 3 child_people ids of this child) become the row's
+    ``people`` ``[{token, person_id, relation}]`` (every row of a pack the same) and the
+    AIContext ``cast`` (token, relation, label; never a name or photo). The output may
+    use only those placeholders (also in teacher edits: 400 otherwise). Regenerate
+    keeps the people; duplicate copies them. The detail adds ``cast`` = the child's
+    name and photo flag and each token's display name and photo flag, so viewers
+    show the real people (``people.cast_out``).
+
 Lifecycle (B9)
     draft → approved (approve; a video row calls video_service.create_video_job)
     draft|approved → draft  on edit (PUT) or regenerate; completed/archived → 409
@@ -54,10 +63,11 @@ Content JSON (staff)::
      mode, focus_area_id, focus_area_title, shared_with_parent, is_template,
      ai_provider, ai_model, variant, video_provider, last_feedback_result,
      # detail only:
-     content, generation_input, approved_by {id,name}|null, created_by {id,name}|null,
+     content, cast {child {name, has_photo, updated_at}, people [{token, relation, person_id,
+     display_name, has_photo, updated_at}]}, generation_input, approved_by {id,name}|null, created_by {id,name}|null,
      feedback [{id, result, support_level, observation, what_helped, observation_id, created_at, by_name}]}
 
-Parents get the first line plus ``content`` (detail, without teacher_note).
+Parents get the first line plus ``content`` (detail, without teacher_note) and ``cast``.
 """
 import copy
 import uuid
@@ -69,6 +79,7 @@ from app import access, vocab
 from app.ai import build_context, find_unsafe_text, for_focus, for_strength, generate, validate_output
 from app.ai import gather as ai_gather
 from app.ai.gather import adult_names, classmate_names  # noqa: F401  (re-exported: reviews use them)
+from app.ai.safety import placeholder_issues
 from app.audit import audit
 from app.config import settings
 from app.errors import AppError
@@ -84,7 +95,7 @@ from app.models import (
     User,
 )
 from app.schemas.content import ContentUpdate, GenerateIn, RegenerateIn, ShareIn
-from app.services import history, video_service
+from app.services import history, people as people_svc, video_service
 from app.services import settings as app_settings
 from app.sessions import utcnow
 
@@ -206,12 +217,18 @@ def feedback_out(fb: ContentFeedback, by_name: str | None) -> dict:
     }
 
 
+def _cast(db: Session, row: GeneratedContent) -> dict:
+    child = db.get(Child, row.child_id)
+    return people_svc.cast_out(db, child, row.people)
+
+
 def detail_out(db: Session, row: GeneratedContent, staff: bool) -> dict:
     content = copy.deepcopy(row.content) if isinstance(row.content, dict) else {}
     if not staff:
         out = summary_out(row, staff=False)
         content.pop("teacher_note", None)
         out["content"] = content
+        out["cast"] = _cast(db, row)
         return out
     focus_title = (db.scalar(select(FocusArea.title).where(FocusArea.id == row.focus_area_id))
                    if row.focus_area_id else None)
@@ -219,6 +236,7 @@ def detail_out(db: Session, row: GeneratedContent, staff: bool) -> dict:
     names = _user_names(db, [row.approved_by, row.created_by, *(f.created_by for f in feedback)])
     out = summary_out(row, staff=True, focus_title=focus_title, last_result=feedback[0].result if feedback else None)
     out["content"] = content
+    out["cast"] = _cast(db, row)
     out["generation_input"] = row.generation_input
     out["approved_by"] = {"id": str(row.approved_by), "name": names.get(row.approved_by)} if row.approved_by else None
     out["created_by"] = {"id": str(row.created_by), "name": names.get(row.created_by)} if row.created_by else None
@@ -347,7 +365,7 @@ def relevant_domains(focus: FocusArea | None, target: str | None) -> list[str]:
 
 def _context(db: Session, child: Child, profile: ChildProfile | None, *, mode: str, kind: str, language: str,
              focus: FocusArea | None, target: str | None, template: str | None = None,
-             instruction: str | None = None, variant: int = 0, include_video: bool = False):
+             instruction: str | None = None, variant: int = 0, include_video: bool = False, people=()):
     linked = _focus_observations(db, child.id, focus.id if focus is not None else None)
     blocks, avoid = ai_gather.content_domains(db, child.id, relevant_domains(focus, target),
                                               exclude_observation_ids=[o.id for o in linked])
@@ -369,10 +387,12 @@ def _context(db: Session, child: Child, profile: ChildProfile | None, *, mode: s
         include_video=include_video,
         avoid=avoid,
         domains=blocks,
+        cast=people_svc.ai_cast(people, language),
     )
 
 
 def _new_row(kind: str, content: dict, base: dict, pack_id=None) -> GeneratedContent:
+    base = {**base, "people": copy.deepcopy(base.get("people") or [])}
     return GeneratedContent(
         content_type=kind,
         title=content["title"],
@@ -403,8 +423,9 @@ def generate_content(db: Session, user: User, child_id, body: GenerateIn) -> dic
         raise _invalid("include_video", "include_video is used with pack only.")
     # Admin setting general.default_content_language ("child" = the child's main language).
     language = body.language or app_settings.default_content_language(db) or default_language(child, user)
+    people = people_svc.content_people(db, child, body.people)
     ctx = _context(db, child, profile, mode=body.mode, kind=body.content_type, language=language, focus=focus,
-                   target=target, template=body.template, include_video=body.include_video)
+                   target=target, template=body.template, include_video=body.include_video, people=people)
     # Nothing is written yet: end the read transaction so no connection is held while the AI works.
     db.commit()
     result = generate(body.content_type, ctx)
@@ -420,6 +441,7 @@ def generate_content(db: Session, user: User, child_id, body: GenerateIn) -> dic
         "is_template": result.is_template,
         "variant": 0,
         "created_by": user.id,
+        "people": people,
     }
     pack_id = uuid.uuid4() if body.content_type == "pack" else None
     parts = _pack_parts(result.content) if pack_id else [(body.content_type, result.content)]
@@ -431,7 +453,7 @@ def generate_content(db: Session, user: User, child_id, body: GenerateIn) -> dic
         audit(db, user, "content.generate", "content", row.id, child_id=child.id, mode=body.mode,
               content_type=row.content_type, template=_template(row), language=language, provider=result.provider,
               is_template=result.is_template, pack_id=str(pack_id) if pack_id else None,
-              fallback_reason=result.fallback_reason)
+              fallback_reason=result.fallback_reason, people=[p["relation"] for p in people])
     db.flush()
     items = [detail_out(db, r, staff=True) for r in rows]
     db.commit()
@@ -495,12 +517,13 @@ def validated_content(row: GeneratedContent, data) -> dict:
     if has_prompts:
         prompts = data.pop(DISCUSSION_KEY)
     template = _template(row)
-    content, issues = validate_output(row.content_type, data, template)
+    tokens = people_svc.tokens_of(row.people)
+    content, issues = validate_output(row.content_type, data, template, tokens=tokens)
     schema = [i.removeprefix("schema:").strip() for i in issues if i.startswith("schema:")]
     safety = [i.removeprefix("safety:").strip() for i in issues if i.startswith("safety:")]
     if has_prompts:
         p_schema, p_safety, prompts = _check_prompts(prompts)
-        schema += p_schema
+        schema += p_schema + [f"{DISCUSSION_KEY}: {i}" for i in placeholder_issues(prompts or [], tokens)]
         safety += p_safety
     if schema:
         raise AppError("VALIDATION", "The content is not complete or has the wrong shape.",
@@ -580,7 +603,7 @@ def regenerate_content(db: Session, user: User, content_id, body: RegenerateIn) 
         kind, template = "pack", gi.get("template")
     variant = (row.variant or 0) + 1
     ctx = _context(db, child, profile, mode=row.mode, kind=kind, language=row.language, focus=focus, target=target,
-                   template=template, instruction=body.instruction, variant=variant)
+                   template=template, instruction=body.instruction, variant=variant, people=row.people)
     row_id = row.id
     db.commit()  # no connection held during the AI call
     result = generate(kind, ctx)
@@ -636,6 +659,7 @@ def duplicate_content(db: Session, user: User, content_id) -> dict:
         variant=row.variant,
         video_status="script_ready" if row.content_type == "video" else None,
         created_by=user.id,
+        people=copy.deepcopy(row.people or []),
     )
     db.add(new)
     db.flush()

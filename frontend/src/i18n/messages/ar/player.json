@@ -37,12 +37,15 @@
     "duration_many": "نحو {count} ثانية",
     "duration_other": "نحو {count} ثانية",
     "learningGoal": "هدف التعلّم",
-    "providerNotConnected": "خدمة إنتاج الفيديو غير متصلة بعد. النص والمشاهد جاهزة للاستخدام.",
+    "providerNotConnected": "يُعرض هذا الفيديو هنا كعرض صور مع سرد صوتي. خدمة إنتاج الفيديو غير متصلة بعد.",
     "script": "النص",
     "scenes": "المشاهد",
     "scene": "المشهد {n}",
     "narration": "السرد",
-    "visualPrompt": "وصف الصورة"
+    "visualPrompt": "وصف الصورة",
+    "play": "تشغيل",
+    "pause": "إيقاف مؤقت",
+    "watchAgain": "شاهد مرة أخرى"
   },
   "present": {
     "exit": "خروج",

@@ -3,8 +3,9 @@ import { RotateCcw, Square, Volume2 } from "lucide-react";
 import { NoteQuoteIcon } from "@/icons";
 import type { AppLocale } from "@/i18n/config";
 import { cn } from "@/lib/utils";
+import { castDeep, useCast } from "./cast";
 import { contentDir, usePlayerText, type Dir } from "./content-locale";
-import { BackArrow, Dots, KidButton, NextArrow, playPaint, RoundButton } from "./kid-ui";
+import { BackArrow, Dots, KidButton, NextArrow, PhotoStack, playPaint, RoundButton } from "./kid-ui";
 import { parseStory } from "./parse";
 import { PlayerFallback } from "./PlayerFallback";
 import type { Story } from "./types";
@@ -24,14 +25,19 @@ export type StoryPlayerProps = {
 
 /**
  * Page-by-page story: one big paragraph with its emoji picture per page, then
- * the discussion questions. Back/Next follow the reading direction (in RTL
+ * the discussion questions. People of the child's life (CastProvider) appear by
+ * name, and a page that mentions them shows their photos instead of the emoji. Back/Next follow the reading direction (in RTL
  * Next sits on the left and the arrows flip). Optional read-aloud uses the
  * browser's speech synthesis in the content language.
  */
 export function StoryPlayer({ story: raw, lang, dir: dirProp, showTeacherNote = false, onFinish }: StoryPlayerProps) {
   const t = usePlayerText(lang);
   const dir = contentDir(lang, dirProp);
-  const story = useMemo(() => parseStory(raw), [raw]);
+  const cast = useCast();
+  const parsed = useMemo(() => parseStory(raw), [raw]);
+  // Photos per page come from the raw paragraphs (placeholders), the text from the resolved copy.
+  const photos = useMemo(() => parsed?.story.map((p) => cast.photos(p)) ?? [], [parsed, cast]);
+  const story = useMemo(() => (parsed ? castDeep(parsed, cast) : null), [parsed, cast]);
   const [page, setPage] = useState(0);
   const { supported, speaking, speak, stop } = useNarration(lang);
   const finished = useRef(false);
@@ -60,6 +66,7 @@ export function StoryPlayer({ story: raw, lang, dir: dirProp, showTeacherNote = 
 
   const pageText = onQuestions ? [t("player.story.questionsTitle"), ...story.questions].join(". ") : story.story[page]!;
   const picture = onQuestions ? "💬" : (story.illustrations?.[page] ?? "📖");
+  const pagePhotos = onQuestions ? [] : (photos[page] ?? []);
 
   return (
     <div dir={dir} lang={lang} className="flex min-h-[70vh] flex-col gap-6" data-testid="story-player">
@@ -73,11 +80,15 @@ export function StoryPlayer({ story: raw, lang, dir: dirProp, showTeacherNote = 
           <div className="relative flex aspect-[4/3] w-full max-w-xl items-center justify-center rounded-xl bg-surface shadow-lip-lg">
             <span aria-hidden className="pointer-events-none absolute inset-0 rounded-xl border-[3px] border-ink" />
             <span aria-hidden className={cn("flex aspect-square h-[66%] items-center justify-center rounded-lg", playPaint(page))}>
-              <span className="flex size-[78%] items-center justify-center rounded-full bg-surface">
-                <span className="text-[6rem] leading-none md:text-[8rem]" data-testid="story-illustration">
-                  {picture}
+              {pagePhotos.length > 0 ? (
+                <PhotoStack photos={pagePhotos} className="size-[92%]" />
+              ) : (
+                <span className="flex size-[78%] items-center justify-center rounded-full bg-surface">
+                  <span className="text-[6rem] leading-none md:text-[8rem]" data-testid="story-illustration">
+                    {picture}
+                  </span>
                 </span>
-              </span>
+              )}
             </span>
           </div>
           <p dir="auto" className="font-display text-kid-story mx-auto max-w-[30ch] text-center font-medium text-ink">

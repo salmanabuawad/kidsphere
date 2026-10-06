@@ -27,9 +27,23 @@ from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
 
 from app.ai.domains import AI_DOMAINS, assessment_blocks, help_keys, is_key, teacher_avoid
-from app.models import Child, ChildParent, ChildProfile, Class, ClassTeacher, Observation, TeacherAssessment, User
+from app.models import (
+    Child,
+    ChildParent,
+    ChildPerson,
+    ChildProfile,
+    Class,
+    ClassTeacher,
+    Observation,
+    TeacherAssessment,
+    User,
+)
 
 INTENSITIES = ("light", "moderate", "strong")
+# People of the child's life (child_people) masked as [friend]; a pet's name is not masked, every
+# other relation is an adult.
+CHILD_RELATIONS = ("sister", "brother", "cousin", "friend")
+UNMASKED_RELATIONS = ("pet",)
 CHANGE_KEYS = ("yes", "partly", "no")
 
 
@@ -42,18 +56,22 @@ def _kindergarten_classes(child: Child):
 def classmate_names(db: Session, child: Child) -> list[str]:
     """Names (full and preferred) of the other children, for masking in AI input as [friend]:
     every child of the same kindergarten and every child without a class; every other child
-    when this one has no class."""
+    when this one has no class. Also the children in the child's people list."""
     stmt = select(Child.name, Child.preferred_name).where(Child.id != child.id)
     if child.class_id is not None:
         stmt = stmt.where(or_(Child.class_id.in_(_kindergarten_classes(child)), Child.class_id.is_(None)))
-    return [n for row in db.execute(stmt).all() for n in row if n]
+    names = [n for row in db.execute(stmt).all() for n in row if n]
+    # The sisters, brothers, cousins and friends in the child's people list (services/people.py).
+    names += db.scalars(select(ChildPerson.display_name).where(ChildPerson.child_id == child.id,
+                                                               ChildPerson.relation.in_(CHILD_RELATIONS))).all()
+    return names
 
 
 def adult_names(db: Session, child: Child) -> list[str]:
     """Names of the adults around the child, for masking in AI input as [adult]: the parent name on
     the child, the linked parent accounts, the parents named in the questionnaire
     (PP.who.parents[].name) and the teachers of the kindergarten's classes (of every
-    class when the child has no class)."""
+    class when the child has no class), and the adults in the child's people list."""
     names = [child.parent_name]
     names += db.scalars(select(User.name).join(ChildParent, ChildParent.user_id == User.id)
                         .where(ChildParent.child_id == child.id)).all()
@@ -68,6 +86,9 @@ def adult_names(db: Session, child: Child) -> list[str]:
     who = (pp.get("sections") or {}).get("who") if isinstance(pp.get("sections"), dict) else None
     parents = who.get("parents") if isinstance(who, dict) else None
     names += [p["name"] for p in parents or [] if isinstance(p, dict) and isinstance(p.get("name"), str) and p["name"].strip()]
+    # The adults in the child's people list (a grandfather, an aunt; services/people.py).
+    names += db.scalars(select(ChildPerson.display_name).where(
+        ChildPerson.child_id == child.id, ChildPerson.relation.not_in(CHILD_RELATIONS + UNMASKED_RELATIONS))).all()
     return [n for n in names if n]
 
 

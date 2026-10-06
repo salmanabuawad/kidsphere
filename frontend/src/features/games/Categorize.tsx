@@ -64,7 +64,7 @@ export function Categorize({ game, lang, replay, onDone }: TemplateProps<Categor
             <span aria-hidden className={cn("pointer-events-none absolute inset-0 rounded-xl", selected !== null ? "border-4 border-dashed border-brand" : "border-[3px] border-ink")} />
             <span aria-hidden className={cn("relative flex size-20 items-center justify-center rounded-lg", playPaint(BASKET_PAINT[ci % BASKET_PAINT.length]!))}>
               <span className="flex size-14 items-center justify-center rounded-full bg-surface">
-                <Pic emoji={c.emoji ?? "🧺"} className="text-[2.25rem]" />
+                <Pic emoji={c.emoji ?? "🧺"} photo={c.photo} className="text-[2.25rem]" />
               </span>
             </span>
             <span dir="auto" className="font-display text-kid-label relative font-semibold text-ink">
@@ -75,8 +75,8 @@ export function Categorize({ game, lang, replay, onDone }: TemplateProps<Categor
                 .filter((i) => game.items[i]!.category === c.key)
                 .map((i) => (
                   <span key={i} className="animate-bounce-place relative rounded-full bg-surface px-2 py-1 text-base ring-2 ring-ink" title={game.items[i]!.label}>
-                    {game.items[i]!.emoji ? <Pic emoji={game.items[i]!.emoji} className="text-2xl" /> : null}
-                    <span className={game.items[i]!.emoji ? "sr-only" : ""}>{game.items[i]!.label}</span>
+                    {game.items[i]!.emoji || game.items[i]!.photo ? <Pic emoji={game.items[i]!.emoji} photo={game.items[i]!.photo} className="text-2xl" /> : null}
+                    <span className={game.items[i]!.emoji || game.items[i]!.photo ? "sr-only" : ""}>{game.items[i]!.label}</span>
                   </span>
                 ))}
             </span>
@@ -91,6 +91,7 @@ export function Categorize({ game, lang, replay, onDone }: TemplateProps<Categor
               key={i}
               label={game.items[i]!.label}
               emoji={game.items[i]!.emoji}
+              photo={game.items[i]!.photo}
               state={selected === i ? "selected" : "idle"}
               paint={i}
               onClick={() => pickItem(i)}

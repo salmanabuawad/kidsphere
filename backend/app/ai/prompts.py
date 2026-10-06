@@ -68,8 +68,9 @@ KIND_GUIDES = {
     "video": (
         "Write a short video content plan (no video is generated now): title; learning_goal; script (the full "
         "narration, under 90 seconds when read aloud); scenes = 3-6 scenes, each with a description, the narration "
-        "for that scene and a visual_prompt for a gentle illustrated style (no real people, no text on screen); "
-        "duration_seconds between 30 and 90."
+        "for that scene, a visual_prompt for a gentle illustrated style (no real people, no text on screen) and one "
+        "emoji that pictures the scene (KidSphere plays the scenes as a narrated slideshow); duration_seconds "
+        "between 30 and 90."
     ),
     "pack": (
         "Write a small weekly pack for one child and one goal: a story (exactly 3 questions), a teacher-led activity, "
@@ -77,6 +78,18 @@ KIND_GUIDES = {
         "teacher can use during the week."
     ),
 }
+
+# Only when the teacher chose people of the child's life (services/people.py). The context carries a
+# placeholder and the relation of each, never a name or a photo.
+CAST_GUIDE = (
+    "People from the child's life: \"cast\" in the context lists people the teacher chose to include (only a "
+    "placeholder and who they are to the child, never a name). Give each of them a warm, natural part in the "
+    "child-facing text and refer to them ONLY by their placeholder, written exactly as given (for example "
+    "{grandfather}): KidSphere shows the name the child uses and the person's photo in its place. Use every "
+    "placeholder at least once, never invent a name for them, never write any other word in curly braces and do "
+    "not describe how they look. In a game a choice label may be the placeholder alone, so the child sees that "
+    "person's photo on the card."
+)
 
 GAME_GUIDES = {
     "multiple_choice": "Game template multiple_choice: 2-4 rounds; each round has a question, 2-4 choices (short label + one emoji), correct_or_preferred_answer = index of the best choice, and a warm explanation shown after any choice.",
@@ -150,6 +163,8 @@ def user_prompt(kind: str, ctx: AIContext, template: str | None = None) -> str:
             parts.append(GAME_GUIDES[template] + f' The pack game uses "template": "{template}".')
         if kind == "pack" and ctx.include_video:
             parts.append("Also include a video plan in \"video\". " + KIND_GUIDES["video"])
+    if ctx.cast:
+        parts.append(CAST_GUIDE)
     if ctx.current_understanding:
         parts.append("Build on the teacher-approved current understanding (adaptations and next steps) in the context.")
     if ctx.instruction:

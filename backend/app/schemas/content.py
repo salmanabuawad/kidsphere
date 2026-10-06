@@ -1,6 +1,6 @@
 """Generated content and feedback: request bodies (spec §14–20, PLAN-ADJUSTMENTS B4, B8, B9).
 
-- ``GenerateIn``  POST /api/children/{id}/content/generate
+- ``GenerateIn``  POST /api/children/{id}/content/generate  (``people``: up to 3 child_people ids)
 - ``ContentUpdate``  PUT /api/content/{id}  (``title`` and/or the whole ``content`` object;
   the content is validated against the type's output model plus the safety check
   in the service, not here)
@@ -47,6 +47,9 @@ class GenerateIn(StrictModel):
     language: Language | None = None
     # pack only: a video plan is generated only when explicitly requested.
     include_video: bool = False
+    # People of the child's life to include (child_people ids of THIS child, at most 3, no repeats).
+    # The AI sees only a placeholder token and the relation of each (services/people.py).
+    people: Annotated[list[uuid.UUID], Field(max_length=3)] = []
 
 
 class ContentUpdate(StrictModel):

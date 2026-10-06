@@ -26,8 +26,15 @@ export function BackArrow({ dir, className }: { dir: Dir; className?: string }) 
   return <ArrowNextIcon mirror={false} className={cn("size-9", !rtl && "-scale-x-100", className)} aria-hidden data-arrow={rtl ? "right" : "left"} />;
 }
 
-/** A decorative emoji picture (screen readers read the label next to it instead). */
-export function Pic({ emoji, className }: { emoji?: string | null; className?: string }) {
+/**
+ * A decorative picture (screen readers read the label next to it instead): the photo of a
+ * person from the child's life when there is one (sized like the emoji: 1em), else the emoji.
+ */
+export function Pic({ emoji, photo, className }: { emoji?: string | null; photo?: string | null; className?: string }) {
+  if (photo)
+    return (
+      <img src={photo} alt="" aria-hidden className={cn("inline-block size-[1em] rounded-full bg-tray object-cover align-middle select-none", className)} />
+    );
   if (!emoji) return null;
   return (
     <span className={cn("leading-none select-none", className)} aria-hidden>
@@ -133,6 +140,7 @@ function CheckBlock({ className }: { className?: string }) {
 export function ChoiceCard({
   label,
   emoji,
+  photo,
   state = "idle",
   size = "md",
   paint = 0,
@@ -141,6 +149,8 @@ export function ChoiceCard({
 }: Omit<ButtonHTMLAttributes<HTMLButtonElement>, "children"> & {
   label: string;
   emoji?: string | null;
+  /** A person's photo (people of the child's life), shown instead of the emoji. */
+  photo?: string | null;
   state?: CardState;
   size?: "md" | "lg";
   /** The tile's position: picks its play paint (sun, sky, berry, leaf, tangerine, grape). */
@@ -178,7 +188,9 @@ export function ChoiceCard({
             lg ? "size-[76px] text-[3.25rem] md:size-[88px] md:text-[4rem]" : "size-14 text-[2.25rem] md:size-16 md:text-[2.75rem]",
           )}
         >
-          {emoji ? (
+          {photo ? (
+            <img src={photo} alt="" className="size-full rounded-full object-cover" data-testid="choice-photo" />
+          ) : emoji ? (
             <Pic emoji={emoji} />
           ) : (
             <span className="font-display text-kid-label font-semibold text-ink">{Array.from(label.trim())[0] ?? ""}</span>
@@ -213,6 +225,31 @@ export function Feedback({ tone, title, children }: { tone: "warm" | "think" | "
         </p>
       )}
     </div>
+  );
+}
+
+/**
+ * Up to 3 round photos of the people a story page or video scene mentions, overlapping like a
+ * little family picture. Decorative: the text next to it names them.
+ */
+export function PhotoStack({ photos, className }: { photos: string[]; className?: string }) {
+  const shown = photos.slice(0, 3);
+  if (shown.length === 0) return null;
+  return (
+    <span className={cn("flex items-center justify-center", className)} aria-hidden data-testid="photo-stack">
+      {shown.map((src, i) => (
+        <img
+          key={src}
+          src={src}
+          alt=""
+          className={cn(
+            "aspect-square rounded-full border-[3px] border-ink bg-tray object-cover shadow-lip-lg select-none",
+            shown.length === 1 ? "w-[78%]" : shown.length === 2 ? "w-[48%]" : "w-[38%]",
+            i > 0 && "-ms-[8%]",
+          )}
+        />
+      ))}
+    </span>
   );
 }
 

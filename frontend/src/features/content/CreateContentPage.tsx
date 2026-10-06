@@ -4,15 +4,18 @@
  *    what is difficult"), then one active focus area or one strength.
  * 2. What to create: Story, Video, Digital game (optional game type),
  *    Real-world activity or Small pack (video only when switched on).
- * 3. Language (defaults to the child's main language).
+ * 3. Who is in it (optional): up to 3 people of the child's life (their names and photos
+ *    are shown in the content; the AI only gets a placeholder and the relation).
+ * 4. Language (defaults to the child's main language).
  * Generate → a draft to review. Query: ?mode=&focus=&strength=&type= preselect.
  */
 import { useState, type ReactNode } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router";
-import { Wand } from "lucide-react";
+import { Lock, Users, Wand } from "lucide-react";
 import { Alert, Button, ButtonLink, Card, CardBody, Checkbox, EmptyState, NumeralBlock, PageHeader, PageSkeleton, Spinner, ToggleChip } from "@/components/ui";
 import { CurrentFocusIcon } from "@/icons";
 import { childUrl, displayName, isStaffView, type ChildDetail } from "@/features/children";
+import { MAX_IN_CONTENT, PersonAvatar, peopleUrl, type PeopleResponse } from "@/features/people";
 import { GAME_TEMPLATES, type GameTemplate } from "@/features/player";
 import { LOCALE_NAMES, LOCALES, isLocale, type AppLocale } from "@/i18n/config";
 import { useI18n } from "@/i18n/I18nProvider";
@@ -85,6 +88,10 @@ function CreateForm({ childId, child }: { childId: string; child: ChildDetail })
   const [template, setTemplate] = useState<GameTemplate | null>(null);
   const [includeVideo, setIncludeVideo] = useState(false);
   const [language, setLanguage] = useState<AppLocale>(isLocale(child.main_language) ? child.main_language : locale);
+  const people = useFetch<PeopleResponse>(peopleUrl(childId)).data?.people ?? [];
+  const [cast, setCast] = useState<string[]>([]);
+  const togglePerson = (id: string) =>
+    setCast((c) => (c.includes(id) ? c.filter((x) => x !== id) : c.length >= MAX_IN_CONTENT ? c : [...c, id]));
 
   // One active focus: preselect it.
   const chosenFocus = focusAreas.some((f) => f.id === focusId) ? focusId : focusAreas.length === 1 ? focusAreas[0]!.id : null;
@@ -106,6 +113,8 @@ function CreateForm({ childId, child }: { childId: string; child: ChildDetail })
     if (mode === "strength_builder" && strength) body.target_strength = strength;
     if (type === "digital_game" && template) body.template = template;
     if (type === "pack" && includeVideo) body.include_video = true;
+    const chosen = cast.filter((id) => people.some((p) => p.id === id));
+    if (chosen.length) body.people = chosen;
     const r = await run(() => generateContent(childId, body), { success: t("content.create.ready") });
     if (r.ok) {
       if (r.data.pack_id) navigate(paths.pack(r.data.pack_id));
@@ -262,7 +271,39 @@ function CreateForm({ childId, child }: { childId: string; child: ChildDetail })
             )}
           </Step>
 
-          <Step n={3} title={t("content.create.languageStep")} hint={t("content.create.languageHint")}>
+          <Step n={3} title={t("content.create.peopleStep", { name })} hint={t("content.create.peopleHint", { count: MAX_IN_CONTENT })}>
+            {people.length === 0 ? (
+              <p className="flex flex-wrap items-center gap-2 text-sm text-ink-muted" data-testid="people-none">
+                <Users className="size-4 shrink-0" aria-hidden />
+                {t("content.create.peopleNone", { name })}
+                <ButtonLink size="sm" variant="ghost" to={paths.child(childId)}>
+                  {t("content.create.peopleAdd")}
+                </ButtonLink>
+              </p>
+            ) : (
+              <div className="space-y-2">
+                <div className="flex flex-wrap gap-2" role="group" aria-label={t("content.create.peopleStep", { name })}>
+                  {people.map((p) => (
+                    <ToggleChip
+                      key={p.id}
+                      selected={cast.includes(p.id)}
+                      disabled={!cast.includes(p.id) && cast.length >= MAX_IN_CONTENT}
+                      onToggle={() => togglePerson(p.id)}
+                      icon={<PersonAvatar person={p} size="sm" className="size-6" />}
+                    >
+                      {p.display_name}
+                    </ToggleChip>
+                  ))}
+                </div>
+                <p className="text-caption flex items-start gap-1.5 text-ink-muted">
+                  <Lock className="mt-0.5 size-3.5 shrink-0" aria-hidden />
+                  {t("content.create.peoplePrivacy")}
+                </p>
+              </div>
+            )}
+          </Step>
+
+          <Step n={4} title={t("content.create.languageStep")} hint={t("content.create.languageHint")}>
             <div className="flex flex-wrap gap-2" role="radiogroup" aria-label={t("content.create.languageStep")}>
               {LOCALES.map((l) => (
                 <ToggleChip key={l} single selected={language === l} onToggle={() => setLanguage(l)}>

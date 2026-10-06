@@ -30,7 +30,7 @@ export function StoryBuilder({ game, lang, dir, onDone }: TemplateProps<StoryBui
             const c = s.choices[chosen[si]!]!;
             return (
               <li key={si} className="animate-bounce-place flex min-w-28 flex-col items-center gap-2 rounded-xl border-[3px] border-ink bg-surface p-4 text-center shadow-lip-lg" data-testid="story-builder-card">
-                <Pic emoji={c.emoji} className="text-6xl" />
+                <Pic emoji={c.emoji} photo={c.photo} className="text-6xl" />
                 <span dir="auto" className="font-display text-kid-label font-semibold text-ink">
                   {c.label}
                 </span>
@@ -69,7 +69,7 @@ export function StoryBuilder({ game, lang, dir, onDone }: TemplateProps<StoryBui
             const c = game.steps[si]!.choices[ci]!;
             return (
               <li key={si} className="rounded-md border-2 border-ink bg-surface px-3 py-1 text-lg text-ink">
-                <Pic emoji={c.emoji} className="me-1" />
+                <Pic emoji={c.emoji} photo={c.photo} className="me-1" />
                 <span dir="auto">{c.label}</span>
               </li>
             );
@@ -82,7 +82,7 @@ export function StoryBuilder({ game, lang, dir, onDone }: TemplateProps<StoryBui
         </p>
         <div className="mx-auto grid w-full max-w-3xl grid-cols-2 gap-4">
           {s.choices.map((c, i) => (
-            <ChoiceCard key={i} label={c.label} emoji={c.emoji} size="lg" paint={i + step} onClick={() => choose(i)} data-testid={`story-choice-${i}`} />
+            <ChoiceCard key={i} label={c.label} emoji={c.emoji} photo={c.photo} size="lg" paint={i + step} onClick={() => choose(i)} data-testid={`story-choice-${i}`} />
           ))}
         </div>
       </section>

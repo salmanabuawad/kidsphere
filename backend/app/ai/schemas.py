@@ -242,6 +242,8 @@ class VideoScene(Out):
     description: Text(300)
     narration: Text(400)
     visual_prompt: Text(300)
+    # The picture of the scene in the narrated slideshow (optional: plans made before it have none).
+    emoji: Emoji | None = None
 
 
 class VideoPlanOut(Out):

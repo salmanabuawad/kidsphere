@@ -15,6 +15,7 @@ import {
   WhatHelpsIcon,
   type KidIcon,
 } from "@/icons";
+import { PeopleCard } from "@/features/people";
 import { pick } from "@/i18n/config";
 import { useI18n } from "@/i18n/I18nProvider";
 import { useFormat } from "@/lib/format";
@@ -67,7 +68,11 @@ export function ChildProfilePage() {
 
   return (
     <ChildLayout childId={id} child={child} onChanged={reload}>
-      {isStaffView(child) ? <StaffOverview child={child} /> : <BasicProfile strengths={child.strengths} interests={child.interests} />}
+      {isStaffView(child) ? (
+        <StaffOverview child={child} />
+      ) : (
+        <BasicProfile childId={child.id} name={displayName(child)} strengths={child.strengths} interests={child.interests} />
+      )}
     </ChildLayout>
   );
 }
@@ -99,6 +104,8 @@ function StaffOverview({ child }: { child: ChildStaffView }) {
       {(data.heart || data.describeWords.length > 0) && <HeartCard data={data} name={displayName(child)} />}
 
       <GoodToKnowCard child={child} data={data} />
+
+      <PeopleCard childId={child.id} childName={displayName(child)} canEdit />
 
       <Section
         title={t("children.profile.strengths")}
@@ -163,13 +170,14 @@ function StaffOverview({ child }: { child: ChildStaffView }) {
   );
 }
 
-/** What a non-staff viewer may see: strengths and interests only. */
-function BasicProfile({ strengths, interests }: { strengths: ProfileItem[]; interests: ProfileItem[] }) {
+/** What a non-staff viewer may see: strengths and interests, and the people in the child's life (read only). */
+function BasicProfile({ childId, name, strengths, interests }: { childId: string; name: string; strengths: ProfileItem[]; interests: ProfileItem[] }) {
   const { t } = useI18n();
   return (
     <div className="space-y-5">
       <Section title={t("children.profile.strengths")} tone="strength" empty={t("children.profile.strengthsEmpty")} list="strengths" items={strengths} />
       <Section title={t("children.profile.interests")} tone="interest" empty={t("children.profile.interestsEmpty")} list="interests" items={interests} />
+      <PeopleCard childId={childId} childName={name} canEdit={false} />
     </div>
   );
 }

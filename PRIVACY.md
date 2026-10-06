@@ -9,6 +9,7 @@ KidSphere stores sensitive information about young children. It is an educationa
 | User accounts | `users` | Name, login (an e-mail or a username), bcrypt hash, role, UI language, active flag, last login. |
 | Child basics | `children` | Name, preferred name, birth date, optional gender, class, main and additional languages, optional parent name and contact. |
 | Child photo (optional) | `UPLOAD_DIR/children/<random>.jpg` | Re-encoded JPEG without EXIF/GPS. The DB stores only its relative path. |
+| People in the child's life (optional) | `child_people`, photos in `UPLOAD_DIR/people/<random>.jpg` | At most 12 per child: the relation (grandfather, sister, friend, pet, …), the name the child uses for them and an optional photo, processed like the child photo. Entered by staff. |
 | Profile | `child_profiles` | Parent and teacher answers from the wizard (strengths, interests, motivators, emotions and transitions, social and communication snapshot, independence levels, environment, priorities), who entered each section and when, the merged lists, and the current understanding. |
 | Baselines | `baselines` | Immutable snapshots of the profile and the active focus areas. |
 | Focus areas | `focus_areas` | Title, category and the 5-step plan. |
@@ -47,6 +48,7 @@ KidSphere stores sensitive information about young children. It is an educationa
 - the domain blocks (`domains`) of the AI domains the focus or strength concerns, and of no other domain: the teacher-observation item keys with the support needed (or the Domain 9 effect), help keys, and at most 3 recent observations tagged with that domain (date, context, support level, the stage-E result key "did anything change" (yes/partly/no) and the focus whose plan was applied, the masked text cut to 300 characters). The domains sent are stored with the content.
 - the approved current understanding (summary, adaptations, next steps)
 - the teacher's regenerate instruction
+- the people the teacher chose for this content (at most 3): only a placeholder such as `{grandfather}` and the relation with its label. Never their name or photo. The AI writes the placeholder; the browser shows the name and photo in its place, so names and photos never leave KidSphere. AI output that uses any other placeholder is rejected and replaced by the built-in template.
 
 **For a development-review suggestion and a functional-summary draft (analysis, de-identified):**
 - the child as `[child]`, never the first or preferred name, and the age; the answer gets the name back on the server
@@ -63,13 +65,14 @@ KidSphere stores sensitive information about young children. It is an educationa
 - The child's names, including the surname, become `[child]`.
 - The names of the other children of the kindergarten and of children not yet in a class (of every other child when the child has no class) become `[friend]`.
 - The parent name on the child, the linked parent accounts, the parents and guardians the family named in the questionnaire (with or without an account) and the teachers of the kindergarten become `[adult]`.
+- The names in the child's people list are masked too: sisters, brothers, cousins and friends as `[friend]`, every other relation as `[adult]`. A pet's name is not masked.
 - Phone numbers become `[phone]` and e-mail addresses `[email]`.
 - Matching tolerates the usual spelling variants: case and accents, Arabic hamza and alef forms, ta marbuta, alef maqsura, tashkeel and tatweel, Hebrew niqqud and geresh, and Hebrew and Arabic one-letter prefixes.
-- Only names KidSphere knows can be masked. A relative, a sibling or anyone else who is not in KidSphere (for example "Grandma Huda") is sent as written, so teachers should not write such names.
+- Only names KidSphere knows can be masked. A relative, a sibling or anyone else who is not in KidSphere or in the child's people list (for example "Grandma Huda") is sent as written, so teachers should add such people to the list or not write their names.
 - A given name that is also a common word (Will, May, אור, نور) is masked wherever that word appears. A name particle (bin, בן, عبد, de) is masked only together with the next word.
 - Vocabulary labels are not changed.
 
-**Never sent:** the birth date, the surname, the photo, the parent's name or contact, free-text parent answers (including the message from the heart), the health, medical and family answers, whole perspectives, observation notes and the other observation free texts (who was there, before, after, what changed, documentation), teacher-observation notes and texts, "who is responsible" in a plan, follow-up and summary texts, user accounts and other children's data. The source registries (`backend/app/data/source/*.json`) mark every question with `ai_policy`; anything marked `never` (or not listed) stays out, and `tests/test_ai_payload_policy.py` checks it.
+**Never sent:** the birth date, the surname, the photo, the names and photos of the people in the child's life, the parent's name or contact, free-text parent answers (including the message from the heart), the health, medical and family answers, whole perspectives, observation notes and the other observation free texts (who was there, before, after, what changed, documentation), teacher-observation notes and texts, "who is responsible" in a plan, follow-up and summary texts, user accounts and other children's data. The source registries (`backend/app/data/source/*.json`) mark every question with `ai_policy`; anything marked `never` (or not listed) stays out, and `tests/test_ai_payload_policy.py` checks it.
 
 **Checks and logs:**
 - AI output is validated and safety-checked before it is saved, and it is always saved as a draft for teacher review. AI output may never recommend a referral or a professional evaluation, and never uses deficit wording, also in text only the teacher sees; such output is replaced by the built-in template.
@@ -80,10 +83,11 @@ KidSphere stores sensitive information about young children. It is an educationa
 
 ## Uploads
 
-- **Who can upload:** child photos are optional and only staff can upload them.
+- **Who can upload:** child photos and photos of the people in the child's life are optional and only staff can upload them.
 - **Checks:** the file is limited to 8 MB, and only JPEG, PNG and WebP are accepted, judged by their magic bytes.
 - **Processing:** the image is re-encoded with Pillow (max 1024 px), which strips EXIF and GPS metadata. It is stored under a random name.
-- **Serving:** nginx returns 404 for `/uploads/`. Photos are served only by `GET /api/children/{id}/photo` after the access check, with `Cache-Control: private, no-store`.
+- **Serving:** nginx returns 404 for `/uploads/`. Photos are served only by `GET /api/children/{id}/photo` and `GET /api/people/{pid}/photo` after the access check (anyone who may see the child, parents included), with `Cache-Control: private, no-store`.
+- **Video:** a video plan plays in the browser as a narrated slideshow (the browser's own speech synthesis, with the people's photos). No photo, name or script is sent to a video service.
 - **On the server:** the uploads directory is 750, owned by the service user, which is the only path the service may write to.
 
 ## Accounts and sessions
@@ -112,6 +116,7 @@ Important changes are written to `audit_log` in the same transaction as the chan
 - user, class and parent-link changes
 - child create, update, archive and unarchive
 - photo set and delete
+- people in the child's life: create, update, delete, photo set and delete (relation keys and field names only, never the name)
 - profile section updates
 - baseline creation
 - focus create, update and close
@@ -131,5 +136,5 @@ The metadata contains only ids, keys and field names. Read a child's history on 
 - **Deletion:**
   - Children are archived (hidden from everyone except admins), not deleted. Users are deactivated.
   - There is no export or hard-delete feature yet.
-  - Deleting a child row directly in the database removes all of its data by cascade, including baselines. The photo file has to be removed separately.
+  - Deleting a child row directly in the database removes all of its data by cascade, including baselines and the people list. The photo files have to be removed separately. Removing a person through the app also removes their photo.
   - Deleted data stays in the backups until they rotate out: 14 nights for the nightly backups, and the last 10 deploys for the pre-deploy dumps.

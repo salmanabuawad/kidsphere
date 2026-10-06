@@ -13,6 +13,7 @@ import {
   type Story,
   type StoryBuilderGame,
   type VideoPlan,
+  type VideoScene,
 } from "./types";
 
 /**
@@ -127,11 +128,13 @@ export function parseVideoPlan(data: unknown): VideoPlan | null {
       script: text(o.script, 2500, "script"),
       scenes: list(o.scenes, 2, 8, "scenes", (s) => {
         const sc = obj(s, "scene");
-        return {
+        const scene: VideoScene = {
           description: text(sc.description, 300, "scene.description"),
           narration: text(sc.narration, 400, "scene.narration"),
           visual_prompt: text(sc.visual_prompt, 300, "scene.visual_prompt"),
         };
+        const e = emoji(sc.emoji, "scene.emoji");
+        return e ? { ...scene, emoji: e } : scene;
       }),
       duration_seconds: int(o.duration_seconds, 30, 90, "duration_seconds"),
     };

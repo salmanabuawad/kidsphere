@@ -25,7 +25,7 @@ nginx ── /         → /var/www/kidsphere/frontend/dist   (try_files → ind
 | `main.py` | Builds the app. Installs the error handlers and a same-origin check: a POST/PUT/PATCH/DELETE whose `Origin` host differs from `Host` gets 403. Includes every module in `routers/` under `/api`. Serves a built SPA only when `SERVE_STATIC_DIR` is set. |
 | `config.py` | `settings`, read by pydantic-settings from the environment and `backend/.env`. |
 | `db.py` | Engine, `SessionLocal`, `get_db`. Nothing auto-commits: a service commits once at the end of its unit of work. |
-| `models.py` | All 20 tables, plus the value tuples that mirror the CHECKs (`AI_DOMAIN_VALUES`, `ASSESSMENT_DOMAIN_VALUES`, `SECTION_STATUS_VALUES`, `REPORT_TYPE_VALUES`, …). There are no ORM relationships; queries are explicit `select()`s. |
+| `models.py` | All 22 tables, plus the value tuples that mirror the CHECKs (`AI_DOMAIN_VALUES`, `ASSESSMENT_DOMAIN_VALUES`, `SECTION_STATUS_VALUES`, `REPORT_TYPE_VALUES`, …). There are no ORM relationships; queries are explicit `select()`s. |
 | `errors.py` | `AppError(code)` turns into `{"error": {code, message, details}}`. Request validation errors become 400 VALIDATION with `details=[{path, message}]`. A unique violation becomes 409 DUPLICATE, and FK/CHECK/NOT NULL violations become 400; `CONSTRAINT_CODES` maps the named guards to their codes (`focus_areas_max_active` → FOCUS_LIMIT, `teacher_assessments_one_open_uq` → ASSESSMENT_OPEN, `teacher_assessments_closed` → ASSESSMENT_CLOSED, `functional_summaries_approved` → SUMMARY_APPROVED). Anything else becomes 500 INTERNAL and is logged. |
 | `deps.py` | `DB`, `CurrentUser` (401), `StaffUser` and `AdminUser` (403), `require_roles(...)`. |
 | `access.py` | Child scope inside the query: `child_scope`, `visible_children`, `scoped_child_ids`, `get_child_or_404`, `get_child_row_or_404` (with `write=` and `lock=`). |
@@ -44,7 +44,7 @@ nginx ── /         → /var/www/kidsphere/frontend/dist   (try_files → ind
 | `dev_seed.py` | Demo data for Adam and Maya. Refuses to run unless the DB name ends in `_test` or `_preview`, or `KIDSPHERE_ALLOW_DEMO=1` is set. |
 | `migrations/` | Alembic, hand-written DDL. `0001_initial` has the CHECKs, the indexes and the immutable-baseline trigger. `0002_source_documents` is additive: 6 tables with their guard triggers (`kidsphere_append_only` and friends), new columns, the deferred max-3-active-focus constraint trigger, and idempotent data steps (seq-1 `record_versions` for existing sections, observations, focus areas and content; `observations.domains` from `area`; `follow_up_on` from a dated `plan.review_on`; `questionnaire` / `section_status` keys added only when absent). |
 
-## 3. Data model (20 tables)
+## 3. Data model (22 tables)
 
 Every table has a UUID primary key (except `audit_log`) and `timestamptz` timestamps. Enumerations are TEXT + CHECK. Child-owned rows use `ON DELETE CASCADE`. Users are deactivated, never deleted. Children are archived (`archived_at`).
 
@@ -70,6 +70,7 @@ Every table has a UUID primary key (except `audit_log`) and `timestamptz` timest
 | `ai_suggestions` | Every AI analysis call: `kind` understanding\|functional_summary\|observation_questions, the de-identified `input` that was sent, `output`, `domains`, provider/model, `outcome` pending\|accepted\|edited\|discarded and what used it. |
 | `report_exports` | One row per PDF export: `report_type`, `language`, `date_range`, `options` (flags only), `generated_by`, `generated_at`. Never the content; append-only. |
 | `audit_log` | `actor_id`, `action`, `object_type`, `object_id`, `child_id`, `metadata` (primitives only). It has no foreign keys, so rows outlive what they describe. |
+| `child_people` | 0004. The people in the child's life that content may include: `relation` (a `person_relations` key), `display_name` (what the child calls them, 1–40 characters), `photo_path`. At most 12 per child. `generated_content.people` = `[{token, person_id, relation}]` for each content row. |
 | `app_settings` | 0003. `key` (general, ai, reports), `value` JSONB, `updated_by`, `updated_at`. Read and written only through `services/settings.py` (typed defaults, no cache). The ai section may hold the Anthropic API key: a saved key overrides .env `ANTHROPIC_API_KEY`, and `provider_mode` template forces the templates. |
 
 There is one support scale everywhere: `independent | some_support | significant_support | not_observed`.
@@ -130,6 +131,7 @@ An id outside the user's scope returns **404**, because the scope is part of the
 - `GET /children?class_id&q&include_archived`, `POST /children`, `GET /children/{id}`, `PUT /children/{id}`
 - `POST /children/{id}/archive`, `POST /children/{id}/unarchive` (admin)
 - `PUT /children/{id}/photo` (multipart), `GET /children/{id}/photo`, `DELETE /children/{id}/photo`
+- `GET /children/{id}/people` (anyone who may see the child), `POST /children/{id}/people {relation, display_name}` (staff; 409 CONFLICT over 12), `PUT /people/{pid}`, `DELETE /people/{pid}`, `PUT|GET|DELETE /people/{pid}/photo`
 - `GET /children/{id}/profile` (staff also get `section_status`, `has_baseline` and `provenance[]` on every list item), `PATCH /children/{id}/profile {perspective?, section?, data?, status?, questionnaire?{filled_at?, school_year?, entry_mode?, meeting?, submit?}, wizard_step?, complete?}`. Every changed section writes one `record_versions` row.
 - `GET /children/{id}/profile/history?perspective&section` (staff): every version, with the state at the first submission marked `initial`.
 - `GET /source-model` (any signed-in user): the two source registries.
@@ -170,7 +172,7 @@ An id outside the user's scope returns **404**, because the scope is part of the
 
 **Content**
 
-- `POST /children/{id}/content/generate {mode, content_type, template?, focus_area_id?, target_strength?, language?, include_video?}`. `content_type` is story, video, digital_game, real_world_activity or pack.
+- `POST /children/{id}/content/generate {mode, content_type, template?, focus_area_id?, target_strength?, language?, include_video?, people?}`. `content_type` is story, video, digital_game, real_world_activity or pack. `people`: up to 3 `child_people` ids. Every content detail carries `cast` = `{child {name, has_photo}, people [{token, relation, person_id, display_name, has_photo}]}`.
 - `GET /children/{id}/content?status&pack_id`, `GET /packs/{pack_id}`
 - `GET /content/{id}`, `PUT /content/{id} {title?, content?}`, `DELETE /content/{id}` (soft delete, drafts only), `GET /content/{id}/versions`
 - `POST /content/{id}/approve`, `/regenerate {instruction?}`, `/duplicate`, `/share {shared}`, `/archive`
@@ -237,6 +239,7 @@ An id outside the user's scope returns **404**, because the scope is part of the
   - at most 5 recent observations, each at most 300 characters
   - the current understanding (summary, adaptations, next_steps)
   - the regenerate instruction, the variant and `include_video`
+  - `cast`: the people chosen for this content (at most 3), as a placeholder (`{grandfather}`) and the relation only; output may use no other placeholder (`safety.placeholder_issues`)
 
   A custom label (a list entry without a key) is included only when staff entered or confirmed it (`staff_confirmed`: sources teacher, observation or review), so a parent's own wording never reaches the AI. The name is the preferred name without a surname typed into it (`first_name`).
 
@@ -281,6 +284,7 @@ An id outside the user's scope returns **404**, because the scope is part of the
 ## 7. Video service (`services/video_service.py`)
 
 - **Functions:** `create_video_job(row)`, `check_video_status(row)` and `get_video_url(row)`.
+- **In the browser:** a video plan plays as a narrated slideshow (`player/VideoSlideshow`): one scene at a time with its emoji or the photos of the people it mentions, read aloud with the browser's speech synthesis. Nothing is generated or uploaded elsewhere.
 - **Placeholder provider:** `VIDEO_PROVIDER=none` is the only provider today. On approval, the row keeps `video_status=script_ready` and returns the notice `provider_not_configured`.
 - **What the AI makes:** only the video plan (script, scenes, narration, visual prompts). A pack includes one only when `include_video` is set.
 - **No dedicated endpoints:** there are no video-job REST endpoints, and nothing ever waits on a video.

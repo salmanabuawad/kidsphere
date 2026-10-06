@@ -26,6 +26,19 @@ const options: OptionLists = {
     { key: "independence", label: L("Independence", "الاستقلالية", "עצמאות") },
     { key: "social", label: L("Social", "الجانب الاجتماعي", "חברתי") },
   ],
+  person_relations: [
+    { key: "grandfather", icon: "👴", label: L("Grandfather", "الجدّ", "סבא") },
+    { key: "sister", icon: "👧", label: L("Sister", "الأخت", "אחות") },
+  ],
+};
+
+const people = [
+  { id: "p1", child_id: "c1", relation: "grandfather", display_name: "Sido", has_photo: true, updated_at: "v2" },
+  { id: "p2", child_id: "c1", relation: "sister", display_name: "Lulu", has_photo: false, updated_at: "v3" },
+];
+const cast = {
+  child: { name: "Adam", has_photo: false, updated_at: null },
+  people: [{ token: "{grandfather}", relation: "grandfather", person_id: "p1", display_name: "Sido", has_photo: true, updated_at: "v2" }],
 };
 
 const adam: ChildStaffView = {
@@ -211,6 +224,36 @@ describe("CreateContentPage", () => {
 
     expect(await screen.findByRole("heading", { level: 1, name: "Small pack" })).toBeTruthy();
     expect(body).toEqual({ mode: "strength_builder", content_type: "pack", language: "en", target_strength: "storytelling", include_video: true });
+  });
+
+  it("includes the chosen people of the child's life (at most 3), never by name", async () => {
+    let body: Record<string, unknown> | null = null;
+    mockFetch({
+      "GET /api/children/c1": { body: { child: adam } },
+      "GET /api/children/c1/people": { body: { people, max: 12 } },
+      "POST /api/children/c1/content/generate": (init) => {
+        body = JSON.parse(String(init?.body));
+        return { status: 201, body: { content: row({ id: "new2", cast }) } };
+      },
+      "GET /api/content/new2": { body: { content: row({ id: "new2", cast }) } },
+    });
+    renderApp({ routes, url: "/children/c1/content/new?mode=growth_support&focus=f1&type=story", user: teacher, options });
+
+    const sido = await screen.findByRole("button", { name: /Sido/ });
+    expect(screen.getByText(/The AI never sees their names or photos/)).toBeTruthy();
+    fireEvent.click(sido);
+    expect(sido.getAttribute("aria-pressed")).toBe("true");
+    fireEvent.click(screen.getByRole("button", { name: "Create draft" }));
+    expect(await screen.findByTestId("why-people")).toBeTruthy();
+    expect(body).toEqual({ mode: "growth_support", content_type: "story", language: "en", focus_area_id: "f1", people: ["p1"] });
+    expect(screen.getByTestId("why-people").textContent).toBe("Sido (Grandfather)");
+  });
+
+  it("links to the Overview when the child has no people yet", async () => {
+    mockFetch({ "GET /api/children/c1": { body: { child: adam } }, "GET /api/children/c1/people": { body: { people: [], max: 12 } } });
+    renderApp({ routes, url: "/children/c1/content/new", user: teacher, options });
+    expect(await screen.findByTestId("people-none")).toBeTruthy();
+    expect(screen.getByRole("link", { name: "Add people on the Overview" }).getAttribute("href")).toBe("/children/c1");
   });
 
   it("offers the game types and explains when there is no active focus", async () => {
@@ -485,6 +528,34 @@ describe("PresentPage", () => {
     const frame = await screen.findByTestId("present-frame");
     expect(frame.getAttribute("dir")).toBe("rtl");
     expect(within(frame).getByTestId("story-player")).toBeTruthy();
+  });
+});
+
+describe("Video content", () => {
+  it("plays as a narrated slideshow with the people's names; teachers also see the plan", async () => {
+    const plan = {
+      ...en.video,
+      scenes: [
+        { description: "One", narration: "{grandfather} opens the garage door.", visual_prompt: "a garage", emoji: "🚗" },
+        { description: "Two", narration: "Everyone builds together.", visual_prompt: "blocks", emoji: "🧱" },
+      ],
+    };
+    const video = row({ content_type: "video", status: "approved", video_status: "script_ready", title: plan.title, content: plan as unknown as Record<string, unknown>, cast });
+    mockFetch({ "GET /api/content/s1": { body: { content: video } } });
+    renderApp({ routes, url: "/content/s1/present", user: teacher, options });
+    expect((await screen.findByTestId("slideshow-narration")).textContent).toBe("Sido opens the garage door.");
+    // The child view has no plan.
+    expect(screen.queryByTestId("video-plan")).toBeNull();
+  });
+
+  it("the editor names each placeholder", async () => {
+    const story = { ...en.story, story: ["{grandfather} came along.", ...en.story.story.slice(1)] };
+    mockFetch({ "GET /api/content/s1": { body: { content: row({ content: story as unknown as Record<string, unknown>, cast }) } } });
+    renderApp({ routes, url: "/content/s1", user: teacher, options });
+    fireEvent.click(await screen.findByRole("tab", { name: /Edit/ }));
+    const legend = await screen.findByTestId("cast-legend");
+    expect(legend.textContent).toContain("{grandfather}");
+    expect(legend.textContent).toContain("Sido");
   });
 });
 

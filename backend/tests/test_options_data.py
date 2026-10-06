@@ -92,6 +92,11 @@ EXACT_KEYS = {
         "what_happens_next", "story_builder",
     ],
     "relations": ["mother", "father", "guardian", "other"],
+    # The people in the child's life that content may include (services/people.py).
+    "person_relations": [
+        "mother", "father", "grandmother", "grandfather", "sister", "brother", "aunt", "uncle", "cousin",
+        "friend", "pet", "other",
+    ],
     # lists/common.json (COVERAGE-MATRIX §3.3.7)
     "section_statuses": ["not_started", "in_progress", "sufficient", "review_later"],
     "provenance": ["parent_said", "teacher_observed", "ai_suggested", "teacher_approved"],

@@ -7,6 +7,7 @@ import { Button, ButtonLink } from "@/components/ui/Button";
 import { Card, CardBody, CardFooter } from "@/components/ui/Card";
 import { Chip, toneGlyph } from "@/components/ui/Chip";
 import { BlockCluster, EmptyState } from "@/components/ui/EmptyState";
+import { PeopleStrip } from "@/features/people";
 import { DONE_STEP, LAST_STEP, profileUrl, type QProfile } from "@/features/wizard/questionnaire";
 import { PageSkeleton } from "@/components/ui/Spinner";
 import { ContentIcon, InterestsIcon, ParentHomeIcon, StrengthsIcon } from "@/icons";
@@ -136,6 +137,7 @@ function ChildCard({ child: listed }: { child: ParentChild }) {
           <ItemChips items={interests} list="interests" tone="interest" title={t("parent.home.interests")} icon={<InterestsIcon />} />
         )}
         {strengths.length === 0 && interests.length === 0 && <p className="text-sm text-ink-muted">{t("parent.home.noProfileYet", { name })}</p>}
+        <PeopleStrip childId={child.id} childName={name} />
         <QuestionnaireStatus q={questionnaire} />
       </CardBody>
       <CardFooter className="justify-stretch bg-tray sm:justify-end">

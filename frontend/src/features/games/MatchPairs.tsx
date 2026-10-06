@@ -58,6 +58,7 @@ export function MatchPairs({ game, lang, replay, onDone }: TemplateProps<MatchPa
               key={i}
               label={p.left.label}
               emoji={p.left.emoji}
+              photo={p.left.photo}
               state={stateOf("a", i)}
               paint={paintOf(i, i)}
               disabled={matched.includes(i)}
@@ -72,6 +73,7 @@ export function MatchPairs({ game, lang, replay, onDone }: TemplateProps<MatchPa
               key={i}
               label={game.pairs[i]!.right.label}
               emoji={game.pairs[i]!.right.emoji}
+              photo={game.pairs[i]!.right.photo}
               state={stateOf("b", i)}
               paint={paintOf(i, position + 3)}
               disabled={matched.includes(i)}

@@ -387,6 +387,11 @@ function WhyCard({ item }: { item: ContentDetail }) {
   };
   // The AI domains sent with the request (only those the focus or strength concerns).
   const domains = domainsUsed(gi).map((d) => optionLabel("ai_domains", d));
+  // The people in it, by the name the child uses (the AI only saw the relation).
+  const people = (item.cast?.people ?? []).map((p) => {
+    const relation = p.relation ? optionLabel("person_relations", p.relation) : "";
+    return p.display_name ? `${p.display_name} (${relation})` : relation;
+  });
   return (
     <Card data-testid="why-card">
       <CardHeader title={t("content.review.why")} />
@@ -397,6 +402,11 @@ function WhyCard({ item }: { item: ContentDetail }) {
           {target && <Row label={t("content.review.whyStrength")}>{strengthLabel(target.key, target.label)}</Row>}
           {gi.strengths && gi.strengths.length > 0 && <Row label={t("content.review.whyStrengths")}>{labels(gi.strengths)}</Row>}
           {gi.interests && gi.interests.length > 0 && <Row label={t("content.review.whyInterests")}>{labels(gi.interests)}</Row>}
+          {people.length > 0 && (
+            <Row label={t("content.review.whyPeople")}>
+              <span data-testid="why-people">{people.join(" · ")}</span>
+            </Row>
+          )}
           {domains.length > 0 && (
             <Row label={t("content.review.whyDomains")}>
               <span data-testid="why-domains">{domains.join(" · ")}</span>
