@@ -120,7 +120,7 @@ export function DomainCard({
           parentSections={parentSections}
           onSaved={onSaved}
           onFocusCreated={onFocusCreated}
-          activeFocusCount={activeFocusCount}
+          thirdGoal={activeFocusCount === 2}
         />
       )}
     </Card>
@@ -135,7 +135,7 @@ function DomainEditor({
   parentSections,
   onSaved,
   onFocusCreated,
-  activeFocusCount,
+  thirdGoal,
 }: {
   domain: Domain;
   cycle: Assessment;
@@ -144,7 +144,7 @@ function DomainEditor({
   parentSections: ParentSections;
   onSaved: (saved: DomainSaved) => void;
   onFocusCreated: () => void;
-  activeFocusCount: number;
+  thirdGoal: boolean;
 }) {
   const { t } = useI18n();
   const sm = useSourceModel();
@@ -197,7 +197,7 @@ function DomainEditor({
     applying: applying.pending,
     promote: (index, need) => void promote(index, need),
     promoting: promoting.pending,
-    thirdGoal: activeFocusCount === 2,
+    thirdGoal,
     promoted: new Map(
       cycle.need_focus_areas.filter((n) => n.status === "active" || n.status === "paused").map((n) => [n.index, n.title] as [number, string]),
     ),
