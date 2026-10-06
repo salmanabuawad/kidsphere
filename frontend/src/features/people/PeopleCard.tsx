@@ -44,28 +44,29 @@ export function PeopleCard({ childId, childName, canEdit }: { childId: string; c
         {people.length === 0 ? (
           <p className="text-ink-muted">{t("people.empty", { name: childName })}</p>
         ) : (
-          <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-            {people.map((p) => (
-              <li key={p.id}>
+          <ul className="flex flex-wrap gap-x-4 gap-y-3">
+            {people.map((p, i) => (
+              <li key={p.id} className="animate-placed" style={{ animationDelay: `${Math.min(i, 8) * 60}ms` }}>
                 <button
                   type="button"
                   disabled={!canEdit}
                   onClick={() => setEditing(p)}
-                  className={cn(
-                    "flex w-full items-center gap-3 rounded-md border border-line bg-surface p-2.5 text-start",
-                    canEdit && "ks-press shadow-lip hover:bg-tray",
-                  )}
+                  className={cn("group flex w-28 flex-col items-center gap-1.5 rounded-lg p-2 text-center", canEdit && "hover:bg-tray")}
                   aria-label={canEdit ? t("people.editPerson", { name: p.display_name }) : undefined}
                   data-testid="person-tile"
                 >
-                  <PersonAvatar person={p} size="lg" />
-                  <span className="min-w-0">
-                    <span dir="auto" className="block truncate font-semibold text-ink">
-                      {p.display_name}
-                    </span>
-                    <span className="block truncate text-sm text-ink-muted">{optionLabel("person_relations", p.relation)}</span>
+                  <span className="relative">
+                    <PersonAvatar person={p} size="xl" className="size-[88px] rounded-full border-[3px] border-ink text-[34px]" />
+                    {canEdit && (
+                      <span aria-hidden className="absolute -end-1 bottom-0 flex size-8 items-center justify-center rounded-md border-[1.5px] border-line-strong bg-surface text-ink shadow-lip">
+                        <Pencil className="size-4" />
+                      </span>
+                    )}
                   </span>
-                  {canEdit && <Pencil className="ms-auto size-4 shrink-0 text-ink-muted" aria-hidden />}
+                  <span dir="auto" className="w-full truncate font-semibold text-ink">
+                    {p.display_name}
+                  </span>
+                  <span className="text-caption w-full truncate text-ink-muted">{optionLabel("person_relations", p.relation)}</span>
                 </button>
               </li>
             ))}

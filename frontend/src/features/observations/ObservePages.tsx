@@ -67,7 +67,7 @@ export function ChildObservePage() {
         </div>
       </div>
       <p className="mb-5 text-sm text-muted">{t("observations.intro")}</p>
-      <QuickObservationForm childId={child.id} focusAreas={focus} lookFor={lookFor} onSaved={() => navigate(paths.child(child.id))} />
+      <QuickObservationForm childId={child.id} focusAreas={focus} lookFor={lookFor} onSaved={() => navigate(paths.child(child.id), { state: { saved: true } })} />
     </div>
   );
 }

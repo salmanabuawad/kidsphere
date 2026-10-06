@@ -6,13 +6,14 @@ import { Alert, Badge, Button, ButtonLink, cardTappable, Checkbox, Chip, EmptySt
 import { AttentionIcon, ChildrenIcon, ContentIcon, StrengthsIcon } from "@/icons";
 import { useI18n } from "@/i18n/I18nProvider";
 import { useFormat } from "@/lib/format";
-import { KindergartenChip, useMyKindergartens } from "@/lib/kindergarten";
+import { useMyKindergartens } from "@/lib/kindergarten";
 import { paths } from "@/lib/paths";
 import { useFetch } from "@/lib/useFetch";
 import { useErrorMessage } from "@/lib/useAction";
 import { cn } from "@/lib/utils";
 import { displayName, notObservedRecently } from "./api";
 import { ChildAvatar } from "./ChildAvatar";
+import { HomeHero } from "./HomeHero";
 import { useProfileItem } from "./ProfileItems";
 import type { ChildCard, ChildListResponse } from "./types";
 
@@ -44,29 +45,30 @@ export function ChildListPage() {
   const drafts = inClass.filter((c) => (c.draft_content_count ?? 0) > 0);
   const notObserved = inClass.filter((c) => notObservedRecently(c.last_observation_at));
   const filtering = !!q.trim() || !!classId;
-  const kindergartens = useMyKindergartens();
+  const allKindergartens = useMyKindergartens();
+  const kindergartens = isAdmin ? [] : allKindergartens;
 
   return (
     <div>
-      <PageHeader
-        icon={<ChildrenIcon />}
-        title={t("children.list.title")}
-        description={t("children.list.description")}
-        eyebrow={
-          kindergartens.length > 0 && (
-            <span className="flex flex-wrap gap-2">
-              {kindergartens.map((k) => (
-                <KindergartenChip key={k.name} kindergarten={k} />
-              ))}
-            </span>
-          )
-        }
-        actions={
-          <ButtonLink to={paths.newChild()} size="lg" icon={<Plus className="size-5" aria-hidden />}>
-            {t("children.list.add")}
-          </ButtonLink>
-        }
-      />
+      {isAdmin ? (
+        <PageHeader
+          icon={<ChildrenIcon />}
+          title={t("children.list.title")}
+          description={t("children.list.description")}
+          actions={
+            <ButtonLink to={paths.newChild()} size="lg" icon={<Plus className="size-5" aria-hidden />}>
+              {t("children.list.add")}
+            </ButtonLink>
+          }
+        />
+      ) : (
+        <HomeHero kindergartens={kindergartens} waiting={notObserved.length > 0} />
+      )}
+      {!isAdmin && children.length > 0 && (
+        <h2 className="font-display text-title mb-3 font-semibold text-ink">
+          {kindergartens.length === 1 ? t("children.home.childrenOf", { name: kindergartens[0]!.name }) : t("children.list.title")}
+        </h2>
+      )}
 
       {error && (
         <Alert
@@ -170,8 +172,9 @@ export function ChildListPage() {
         />
       ) : (
         <ul className="grid gap-3 md:grid-cols-2 xl:grid-cols-3" data-testid="child-cards">
-          {visible.map((c) => (
-            <li key={c.id}>
+          {visible.map((c, i) => (
+            // Cards settle in one after another, once (a short stagger, capped).
+            <li key={c.id} className="animate-placed" style={{ animationDelay: `${Math.min(i, 8) * 50}ms` }}>
               <ChildListCard child={c} />
             </li>
           ))}
@@ -207,8 +210,8 @@ function ChildListCard({ child }: { child: ChildCard }) {
       className={cn("flex h-full flex-col rounded-lg border border-line bg-surface p-3 text-ink sm:px-4", cardTappable)}
       data-testid={`child-card-${child.id}`}
     >
-      <div className="grid min-h-[72px] grid-cols-[auto_minmax(0,1fr)_auto] items-start gap-x-3">
-        <ChildAvatar child={child} size="lg" />
+      <div className="grid min-h-[88px] grid-cols-[auto_minmax(0,1fr)_auto] items-start gap-x-4">
+        <ChildAvatar child={child} size="xl" className="row-span-2 size-[88px] rounded-lg" />
         <div className="min-w-0">
           <p className="text-name truncate font-semibold text-ink" dir="auto">
             {name}
@@ -232,7 +235,7 @@ function ChildListCard({ child }: { child: ChildCard }) {
           </span>
         )}
         {shownStrengths.length > 0 && (
-          <ul className="col-span-2 col-start-2 mt-2 flex min-w-0 flex-nowrap gap-2" aria-label={t("children.profile.strengths")}>
+          <ul className="col-span-2 col-start-2 mt-2 flex min-w-0 flex-wrap gap-2" aria-label={t("children.profile.strengths")}>
             {shownStrengths.map((it, i) => (
               <li key={it.key ?? it.custom ?? i} className="min-w-0">
                 <Chip

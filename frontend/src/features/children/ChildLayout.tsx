@@ -1,10 +1,11 @@
 import { useState, type ReactNode } from "react";
-import { FileDown, Languages, Pencil, School } from "lucide-react";
+import { FileDown, Languages, Pencil } from "lucide-react";
 import { useAuth } from "@/auth/AuthProvider";
 import { Alert, BackLink, Badge, BlockCluster, Button, ButtonLink, Card, PageSkeleton, TabNav } from "@/components/ui";
-import { ClassesIcon, ParentHomeIcon } from "@/icons";
+import { ClassesIcon, ParentHomeIcon, StrengthsIcon } from "@/icons";
 import { useI18n } from "@/i18n/I18nProvider";
 import { useFormat } from "@/lib/format";
+import { KindergartenChip, useMyKindergartens } from "@/lib/kindergarten";
 import { useOptions } from "@/lib/options";
 import { CHILD_TABS, childTabPath, paths } from "@/lib/paths";
 import { useErrorMessage } from "@/lib/useAction";
@@ -55,13 +56,22 @@ export function ChildHeader({ child, onChanged }: { child: ChildBasics; onChange
   const staff = user?.role === "teacher" || user?.role === "admin";
   const name = displayName(child);
   const languages = [child.main_language, ...child.additional_languages.filter((l) => l !== child.main_language)];
+  const kindergarten = child.class?.kindergarten ?? null;
+  const theme = useMyKindergartens().find((k) => k.name === kindergarten)?.theme ?? null;
 
   return (
     <div className="mb-4">
       <BackLink to={paths.children()} label={t("children.child.backToList")} className="mb-2" />
-      <Card className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center md:p-5">
+      <Card className="animate-placed flex flex-col gap-5 rounded-xl p-4 sm:flex-row sm:items-center md:p-6">
         <div className="relative self-center sm:self-auto">
-          <ChildAvatar child={child} size="xl" />
+          <ChildAvatar child={child} size="xl" className="size-32 rounded-xl text-[44px] md:size-40" />
+          {/* A gold star sticker on the photo: strengths first, before anything else. */}
+          <span
+            aria-hidden
+            className="animate-placed absolute -end-2 -top-2 flex size-11 items-center justify-center rounded-full border-[3px] border-ink bg-paint-sun [animation-delay:200ms]"
+          >
+            <StrengthsIcon size={22} paint={false} className="text-on-paint" />
+          </span>
           {staff && <PhotoButton hasPhoto={child.has_photo} onClick={() => setPhotoOpen(true)} />}
         </div>
         <div className="min-w-0 flex-1 text-center sm:text-start">
@@ -79,11 +89,10 @@ export function ChildHeader({ child, onChanged }: { child: ChildBasics; onChange
               <ClassesIcon className="size-4" paint={false} aria-hidden />
               <span dir="auto">{child.class ? child.class.name : t("children.child.noClass")}</span>
             </span>
-            {child.class?.kindergarten && (
-              <span className="inline-flex items-center gap-1.5" data-testid="child-kindergarten">
-                <School className="size-4" aria-hidden />
+            {kindergarten && (
+              <span className="inline-flex items-center" data-testid="child-kindergarten">
                 <span className="sr-only">{t("children.child.kindergarten")}: </span>
-                <span dir="auto">{child.class.kindergarten}</span>
+                <KindergartenChip kindergarten={{ name: kindergarten, theme }} className="min-h-7 text-caption" />
               </span>
             )}
             <span className="inline-flex items-center gap-1.5">

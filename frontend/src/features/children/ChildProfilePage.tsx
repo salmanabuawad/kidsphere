@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from "react";
-import { Link, useParams } from "react-router";
+import { Link, useLocation, useNavigate, useParams } from "react-router";
 import { ArrowRight, ClipboardCheck, ClipboardList, HeartHandshake, Lightbulb, Lock, MessageCircleQuestion, Pencil, PencilLine, Phone, Plus, Utensils } from "lucide-react";
 import { ProvenanceBadge, ProvenanceBadges, type ProvenanceEntry } from "@/components/source";
 import { Alert, Badge, Button, ButtonLink, Card, CardBody, CardHeader, Chip, NumeralBlock, PageSkeleton } from "@/components/ui";
@@ -17,6 +17,7 @@ import {
 } from "@/icons";
 import { PeopleCard } from "@/features/people";
 import { pick } from "@/i18n/config";
+import { useMyKindergartens } from "@/lib/kindergarten";
 import { useI18n } from "@/i18n/I18nProvider";
 import { useFormat } from "@/lib/format";
 import { useOptions } from "@/lib/options";
@@ -29,6 +30,7 @@ import { assessmentsUrl, childUrl, displayName, isStaffView, profileUrl, WIZARD_
 import { ChildLayout } from "./ChildLayout";
 import { mainFirst, nextReviewOn, overviewData, type GoodToKnowRow, type OverviewData, type ParentHelpRow, type ReviewLater } from "./overview";
 import { ProfileItemChips, SECTION_CHIP_CAP, useProfileItem } from "./ProfileItems";
+import { SavedCelebration } from "./SavedCelebration";
 import { parentSaid } from "./provenance";
 import type { AssessmentsSummary, ChildDetail, ChildStaffView, FocusAreaSummary, FocusPlan, ProfileItem, ProfileResponse } from "./types";
 
@@ -42,6 +44,11 @@ export function ChildProfilePage() {
   const toMessage = useErrorMessage();
   const { data, error, reload } = useFetch<{ child: ChildDetail }>(childUrl(id));
   const child = data?.child;
+  // Right after a quick observation was saved (ObservePages navigates here with state.saved).
+  const location = useLocation();
+  const navigate = useNavigate();
+  const justSaved = !!(location.state as { saved?: unknown } | null)?.saved;
+  const theme = useMyKindergartens().find((k) => k.name === child?.class?.kindergarten)?.theme ?? null;
 
   if (!child) {
     if (error)
@@ -68,6 +75,9 @@ export function ChildProfilePage() {
 
   return (
     <ChildLayout childId={id} child={child} onChanged={reload}>
+      {justSaved && (
+        <SavedCelebration name={displayName(child)} theme={theme} onClose={() => navigate(location.pathname, { replace: true, state: null })} />
+      )}
       {isStaffView(child) ? (
         <StaffOverview child={child} />
       ) : (
@@ -148,7 +158,10 @@ function StaffOverview({ child }: { child: ChildStaffView }) {
 
       <FocusCard child={child} />
 
-      <RecentCard child={child} />
+      <div className="grid gap-5 lg:grid-cols-2">
+        <RecentCard child={child} />
+        <LatestContentCard childId={child.id} />
+      </div>
 
       {summary && (
         <Card>
@@ -619,6 +632,45 @@ function FocusRow({ childId, focus, n }: { childId: string; focus: FocusAreaSumm
 }
 
 /** Recent development (spec 6.7): the latest quote in a tray well, with the note-quote icon. */
+type ContentRow = { id: string; title: string; content_type?: string | null; status?: string | null; language?: string | null };
+
+/**
+ * The newest approved (or already used) content made for the child: a painted picture block,
+ * its title and type, and Present. Hidden until there is some.
+ */
+function LatestContentCard({ childId }: { childId: string }) {
+  const { t } = useI18n();
+  const { data } = useFetch<{ content: ContentRow[] }>(`/api/children/${encodeURIComponent(childId)}/content`);
+  const latest = (data?.content ?? []).find((c) => c.status === "approved" || c.status === "completed");
+  if (!latest) return null;
+  return (
+    <section aria-labelledby="section-latest-content" className="rounded-lg border border-line bg-surface p-4 md:p-5" data-testid="latest-content">
+      <SectionHeading id="section-latest-content" title={t("children.overview.latestContent")} tile="bg-tray" icon={<ContentIcon />} />
+      <div className="flex items-center gap-4 rounded-md bg-tray p-3">
+        <span aria-hidden className="flex h-20 w-24 shrink-0 items-center justify-center rounded-md border-[3px] border-ink bg-paint-sky">
+          <span className="flex size-12 items-center justify-center rounded-full bg-surface">
+            <ContentIcon className="size-7" />
+          </span>
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="font-display text-title truncate font-semibold text-ink" dir="auto" lang={latest.language ?? undefined}>
+            {latest.title}
+          </p>
+          {latest.content_type && <p className="text-caption text-ink-muted">{t(`content.types.${latest.content_type}`)}</p>}
+          <div className="mt-2 flex flex-wrap gap-2">
+            <ButtonLink to={paths.presentContent(latest.id)} size="sm">
+              {t("children.overview.present")}
+            </ButtonLink>
+            <ButtonLink to={paths.content(latest.id)} size="sm" variant="ghost">
+              {t("children.overview.open")}
+            </ButtonLink>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function RecentCard({ child }: { child: ChildStaffView }) {
   const { t, locale } = useI18n();
   const { formatDate } = useFormat();

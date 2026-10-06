@@ -88,7 +88,10 @@
       "openQuestionAction": "Open the quick baseline",
       "reviewLater": "Marked to review later",
       "parentSection": "Family answers"
-    }
+    },
+    "latestContent": "Latest content",
+    "present": "Present",
+    "open": "Open"
   },
   "profile": {
     "strengths": "Strengths",
@@ -166,5 +169,19 @@
     "archiveConfirm": "{name} will no longer appear in the list. An administrator can bring the profile back later.",
     "archiveConfirmAction": "Yes, archive",
     "archived": "Child archived"
+  },
+  "home": {
+    "morning": "Good morning, {name}",
+    "afternoon": "Good afternoon, {name}",
+    "evening": "Good evening, {name}",
+    "question": "What will you notice today?",
+    "waiting": "Some children are waiting for an observation. Start with them today.",
+    "observe": "Quick observation",
+    "childrenOf": "The children of {name}"
+  },
+  "saved": {
+    "badge": "Saved",
+    "title": "Observation added for {name}",
+    "hint": "It joins the development timeline and helps show what works."
   }
 }

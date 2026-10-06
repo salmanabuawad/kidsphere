@@ -309,6 +309,30 @@ describe("ChildProfilePage (Overview)", () => {
     expect(screen.queryByRole("link", { name: "Export PDF" })).toBeNull();
   });
 
+  it("celebrates a just-saved observation once, and Close removes it", async () => {
+    mockFetch({ "GET /api/children/c1": { body: { child: detail } } });
+    const { router } = renderApp({ routes, url: "/children", user: teacher, options });
+    await router.navigate("/children/c1", { state: { saved: true } });
+    const done = await screen.findByTestId("saved-celebration");
+    expect(done.textContent).toContain("Saved");
+    expect(done.getAttribute("role")).toBe("status");
+    fireEvent.click(within(done).getByRole("button", { name: "Close" }));
+    await waitFor(() => expect(screen.queryByTestId("saved-celebration")).toBeNull());
+  });
+
+  it("shows the newest approved content with Present", async () => {
+    mockFetch({
+      "GET /api/children/c1": { body: { child: detail } },
+      "GET /api/children/c1/content": {
+        body: { content: [{ id: "d1", title: "A draft", status: "draft", content_type: "story" }, { id: "s1", title: "Maya and Grandpa", status: "approved", content_type: "story" }] },
+      },
+    });
+    renderApp({ routes, url: "/children/c1", user: teacher, options });
+    const card = await screen.findByTestId("latest-content");
+    expect(card.textContent).toContain("Maya and Grandpa");
+    expect(within(card).getByRole("link", { name: "Present" }).getAttribute("href")).toBe("/content/s1/present");
+  });
+
   it("shows the kindergarten and an Export PDF action that opens the Reports tab", async () => {
     mockFetch({ "GET /api/children/c1": { body: { child: detail } } });
     renderApp({ routes, url: "/children/c1", user: teacher, options });

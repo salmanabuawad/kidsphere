@@ -88,7 +88,10 @@
       "openQuestionAction": "פתיחת הקריאה הראשונה",
       "reviewLater": "סומן לחזור אליו בהמשך",
       "parentSection": "תשובות המשפחה"
-    }
+    },
+    "latestContent": "התוכן האחרון",
+    "present": "הצגה",
+    "open": "פתיחה"
   },
   "profile": {
     "strengths": "חוזקות",
@@ -166,5 +169,19 @@
     "archiveConfirm": "{name} לא יופיע/תופיע יותר ברשימה. מנהל/ת המערכת יכול/ה להחזיר את הפרופיל אחר כך.",
     "archiveConfirmAction": "כן, להעביר לארכיון",
     "archived": "הפרופיל הועבר לארכיון"
+  },
+  "home": {
+    "morning": "בוקר טוב, {name}",
+    "afternoon": "צהריים טובים, {name}",
+    "evening": "ערב טוב, {name}",
+    "question": "מה נראה היום בגן?",
+    "waiting": "יש ילדים שמחכים לתצפית. כדאי להתחיל בהם היום.",
+    "observe": "תצפית מהירה",
+    "childrenOf": "הילדים של {name}"
+  },
+  "saved": {
+    "badge": "נשמר",
+    "title": "נוספה תצפית ל{name}",
+    "hint": "היא מצטרפת לציר ההתפתחות ועוזרת לראות מה עובד."
   }
 }

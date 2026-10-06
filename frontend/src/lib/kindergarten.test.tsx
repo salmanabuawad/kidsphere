@@ -25,7 +25,9 @@ describe("kindergarten in the app", () => {
     const block = await screen.findByTestId("kindergarten-block");
     expect(block.textContent).toContain("גן");
     expect(block.textContent).toContain("פרחים");
-    expect(block.textContent).toContain("🌸");
+    // The theme is painted, never an emoji in the nav.
+    expect(within(block).getByTestId("kindergarten-tile").getAttribute("data-theme")).toBe("flowers");
+    expect(block.textContent).not.toMatch(/\p{Extended_Pictographic}/u);
     expect(screen.getByTestId("kindergarten-band").className).toContain("bg-paint-berry");
     const chips = await screen.findAllByTestId("kindergarten-chip");
     expect(chips.some((c) => c.getAttribute("data-theme") === "flowers")).toBe(true);
@@ -39,8 +41,21 @@ describe("kindergarten in the app", () => {
     });
     renderApp({ routes: childRoutes, url: "/children", user: teacher, options });
     const block = await screen.findByTestId("kindergarten-block");
-    expect(block.textContent).toContain("🏡");
+    expect(within(block).getByTestId("kindergarten-tile").getAttribute("data-theme")).toBe("default");
     expect(screen.queryByTestId("kindergarten-band")).toBeNull();
+  });
+
+  it("the teacher home greets by name with the kindergarten's garden and the two everyday actions", async () => {
+    mockFetch({
+      "GET /api/me/kindergartens": { body: { kindergartens: [flowers] } },
+      "GET /api/children": { body: { children: [], classes: [] } },
+    });
+    renderApp({ routes: childRoutes, url: "/children", user: { ...teacher, name: "Lena Cohen" }, options });
+    const hero = await screen.findByTestId("home-hero");
+    expect(within(hero).getByRole("heading", { level: 1 }).textContent).toMatch(/^Good (morning|afternoon|evening), Lena$/);
+    expect(within(hero).getByRole("link", { name: /Quick observation/ }).getAttribute("href")).toBe("/observe");
+    expect(within(hero).getByRole("link", { name: /Add child/ }).getAttribute("href")).toBe("/children/new");
+    await waitFor(() => expect(within(hero).getByTestId("home-garden").getAttribute("data-theme")).toBe("flowers"));
   });
 
   it("an admin picks a kindergarten's theme on the Classes page", async () => {
