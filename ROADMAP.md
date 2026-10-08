@@ -50,6 +50,19 @@ This file tracks progress against the phases in spec §42 ([docs/mvp-refocus/SPE
 - **Native-speaker review of the Arabic and Hebrew wording.** This covers the new option labels and the template phrase tables. Also decide on one Hebrew convention for UI strings (slash forms or not). See [docs/terminology.md](docs/terminology.md) §6.
 - **Personalised characters.** Generic characters, animals and interest-based heroes are used today. Characters made from the child or family would need consent (spec §32).
 
+**Communication and access** (ideas taken from a review of d-bur.com, an Israeli AAC provider, in October 2026; in suggested order)
+- **Read every game tile aloud.** The games (`ChoiceRounds`, `MatchPairs`, `Sequence`, `Categorize`) are silent today. Add a speaker button on each tile that reuses `useNarration`'s `speak()` and can be tapped again and again, so a child who does not read can play.
+- **How the child communicates.** Add `communication` keys for "uses a symbol board or communication device", "chooses by looking", "uses a switch" and "points to pictures" (en/ar/he). They describe what the child does, never a condition. The AI uses them to adapt drafts (fewer choices, more pictures, shorter text).
+- **Observation prompts beyond requests.** Add optional chips to the observation form for what the child did (shared or commented, showed a feeling, refused or chose, asked, joined in, told something) and how (words, gesture, look, pointing, device). Qualitative only, never counted.
+- **Player settings per child.** Number of choices (2/4/6) instead of difficulty levels, large tiles with more spacing, hold-to-choose with a visible fill and a repeated-tap filter, and a calm mode with no animations. Switch scanning and dwell (hover-to-choose for eye-gaze users) come later.
+- **Early-literacy game templates.** `sound_train` (tap one carriage per sound), `rhyme` and `first_sound` (choose among 2–4 options that each speak), in he and ar. Every option can be heard again; extra taps are silent rather than "wrong".
+- **Daily-life templates.** `my_day` (the child taps each step of the day as done; First–Then), `morning_meeting` (day, weather, who is here, the plan), `scene` (one picture with hotspots that each say a word, for the youngest children) and `share_my_experience` (one big button plays the next part of what the child did today).
+- **Modeling lines in drafts.** Each draft gets 2–3 "say and show" lines for the teacher (for example "more" or "finished"), so the adult models the words the child is learning.
+- **Holiday packs for Muslim, Christian and Druze children.** Alongside the Jewish holidays, in Arabic and Hebrew. The AAC market in Israel leaves this gap open.
+- **Niqqud and recorded voice.** Optional niqqud in Hebrew narration text, for early readers and correct speech synthesis, and an optional teacher recording that replaces synthetic speech for an item. Never clone a child's voice.
+- **A help bot for teachers.** The teacher picks a topic first, the bot answers only from our own guides, says plainly that it is not a professional, and always offers a human contact.
+- Do not adopt their condition-based wording, "levels" or achievements attached to a child, or gaze heat maps or accuracy measures, and do not copy their content or recordings.
+
 **Server**
 - **Remove the legacy apps.** The owner removes the legacy apps from the server after checking the backups (see [deploy/README.md](deploy/README.md#legacy-installs-still-on-the-server)). After that, the side-by-side names (`kidsphere-mvp`, `kidsphere_mvp`) may stay as they are.
 - **Off-site backups.** The nightly backups and the pre-deploy dumps stay on the same server (`/var/backups/kidsphere`). Copy them to another host if the data must survive losing the server.
