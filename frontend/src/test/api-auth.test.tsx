@@ -106,6 +106,10 @@ describe("auth redirects", () => {
     expect(lockup.dataset.logo).toBe("stacked");
     // A 120px mark: well above the 64px stacked minimum, and the page still fits one laptop screen.
     expect(mark.getAttribute("height")).toBe("120");
+    // The three pillar chips stay under the card on every screen.
+    const pillars = screen.getByRole("list", { name: createTranslator("en").t("common.tagline") });
+    expect(pillars.querySelectorAll("li")).toHaveLength(3);
+    expect(pillars.className).not.toContain("hidden");
     expect(lockup.querySelectorAll("img.ks-logo-light, img.ks-logo-dark")).toHaveLength(2);
     expect(lockup.compareDocumentPosition(heading) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     expect(document.querySelector('[data-icon="brand-mark"]')).toBeNull();

@@ -50,8 +50,9 @@ export function LoginPage() {
   }
 
   return (
-    // The whole page fits one screen (a laptop at about 800px tall): the language switch floats in the
-    // corner, and the pillar chips and the block cluster appear only on tall screens.
+    // The whole page, chips included, fits one screen: the language switch floats in the corner, the
+    // logo is drawn smaller on short screens (CSS zoom keeps the layout box in step), and the
+    // decorative block cluster appears only where there is room.
     <div className="relative flex min-h-dvh flex-col overflow-hidden bg-ground">
       <div className="absolute end-0 top-0 z-10 p-3">
         <LocaleSwitcher variant="compact" />
@@ -60,7 +61,7 @@ export function LoginPage() {
       <main className="relative flex flex-1 items-center justify-center px-4 py-4">
         <div className="w-full max-w-md">
           <div className="mb-4 flex flex-col items-center text-center">
-            <Logo variant="lockup" size={120} className="mb-3" />
+            <Logo variant="lockup" size={120} className="mb-3 [@media(max-height:780px)]:[zoom:0.7]" />
             <h1 className="font-display text-display-lg font-semibold text-ink">{t("auth.welcome")}</h1>
             <p className="mt-1.5 text-sm text-ink-muted">{t("auth.welcomeSub")}</p>
           </div>
@@ -117,7 +118,7 @@ export function LoginPage() {
             <p className="text-caption mt-4 text-center text-ink-muted">{t("auth.forgotHint")}</p>
           </div>
 
-          <ul className="mt-6 hidden flex-wrap justify-center gap-2 [@media(min-height:960px)]:flex" aria-label={t("common.tagline")}>
+          <ul className="mt-4 flex flex-wrap justify-center gap-2" aria-label={t("common.tagline")}>
             <li>
               <Chip tone="strength" icon={<StrengthsIcon size={16} />}>
                 {t("auth.pillarStrengths")}
@@ -134,7 +135,7 @@ export function LoginPage() {
               </Chip>
             </li>
           </ul>
-          <BlockCluster className="mx-auto mt-6 hidden [@media(min-height:960px)]:block" />
+          <BlockCluster className="mx-auto mt-4 hidden [@media(min-height:900px)]:block" />
         </div>
       </main>
     </div>
