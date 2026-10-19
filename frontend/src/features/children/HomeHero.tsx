@@ -15,9 +15,10 @@ export function partOfDay(now: Date = new Date()): "morning" | "afternoon" | "ev
 }
 
 /**
- * The teacher home's hero: a greeting by the time of day, today's date, the kindergarten (its
- * painted chip), one plain line about today and the two everyday actions, beside a small
- * garden built from block primitives in the kindergarten's paint. The stems grow and the
+ * The teacher home's hero, kept slim so the children list gets the screen: a greeting by the
+ * time of day with today's date and the kindergarten (its painted chip), one short line about
+ * today and the two everyday actions, beside a small garden built from block primitives in the
+ * kindergarten's paint (wide screens only). The stems grow and the
  * blooms are placed once on load; nothing loops (and nothing moves under reduced motion).
  */
 export function HomeHero({ kindergartens, waiting, now = new Date() }: { kindergartens: Kindergarten[]; waiting: boolean; now?: Date }) {
@@ -29,29 +30,29 @@ export function HomeHero({ kindergartens, waiting, now = new Date() }: { kinderg
 
   return (
     <section
-      className="animate-placed relative mb-6 flex flex-wrap items-center gap-6 overflow-hidden rounded-xl border border-line bg-surface p-5 md:p-7"
+      className="animate-placed relative mb-4 flex flex-wrap items-center gap-x-6 gap-y-3 overflow-hidden rounded-xl border border-line bg-surface px-4 py-3 md:px-5"
       aria-labelledby="home-greeting"
       data-testid="home-hero"
     >
-      <div className="flex min-w-0 flex-[1_1_320px] flex-col gap-2.5">
-        <div className="flex flex-wrap items-center gap-2">
+      <div className="flex min-w-0 flex-[1_1_280px] flex-col gap-1">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+          <h1 id="home-greeting" className="font-display text-xl font-semibold text-ink md:text-2xl">
+            {first ? t(`children.home.${partOfDay(now)}`, { name: first }) : t("children.list.title")}
+          </h1>
           {kindergartens.map((k) => (
-            <KindergartenChip key={k.name} kindergarten={k} />
+            <KindergartenChip key={k.name} kindergarten={k} className="min-h-7 text-caption" />
           ))}
           <span className="text-caption text-ink-muted">{date}</span>
         </div>
-        <h1 id="home-greeting" className="font-display text-display-lg md:text-display-xl font-semibold text-ink">
-          {first ? t(`children.home.${partOfDay(now)}`, { name: first }) : t("children.list.title")}
-        </h1>
-        <p className="max-w-[46ch] text-lg text-ink-muted">{waiting ? t("children.home.waiting") : t("children.home.question")}</p>
-        <div className="mt-1 flex flex-wrap gap-2">
-          <ButtonLink to={paths.observe()} size="lg" icon={<ObserveAddIcon aria-hidden />} className="[--icon-paint:transparent]">
-            {t("children.home.observe")}
-          </ButtonLink>
-          <ButtonLink to={paths.newChild()} size="lg" variant="secondary" icon={<Plus className="size-5" aria-hidden />}>
-            {t("children.list.add")}
-          </ButtonLink>
-        </div>
+        <p className="text-sm text-ink-muted">{waiting ? t("children.home.waiting") : t("children.home.question")}</p>
+      </div>
+      <div className="flex flex-wrap gap-2">
+        <ButtonLink to={paths.observe()} icon={<ObserveAddIcon aria-hidden />} className="[--icon-paint:transparent]">
+          {t("children.home.observe")}
+        </ButtonLink>
+        <ButtonLink to={paths.newChild()} variant="secondary" icon={<Plus className="size-5" aria-hidden />}>
+          {t("children.list.add")}
+        </ButtonLink>
       </div>
       <Garden theme={theme} />
     </section>
@@ -71,7 +72,7 @@ function Garden({ theme }: { theme: string | null }) {
     <svg
       aria-hidden
       viewBox="0 0 420 200"
-      className="h-auto w-full max-w-[420px] flex-[0_1_420px]"
+      className="hidden h-16 w-auto shrink-0 xl:block"
       fill="none"
       stroke="var(--ink)"
       strokeWidth={3}

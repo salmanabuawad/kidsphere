@@ -161,14 +161,14 @@ export function ParentHomePage() {
 
   return (
     <div className="mx-auto max-w-3xl">
-      <div className="mb-6 flex items-end justify-between gap-4 md:mb-8">
+      <div className="mb-4 flex items-end justify-between gap-4 md:mb-5">
         <div className="min-w-0">
-          <h1 className="font-display text-display-lg font-semibold text-ink" dir="auto">
+          <h1 className="font-display text-xl font-semibold text-ink md:text-2xl" dir="auto">
             {t("parent.home.greeting", { name: firstName })}
           </h1>
-          <p className="mt-1 text-base text-ink-muted">{t("parent.home.subtitle")}</p>
+          <p className="mt-0.5 text-sm text-ink-muted">{t("parent.home.subtitle")}</p>
         </div>
-        <BlockCluster />
+        <BlockCluster className="hidden md:block" />
       </div>
 
       {error ? (

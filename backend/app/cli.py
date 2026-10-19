@@ -25,13 +25,13 @@ from sqlalchemy import select
 from app.audit import audit
 from app.db import SessionLocal
 from app.models import AuditLog, User
+from app.schemas.auth import MIN_PASSWORD
 from app.security import hash_password, is_bcrypt_hash
 from app.sessions import revoke_user_sessions
 
 IDENTIFIER_RE = re.compile(r"^[a-z0-9._%+@-]{2,200}$")
 ROLES = ("admin", "teacher", "parent")
 LANGUAGES = ("ar", "he", "en")
-MIN_PASSWORD = 8
 
 
 class CliError(Exception):

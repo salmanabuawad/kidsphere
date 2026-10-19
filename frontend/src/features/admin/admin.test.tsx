@@ -83,7 +83,7 @@ describe("UsersPage", () => {
     fireEvent.change(within(dialog).getByLabelText(/Email or username/), { target: { value: " New@X.org " } });
     fireEvent.change(within(dialog).getByLabelText(/^Password/), { target: { value: "short" } });
     fireEvent.click(within(dialog).getByRole("button", { name: "Create" }));
-    expect(await within(dialog).findByText("At least 10 characters.", { selector: "[role=alert]" })).toBeTruthy();
+    expect(await within(dialog).findByText("At least 6 characters.", { selector: "[role=alert]" })).toBeTruthy();
     expect(created).toBeNull();
     fireEvent.change(within(dialog).getByLabelText(/^Password/), { target: { value: "long-enough-1" } });
     fireEvent.click(within(dialog).getByRole("button", { name: "Create" }));

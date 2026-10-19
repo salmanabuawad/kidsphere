@@ -89,9 +89,11 @@ def test_create_user_accepts_a_plain_username_and_defaults_language(admin_client
 
 def test_create_user_validation(admin_client, teacher):
     base = {"name": "N", "email": "new@test.local", "role": "teacher", "password": "long-enough-1"}
-    short = admin_client.post("/api/users", json={**base, "password": "123456789"})
+    short = admin_client.post("/api/users", json={**base, "password": "12345"})  # the minimum is 6
     assert short.status_code == 400 and short.json()["error"]["code"] == "VALIDATION"
     assert any(d["path"] == "password" for d in short.json()["error"]["details"])
+    six = admin_client.post("/api/users", json={**base, "email": "six@test.local", "password": "123456"})
+    assert six.status_code == 201, six.text
     dup = admin_client.post("/api/users", json={**base, "email": "TEACHER@test.local"})
     assert dup.status_code == 409 and dup.json()["error"]["code"] == "DUPLICATE"
     for bad in ({**base, "role": "superuser"}, {**base, "language": "fr"}, {**base, "email": "has space"},

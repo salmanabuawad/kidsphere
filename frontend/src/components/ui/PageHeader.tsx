@@ -16,8 +16,8 @@ export function BackLink({ to, label, className }: { to: string; label: ReactNod
 }
 
 /**
- * Page title row: the title in the display face (display-lg). `icon` sits in a 48px
- * tray block (a painted custom icon reads best at 28px); `back` renders a BackLink.
+ * Page title row: the title in the display face, kept compact so the content gets the screen.
+ * `icon` sits in a 40px tray block (a painted custom icon at 24px); `back` renders a BackLink.
  */
 export function PageHeader({
   title,
@@ -35,22 +35,22 @@ export function PageHeader({
   icon?: ReactNode;
 }) {
   return (
-    <div className="mb-6 space-y-2 md:mb-8">
+    <div className="mb-4 space-y-1 md:mb-5">
       {back && <BackLink to={back.to} label={back.label} />}
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div className="flex min-w-0 items-center gap-3">
           {icon && (
-            <span className="flex size-12 shrink-0 items-center justify-center rounded-md bg-tray text-ink [&_svg]:size-7" aria-hidden>
+            <span className="flex size-10 shrink-0 items-center justify-center rounded-md bg-tray text-ink [&_svg]:size-6" aria-hidden>
               {icon}
             </span>
           )}
           <div className="min-w-0">
             {eyebrow && <div className="mb-0.5 text-sm text-ink-muted">{eyebrow}</div>}
             {/* bdi isolates the title's own direction while the heading still aligns to the page's start. */}
-            <h1 className="font-display text-display-lg font-semibold text-ink">
+            <h1 className="font-display text-xl font-semibold text-ink md:text-2xl">
               <bdi>{title}</bdi>
             </h1>
-            {description && <p className="mt-1 max-w-2xl text-base text-ink-muted">{description}</p>}
+            {description && <p className="mt-0.5 max-w-2xl text-sm text-ink-muted">{description}</p>}
           </div>
         </div>
         {actions && <div className="flex flex-wrap gap-2">{actions}</div>}

@@ -256,7 +256,7 @@ export function AppShell({ nav, children }: { nav: NavItem[]; children: ReactNod
       </header>
 
       <div className="min-w-0 flex-1">
-        <main className={cn("mx-auto max-w-6xl px-4 pt-5 md:px-8 lg:pt-8 lg:pb-12", hasBottomBar ? "pb-32" : "pb-12")}>{children}</main>
+        <main className={cn("mx-auto max-w-6xl px-4 pt-4 md:px-6 lg:pt-5 lg:pb-8", hasBottomBar ? "pb-32" : "pb-8")}>{children}</main>
       </div>
 
       {/* Phone / tablet bottom bar */}

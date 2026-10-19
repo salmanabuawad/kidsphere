@@ -5,6 +5,8 @@ from app.models import User
 from app.schemas.common import Language, Role, StrictModel
 
 IDENTIFIER_PATTERN = r"^[a-z0-9._%+@-]+$"
+# The one minimum password length: admin-set, self-changed and CLI-set passwords alike.
+MIN_PASSWORD = 6
 
 
 class LoginIn(BaseModel):
@@ -29,7 +31,7 @@ class PasswordChangeIn(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     current_password: str = Field(min_length=1, max_length=200)
-    new_password: str = Field(min_length=8, max_length=200)
+    new_password: str = Field(min_length=MIN_PASSWORD, max_length=200)
 
 
 class UserOut(BaseModel):

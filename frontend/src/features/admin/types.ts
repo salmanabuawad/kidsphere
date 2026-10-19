@@ -45,7 +45,7 @@ export type ChildLite = {
 
 export const ROLES: Role[] = ["admin", "teacher", "parent"];
 export const LANGUAGES: Language[] = ["ar", "he", "en"];
-export const MIN_PASSWORD = 10;
+export const MIN_PASSWORD = 6;
 
 /** Accept {children: [...]}, {items: [...]} or a bare array. */
 export function childrenOf(data: unknown): ChildLite[] {

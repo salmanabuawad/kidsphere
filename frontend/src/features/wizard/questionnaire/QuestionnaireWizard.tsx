@@ -149,7 +149,7 @@ function StepView({
           <WizardProgress current={current} total={total} labels={allSteps.map((s) => sm.label(s))} onPick={(n) => void go(n)} />
         </div>
         <div className="min-w-0">
-          <h1 className="font-display text-title md:text-display-lg font-semibold text-ink">{sm.label(meta)}</h1>
+          <h1 className="font-display text-title md:text-2xl font-semibold text-ink">{sm.label(meta)}</h1>
           {current === 1 && (
             <p className="text-sm text-ink-muted md:text-base" dir="auto">
               {sm.label({ label: localized(reg.meta.purpose) })}

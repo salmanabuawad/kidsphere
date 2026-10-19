@@ -66,11 +66,11 @@ export function WizardHeader({
     <div className="flex flex-col gap-3 lg:flex-row-reverse lg:items-end lg:justify-between lg:gap-8">
       <div className="lg:w-80 lg:shrink-0">{progress}</div>
       <div className="flex min-w-0 items-start gap-3">
-        <span className={cn("flex size-11 shrink-0 items-center justify-center rounded-md md:size-12", tile)} aria-hidden>
-          <Icon className="size-6 md:size-7" />
+        <span className={cn("flex size-10 shrink-0 items-center justify-center rounded-md", tile)} aria-hidden>
+          <Icon className="size-6" />
         </span>
         <div className="min-w-0">
-          <h1 className="font-display text-title md:text-display-lg font-semibold text-ink">{title}</h1>
+          <h1 className="font-display text-title md:text-2xl font-semibold text-ink">{title}</h1>
           {intro && <p className="text-sm text-ink-muted md:text-base">{intro}</p>}
         </div>
       </div>

@@ -13,7 +13,7 @@ import { useI18n } from "@/i18n/I18nProvider";
 import { api, fieldErrors, isApiError } from "@/lib/api";
 import { useAction } from "@/lib/useAction";
 
-export const MIN_PASSWORD_LENGTH = 10;
+export const MIN_PASSWORD_LENGTH = 6;
 
 function ProfileCard() {
   const { t } = useI18n();

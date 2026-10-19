@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from "react";
 import { FileDown, Languages, Pencil } from "lucide-react";
 import { useAuth } from "@/auth/AuthProvider";
-import { Alert, BackLink, Badge, BlockCluster, Button, ButtonLink, Card, PageSkeleton, TabNav } from "@/components/ui";
+import { Alert, BackLink, Badge, Button, ButtonLink, Card, PageSkeleton, TabNav } from "@/components/ui";
 import { ClassesIcon, ParentHomeIcon, StrengthsIcon } from "@/icons";
 import { useI18n } from "@/i18n/I18nProvider";
 import { useFormat } from "@/lib/format";
@@ -61,21 +61,21 @@ export function ChildHeader({ child, onChanged }: { child: ChildBasics; onChange
 
   return (
     <div className="mb-4">
-      <BackLink to={paths.children()} label={t("children.child.backToList")} className="mb-2" />
-      <Card className="animate-placed flex flex-col gap-5 rounded-xl p-4 sm:flex-row sm:items-center md:p-6">
+      <BackLink to={paths.children()} label={t("children.child.backToList")} className="mb-1" />
+      <Card className="animate-placed flex flex-col gap-4 rounded-xl p-3 sm:flex-row sm:items-center md:p-4">
         <div className="relative self-center sm:self-auto">
-          <ChildAvatar child={child} size="xl" className="size-32 rounded-xl text-[44px] md:size-40" />
+          <ChildAvatar child={child} size="xl" className="size-20 rounded-lg text-[28px] md:size-24 md:text-[32px]" />
           {/* A gold star sticker on the photo: strengths first, before anything else. */}
           <span
             aria-hidden
-            className="animate-placed absolute -end-2 -top-2 flex size-11 items-center justify-center rounded-full border-[3px] border-ink bg-paint-sun [animation-delay:200ms]"
+            className="animate-placed absolute -end-2 -top-2 flex size-8 items-center justify-center rounded-full border-[2.5px] border-ink bg-paint-sun [animation-delay:200ms]"
           >
-            <StrengthsIcon size={22} paint={false} className="text-on-paint" />
+            <StrengthsIcon size={16} paint={false} className="text-on-paint" />
           </span>
           {staff && <PhotoButton hasPhoto={child.has_photo} onClick={() => setPhotoOpen(true)} />}
         </div>
         <div className="min-w-0 flex-1 text-center sm:text-start">
-          <h1 className="font-display text-display-lg font-semibold text-ink">
+          <h1 className="font-display text-xl font-semibold text-ink md:text-2xl">
             <bdi>{name}</bdi>
           </h1>
           {child.preferred_name && child.preferred_name !== child.name && (
@@ -83,8 +83,8 @@ export function ChildHeader({ child, onChanged }: { child: ChildBasics; onChange
               {child.name}
             </p>
           )}
-          <p className="tabular mt-1 text-base text-ink">{formatAge(child.birth_date)}</p>
-          <div className="text-caption mt-2 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-ink-muted sm:justify-start">
+          <p className="tabular text-sm text-ink">{formatAge(child.birth_date)}</p>
+          <div className="text-caption mt-1 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-ink-muted sm:justify-start">
             <span className="inline-flex items-center gap-1.5">
               <ClassesIcon className="size-4" paint={false} aria-hidden />
               <span dir="auto">{child.class ? child.class.name : t("children.child.noClass")}</span>
@@ -102,22 +102,21 @@ export function ChildHeader({ child, onChanged }: { child: ChildBasics; onChange
             </span>
           </div>
           {child.archived && (
-            <Badge tone="muted" className="mt-2">
+            <Badge tone="muted" className="mt-1">
               {t("children.list.archived")}
             </Badge>
           )}
         </div>
-        <BlockCluster className="self-center sm:self-start" />
         {staff && (
-          <div className="flex flex-wrap justify-center gap-2 sm:flex-col sm:items-stretch">
-            <ButtonLink to={paths.childReports(child.id)} variant="secondary" icon={<FileDown aria-hidden />}>
+          <div className="flex flex-wrap justify-center gap-2 sm:justify-end">
+            <ButtonLink to={paths.childReports(child.id)} size="sm" variant="secondary" icon={<FileDown aria-hidden />}>
               {t("children.child.exportPdf")}
             </ButtonLink>
-            <Button variant="ghost" icon={<Pencil aria-hidden />} onClick={() => setEditOpen(true)}>
+            <Button size="sm" variant="ghost" icon={<Pencil aria-hidden />} onClick={() => setEditOpen(true)}>
               {t("children.child.editBasics")}
             </Button>
             {user?.role === "admin" && (
-              <ButtonLink to={paths.adminChildParents(child.id)} variant="ghost" icon={<ParentHomeIcon paint={false} aria-hidden />}>
+              <ButtonLink to={paths.adminChildParents(child.id)} size="sm" variant="ghost" icon={<ParentHomeIcon paint={false} aria-hidden />}>
                 {t("children.child.parents")}
               </ButtonLink>
             )}

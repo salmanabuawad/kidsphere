@@ -8,10 +8,8 @@ import uuid
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from app.models import Class, ChildParent, User
-from app.schemas.auth import IDENTIFIER_PATTERN
+from app.schemas.auth import IDENTIFIER_PATTERN, MIN_PASSWORD
 from app.schemas.common import Language, Role, StrictModel
-
-MIN_PASSWORD = 10
 
 
 def _strip(v):
