@@ -120,7 +120,7 @@ Important changes are written to `audit_log` in the same transaction as the chan
 
 - logins, logouts and failed logins
 - user, class and parent-link changes
-- child create, update, archive and unarchive
+- child create, update, archive, unarchive and permanent delete (ids only)
 - photo set and delete
 - people in the child's life: create, update, delete, photo set and delete (relation keys and field names only, never the name)
 - profile section updates
@@ -140,7 +140,7 @@ The metadata contains only ids, keys and field names. Read a child's history on 
   - Every night at about 03:30, `kidsphere-mvp-backup.timer` writes a full database dump (`nightly-<stamp>.dump`) and an archive of the uploads directory, that is the child photos (`uploads-<stamp>.tgz`). The newest 14 of each are kept.
   - **The backups contain all child data and photos**, so treat them like the live database. They stay on the same server; nothing copies them elsewhere yet.
 - **Deletion:**
-  - Children are archived (hidden from everyone except admins), not deleted. Users are deactivated.
-  - There is no export or hard-delete feature yet.
-  - Deleting a child row directly in the database removes all of its data by cascade, including baselines and the people list. The photo files have to be removed separately. Removing a person through the app also removes their photo.
+  - Staff archive a child (hidden from everyone except admins, and reversible). Users are deactivated.
+  - An admin can then delete an archived child permanently (`DELETE /api/children/{id}`, after typing the child's full name in the edit dialog). The database cascade removes every row that belongs to the child, including baselines, history, AI requests and the people list, and the app removes the child's photo, the people's photos and the files AI engines produced. Only the audit rows remain, with ids and no names.
+  - There is no export feature yet. Removing a person through the app also removes their photo.
   - Deleted data stays in the backups until they rotate out: 14 nights for the nightly backups, and the last 10 deploys for the pre-deploy dumps.

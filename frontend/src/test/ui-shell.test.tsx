@@ -109,7 +109,7 @@ describe("AppShell", () => {
       expect(link.querySelector("img.ks-logo-dark")).not.toBeNull();
     }
     const [side, top] = brands.map((l) => l.querySelector('[data-logo-part="mark"]')!.getAttribute("width"));
-    expect([side, top]).toEqual(["40", "36"]);
+    expect([side, top]).toEqual(["56", "44"]);
     // The retired block-tower mark is not the brand any more.
     expect(container.ownerDocument.querySelector('[data-icon="brand-mark"]')).toBeNull();
   });

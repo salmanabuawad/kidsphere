@@ -3,10 +3,11 @@ import uuid
 from datetime import date, datetime, timedelta, timezone
 
 import pytest
-from sqlalchemy import select
+from sqlalchemy import select, text
 
-from app.models import AuditLog, Baseline, Child, ChildProfile, FocusArea, GeneratedContent, Observation
+from app.models import AuditLog, Baseline, Child, ChildPerson, ChildProfile, FocusArea, GeneratedContent, Observation
 from app.services import children as svc
+from app.services import uploads
 
 STAFF_ONLY_KEYS = {
     "what_helps", "motivators", "sensitivities", "current_understanding", "focus_areas",
@@ -364,3 +365,69 @@ def test_archive_hides_child(db, teacher_client, admin_client, parent_client, ot
     r = admin_client.post(f"/api/children/{child.id}/unarchive")
     assert r.status_code == 200 and r.json()["child"]["archived"] is False
     assert [c["name"] for c in teacher_client.get("/api/children").json()["children"]] == ["Adam"]
+
+
+# --------------------------------------------------------------------------- permanent delete
+
+
+def _child_rows(db, child_id) -> dict[str, int]:
+    """Rows that still point at the child, in every table with a child_id column."""
+    tables = db.execute(text(
+        "SELECT table_name FROM information_schema.columns WHERE table_schema = 'public' "
+        "AND column_name = 'child_id' AND table_name <> 'audit_log'")).scalars().all()
+    counts = {t: db.execute(text(f'SELECT count(*) FROM "{t}" WHERE child_id = :c'), {"c": child_id}).scalar()
+              for t in tables}
+    return {t: n for t, n in counts.items() if n}
+
+
+def test_delete_child_is_admin_only_and_needs_archive(db, teacher_client, admin_client, parent_client, child):
+    url = f"/api/children/{child.id}"
+    assert parent_client.delete(url).status_code == 403
+    assert teacher_client.delete(url).status_code == 403
+    r = admin_client.delete(url)
+    assert r.status_code == 409 and r.json()["error"]["code"] == "CONFLICT"  # archive first
+    assert teacher_client.post(f"{url}/archive").status_code == 204
+    assert teacher_client.delete(url).status_code == 403  # archived or not, never a teacher
+    assert admin_client.delete(f"/api/children/{uuid.uuid4()}").status_code == 404
+    assert db.get(Child, child.id) is not None
+
+
+def test_delete_child_erases_everything(db, teacher_client, admin_client, child, other_child, teacher,
+                                        make_observation, make_assessment, make_ai_suggestion):
+    from tests.test_content import add_focus, generate, set_profile
+    from tests.test_people import _image, add_person
+
+    cid, other_id = child.id, other_child.id  # the ORM objects expire once the row is gone
+    url = f"/api/children/{cid}"
+    assert teacher_client.put(f"{url}/photo", files={"file": ("c.png", _image(), "image/png")}).status_code == 200
+    person = add_person(teacher_client, child)
+    assert teacher_client.put(f"/api/people/{person['id']}/photo",
+                              files={"file": ("p.png", _image(), "image/png")}).status_code == 200
+    db.add(Baseline(child_id=child.id, baseline_data={"basics": {}}))  # immutable while the child exists
+    db.commit()
+    set_profile(db, child, strengths=["building"], interests=["cars"])
+    generate(teacher_client, child, add_focus(db, child, teacher))
+    make_observation(child, created_by=teacher)
+    make_assessment(child, created_by=teacher)
+    make_ai_suggestion(child, created_by=teacher)
+    make_observation(other_child, created_by=teacher)
+    db.expire_all()
+    files = [db.get(Child, child.id).photo_path,
+             db.scalar(select(ChildPerson.photo_path).where(ChildPerson.child_id == child.id))]
+    assert all(files) and all(uploads.resolve_upload(f).exists() for f in files)
+    before = _child_rows(db, child.id)
+    assert {"baselines", "child_people", "observations", "focus_areas", "generated_content"} <= set(before)
+
+    assert teacher_client.post(f"{url}/archive").status_code == 204
+    assert admin_client.delete(url).status_code == 204
+
+    db.expire_all()
+    assert db.get(Child, cid) is None
+    assert _child_rows(db, cid) == {}
+    assert not any(uploads.resolve_upload(f).exists() for f in files)
+    assert admin_client.get(url).status_code == 404
+    assert admin_client.delete(url).status_code == 404
+    # Other children are untouched, and the audit keeps only ids.
+    assert db.get(Child, other_id) is not None and _child_rows(db, other_id)
+    [row] = _audits(db, "child.delete")
+    assert row.child_id == cid and row.meta == {}

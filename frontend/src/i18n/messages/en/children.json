@@ -168,7 +168,12 @@
     "archive": "Archive child",
     "archiveConfirm": "{name} will no longer appear in the list. An administrator can bring the profile back later.",
     "archiveConfirmAction": "Yes, archive",
-    "archived": "Child archived"
+    "archived": "Child archived",
+    "deleteForever": "Delete permanently",
+    "deleteConfirm": "This erases {name} and everything recorded about them: the profile, observations, focus areas, content, people and photos. It cannot be undone.",
+    "deleteTypeName": "To confirm, type the full name: {name}",
+    "deleteConfirmAction": "Delete permanently",
+    "deleted": "Child deleted"
   },
   "home": {
     "morning": "Good morning, {name}",

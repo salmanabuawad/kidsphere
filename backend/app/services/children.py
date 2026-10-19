@@ -18,8 +18,11 @@ from app import access
 from app.audit import audit
 from app.errors import AppError
 from app.models import (
+    AiAsset,
+    AiRequest,
     Baseline,
     Child,
+    ChildPerson,
     ChildProfile,
     Class,
     ClassTeacher,
@@ -335,6 +338,26 @@ def unarchive_child(db: Session, user: User, child_id: str) -> Child:
         child.archived_at = None
         audit(db, user, "child.unarchive", "child", child.id, child_id=child.id)
     return child
+
+
+def delete_child(db: Session, user: User, child_id: str) -> list[str]:
+    """Erase an archived child for good (admins only). The database cascade removes every row
+    that belongs to the child, baselines and history included (their guards allow a delete once
+    the child row is gone). Returns the stored files to remove after the commit: the child's
+    photo, the photos of the people in the child's life and the files AI engines produced.
+    The audit row keeps only the ids."""
+    if user.role != "admin":
+        raise AppError("FORBIDDEN")
+    child = access.get_child_or_404(db, user, child_id, write=True, lock=True, include_archived=True)
+    if child.archived_at is None:
+        raise AppError("CONFLICT", "Archive the child before deleting.")
+    files = [child.photo_path] if child.photo_path else []
+    files += [p for p in db.scalars(select(ChildPerson.photo_path).where(ChildPerson.child_id == child.id)) if p]
+    requests = select(AiRequest.id).where(AiRequest.child_id == child.id)
+    files += list(db.scalars(select(AiAsset.path).where(or_(AiAsset.child_id == child.id, AiAsset.request_id.in_(requests)))))
+    audit(db, user, "child.delete", "child", child.id, child_id=child.id)
+    db.delete(child)
+    return files
 
 
 # ───────────────────────────── photo ─────────────────────────────

@@ -37,10 +37,10 @@ function isActivePath(pathname: string, to: string) {
 
 /**
  * The Sharnaqa logo linking home: the mark with the wordmark beside it (the inline
- * lockup). The mark's alt text names the link. `size` is the mark's side: 36 in the
- * 56px top bar, 40 in the side nav.
+ * lockup). The mark's alt text names the link. `size` is the mark's side: 44 in the
+ * 56px top bar, 56 in the side nav.
  */
-export function Brand({ to = "/", size = 36, className }: { to?: string; size?: number; className?: string }) {
+export function Brand({ to = "/", size = 44, className }: { to?: string; size?: number; className?: string }) {
   return (
     <Link to={to} className={cn("inline-flex min-h-11 items-center rounded-md px-1", className)}>
       <Logo variant="lockup" layout="inline" size={size} />
@@ -210,7 +210,7 @@ export function AppShell({ nav, children }: { nav: NavItem[]; children: ReactNod
       {/* Desktop side nav */}
       <aside className="sticky top-0 hidden h-dvh w-64 shrink-0 flex-col gap-4 border-e border-line bg-ground p-3 lg:flex">
         <div className="pt-1">
-          <Brand size={40} />
+          <Brand size={56} />
         </div>
         <KindergartenBlock kindergartens={kindergartens} />
         {action && (

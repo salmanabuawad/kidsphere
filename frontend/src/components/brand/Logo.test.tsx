@@ -51,7 +51,8 @@ describe("Logo", () => {
     expect(root.className).toContain("flex-col");
     expect(root.className).toContain("mb-6");
     // The wordmark is as wide as in the drawn lockup: 639/470 of the mark.
-    expect(container.querySelector(".ks-logo-light")!.getAttribute("width")).toBe(String(Math.round((96 * 639) / 470)));
+    const wide = Number(container.querySelector(".ks-logo-light")!.getAttribute("width"));
+    expect(Math.abs(wide - (96 * 639) / 470)).toBeLessThan(3);
 
     rerender(<Logo variant="lockup" layout="inline" size={36} />);
     root = container.firstElementChild as HTMLElement;

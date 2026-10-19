@@ -9,6 +9,7 @@ Owned by WP-05. Paths are relative to /api (no router prefix); main.py includes 
 - PUT  /children/{id}                          → {"child": composite}          (parents: PARENT_FIELDS only)
 - POST /children/{id}/archive                  → 204                           (staff)
 - POST /children/{id}/unarchive                → {"child": composite}          (admin)
+- DELETE /children/{id}                        → 204, archived children only    (admin; erases everything)
 - PUT  /children/{id}/photo  (multipart "file")→ {"has_photo": true, "updated_at"} (staff)
 - GET  /children/{id}/photo                    → image/jpeg, private, no-store
 - DELETE /children/{id}/photo                  → 204                           (staff)
@@ -19,7 +20,7 @@ from typing import Annotated
 from fastapi import APIRouter, File, Query, Response, UploadFile
 from fastapi.responses import FileResponse
 
-from app.deps import DB, CurrentUser, StaffUser
+from app.deps import DB, AdminUser, CurrentUser, StaffUser
 from app.schemas.children import ChildCreateIn, ChildUpdateIn
 from app.services import children as svc
 from app.services import uploads
@@ -77,6 +78,15 @@ def unarchive_child(child_id: str, db: DB, user: StaffUser) -> dict:
     db.commit()
     db.refresh(child)
     return {"child": svc.child_detail(db, user, child)}
+
+
+@router.delete("/children/{child_id}", status_code=204)
+def delete_child(child_id: str, db: DB, user: AdminUser) -> Response:
+    files = svc.delete_child(db, user, child_id)
+    db.commit()
+    for rel in files:
+        uploads.delete_upload(rel)
+    return Response(status_code=204)
 
 
 @router.put("/children/{child_id}/photo")

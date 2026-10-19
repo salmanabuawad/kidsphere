@@ -346,10 +346,14 @@ def test_report_header_uses_the_settings(db, admin_client):
               "prepared_by": "p", "period": "x", "disclaimer": "DISCLAIMER"}
     header = environment().get_template("_header.html").render(meta=meta, t=labels)
     footer = environment().get_template("_footer.html").render(meta=meta, t=labels)
-    assert "Olive KG" in header and "Olive Network" in header and 'class="sphere"' not in header
+    assert "Olive KG" in header and "Olive Network" in header and 'class="wm"' not in header
     assert "For the team only." in footer and "DISCLAIMER" in footer
     default = environment().get_template("_header.html").render(meta={**meta, "org": None}, t=labels)
-    assert 'class="sphere"' in default
+    assert 'class="wm">Sharnaqa<' in default
+    # A title saved before the rename still counts as the brand, so the wordmark shows.
+    legacy = {"name": "KidSphere", "header_title": "KidSphere", "footer_note": ""}
+    old = environment().get_template("_header.html").render(meta={**meta, "org": legacy}, t=labels)
+    assert 'class="wm">Sharnaqa<' in old and "KidSphere" not in old
     footer = environment().get_template("_footer.html").render(meta={**meta, "org": None}, t=labels)
     assert "DISCLAIMER" in footer  # the disclaimer is always printed
 

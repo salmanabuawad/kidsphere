@@ -1,7 +1,8 @@
 import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router";
-import { Archive } from "lucide-react";
+import { Archive, Trash2 } from "lucide-react";
 import { Alert, Button, Dialog, Field, Input, Select, ToggleChip } from "@/components/ui";
+import { useAuth } from "@/auth/AuthProvider";
 import { useI18n } from "@/i18n/I18nProvider";
 import { api, fieldErrors } from "@/lib/api";
 import { useOptions } from "@/lib/options";
@@ -55,7 +56,7 @@ function diff(before: Form, after: Form): ChildBasicsInput {
   return out;
 }
 
-/** Staff dialog for the child's basics (spec §5), plus "Archive child". */
+/** Staff dialog for the child's basics (spec §5), plus "Archive child", and for an admin on an archived child "Delete permanently". */
 export function EditBasicsDialog({
   child,
   open,
@@ -85,6 +86,11 @@ function EditForm({ child, onClose, onSaved }: { child: ChildBasics; onClose: ()
   const [confirmArchive, setConfirmArchive] = useState(false);
   const save = useAction();
   const archive = useAction();
+  const { user } = useAuth();
+  const canDelete = user?.role === "admin" && child.archived;
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [typedName, setTypedName] = useState("");
+  const remove = useAction();
   const { data: listing } = useFetch<ChildListResponse>("/api/children");
   const classes = listing?.classes ?? (child.class ? [child.class] : []);
 
@@ -213,7 +219,49 @@ function EditForm({ child, onClose, onSaved }: { child: ChildBasics; onClose: ()
         </Alert>
       ) : null}
 
+      {confirmDelete ? (
+        <div className="space-y-3" data-testid="delete-child">
+          <Alert tone="error" title={t("children.edit.deleteForever")}>
+            {t("children.edit.deleteConfirm", { name: displayName(child) })}
+          </Alert>
+          <Field label={t("children.edit.deleteTypeName", { name: child.name })}>
+            {(p) => <Input {...p} dir="auto" autoComplete="off" value={typedName} onChange={(e) => setTypedName(e.target.value)} />}
+          </Field>
+          <div className="flex flex-wrap justify-end gap-2">
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => {
+                setConfirmDelete(false);
+                setTypedName("");
+              }}
+            >
+              {t("common.cancel")}
+            </Button>
+            <Button
+              size="sm"
+              variant="danger"
+              disabled={typedName.trim() !== child.name.trim()}
+              loading={remove.pending}
+              onClick={() =>
+                remove.run(() => api(childUrl(child.id), { method: "DELETE" }), {
+                  success: t("children.edit.deleted"),
+                  onSuccess: () => navigate(paths.children()),
+                })
+              }
+            >
+              {t("children.edit.deleteConfirmAction")}
+            </Button>
+          </div>
+        </div>
+      ) : null}
+
       <div className="flex flex-wrap items-center justify-end gap-2 border-t border-line pt-4">
+        {canDelete && !confirmDelete && (
+          <Button variant="ghost" className="me-auto text-danger" icon={<Trash2 className="size-4" aria-hidden />} onClick={() => setConfirmDelete(true)}>
+            {t("children.edit.deleteForever")}
+          </Button>
+        )}
         {!child.archived && !confirmArchive && (
           <Button variant="ghost" className="me-auto" icon={<Archive className="size-4" aria-hidden />} onClick={() => setConfirmArchive(true)}>
             {t("children.edit.archive")}
