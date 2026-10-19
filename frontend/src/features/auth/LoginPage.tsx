@@ -58,7 +58,7 @@ export function LoginPage() {
       <main className="relative flex flex-1 items-center justify-center px-4 pb-12">
         <div className="w-full max-w-md">
           <div className="mb-6 flex flex-col items-center text-center">
-            <Logo variant="lockup" size={112} className="mb-5" />
+            <Logo variant="lockup" size={144} className="mb-5" />
             <h1 className="font-display text-display-lg font-semibold text-ink">{t("auth.welcome")}</h1>
             <p className="mt-1.5 text-sm text-ink-muted">{t("auth.welcomeSub")}</p>
           </div>

@@ -19,7 +19,7 @@ const BOTTOM_MAX = 4;
 /*
  * Nav icon states (spec 5.2): inactive = an `ink-muted` outline with no paint; active =
  * an `ink` outline with its designated primitive "coloured in" with the logo teal `accent`
- * (the navy `brand` would barely show against the outline). Custom KidSphere icons read
+ * (the violet `brand` would barely show against the outline). Custom KidSphere icons read
  * the paint from --icon-paint; lucide icons simply ignore it.
  */
 const ICON_IDLE = "[--icon-paint:transparent]";
@@ -37,10 +37,10 @@ function isActivePath(pathname: string, to: string) {
 
 /**
  * The Sharnaqa logo linking home: the mark with the wordmark beside it (the inline
- * lockup). The mark's alt text names the link. `size` is the mark's side: 44 in the
- * 56px top bar, 56 in the side nav.
+ * lockup). The mark's alt text names the link. `size` is the mark's side: 52 in the
+ * 64px top bar, 64 in the side nav.
  */
-export function Brand({ to = "/", size = 44, className }: { to?: string; size?: number; className?: string }) {
+export function Brand({ to = "/", size = 52, className }: { to?: string; size?: number; className?: string }) {
   return (
     <Link to={to} className={cn("inline-flex min-h-11 items-center rounded-md px-1", className)}>
       <Logo variant="lockup" layout="inline" size={size} />
@@ -208,9 +208,9 @@ export function AppShell({ nav, children }: { nav: NavItem[]; children: ReactNod
       {/* The kindergarten's colour, a thin band along the top of the page. */}
       {band && <div aria-hidden className={cn("fixed inset-x-0 top-0 z-40 h-1.5", band)} data-testid="kindergarten-band" />}
       {/* Desktop side nav */}
-      <aside className="sticky top-0 hidden h-dvh w-64 shrink-0 flex-col gap-4 border-e border-line bg-ground p-3 lg:flex">
+      <aside className="sticky top-0 hidden h-dvh w-72 shrink-0 flex-col gap-4 border-e border-line bg-ground p-3 lg:flex">
         <div className="pt-1">
-          <Brand size={56} />
+          <Brand size={64} />
         </div>
         <KindergartenBlock kindergartens={kindergartens} />
         {action && (
@@ -236,7 +236,7 @@ export function AppShell({ nav, children }: { nav: NavItem[]; children: ReactNod
 
       {/* Phone / tablet top bar: solid ground, no blur */}
       <header className="sticky top-0 z-30 border-b border-line bg-ground pt-[env(safe-area-inset-top)] lg:hidden">
-        <div className="mx-auto flex h-14 max-w-3xl items-center justify-between gap-2 px-3">
+        <div className="mx-auto flex h-16 max-w-3xl items-center justify-between gap-2 px-3">
           <Brand />
           {kindergartens[0] && <KindergartenChip kindergarten={kindergartens[0]} className="hidden min-w-0 truncate sm:inline-flex" />}
           <div className="flex items-center gap-1">

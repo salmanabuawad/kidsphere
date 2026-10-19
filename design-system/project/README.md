@@ -26,8 +26,8 @@ The Logos asset group (`assets/Logos/README.md`) holds five PNGs:
 
 ### Arrangements
 
-- **Stacked** (as drawn): the mark centred above the wordmark, the wordmark 1.36 times the mark's width, a gap of about a thirtieth of the mark. Use it where the logo leads a page: the sign-in page (a 112px mark), covers and documents.
-- **Inline**, for bars: the mark at the start and the wordmark beside it, the wordmark image 0.75 of the mark's height and about a fifth of the mark away (10px beside a 44px mark). The top bar uses a 44px mark and the side nav a 56px mark.
+- **Stacked** (as drawn): the mark centred above the wordmark, the wordmark 1.36 times the mark's width, a gap of about a thirtieth of the mark. Use it where the logo leads a page: the sign-in page (a 144px mark), covers and documents.
+- **Inline**, for bars: the mark at the start and the wordmark beside it, the wordmark image 0.75 of the mark's height and about a fifth of the mark away (11px beside a 52px mark). The 64px top bar uses a 52px mark and the side nav a 64px mark.
 - **Mark alone**: app icons, the favicon, and anywhere narrower than the minimum lockup.
 
 ### Clear space and minimum sizes

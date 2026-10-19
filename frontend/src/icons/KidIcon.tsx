@@ -8,14 +8,14 @@ import { iconDefs, type IconElement, type KidIconDef, type KidIconName, type Pai
  * fallback so an icon still paints before (or without) the token sheet.
  */
 export const PAINTS: Record<PaintKey, string> = {
-  brand: "var(--brand, #0D3D72)",
-  accent: "var(--accent, #0A9EA3)",
-  sky: "var(--paint-sky, #44C2F2)",
-  sun: "var(--paint-sun, #FDC010)",
-  berry: "var(--paint-berry, #EE4E89)",
-  leaf: "var(--paint-leaf, #4CC2A6)",
-  grape: "var(--paint-grape, #BC6ECE)",
-  tangerine: "var(--paint-tangerine, #F99E3A)",
+  brand: "var(--brand, #4A2D86)",
+  accent: "var(--accent, #3FA9A3)",
+  sky: "var(--paint-sky, #86BDF0)",
+  sun: "var(--paint-sun, #F8C44E)",
+  berry: "var(--paint-berry, #F28AAE)",
+  leaf: "var(--paint-leaf, #6CC9B9)",
+  grape: "var(--paint-grape, #B49BEB)",
+  tangerine: "var(--paint-tangerine, #F7A866)",
 };
 
 /**

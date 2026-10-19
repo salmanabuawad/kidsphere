@@ -1,7 +1,8 @@
 import { RotateCcw } from "lucide-react";
 import type { AppLocale } from "@/i18n/config";
 import { usePlayerText } from "@/features/player/content-locale";
-import { KidButton, StarSticker } from "@/features/player/kid-ui";
+import { RoundButton, StarSticker } from "@/features/player/kid-ui";
+import { Spoken, useSayOnShow } from "@/features/player/voice";
 
 export type FinishScreenProps = {
   lang: AppLocale;
@@ -31,9 +32,11 @@ function FinishTower() {
   );
 }
 
-/** Shared end screen: a warm "Well done!" and Play again. No scores, star counts or results. */
+/** Shared end screen: a warm "Well done!" (also spoken) and a round Play again. No scores, star counts or results. */
 export function FinishScreen({ lang, onPlayAgain, message }: FinishScreenProps) {
   const t = usePlayerText(lang);
+  const body = message ?? t("player.finish.body");
+  useSayOnShow(`${t("player.finish.title")} ${body}`, "finish");
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-6 py-10 text-center" data-testid="finish-screen">
       <div className="flex items-end gap-2">
@@ -41,13 +44,10 @@ export function FinishScreen({ lang, onPlayAgain, message }: FinishScreenProps) 
         <StarSticker size={56} className="animate-stamp mb-16 [animation-delay:600ms]" />
       </div>
       <p className="font-display text-display-xl font-semibold text-ink">{t("player.finish.title")}</p>
-      <p dir="auto" className="max-w-xl text-xl leading-[1.875rem] text-ink-muted">
-        {message ?? t("player.finish.body")}
-      </p>
-      <KidButton onClick={onPlayAgain} data-testid="play-again">
-        <RotateCcw aria-hidden />
-        {t("player.finish.playAgain")}
-      </KidButton>
+      <Spoken text={body} className="max-w-xl text-xl leading-[1.875rem] text-ink-muted" />
+      <RoundButton label={t("player.finish.playAgain")} tone="brand" onClick={onPlayAgain} data-testid="play-again">
+        <RotateCcw className="size-9" aria-hidden />
+      </RoundButton>
     </div>
   );
 }

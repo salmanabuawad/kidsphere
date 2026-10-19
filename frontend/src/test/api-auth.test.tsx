@@ -104,8 +104,8 @@ describe("auth redirects", () => {
     const mark = screen.getByAltText("Sharnaqa");
     const lockup = mark.closest<HTMLElement>("[data-logo]")!;
     expect(lockup.dataset.logo).toBe("stacked");
-    // A 112px mark: well above the 64px stacked minimum, still leaving Sign in above a phone's fold.
-    expect(mark.getAttribute("height")).toBe("112");
+    // A 144px mark: well above the 64px stacked minimum, still leaving Sign in above a phone's fold.
+    expect(mark.getAttribute("height")).toBe("144");
     expect(lockup.querySelectorAll("img.ks-logo-light, img.ks-logo-dark")).toHaveLength(2);
     expect(lockup.compareDocumentPosition(heading) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     expect(document.querySelector('[data-icon="brand-mark"]')).toBeNull();

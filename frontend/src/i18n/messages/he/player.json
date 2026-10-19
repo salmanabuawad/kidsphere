@@ -2,6 +2,8 @@
   "next": "הבא",
   "back": "הקודם",
   "listen": "הקשבה",
+  "soundOn": "הפעלת קול",
+  "soundOff": "השתקת קול",
   "stopReading": "עצירה",
   "story": {
     "questionsTitle": "בואו נדבר על הסיפור",

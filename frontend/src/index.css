@@ -8,10 +8,10 @@
 @custom-variant ltr (&:where(:dir(ltr)));
 
 /*
- * KidSphere design tokens: "Painted Block Box" (design spec DESIGN-SPEC.md, sections 2-4).
+ * Sharnaqa design tokens: "Painted Block Box" (design spec DESIGN-SPEC.md, sections 2-4).
  *
  * Three colour layers, each with one job:
- *   1. ground + ink (calm): birch `ground`, white `surface` cards, graphite `ink` text.
+ *   1. ground + ink (calm): the logo's cream `ground`, white `surface` cards, plum `ink` text.
  *   2. tints (meaning): `<tone>-soft` fill + `<tone>-ink`, always with an icon and a word.
  *        strength = sunflower, interest = berry, helps = leaf, focus = grape,
  *        attention = tangerine ("worth a look", never red). `danger` is for system errors only.
@@ -19,63 +19,65 @@
  *      blocks, stickers, the present-mode finish tower and empty-state scenes. Never text,
  *      never a big fill. (The logo is artwork with its own inks: components/brand/Logo.tsx.)
  *
- * The accents come from the logo (2026-10-06): `brand` is its navy "Kid" (act, you-are-here),
- * `accent` its teal "Sphere", used sparingly (the active nav icon's paint; `ring` is the
- * accent-strong teal), and paint-sky / paint-leaf / paint-tangerine are its sky, green and star.
+ * The colours come from the Sharnaqa logo (2026-10-19): `brand` is the deep violet of its
+ * plum lettering and lavender cocoon (act, you-are-here), `accent` the teal of its leaf, used
+ * sparingly (the active nav icon's paint; `ring` is the accent-strong teal), and the paints
+ * are the cocoon's lavender and teal, the butterfly's peach and gold, and the child's pink cheeks.
+ * The dark theme is a plum night.
  *
- * Light values on :root; dark values ("walnut night playroom") under prefers-color-scheme
+ * Light values on :root; dark values ("plum night playroom") under prefers-color-scheme
  * unless <html data-theme="light">, and under <html data-theme="dark">.
  * Layout uses logical properties only (ms/me/ps/pe/start/end), so RTL is native.
  */
 :root {
   color-scheme: light;
 
-  --ground: #fbf6ec;
+  --ground: #f9f5ee;
   --surface: #ffffff;
   --surface-raised: #ffffff;
-  --tray: #f3ebdd;
-  --line: #e5daca;
-  --line-strong: #8a7e6c;
-  --ink: #1f2233;
-  --ink-muted: #57525f;
-  --brand: #0d3d72;
-  --brand-strong: #032b56;
-  --brand-soft: #d4e4fa;
+  --tray: #f2ebe1;
+  --line: #e7ddd2;
+  --line-strong: #877c8f;
+  --ink: #231a3a;
+  --ink-muted: #5a5068;
+  --brand: #4a2d86;
+  --brand-strong: #2f1b60;
+  --brand-soft: #e9e0fa;
   --on-brand: #ffffff;
-  --accent: #0a9ea3;
-  --accent-strong: #006e73;
-  --accent-soft: #b8fcff;
-  --on-accent: #1f2233;
-  --strength-soft: #fbe794;
-  --strength-ink: #735603;
-  --interest-soft: #ffc9d5;
-  --interest-ink: #a42056;
-  --helps-soft: #c3f3ce;
-  --helps-ink: #206b38;
-  --focus-soft: #efc4f9;
-  --focus-ink: #7c2d88;
-  --attention-soft: #ffd1aa;
-  --attention-ink: #984500;
+  --accent: #3fa9a3;
+  --accent-strong: #1d6c69;
+  --accent-soft: #cff0ec;
+  --on-accent: #231a3a;
+  --strength-soft: #fce7a2;
+  --strength-ink: #6e5205;
+  --interest-soft: #ffd5e2;
+  --interest-ink: #a12457;
+  --helps-soft: #cdefe6;
+  --helps-ink: #1d6658;
+  --focus-soft: #e9dbfa;
+  --focus-ink: #6b3aa8;
+  --attention-soft: #ffdcc0;
+  --attention-ink: #934300;
   --danger: #be2323;
-  --ring: #006e73;
-  --paint-sun: #fdc010;
-  --paint-berry: #ee4e89;
-  --paint-leaf: #4cc2a6;
-  --paint-grape: #bc6ece;
-  --paint-tangerine: #f99e3a;
-  --paint-sky: #44c2f2;
-  --on-paint: #1f2233;
+  --ring: #1d6c69;
+  --paint-sun: #f8c44e;
+  --paint-berry: #f28aae;
+  --paint-leaf: #6cc9b9;
+  --paint-grape: #b49beb;
+  --paint-tangerine: #f7a866;
+  --paint-sky: #86bdf0;
+  --on-paint: #231a3a;
   /* Aliases (tokens.json writes them as "{helps-ink}" and "{attention-ink}"). */
   --success: var(--helps-ink);
   --warning: var(--attention-ink);
 
   /* Hard "block lips"; blur only on sheets. */
-  --lip: 0 2px 0 0 rgb(31 34 51 / 0.14);
-  --lip-lg: 0 4px 0 0 rgb(31 34 51 / 0.18);
-  --lip-brand: 0 3px 0 0 #011a3a;
-  --lip-brand-pressed: 0 1px 0 0 #011a3a;
-  --sheet: 0 12px 32px -12px rgb(31 34 51 / 0.3), 0 -6px 20px -14px rgb(31 34 51 / 0.2);
-  --backdrop: rgb(31 34 51 / 0.45);
+  --lip: 0 2px 0 0 rgb(35 26 58 / 0.14);
+  --lip-lg: 0 4px 0 0 rgb(35 26 58 / 0.18);
+  --lip-brand: 0 3px 0 0 #22124a;
+  --lip-brand-pressed: 0 1px 0 0 #22124a;
+  --sheet: 0 12px 32px -12px rgb(35 26 58 / 0.3), 0 -6px 20px -14px rgb(35 26 58 / 0.2);
+  --backdrop: rgb(35 26 58 / 0.45);
 
   /* Body and every teacher control, all three scripts (the display stacks are with the type scale below). */
   --font-body: "Rubik Variable", "Rubik", system-ui, "Segoe UI", Tahoma, sans-serif;
@@ -90,46 +92,46 @@
   :root:not([data-theme="light"]) {
     color-scheme: dark;
 
-    --ground: #16120e;
-    --surface: #27221d;
-    --surface-raised: #312b26;
-    --tray: #0e0a07;
-    --line: #4f4740;
-    --line-strong: #8f847a;
+    --ground: #18131f;
+    --surface: #251e31;
+    --surface-raised: #2f273d;
+    --tray: #100c16;
+    --line: #493f58;
+    --line-strong: #8e83a2;
     --ink: #f3eee6;
-    --ink-muted: #c0b8ad;
-    --brand: #90baf1;
-    --brand-strong: #b5d4fc;
-    --brand-soft: #1a3658;
-    --on-brand: #0c121a;
-    --accent: #35b9be;
-    --accent-strong: #7edde1;
-    --accent-soft: #003940;
-    --on-accent: #1f2233;
+    --ink-muted: #c4bbd2;
+    --brand: #c4aef5;
+    --brand-strong: #ddd0fb;
+    --brand-soft: #35274f;
+    --on-brand: #170f28;
+    --accent: #5bc8bf;
+    --accent-strong: #8fe2da;
+    --accent-soft: #0e3b38;
+    --on-accent: #231a3a;
     --strength-soft: #433706;
     --strength-ink: #f7d471;
-    --interest-soft: #4c222d;
-    --interest-ink: #fdaebe;
-    --helps-soft: #183b23;
-    --helps-ink: #95dfa4;
-    --focus-soft: #3e1946;
-    --focus-ink: #d79fe9;
+    --interest-soft: #4c2233;
+    --interest-ink: #fdb0c6;
+    --helps-soft: #133a33;
+    --helps-ink: #8ee0cd;
+    --focus-soft: #35214f;
+    --focus-ink: #cfb2f5;
     --attention-soft: #4e270c;
     --attention-ink: #fab27b;
     --danger: #f47c6b;
-    --ring: #7edde1;
-    --paint-sun: #f9c635;
-    --paint-berry: #f56696;
-    --paint-leaf: #5fceb3;
-    --paint-grape: #c77dd8;
-    --paint-tangerine: #fca953;
-    --paint-sky: #5dcdfa;
-    --on-paint: #1f2233;
+    --ring: #8fe2da;
+    --paint-sun: #f8c850;
+    --paint-berry: #f591b4;
+    --paint-leaf: #74d0c0;
+    --paint-grape: #bca5ef;
+    --paint-tangerine: #f9b074;
+    --paint-sky: #8ec4f3;
+    --on-paint: #231a3a;
 
     --lip: 0 2px 0 0 rgb(0 0 0 / 0.55);
     --lip-lg: 0 4px 0 0 rgb(0 0 0 / 0.6);
-    --lip-brand: 0 3px 0 0 #4c73a5;
-    --lip-brand-pressed: 0 1px 0 0 #4c73a5;
+    --lip-brand: 0 3px 0 0 #8c73c4;
+    --lip-brand-pressed: 0 1px 0 0 #8c73c4;
     --sheet: 0 12px 32px -12px rgb(0 0 0 / 0.7), 0 -6px 20px -14px rgb(0 0 0 / 0.5);
     --backdrop: rgb(0 0 0 / 0.6);
 
@@ -185,46 +187,46 @@
 :root[data-theme="dark"] {
   color-scheme: dark;
 
-  --ground: #16120e;
-  --surface: #27221d;
-  --surface-raised: #312b26;
-  --tray: #0e0a07;
-  --line: #4f4740;
-  --line-strong: #8f847a;
+  --ground: #18131f;
+  --surface: #251e31;
+  --surface-raised: #2f273d;
+  --tray: #100c16;
+  --line: #493f58;
+  --line-strong: #8e83a2;
   --ink: #f3eee6;
-  --ink-muted: #c0b8ad;
-  --brand: #90baf1;
-  --brand-strong: #b5d4fc;
-  --brand-soft: #1a3658;
-  --on-brand: #0c121a;
-  --accent: #35b9be;
-  --accent-strong: #7edde1;
-  --accent-soft: #003940;
-  --on-accent: #1f2233;
+  --ink-muted: #c4bbd2;
+  --brand: #c4aef5;
+  --brand-strong: #ddd0fb;
+  --brand-soft: #35274f;
+  --on-brand: #170f28;
+  --accent: #5bc8bf;
+  --accent-strong: #8fe2da;
+  --accent-soft: #0e3b38;
+  --on-accent: #231a3a;
   --strength-soft: #433706;
   --strength-ink: #f7d471;
-  --interest-soft: #4c222d;
-  --interest-ink: #fdaebe;
-  --helps-soft: #183b23;
-  --helps-ink: #95dfa4;
-  --focus-soft: #3e1946;
-  --focus-ink: #d79fe9;
+  --interest-soft: #4c2233;
+  --interest-ink: #fdb0c6;
+  --helps-soft: #133a33;
+  --helps-ink: #8ee0cd;
+  --focus-soft: #35214f;
+  --focus-ink: #cfb2f5;
   --attention-soft: #4e270c;
   --attention-ink: #fab27b;
   --danger: #f47c6b;
-  --ring: #7edde1;
-  --paint-sun: #f9c635;
-  --paint-berry: #f56696;
-  --paint-leaf: #5fceb3;
-  --paint-grape: #c77dd8;
-  --paint-tangerine: #fca953;
-  --paint-sky: #5dcdfa;
-  --on-paint: #1f2233;
+  --ring: #8fe2da;
+  --paint-sun: #f8c850;
+  --paint-berry: #f591b4;
+  --paint-leaf: #74d0c0;
+  --paint-grape: #bca5ef;
+  --paint-tangerine: #f9b074;
+  --paint-sky: #8ec4f3;
+  --on-paint: #231a3a;
 
   --lip: 0 2px 0 0 rgb(0 0 0 / 0.55);
   --lip-lg: 0 4px 0 0 rgb(0 0 0 / 0.6);
-  --lip-brand: 0 3px 0 0 #4c73a5;
-  --lip-brand-pressed: 0 1px 0 0 #4c73a5;
+  --lip-brand: 0 3px 0 0 #8c73c4;
+  --lip-brand-pressed: 0 1px 0 0 #8c73c4;
   --sheet: 0 12px 32px -12px rgb(0 0 0 / 0.7), 0 -6px 20px -14px rgb(0 0 0 / 0.5);
   --backdrop: rgb(0 0 0 / 0.6);
 

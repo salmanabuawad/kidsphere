@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import type { MatchPairsGame } from "@/features/player/types";
 import { usePlayerText } from "@/features/player/content-locale";
 import { ChoiceCard, Feedback, KidHeading, type CardState } from "@/features/player/kid-ui";
+import { ListenButton, Spoken, useSayOnShow } from "@/features/player/voice";
 import { seedOf, shuffledIndices } from "./shuffle";
 import type { TemplateProps } from "./template-props";
 
@@ -16,6 +17,10 @@ type Pick = { side: Side; pair: number };
  */
 export function MatchPairs({ game, lang, replay, onDone }: TemplateProps<MatchPairsGame>) {
   const t = usePlayerText(lang);
+  const howTo = t("player.game.match.hint");
+  useSayOnShow([game.intro, howTo].filter(Boolean).join(". "), "start");
+  // Each tap that brings feedback is a new beat, so the same words are said again.
+  const [beat, setBeat] = useState(0);
   const order = useMemo(() => shuffledIndices(game.pairs.length, seedOf(game.pairs.map((p) => p.right.label), replay)), [game, replay]);
   const [pick, setPick] = useState<Pick | null>(null);
   const [matched, setMatched] = useState<number[]>([]);
@@ -33,9 +38,11 @@ export function MatchPairs({ game, lang, replay, onDone }: TemplateProps<MatchPa
       const next = [...matched, pair];
       setMatched(next);
       setFeedback("match");
+      setBeat((b) => b + 1);
       if (next.length === game.pairs.length) onDone();
     } else {
       setFeedback("again");
+      setBeat((b) => b + 1);
     }
   };
 
@@ -49,8 +56,11 @@ export function MatchPairs({ game, lang, replay, onDone }: TemplateProps<MatchPa
 
   return (
     <div className="flex flex-1 flex-col gap-6" data-testid="game-match_pairs">
-      <KidHeading title={game.title} intro={game.intro} />
-      <p className="text-center text-lg text-ink-muted">{t("player.game.match.hint")}</p>
+      <KidHeading title={game.title} intro={game.intro} spoken />
+      <div className="flex items-center justify-center gap-3">
+        <Spoken text={howTo} className="text-center text-lg text-ink-muted" />
+        <ListenButton text={howTo} lang={lang} />
+      </div>
       <div className="mx-auto grid w-full max-w-3xl grid-cols-2 gap-x-8 gap-y-4 md:gap-x-16">
         <div className="flex flex-col gap-4" data-testid="match-column-a">
           {game.pairs.map((p, i) => (
@@ -83,8 +93,8 @@ export function MatchPairs({ game, lang, replay, onDone }: TemplateProps<MatchPa
           ))}
         </div>
       </div>
-      {feedback === "match" && <Feedback tone="warm" title={t("player.game.match.yes")} />}
-      {feedback === "again" && <Feedback tone="think" title={t("player.game.tryAnother")} />}
+      {feedback === "match" && <Feedback key={beat} tone="warm" title={t("player.game.match.yes")} />}
+      {feedback === "again" && <Feedback key={beat} tone="think" title={t("player.game.tryAnother")} />}
     </div>
   );
 }

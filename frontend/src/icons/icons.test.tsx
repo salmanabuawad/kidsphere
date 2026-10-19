@@ -94,14 +94,14 @@ describe("KidSphere icon set", () => {
     const paint = svg.querySelector("g[stroke='none']") as SVGGElement;
     expect(paint).not.toBeNull();
     expect(svg.firstElementChild).toBe(paint);
-    expect(paint.style.fill).toBe("var(--icon-paint, var(--paint-sky, #44C2F2))");
+    expect(paint.style.fill).toBe("var(--icon-paint, var(--paint-sky, #86BDF0))");
     expect(paint.getAttribute("transform")).toBe("translate(0 1.5)");
 
     const star = svgOf(<StrengthsIcon />).querySelector("g[stroke='none']") as SVGGElement;
-    expect(star.style.fill).toBe("var(--icon-paint, var(--paint-sun, #FDC010))");
-    // Nav icons are coloured in with the logo teal: a navy brand paint would vanish against the graphite outline.
+    expect(star.style.fill).toBe("var(--icon-paint, var(--paint-sun, #F8C44E))");
+    // Nav icons are coloured in with the logo teal: a violet brand paint would vanish against the graphite outline.
     const nav = svgOf(<ChildrenIcon />).querySelector("g[stroke='none']") as SVGGElement;
-    expect(nav.style.fill).toBe("var(--icon-paint, var(--accent, #0A9EA3))");
+    expect(nav.style.fill).toBe("var(--icon-paint, var(--accent, #3FA9A3))");
   });
 
   it("paints every nav icon with the accent by default", () => {

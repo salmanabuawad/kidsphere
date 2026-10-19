@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import type { SequenceGame } from "@/features/player/types";
 import { usePlayerText } from "@/features/player/content-locale";
 import { ChoiceCard, Feedback, KidHeading, Pic } from "@/features/player/kid-ui";
+import { ListenButton, Spoken, useSayOnShow, useShowWords } from "@/features/player/voice";
 import { seedOf, shuffledIndices } from "./shuffle";
 import type { TemplateProps } from "./template-props";
 
@@ -13,6 +14,11 @@ import type { TemplateProps } from "./template-props";
  */
 export function Sequence({ game, lang, dir, replay, onDone }: TemplateProps<SequenceGame>) {
   const t = usePlayerText(lang);
+  const howTo = t("player.game.sequence.hint");
+  useSayOnShow([game.intro, howTo].filter(Boolean).join(". "), "start");
+  // Each tap that brings feedback is a new beat, so the same words are said again.
+  const [beat, setBeat] = useState(0);
+  const showWords = useShowWords();
   const n = game.items.length;
   const pool = useMemo(() => shuffledIndices(n, seedOf(game.items.map((i) => i.label), replay)), [game, n, replay]);
   const [placed, setPlaced] = useState<number[]>([]);
@@ -27,13 +33,17 @@ export function Sequence({ game, lang, dir, replay, onDone }: TemplateProps<Sequ
       if (next.length === n) onDone();
     } else {
       setHint(i);
+      setBeat((b) => b + 1);
     }
   };
 
   return (
     <div className="flex flex-1 flex-col gap-6" data-testid="game-sequence">
-      <KidHeading title={game.title} intro={game.intro} />
-      <p className="text-center text-lg text-ink-muted">{t("player.game.sequence.hint")}</p>
+      <KidHeading title={game.title} intro={game.intro} spoken />
+      <div className="flex items-center justify-center gap-3">
+        <Spoken text={howTo} className="text-center text-lg text-ink-muted" />
+        <ListenButton text={howTo} lang={lang} />
+      </div>
 
       <ol dir={dir} className="mx-auto flex w-full max-w-4xl flex-row flex-wrap justify-center gap-3 rounded-xl bg-tray p-4" data-testid="sequence-track">
         {game.items.map((_, slot) => {
@@ -51,7 +61,7 @@ export function Sequence({ game, lang, dir, replay, onDone }: TemplateProps<Sequ
               {item && (
                 <>
                   <Pic emoji={item.emoji} photo={item.photo} className="text-4xl" />
-                  <span dir="auto" className="font-display text-lg font-semibold text-ink">
+                  <span dir="auto" className={showWords || !(item.emoji || item.photo) ? "font-display text-lg font-semibold text-ink" : "sr-only"}>
                     {item.label}
                   </span>
                 </>
@@ -77,7 +87,7 @@ export function Sequence({ game, lang, dir, replay, onDone }: TemplateProps<Sequ
             />
           ))}
       </div>
-      {hint !== null && <Feedback tone="think" title={placed.length === 0 ? t("player.game.sequence.whatFirst") : t("player.game.sequence.whatNext")} />}
+      {hint !== null && <Feedback key={beat} tone="think" title={placed.length === 0 ? t("player.game.sequence.whatFirst") : t("player.game.sequence.whatNext")} />}
     </div>
   );
 }

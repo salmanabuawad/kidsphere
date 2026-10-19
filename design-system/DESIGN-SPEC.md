@@ -1000,7 +1000,7 @@ Then a 56px star sticker stamps beside the tower at the inline-end (320ms).
 #### Top bar (below lg)
 
 - **Bar.** Sticky; 56px tall plus `safe-area-inset-top`. Solid `ground` with a 1px `line` bottom border and no blur.
-- **Start.** The Brand link: the Sharnaqa logo as an inline lockup (a 44px mark, then the wordmark image 33px tall, 10px apart; `project/assets/Logos`), at least 44px tall, named by the mark's alt text.
+- **Start.** The Brand link: the Sharnaqa logo as an inline lockup (a 52px mark, then the wordmark image 39px tall, 11px apart; `project/assets/Logos`), at least 44px tall, named by the mark's alt text.
 - **End.** The compact LocaleSwitcher, plus a 44px avatar-menu IconButton (a 32px `tray` avatar block).
 
 #### Side nav (lg and up)

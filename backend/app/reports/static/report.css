@@ -3,9 +3,9 @@
  * serve dir=ltr and dir=rtl. Direction-specific @page boxes live in
  * page-ltr.css / page-rtl.css.
  *
- * Brand colours (hard-coded for print; see frontend/src/index.css):
- *   navy #0D3D72 (headings, "Kid"), teal #0A9EA3 (fills only) / #006E73 (teal text),
- *   sky #44C2F2, green #4CC2A6, star orange #F99E3A, ink #1F2233, ground #FBF6EC.
+ * Brand colours from the Sharnaqa logo (hard-coded for print; see frontend/src/index.css):
+ *   violet #4A2D86 (headings), plum #190B40 (the wordmark), teal #3FA9A3 (fills only) /
+ *   #1D6C69 (teal text), sky #86BDF0, teal-green #6CC9B9, peach #F7A866, ink #231A3A, cream #F9F5EE.
  * Chips are soft tints with ink text. No scores, no checkbox grids, nothing that
  * looks like a clinical form.
  */
@@ -33,7 +33,7 @@
   @top-center { content: none; }
 }
 
-html { color: #1F2233; background: #FFFFFF; }
+html { color: #231A3A; background: #FFFFFF; }
 body {
   margin: 0;
   font-size: 9.5pt;
@@ -50,18 +50,18 @@ p, li, td, th { text-align: start; }
 .running-header {
   position: running(running-header);
   font-size: 7.5pt;
-  color: #5B5F70;
+  color: #5A5068;
   border-block-end: 0.6pt solid #E3DCCD;
   padding-block-end: 1.5mm;
   width: 100%;
 }
 .running-header .rh-mark { width: 4mm; height: 4mm; vertical-align: -1mm; margin-inline-end: 1mm; }
-.running-header .rh-sep { margin-inline: 1.5mm; color: #9A9EAD; }
+.running-header .rh-sep { margin-inline: 1.5mm; color: #9A92A8; }
 .running-footer {
   position: running(running-footer);
   font-size: 6.8pt;
   line-height: 1.35;
-  color: #5B5F70;
+  color: #5A5068;
   text-align: center;
 }
 .running-footer .disclaimer { text-align: center; }
@@ -73,7 +73,7 @@ p, li, td, th { text-align: start; }
 
 /* ------------------------------------------------------------------ page 1 header */
 .cover {
-  border-block-end: 1.2pt solid #0A9EA3;
+  border-block-end: 1.2pt solid #3FA9A3;
   padding-block-end: 4mm;
   margin-block-end: 5mm;
 }
@@ -81,14 +81,14 @@ p, li, td, th { text-align: start; }
 .brand-row .mark { width: 13mm; height: 13mm; display: inline-block; vertical-align: middle; }
 .brand-text { display: inline-block; vertical-align: middle; margin-inline-start: 3mm; }
 .wordmark { font-size: 15pt; line-height: 1.1; }
-.report-label { font-size: 8.5pt; color: #5B5F70; }
-.report-title { font-size: 18pt; line-height: 1.25; color: #0D3D72; font-weight: 700; margin-block-end: 1mm; }
-.subtitle { color: #5B5F70; font-size: 9pt; margin-block-end: 2mm; }
+.report-label { font-size: 8.5pt; color: #5A5068; }
+.report-title { font-size: 18pt; line-height: 1.25; color: #4A2D86; font-weight: 700; margin-block-end: 1mm; }
+.subtitle { color: #5A5068; font-size: 9pt; margin-block-end: 2mm; }
 .facts { margin-block-start: 2mm; }
 .fact { display: inline-block; vertical-align: top; width: 32%; margin-block-end: 2mm; }
-.fact-k { font-size: 7.5pt; color: #5B5F70; }
+.fact-k { font-size: 7.5pt; color: #5A5068; }
 .fact-v { font-size: 10pt; font-weight: 600; }
-.cover-note { margin-block-start: 1mm; font-size: 8pt; color: #5B5F70; }
+.cover-note { margin-block-start: 1mm; font-size: 8pt; color: #5A5068; }
 
 /* ------------------------------------------------------------------ sections */
 .section { margin-block-end: 5mm; }
@@ -96,7 +96,7 @@ p, li, td, th { text-align: start; }
 .section-title {
   font-size: 12.5pt;
   line-height: 1.3;
-  color: #0D3D72;
+  color: #4A2D86;
   font-weight: 700;
   border-block-end: 0.8pt solid #E3DCCD;
   padding-block-end: 1mm;
@@ -104,10 +104,10 @@ p, li, td, th { text-align: start; }
   break-after: avoid;
 }
 .section-meta { margin-block-end: 2mm; break-after: avoid; }
-.intro { color: #5B5F70; margin-block-end: 2mm; }
+.intro { color: #5A5068; margin-block-end: 2mm; }
 .block-heading {
   font-size: 10.5pt;
-  color: #0D3D72;
+  color: #4A2D86;
   font-weight: 700;
   margin-block: 3mm 1.5mm;
   break-after: avoid;
@@ -123,7 +123,7 @@ p, li, td, th { text-align: start; }
   padding: 0.3mm 2mm;
   border-radius: 3mm;
   background: #F1EEE7;
-  color: #1F2233;
+  color: #231A3A;
   font-size: 8.5pt;
   line-height: 1.45;
   margin-block-end: 0.6mm;
@@ -134,16 +134,16 @@ p, li, td, th { text-align: start; }
   border-radius: 1.2mm;
   font-size: 7pt;
   line-height: 1.4;
-  color: #1F2233;
+  color: #231A3A;
   background: #F1EEE7;
   font-weight: 400;
 }
 .tone-sky { background: #E1F4FC; }
 .tone-leaf { background: #E0F4EE; }
 .tone-sun { background: #FEEDD8; }
-.tone-navy { background: #E2E9F2; }
-.tone-teal { background: #DDF3F3; }
-.tone-muted { background: #F1EEE7; color: #5B5F70; }
+.tone-navy { background: #ECE5F8; }
+.tone-teal { background: #DDF3F0; }
+.tone-muted { background: #F1EEE7; color: #5A5068; }
 .tone-neutral { background: #F1EEE7; }
 .status {
   display: inline-block;
@@ -151,35 +151,35 @@ p, li, td, th { text-align: start; }
   border-radius: 1.2mm;
   border: 0.6pt solid #C9C2B2;
   font-size: 7pt;
-  color: #1F2233;
+  color: #231A3A;
 }
-.status-sufficient { border-color: #4CC2A6; }
-.status-in_progress { border-color: #44C2F2; }
-.status-review_later { border-color: #F99E3A; }
-.status-not_started { color: #5B5F70; }
+.status-sufficient { border-color: #6CC9B9; }
+.status-in_progress { border-color: #86BDF0; }
+.status-review_later { border-color: #F7A866; }
+.status-not_started { color: #5A5068; }
 
 /* ------------------------------------------------------------------ question / answer */
 .qa-item { margin-block-end: 2.2mm; break-inside: avoid; }
-.q { font-size: 8.5pt; color: #4A4E5E; font-weight: 600; margin-block-end: 0.5mm; }
+.q { font-size: 8.5pt; color: #4A4058; font-weight: 600; margin-block-end: 0.5mm; }
 .a .line { margin-block-end: 0.6mm; }
-.qa-heading { font-size: 9.5pt; color: #0D3D72; font-weight: 700; margin-block: 2.5mm 1mm; break-after: avoid; }
+.qa-heading { font-size: 9.5pt; color: #4A2D86; font-weight: 700; margin-block: 2.5mm 1mm; break-after: avoid; }
 
 /* ------------------------------------------------------------------ callout (message from the heart) */
 .callout {
-  background: #FBF6EC;
-  border-inline-start: 2.5pt solid #F99E3A;
+  background: #F9F5EE;
+  border-inline-start: 2.5pt solid #F7A866;
   border-radius: 2mm;
   padding: 3mm 4mm;
   margin-block-end: 3mm;
   break-inside: avoid;
 }
-.callout-title { font-weight: 700; color: #0D3D72; margin-block-end: 1mm; }
+.callout-title { font-weight: 700; color: #4A2D86; margin-block-end: 1mm; }
 .callout-text { font-size: 10.5pt; line-height: 1.5; }
 
 /* ------------------------------------------------------------------ key / value */
 .kv { margin-block-end: 2mm; }
 .kv-item { display: inline-block; vertical-align: top; width: 32%; margin-block-end: 1.5mm; }
-.kv-k { font-size: 7.5pt; color: #5B5F70; }
+.kv-k { font-size: 7.5pt; color: #5A5068; }
 .kv-v { font-size: 9.5pt; font-weight: 600; }
 
 /* ------------------------------------------------------------------ tables */
@@ -193,7 +193,7 @@ table.grid thead { display: table-header-group; }
 table.grid tr { break-inside: avoid; }
 table.grid th {
   background: #F4EFE4;
-  color: #0D3D72;
+  color: #4A2D86;
   font-weight: 700;
   font-size: 8pt;
   padding: 1.6mm 2mm;
@@ -205,21 +205,21 @@ table.grid td {
   border-block-end: 0.5pt solid #E9E3D6;
   vertical-align: top;
 }
-table.grid tr.sub td { background: #FBF6EC; font-weight: 700; color: #0D3D72; font-size: 8.5pt; }
+table.grid tr.sub td { background: #F9F5EE; font-weight: 700; color: #4A2D86; font-size: 8.5pt; }
 table.grid tr.detail td { background: #FCFAF5; font-size: 8.2pt; }
 .detail-part { margin-block-end: 0.8mm; }
-.detail-k { color: #5B5F70; font-size: 7.5pt; }
+.detail-k { color: #5A5068; font-size: 7.5pt; }
 .cell-line { margin-block-end: 0.5mm; }
 
 /* ------------------------------------------------------------------ entries and timeline */
 .entry { margin-block-end: 3mm; padding-block-end: 2mm; border-block-end: 0.5pt solid #EFE9DC; break-inside: avoid; }
 .entry-title { font-weight: 700; margin-block-end: 1mm; }
-.entry-meta { color: #5B5F70; font-weight: 400; margin-inline-end: 1.5mm; }
+.entry-meta { color: #5A5068; font-weight: 400; margin-inline-end: 1.5mm; }
 .part { margin-block-end: 1mm; }
-.part-k { font-size: 8pt; color: #4A4E5E; font-weight: 600; }
-.month { font-size: 10.5pt; color: #0D3D72; margin-block: 3mm 1.5mm; break-after: avoid; }
+.part-k { font-size: 8pt; color: #4A4058; font-weight: 600; }
+.month { font-size: 10.5pt; color: #4A2D86; margin-block: 3mm 1.5mm; break-after: avoid; }
 .tl-entry { margin-block-end: 2mm; padding-inline-start: 3mm; border-inline-start: 1.5pt solid #A6DDE0; break-inside: avoid; }
-.tl-date { color: #5B5F70; font-size: 8.5pt; margin-inline-end: 1mm; }
+.tl-date { color: #5A5068; font-size: 8.5pt; margin-inline-end: 1mm; }
 .tl-title { font-weight: 600; }
 
 /* ------------------------------------------------------------------ lists */
@@ -227,7 +227,7 @@ table.grid tr.detail td { background: #FCFAF5; font-size: 8.2pt; }
 .plain-list li { margin-block-end: 0.8mm; }
 .chip-list { margin-block-end: 2mm; }
 .chip-row { margin-block-end: 0.8mm; }
-.chip-note { color: #4A4E5E; }
+.chip-note { color: #4A4058; }
 
 /* Free-text lines keep their own dir (correct bidi order) but align with the document, so an
    answer that starts with a Latin word stays under its question in an RTL report. */

@@ -1,8 +1,9 @@
-import type { ButtonHTMLAttributes, CSSProperties, ReactNode } from "react";
+import { useEffect, type ButtonHTMLAttributes, type CSSProperties, type ReactNode } from "react";
 import { Check } from "lucide-react";
 import { ArrowNextIcon, StrengthsIcon } from "@/icons";
 import { cn } from "@/lib/utils";
 import type { Dir } from "./content-locale";
+import { useShowWords, useVoice } from "./voice";
 
 /**
  * Child-facing building blocks for "present" mode on a tablet (spec 6.10): the block
@@ -145,6 +146,7 @@ export function ChoiceCard({
   size = "md",
   paint = 0,
   className,
+  onClick,
   ...props
 }: Omit<ButtonHTMLAttributes<HTMLButtonElement>, "children"> & {
   label: string;
@@ -158,11 +160,19 @@ export function ChoiceCard({
 }) {
   const lg = size === "lg";
   const s = cardStates[state];
+  const { say } = useVoice();
+  // A picture speaks for itself: its name is heard on tap, and shown only when it cannot be heard.
+  const wordless = !useShowWords() && Boolean(photo || emoji);
   return (
     <button
       type="button"
+      aria-label={wordless ? label : undefined}
       aria-pressed={state === "selected" || state === "preferred" || state === "other" ? true : undefined}
       data-state={state}
+      onClick={(e) => {
+        say(label);
+        onClick?.(e);
+      }}
       className={cn(
         "ks-press relative flex w-full flex-col items-center justify-center gap-2 rounded-xl p-3 text-center select-none focus-visible:outline-offset-[3px]",
         lg ? "min-h-[150px] md:min-h-[180px]" : "min-h-[120px] md:min-h-[140px]",
@@ -197,7 +207,10 @@ export function ChoiceCard({
           )}
         </span>
       </span>
-      <span dir="auto" className={cn("font-display text-kid-label relative line-clamp-2 font-medium", state === "done" ? "text-ink-muted" : "text-ink")}>
+      <span
+        dir="auto"
+        className={wordless ? "sr-only" : cn("font-display text-kid-label relative line-clamp-2 font-medium", state === "done" ? "text-ink-muted" : "text-ink")}
+      >
         {label}
       </span>
       {state === "selected" && <CheckBlock className="bg-brand" />}
@@ -208,19 +221,38 @@ export function ChoiceCard({
   );
 }
 
-/** Gentle feedback bubble (never "wrong", never a score). warm carries a sun-star sticker. */
-export function Feedback({ tone, title, children }: { tone: "warm" | "think" | "calm"; title: string; children?: ReactNode }) {
+/** The picture a feedback bubble shows: a star for "yes", a thinking face, a thumbs up. */
+const FEEDBACK_PICTURE = { think: "🤔", calm: "👍" } as const;
+
+/**
+ * Gentle feedback bubble (never "wrong", never a score). For pre-readers it is a picture
+ * (warm: the sun-star sticker) and the words are spoken; they show only without a voice.
+ */
+export function Feedback({ tone, title, children }: { tone: "warm" | "think" | "calm"; title: string; children?: string | null }) {
   const tones = { warm: "bg-helps-soft", think: "bg-attention-soft", calm: "bg-brand-soft" };
+  const { say } = useVoice();
+  const show = useShowWords();
+  // After the tapped card's name: queued, so the child hears both.
+  useEffect(() => say([title, children].filter(Boolean).join(". "), "queue"), [say, title, children]);
   return (
     <div
       role="status"
       aria-live="polite"
       className={cn("animate-bounce-place mx-auto flex w-full max-w-[640px] flex-col items-center rounded-xl px-6 py-5 text-center text-ink", tones[tone])}
+      data-tone={tone}
     >
-      {tone === "warm" && <StarSticker size={40} className="animate-stamp mb-1" />}
-      <p className="font-display text-kid-label font-semibold">{title}</p>
+      {tone === "warm" ? (
+        <StarSticker size={show ? 40 : 72} className="animate-stamp mb-1" />
+      ) : (
+        !show && (
+          <span aria-hidden className="text-[3.5rem] leading-none select-none">
+            {FEEDBACK_PICTURE[tone]}
+          </span>
+        )
+      )}
+      <p className={show ? "font-display text-kid-label font-semibold" : "sr-only"}>{title}</p>
       {children && (
-        <p dir="auto" className="font-display mt-2 text-xl leading-[1.875rem] font-medium">
+        <p dir="auto" className={show ? "font-display mt-2 text-xl leading-[1.875rem] font-medium" : "sr-only"}>
           {children}
         </p>
       )}
@@ -253,15 +285,19 @@ export function PhotoStack({ photos, className }: { photos: string[]; className?
   );
 }
 
-/** Title + optional intro on top of a game or story. */
-export function KidHeading({ title, intro }: { title: string; intro?: string | null }) {
+/**
+ * Title + optional intro on top of a game or story. In a game (`spoken`) the intro is
+ * heard, not shown, unless there is no voice.
+ */
+export function KidHeading({ title, intro, spoken }: { title: string; intro?: string | null; spoken?: boolean }) {
+  const show = useShowWords();
   return (
     <header className="text-center">
       <h2 dir="auto" className="font-display text-display-lg md:text-display-xl font-semibold text-ink">
         {title}
       </h2>
       {intro && (
-        <p dir="auto" className="mx-auto mt-2 max-w-[40ch] text-xl leading-[1.875rem] text-ink-muted">
+        <p dir="auto" className={spoken && !show ? "sr-only" : "mx-auto mt-2 max-w-[40ch] text-xl leading-[1.875rem] text-ink-muted"}>
           {intro}
         </p>
       )}

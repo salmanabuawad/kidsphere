@@ -10,7 +10,7 @@
  *  - `line`: the outline (stroke only). A third tuple item is a stroke-weight multiplier.
  *  - `ink`: small solid details in the outline colour (pupil, antenna balls).
  *  - `paint`: which paint token the `fill` uses by default. Nav icons use `accent`, the
- *    logo teal: the navy `brand` sits at 1.44:1 against the graphite outline, so a navy
+ *    logo teal: the violet `brand` sits too close to the plum outline, so a violet
  *    paint would not read as "coloured in" (teal: 4.82:1).
  *  - `mirror`: flips under RTL (spec 5.3).
  *

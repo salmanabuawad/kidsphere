@@ -14,7 +14,7 @@ The frame around every teacher, admin and parent screen: phone-first, with a top
 
 ## Below lg: top bar and bottom bar
 
-- **Top bar**: sticky, 56px plus the top safe area, solid `ground` with a 1px `line` bottom edge and no blur. The Brand link at the start: the logo as an inline lockup (the 44px mark, then the wordmark image 33px tall, 10px apart, `assets/Logos`), at least 44px tall and named by the mark's alt text "Sharnaqa"; the compact language switch and a 44px avatar-menu IconButton at the end.
+- **Top bar**: sticky, 64px plus the top safe area, solid `ground` with a 1px `line` bottom edge and no blur. The Brand link at the start: the logo as an inline lockup (the 52px mark, then the wordmark image 39px tall, 11px apart, `assets/Logos`), at least 44px tall and named by the mark's alt text "Sharnaqa"; the compact language switch and a 44px avatar-menu IconButton at the end.
 - **Bottom bar**: fixed, 64px plus the bottom safe area, `surface` with a 1px `line` top edge. Up to four items split around the centre action, in a row at most 576 wide; overflow goes under More (Menu), which opens a bottom sheet with the same items.
 - **Items**: a 24px icon in a 48 by 28 pill (`radius-md`) over a `caption` 500 label at 13/16 (14/18 in Arabic), one line with an ellipsis.
 

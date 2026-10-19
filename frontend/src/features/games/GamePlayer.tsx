@@ -10,6 +10,7 @@ import { ChoiceRounds } from "./ChoiceRounds";
 import { FinishScreen } from "./FinishScreen";
 import { MatchPairs } from "./MatchPairs";
 import { Sequence } from "./Sequence";
+import { SoundToggle, VoiceProvider } from "@/features/player/voice";
 import { StoryBuilder } from "./StoryBuilder";
 import type { TemplateProps } from "./template-props";
 
@@ -44,7 +45,8 @@ function Template({ game, ...rest }: TemplateProps<Game>) {
 /**
  * Renders one of the 7 game templates (switching on `template`), then the shared finish screen.
  * People of the child's life (CastProvider) appear by name, and a card that names one shows
- * their photo instead of the emoji.
+ * their photo instead of the emoji. Most players cannot read yet, so the game speaks
+ * (VoiceProvider) and shows pictures; the sound switch at the top brings the words back.
  */
 export function GamePlayer({ game: raw, lang, dir: dirProp, onFinish }: GamePlayerProps) {
   const dir = contentDir(lang, dirProp);
@@ -57,30 +59,35 @@ export function GamePlayer({ game: raw, lang, dir: dirProp, onFinish }: GamePlay
   const [finished, setFinished] = useState(false);
 
   return (
-    <div dir={dir} lang={lang} className="flex min-h-[70vh] flex-col" data-testid="game-player" data-template={game?.template ?? "invalid"}>
-      {!game ? (
-        <PlayerFallback lang={lang} />
-      ) : finished ? (
-        <FinishScreen
-          lang={lang}
-          onPlayAgain={() => {
-            setReplay((r) => r + 1);
-            setFinished(false);
-          }}
-        />
-      ) : (
-        <Template
-          key={replay}
-          game={game}
-          lang={lang}
-          dir={dir}
-          replay={replay}
-          onDone={() => {
-            setFinished(true);
-            onFinish?.();
-          }}
-        />
-      )}
-    </div>
+    <VoiceProvider lang={lang}>
+      <div dir={dir} lang={lang} className="flex min-h-[70vh] flex-col" data-testid="game-player" data-template={game?.template ?? "invalid"}>
+        <div className="flex justify-end">
+          <SoundToggle lang={lang} />
+        </div>
+        {!game ? (
+          <PlayerFallback lang={lang} />
+        ) : finished ? (
+          <FinishScreen
+            lang={lang}
+            onPlayAgain={() => {
+              setReplay((r) => r + 1);
+              setFinished(false);
+            }}
+          />
+        ) : (
+          <Template
+            key={replay}
+            game={game}
+            lang={lang}
+            dir={dir}
+            replay={replay}
+            onDone={() => {
+              setFinished(true);
+              onFinish?.();
+            }}
+          />
+        )}
+      </div>
+    </VoiceProvider>
   );
 }

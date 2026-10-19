@@ -2,6 +2,8 @@
   "next": "التالي",
   "back": "السابق",
   "listen": "استمع",
+  "soundOn": "تشغيل الصوت",
+  "soundOff": "إيقاف الصوت",
   "stopReading": "توقّف",
   "story": {
     "questionsTitle": "لنتحدّث عن القصة",

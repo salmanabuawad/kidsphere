@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import type { CategorizeGame } from "@/features/player/types";
 import { usePlayerText } from "@/features/player/content-locale";
 import { ChoiceCard, Feedback, KidHeading, Pic, playPaint } from "@/features/player/kid-ui";
+import { ListenButton, Spoken, useSayOnShow, useShowWords, useVoice } from "@/features/player/voice";
 import { cn } from "@/lib/utils";
 import { seedOf, shuffledIndices } from "./shuffle";
 import type { TemplateProps } from "./template-props";
@@ -15,6 +16,12 @@ const BASKET_PAINT = [1, 5, 4];
  */
 export function Categorize({ game, lang, replay, onDone }: TemplateProps<CategorizeGame>) {
   const t = usePlayerText(lang);
+  const howTo = t("player.game.categorize.hint");
+  useSayOnShow([game.intro, howTo].filter(Boolean).join(". "), "start");
+  // Each tap that brings feedback is a new beat, so the same words are said again.
+  const [beat, setBeat] = useState(0);
+  const showWords = useShowWords();
+  const { say } = useVoice();
   const order = useMemo(() => shuffledIndices(game.items.length, seedOf(game.items.map((i) => i.label), replay)), [game, replay]);
   const [selected, setSelected] = useState<number | null>(null);
   const [placed, setPlaced] = useState<number[]>([]);
@@ -26,8 +33,10 @@ export function Categorize({ game, lang, replay, onDone }: TemplateProps<Categor
   };
 
   const pickBasket = (key: string) => {
+    say(game.categories.find((c) => c.key === key)?.label);
     if (selected === null) {
       setFeedback("pickFirst");
+      setBeat((b) => b + 1);
       return;
     }
     if (game.items[selected]!.category === key) {
@@ -35,9 +44,11 @@ export function Categorize({ game, lang, replay, onDone }: TemplateProps<Categor
       setPlaced(next);
       setSelected(null);
       setFeedback("yes");
+      setBeat((b) => b + 1);
       if (next.length === game.items.length) onDone();
     } else {
       setFeedback("again");
+      setBeat((b) => b + 1);
     }
   };
 
@@ -45,8 +56,11 @@ export function Categorize({ game, lang, replay, onDone }: TemplateProps<Categor
 
   return (
     <div className="flex flex-1 flex-col gap-6" data-testid="game-categorize">
-      <KidHeading title={game.title} intro={game.intro} />
-      <p className="text-center text-lg text-ink-muted">{t("player.game.categorize.hint")}</p>
+      <KidHeading title={game.title} intro={game.intro} spoken />
+      <div className="flex items-center justify-center gap-3">
+        <Spoken text={howTo} className="text-center text-lg text-ink-muted" />
+        <ListenButton text={howTo} lang={lang} />
+      </div>
 
       <div className={cn("mx-auto grid w-full max-w-4xl gap-4", game.categories.length === 3 ? "grid-cols-3" : "grid-cols-2")}>
         {game.categories.map((c, ci) => (
@@ -67,7 +81,7 @@ export function Categorize({ game, lang, replay, onDone }: TemplateProps<Categor
                 <Pic emoji={c.emoji ?? "🧺"} photo={c.photo} className="text-[2.25rem]" />
               </span>
             </span>
-            <span dir="auto" className="font-display text-kid-label relative font-semibold text-ink">
+            <span dir="auto" className={showWords || !(c.emoji || c.photo) ? "font-display text-kid-label relative font-semibold text-ink" : "sr-only"}>
               {c.label}
             </span>
             <span className="flex flex-wrap justify-center gap-1" data-testid={`basket-${c.key}-items`}>
@@ -100,9 +114,9 @@ export function Categorize({ game, lang, replay, onDone }: TemplateProps<Categor
           ))}
         </div>
       )}
-      {feedback === "yes" && <Feedback tone="warm" title={t("player.game.categorize.yes")} />}
-      {feedback === "again" && <Feedback tone="think" title={t("player.game.categorize.again")} />}
-      {feedback === "pickFirst" && <Feedback tone="calm" title={t("player.game.categorize.pickFirst")} />}
+      {feedback === "yes" && <Feedback key={beat} tone="warm" title={t("player.game.categorize.yes")} />}
+      {feedback === "again" && <Feedback key={beat} tone="think" title={t("player.game.categorize.again")} />}
+      {feedback === "pickFirst" && <Feedback key={beat} tone="calm" title={t("player.game.categorize.pickFirst")} />}
     </div>
   );
 }
