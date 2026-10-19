@@ -1,29 +1,30 @@
-import markUrl from "@/assets/brand/kidsphere-mark.webp";
-import wordmarkUrl from "@/assets/brand/kidsphere-wordmark.webp";
-import wordmarkDarkUrl from "@/assets/brand/kidsphere-wordmark-dark.webp";
+import markUrl from "@/assets/brand/sharnaqa-mark.webp";
+import wordmarkUrl from "@/assets/brand/sharnaqa-wordmark.webp";
+import wordmarkDarkUrl from "@/assets/brand/sharnaqa-wordmark-dark.webp";
 import { cn } from "@/lib/utils";
 
 /** The brand name exactly as the logo spells it, in every interface language (the alt text is the image's own words). */
-export const BRAND_NAME = "KidSphere";
+export const BRAND_NAME = "Sharnaqa";
 
 /*
  * Pixel sizes of the processed brand art in src/assets/brand (cut by design-system/make_logo.py):
- * the round mark is square, the wordmark carries a 6px transparent margin, and in the drawn
- * (stacked) lockup the wordmark sits 20px under the mark. The app ships the script's compressed
- * WebP copies; the PNG masters stay in design-system/project/assets/Logos.
+ * the mark is a square rounded tile (the egg and the butterfly on the artwork's cream), the
+ * wordmark carries a 6px transparent margin and includes the leaf above and the "q" below, and
+ * in the drawn (stacked) lockup the wordmark sits 14px under the 470px mark. The app ships the
+ * script's compressed WebP copies; the PNG masters stay in design-system/project/assets/Logos.
  */
-const MARK_PX = 322;
-const WORD_W = 527;
-const WORD_H = 131;
-const STACK_GAP = 20;
-/** Inline lockup (bars): the wordmark image is 0.6 of the mark's height and sits 0.22 of it away (8px at 36). */
-const INLINE_WORD = 0.6;
+const MARK_PX = 470;
+const WORD_W = 639;
+const WORD_H = 173;
+const STACK_GAP = 14;
+/** Inline lockup (bars): the wordmark image is 0.75 of the mark's height and sits 0.22 of it away (8px at 36). */
+const INLINE_WORD = 0.75;
 const INLINE_GAP = 0.22;
 
 export type LogoProps = {
-  /** "mark": the round globe-and-child mark only. "lockup": the mark with the KidSphere wordmark. */
+  /** "mark": the egg-and-child tile only. "lockup": the mark with the Sharnaqa wordmark. */
   variant?: "mark" | "lockup";
-  /** Diameter of the round mark in CSS px; the wordmark scales with it. */
+  /** Side of the square mark in CSS px; the wordmark scales with it. */
   size?: number;
   /** Lockup only. "stacked": the wordmark under the mark, as drawn. "inline": beside it, for the top bar and side nav. */
   layout?: "stacked" | "inline";
@@ -33,10 +34,10 @@ export type LogoProps = {
 const IMG = "shrink-0 object-contain select-none";
 
 /**
- * The KidSphere logo (design-system/project/assets/Logos).
+ * The Sharnaqa logo (design-system/project/assets/Logos).
  *
- * - The mark reads the same on light and dark grounds. The wordmark comes in two inks ("Kid"
- *   in navy, or in chalk for dark grounds); both are placed and the theme shows one through
+ * - The mark reads the same on light and dark grounds. The wordmark comes in two inks (plum,
+ *   or chalk for dark grounds, the leaf teal in both); both are placed and the theme shows one through
  *   `.ks-logo-light` / `.ks-logo-dark` (index.css), which follow the token rule:
  *   prefers-color-scheme, unless `<html data-theme>` says otherwise.
  * - The wordmark images are `loading="lazy"`: a browser never fetches a lazy image that is

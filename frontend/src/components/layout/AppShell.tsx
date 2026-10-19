@@ -36,8 +36,8 @@ function isActivePath(pathname: string, to: string) {
 }
 
 /**
- * The KidSphere logo linking home: the round mark with the wordmark beside it (the inline
- * lockup). The mark's alt text names the link. `size` is the mark's diameter: 36 in the
+ * The Sharnaqa logo linking home: the mark with the wordmark beside it (the inline
+ * lockup). The mark's alt text names the link. `size` is the mark's side: 36 in the
  * 56px top bar, 40 in the side nav.
  */
 export function Brand({ to = "/", size = 36, className }: { to?: string; size?: number; className?: string }) {

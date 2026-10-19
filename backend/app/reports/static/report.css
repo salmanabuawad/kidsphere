@@ -1,5 +1,5 @@
 /*
- * KidSphere PDF reports (WeasyPrint). Logical properties only: the same rules
+ * Sharnaqa PDF reports (WeasyPrint). Logical properties only: the same rules
  * serve dir=ltr and dir=rtl. Direction-specific @page boxes live in
  * page-ltr.css / page-rtl.css.
  *
@@ -69,9 +69,7 @@ p, li, td, th { text-align: start; }
 
 /* The wordmark keeps its left-to-right order inside RTL lines (WeasyPrint reorders inline boxes, so an
    isolate inside the text is not enough). */
-.wm { display: inline-block; direction: ltr; }
-.kid { color: #0D3D72; font-weight: 700; }
-.sphere { color: #006E73; font-weight: 700; }
+.wm { display: inline-block; direction: ltr; color: #190B40; font-weight: 700; }
 
 /* ------------------------------------------------------------------ page 1 header */
 .cover {

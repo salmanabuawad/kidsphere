@@ -139,7 +139,7 @@ def check_footer_and_header(pages, lang, seeded, model):
         assert disclaimer in re.sub(r"[0-9/]", "", text), f"page {number}: disclaimer missing ({lang})"
         assert any(f"{number}/{n}" in norm(line.text) for line in foot), f"page {number}: no '{number} / {n}'"
     first = " ".join(norm(line.text) for line in body_lines(all_lines[0]))
-    assert "KidSphere" in first, "the wordmark is not read left to right"
+    assert "Sharnaqa" in first, "the wordmark is not read left to right"
     for value in (model["meta"]["child"]["name"], model["meta"]["child"]["age"], model["meta"]["child"]["kindergarten"]):
         assert visual(value, rtl) in first, f"page 1 lacks {value!r} ({lang})"
     assert model["meta"]["child"]["name"] == seeded.texts["name"]

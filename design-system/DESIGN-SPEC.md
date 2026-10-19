@@ -1000,7 +1000,7 @@ Then a 56px star sticker stamps beside the tower at the inline-end (320ms).
 #### Top bar (below lg)
 
 - **Bar.** Sticky; 56px tall plus `safe-area-inset-top`. Solid `ground` with a 1px `line` bottom border and no blur.
-- **Start.** The Brand link: the KidSphere logo as an inline lockup (a 36px round mark, then the wordmark image 22px tall, 8px apart; `project/assets/Logos`), at least 44px tall, named by the mark's alt text.
+- **Start.** The Brand link: the Sharnaqa logo as an inline lockup (a 36px mark, then the wordmark image 27px tall, 8px apart; `project/assets/Logos`), at least 44px tall, named by the mark's alt text.
 - **End.** The compact LocaleSwitcher, plus a 44px avatar-menu IconButton (a 32px `tray` avatar block).
 
 #### Side nav (lg and up)

@@ -4,35 +4,35 @@ It must feel like a kids' app and still work for a teacher in the middle of a bu
 
 ## Logo
 
-The KidSphere logo is a round globe with a child reaching up for an orange star, and the wordmark "KidSphere" in navy "Kid" and teal "Sphere". It is the brand mark everywhere the brand appears: the top bar and side nav, the sign-in page, the favicon and the installed-app icon. It is artwork with its own inks, not a block icon, so the paint and no-gradient rules below govern the interface around it, not the logo itself.
+The logo is Sharnaqa (شرنقة / שרנקה, "cocoon"): a smiling child wrapped in a lavender, cream and teal egg like a cocoon, with a butterfly above it, and the wordmark "Sharnaqa" in plum with a small teal leaf over the second "a". It is the brand mark everywhere the brand appears: the top bar and side nav, the sign-in page, the favicon, the installed-app icon and the PDF reports. It is artwork with its own inks and soft gradients, not a block icon, so the paint and no-gradient rules below govern the interface around it, not the logo itself. The source artwork, with the Hebrew and Arabic names and the tagline "A Safe World to Grow.", is `design-system/sharnaqa-logo-source.jpg`.
 
 ### The files
 
-The Logos asset group (`assets/Logos/README.md`) holds five transparent PNGs:
+The Logos asset group (`assets/Logos/README.md`) holds five PNGs:
 
 | File | Use it for |
 |---|---|
-| `kidsphere-mark.png` | The round mark alone: app icons, the favicon, small square slots, and the start of the inline lockup |
-| `kidsphere-logo.png` | The full lockup, the mark above the wordmark, on light grounds: the sign-in page, covers, documents |
-| `kidsphere-logo-dark.png` | The same lockup with "Kid" in chalk, on dark grounds |
-| `kidsphere-wordmark.png` | The wordmark alone, for the inline lockup (mark at the start, wordmark beside it) on light grounds |
-| `kidsphere-wordmark-dark.png` | The wordmark with "Kid" in chalk, on dark grounds |
+| `sharnaqa-mark.png` | The mark alone, a rounded square tile: app icons, the favicon, small square slots, and the start of the inline lockup |
+| `sharnaqa-logo.png` | The full lockup, the mark above the wordmark, on light grounds: the sign-in page, covers, documents |
+| `sharnaqa-logo-dark.png` | The same lockup with the lettering in chalk, on dark grounds |
+| `sharnaqa-wordmark.png` | The wordmark alone, for the inline lockup (mark at the start, wordmark beside it) on light grounds |
+| `sharnaqa-wordmark-dark.png` | The wordmark with the lettering in chalk, on dark grounds |
 
 ### Light and dark
 
-- The mark is the same in both themes: its white sea reads as a light disc on birch and on walnut.
-- The wordmark has two versions. Navy "Kid" falls to about 1.6:1 on the walnut ground, so the `-dark` files repaint it in chalk (`#F3EEE6`, the dark `ink`); teal "Sphere" stays.
+- The mark is the same in both themes: it is an opaque cream tile, which melts into birch and reads as a light tile on walnut.
+- The wordmark has two versions. Plum lettering all but vanishes on the walnut ground, so the `-dark` files repaint it in chalk (`#F3EEE6`, the dark `ink`); the teal leaf stays.
 - Place both versions and let the theme show one, by the same rule as the tokens (`prefers-color-scheme`, unless `data-theme` overrides it). Never filter, invert or tint one version to make the other.
 
 ### Arrangements
 
-- **Stacked** (as drawn): the mark centred above the wordmark, the wordmark 1.64 times the mark's width, a gap of about a sixteenth of the mark. Use it where the logo leads a page: the sign-in page (a 72px mark), covers and documents.
-- **Inline**, for bars: the mark at the start and the wordmark beside it, the wordmark image 0.6 of the mark's height and about a fifth of the mark away (8px beside a 36px mark). The top bar uses a 36px mark and the side nav a 40px mark.
+- **Stacked** (as drawn): the mark centred above the wordmark, the wordmark 1.36 times the mark's width, a gap of about a thirtieth of the mark. Use it where the logo leads a page: the sign-in page (a 72px mark), covers and documents.
+- **Inline**, for bars: the mark at the start and the wordmark beside it, the wordmark image 0.75 of the mark's height and about a fifth of the mark away (8px beside a 36px mark). The top bar uses a 36px mark and the side nav a 40px mark.
 - **Mark alone**: app icons, the favicon, and anywhere narrower than the minimum lockup.
 
 ### Clear space and minimum sizes
 
-- Keep clear space of about half the mark's radius (a quarter of its diameter) on every side of the logo, measured from the circle or the wordmark's letters: 9px around a 36px mark, 20px around the sign-in lockup. No text, icon, border or edge of a control enters it.
+- Keep clear space of about a quarter of the mark's side on every side of the logo, measured from the tile or the wordmark's letters: 9px around a 36px mark, 20px around the sign-in lockup. No text, icon, border or edge of a control enters it.
 - Minimum sizes on screen: the mark alone 24px (the favicon's 16 and 32px files are the only smaller use); the inline lockup a 32px mark; the stacked lockup a 64px mark. Below these, use the mark alone. In print, keep the mark at least 10mm across.
 
 ### Never
@@ -41,7 +41,7 @@ The Logos asset group (`assets/Logos/README.md`) holds five transparent PNGs:
 - Never stretch, squash, crop, rotate or skew it: scale it only in proportion, with both width and height set from the file.
 - Never mirror it. Under right-to-left the bar places the whole lockup at the inline start, but inside the lockup the mark stays before the wordmark, left to right, in every language.
 - Never put the mark on busy paint: photos, paint fills, picture blocks, block clusters, the cover's pegboard or another gradient. Place it on plain `ground`, `surface` or `surface-raised`.
-- Never add an outline, lip, shadow, glow or tile behind it, never animate it, and never set "KidSphere" in live text styled to look like the wordmark.
+- Never add an outline, lip, shadow or glow to it, and never animate it. The PDF reports are the one place the name is set in live text (plum, bold), because WeasyPrint sets the header as text beside the mark.
 
 ### The block tower is not the logo
 

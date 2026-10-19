@@ -18,7 +18,7 @@ const settings: AdminSettings = {
     env_key_set: false,
     effective_mode: "claude",
   },
-  reports: { header_title: "KidSphere", footer_note: null },
+  reports: { header_title: "Sharnaqa", footer_note: null },
 };
 
 const system: SystemStatus = {

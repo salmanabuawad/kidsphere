@@ -14,7 +14,7 @@ The frame around every teacher, admin and parent screen: phone-first, with a top
 
 ## Below lg: top bar and bottom bar
 
-- **Top bar**: sticky, 56px plus the top safe area, solid `ground` with a 1px `line` bottom edge and no blur. The Brand link at the start: the logo as an inline lockup (the 36px round mark, then the wordmark image 22px tall, 8px apart, `assets/Logos`), at least 44px tall and named by the mark's alt text "KidSphere"; the compact language switch and a 44px avatar-menu IconButton at the end.
+- **Top bar**: sticky, 56px plus the top safe area, solid `ground` with a 1px `line` bottom edge and no blur. The Brand link at the start: the logo as an inline lockup (the 36px mark, then the wordmark image 27px tall, 8px apart, `assets/Logos`), at least 44px tall and named by the mark's alt text "Sharnaqa"; the compact language switch and a 44px avatar-menu IconButton at the end.
 - **Bottom bar**: fixed, 64px plus the bottom safe area, `surface` with a 1px `line` top edge. Up to four items split around the centre action, in a row at most 576 wide; overflow goes under More (Menu), which opens a bottom sheet with the same items.
 - **Items**: a 24px icon in a 48 by 28 pill (`radius-md`) over a `caption` 500 label at 13/16 (14/18 in Arabic), one line with an ellipsis.
 
@@ -34,6 +34,6 @@ The frame around every teacher, admin and parent screen: phone-first, with a top
 
 - Do keep the Observe block reachable with one thumb on every teacher screen.
 - Do mirror the whole shell under RTL with logical properties, but never the logo: the Brand sits at the inline start and keeps the mark before the wordmark, left to right, in every language.
-- Do place both wordmark inks (`kidsphere-wordmark.png`, `kidsphere-wordmark-dark.png`) and let the theme show one.
+- Do place both wordmark inks (`sharnaqa-wordmark.png`, `sharnaqa-wordmark-dark.png`) and let the theme show one.
 - Don't blur or tint the top bar, or put more than four items beside Observe.
 - Don't use lucide icons for nav; use the custom set (`children`, `observe-add`, `users`, `classes`, `account`, `parent-home`, `timeline`, `development`, `content`).

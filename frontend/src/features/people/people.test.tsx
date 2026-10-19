@@ -70,7 +70,7 @@ describe("PeopleCard on the child Overview", () => {
     expect(tile.textContent).toContain("Sido");
     expect(tile.textContent).toContain("Grandfather");
     expect(tile.querySelector("img")?.getAttribute("src")).toBe("/api/people/p1/photo?v=2026-10-02T10%3A00%3A00Z");
-    expect(card.textContent).toContain("Names and photos stay in KidSphere");
+    expect(card.textContent).toContain("Names and photos stay in Sharnaqa");
 
     fireEvent.click(within(card).getByTestId("people-add"));
     const dialog = await screen.findByRole("dialog");

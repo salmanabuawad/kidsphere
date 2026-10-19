@@ -97,11 +97,11 @@ describe("auth redirects", () => {
     expect(await screen.findByRole("button", { name: /sign in/i })).toBeTruthy();
   });
 
-  it("the sign-in page leads with the KidSphere logo lockup above the card", async () => {
+  it("the sign-in page leads with the Sharnaqa logo lockup above the card", async () => {
     mockFetch({ "GET /api/me": { status: 401, body: { error: { code: "UNAUTHENTICATED", message: "x" } } } });
     renderApp({ routes: testRoutes, url: "/login" });
     const heading = await screen.findByRole("heading", { level: 1 });
-    const mark = screen.getByAltText("KidSphere");
+    const mark = screen.getByAltText("Sharnaqa");
     const lockup = mark.closest<HTMLElement>("[data-logo]")!;
     expect(lockup.dataset.logo).toBe("stacked");
     // A 72px mark: above the 64px stacked minimum, small enough to keep Sign in above a phone's fold.

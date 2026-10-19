@@ -1,171 +1,143 @@
-"""Cut the KidSphere logo out of the concept image (drop the "2. LITTLE EXPLORER"
-caption) and produce transparent PNGs: the round mark, the wordmark, the full
-lockup, and app icons. Run with Pillow; argv[1] = source png, argv[2] = out dir.
+"""Cut the Sharnaqa logo out of the artwork (design-system/sharnaqa-logo-source.jpg, 850 x 810)
+and produce the masters, the app's compressed copies and the app icons.
+Run with Pillow on the server: argv[1] = source jpg, argv[2] = out dir.
+
+The artwork is one fixed drawing on a warm cream ground, so the regions are fixed boxes
+(measured on a 50px grid), not detected:
+- the mark: the egg wrapping the child, with the butterfly, as an opaque rounded tile;
+- the wordmark: "Sharnaqa" in plum with the teal leaf over the a, cream turned to alpha.
+The Hebrew and Arabic names and the tagline under the wordmark stay in the source only.
 
 Where the outputs go:
-- the five kidsphere-*.png files are the masters: design-system/project/assets/Logos;
-- the three kidsphere-{mark,wordmark,wordmark-dark}.webp files are the compressed
-  copies the app ships: frontend/src/assets/brand (components/brand/Logo.tsx);
+- the five sharnaqa-*.png files are the masters: design-system/project/assets/Logos;
+- the three sharnaqa-{mark,wordmark,wordmark-dark}.webp files are the compressed copies
+  the app ships: frontend/src/assets/brand (components/brand/Logo.tsx);
+- sharnaqa-mark-report.png goes to backend/app/reports/static (the PDF header);
 - favicon.ico goes to frontend/public, and icon-32/192/512.png and
   apple-touch-icon.png to frontend/public/icons."""
 import os
 import sys
 
-from PIL import Image, ImageChops, ImageDraw
+from PIL import Image, ImageDraw
 
 src, out = sys.argv[1], sys.argv[2]
 os.makedirs(out, exist_ok=True)
 im = Image.open(src).convert("RGB")
-W, H = im.size
+BG = (249, 245, 238)  # the cream ground, sampled at the corners
+
+# 1. Mark: the egg and the butterfly. The tops of "S" and "h" reach into the bottom-left
+# corner of the box, so that corner is painted back to the ground first.
+MARK_BOX = (220, 33, 690, 503)
+art = im.copy()
+ImageDraw.Draw(art).rectangle((0, 482, 262, 810), fill=BG)
+side = MARK_BOX[2] - MARK_BOX[0]
 
 
-def inked(px, thr=40):
-    r, g, b = px
-    return (255 - min(r, g, b)) > thr  # anything clearly not white
+def rounded_mask(size, radius, scale=4):
+    big = Image.new("L", (size * scale, size * scale), 0)
+    ImageDraw.Draw(big).rounded_rectangle((0, 0, size * scale - 1, size * scale - 1), radius * scale, fill=255)
+    return big.resize((size, size), Image.LANCZOS)
 
 
-# Row profile: which rows contain ink.
-rows = [any(inked(im.getpixel((x, y))) for x in range(0, W, 2)) for y in range(H)]
-bands, start = [], None
-for y, on in enumerate(rows + [False]):
-    if on and start is None:
-        start = y
-    if not on and start is not None:
-        bands.append((start, y - 1))
-        start = None
-# Merge bands separated by small gaps (letters, the star).
-merged = []
-for b in bands:
-    if merged and b[0] - merged[-1][1] <= 12:
-        merged[-1] = (merged[-1][0], b[1])
-    else:
-        merged.append(b)
-print("ink bands:", merged)
-# Expect: caption (small), globe (big), wordmark.
-big = sorted(merged, key=lambda b: b[1] - b[0], reverse=True)
-globe_band = big[0]
-word_band = [b for b in merged if b[0] > globe_band[1]][0]
-caption = [b for b in merged if b[1] < globe_band[0]]
-print("caption:", caption, "globe:", globe_band, "word:", word_band)
+mark = art.crop(MARK_BOX).convert("RGBA")
+mark.putalpha(rounded_mask(side, round(side * 0.22)))
+mark.save(f"{out}/sharnaqa-mark.png")
+print("mark size", mark.size)
 
 
-def col_extent(y0, y1, thr=40):
-    xs = [x for x in range(W) for y in range(y0, y1 + 1, 2) if inked(im.getpixel((x, y)), thr)]
-    return min(xs), max(xs)
+# 2. Wordmark. The ground around the letters is not flat (the egg's warm glow), so alpha comes
+# from darkness, not from the distance to one cream: the lettering is one plum ink, anti-aliased
+# against something lighter than LIGHT.
+PLUM = (25, 11, 64)  # the median of the lettering's dark pixels
+LIGHT = 228
 
 
-gx0, gx1 = col_extent(*globe_band)
-gy0, gy1 = globe_band
-cx, cy = (gx0 + gx1) / 2, (gy0 + gy1) / 2
-r = max(gx1 - gx0, gy1 - gy0) / 2 - 2.5  # inside the source's light anti-aliased rim
-print("globe bbox", (gx0, gy0, gx1, gy1), "center", (cx, cy), "r", r)
-wx0, wx1 = col_extent(*word_band)
-print("word bbox", (wx0, word_band[0], wx1, word_band[1]))
+def lum(p):
+    return (p[0] * 299 + p[1] * 587 + p[2] * 114) / 1000
 
 
-def white_to_alpha(img):
-    """GIMP-style colour-to-alpha against white."""
-    img = img.convert("RGB")
+def ink_to_alpha(img):
     data = []
-    for (rr, gg, bb) in (img.get_flattened_data() if hasattr(img, "get_flattened_data") else img.getdata()):
-        a = 255 - min(rr, gg, bb)
-        if a < 10:
-            data.append((255, 255, 255, 0))
+    for p in pixels(img):
+        if p[1] > p[0] + 30:
+            # The leaf runs from teal to a pale mint, so it keeps its own colours: opaque inside,
+            # un-mixed from the cream only along its anti-aliased edge.
+            a = min(1.0, max(abs(c - b) for c, b in zip(p, BG)) / 60)
+            data.append(tuple(max(0, min(255, round(b + (c - b) / a))) for c, b in zip(p, BG)) + (round(a * 255),))
             continue
-        f = 255.0 / a
-        data.append((
-            max(0, min(255, round(255 - (255 - rr) * f))),
-            max(0, min(255, round(255 - (255 - gg) * f))),
-            max(0, min(255, round(255 - (255 - bb) * f))),
-            a,
-        ))
+        a = (LIGHT - lum(p)) / (LIGHT - lum(PLUM))
+        data.append(PLUM + (round(max(0.0, min(1.0, a)) * 255),) if a > 0.04 else (0, 0, 0, 0))
     o = Image.new("RGBA", img.size)
     o.putdata(data)
     return o
 
 
-def circle_mask(size, scale=4):
-    big = Image.new("L", (size * scale, size * scale), 0)
-    ImageDraw.Draw(big).ellipse((0, 0, size * scale - 1, size * scale - 1), fill=255)
-    return big.resize((size, size), Image.LANCZOS)
+def pixels(img):
+    return img.get_flattened_data() if hasattr(img, "get_flattened_data") else img.getdata()
 
 
-# 1. Round mark (opaque inside the circle, transparent outside).
-d = int(round(2 * r))
-box = (int(round(cx - r)), int(round(cy - r)), int(round(cx - r)) + d, int(round(cy - r)) + d)
-mark = im.crop(box).convert("RGBA")
-mark.putalpha(circle_mask(d))
-mark.save(f"{out}/kidsphere-mark.png")
-print("mark size", mark.size)
-
-# 2. Wordmark (white -> alpha).
+WORD_BOX = (120, 486, 762, 652)
+word_src = im.copy()
+d = ImageDraw.Draw(word_src)
+# Above the letters' x-height, between the "h" and the leaf, there is only the egg's foot;
+# under the baseline, left of the "q" descender, the dots of the Arabic name begin.
+d.rectangle((256, 486, 578, 531), fill=BG)
+d.rectangle((120, 641, 630, 652), fill=BG)
+word = ink_to_alpha(word_src.crop(WORD_BOX))
+word = word.crop(word.getbbox())
 pad = 6
-wbox = (max(0, wx0 - pad), word_band[0] - pad, min(W, wx1 + pad), word_band[1] + pad)
-word = white_to_alpha(im.crop(wbox))
-word.save(f"{out}/kidsphere-wordmark.png")
+framed = Image.new("RGBA", (word.width + 2 * pad, word.height + 2 * pad), (0, 0, 0, 0))
+framed.alpha_composite(word, (pad, pad))
+word = framed
+word.save(f"{out}/sharnaqa-wordmark.png")
 print("wordmark size", word.size)
 
-# 3. Full lockup: mark above wordmark, layout as in the source, no caption.
-top = box[1]
-lx0, lx1 = min(box[0], wbox[0]), max(box[2], wbox[2])
-lock = Image.new("RGBA", (lx1 - lx0, wbox[3] - top), (0, 0, 0, 0))
-lock.alpha_composite(mark, (box[0] - lx0, 0))
-lock.alpha_composite(word, (wbox[0] - lx0, wbox[1] - top))
-lock.save(f"{out}/kidsphere-logo.png")
-print("lockup size", lock.size)
-
-# 4. App icons from the mark.
-# Only the sizes the app links (index.html, site.webmanifest); favicon.ico holds 16, 32 and 48.
-for s in (32, 192, 512):
-    m = mark.resize((s, s), Image.LANCZOS)
-    m.save(f"{out}/icon-{s}.png")
-# apple-touch-icon: mark on a white rounded tile (iOS ignores transparency).
-t = Image.new("RGBA", (180, 180), (255, 255, 255, 255))
-inner = mark.resize((156, 156), Image.LANCZOS)
-t.alpha_composite(inner, (12, 12))
-t.convert("RGB").save(f"{out}/apple-touch-icon.png")
-# favicon.ico with 16/32/48.
-mark.resize((48, 48), Image.LANCZOS).save(f"{out}/favicon.ico", sizes=[(16, 16), (32, 32), (48, 48)])
-# Preview on dark ground to judge contrast.
-prev = Image.new("RGBA", (lock.width + 40, lock.height * 2 + 60), (250, 246, 238, 255))
-prev.alpha_composite(lock, (20, 20))
-dark = Image.new("RGBA", (lock.width + 40, lock.height + 20), (33, 29, 26, 255))
-prev.alpha_composite(dark, (0, lock.height + 40))
-prev.alpha_composite(lock, (20, lock.height + 50))
-prev.save(f"{out}/preview.png")
-print("done")
-
-
-# 5. Dark-theme variants: navy "Kid" -> chalk, teal "Sphere" kept.
+# 3. Dark-ground wordmark: plum lettering -> chalk (plum is 1.1:1 on walnut), the teal leaf kept.
 CHALK = (243, 238, 230)
 
 
 def darkify(img):
     px = []
-    for (rr, gg, bb, a) in (img.get_flattened_data() if hasattr(img, "get_flattened_data") else img.getdata()):
-        if a and gg < 120 and bb > gg:  # navy ink (teal has a high green channel)
-            px.append(CHALK + (a,))
-        else:
-            px.append((rr, gg, bb, a))
+    for (r, g, b, a) in pixels(img):
+        px.append((CHALK + (a,)) if (r, g, b) == PLUM else (r, g, b, a))
     o = Image.new("RGBA", img.size)
     o.putdata(px)
     return o
 
 
 word_dark = darkify(word)
-word_dark.save(f"{out}/kidsphere-wordmark-dark.png")
-# Compressed copies for the app (the PNGs stay the masters): the bars show the mark at
-# 36-40px and the wordmark 22-24px tall, so the source-size RGBA PNGs are far heavier than needed.
-for n, art in (("kidsphere-mark", mark), ("kidsphere-wordmark", word), ("kidsphere-wordmark-dark", word_dark)):
-    art.save(f"{out}/{n}.webp", "WEBP", quality=90, method=6)
-lock_dark = Image.new("RGBA", lock.size, (0, 0, 0, 0))
-lock_dark.alpha_composite(mark, (box[0] - lx0, 0))
-lock_dark.alpha_composite(word_dark, (wbox[0] - lx0, wbox[1] - top))
-lock_dark.save(f"{out}/kidsphere-logo-dark.png")
-prev2 = Image.new("RGBA", (lock.width * 2 + 60, lock.height + 40), (250, 246, 238, 255))
-prev2.alpha_composite(lock, (20, 20))
-dk = Image.new("RGBA", (lock.width + 30, lock.height + 40), (33, 29, 26, 255))
-prev2.alpha_composite(dk, (lock.width + 30, 0))
-prev2.alpha_composite(lock_dark, (lock.width + 40, 20))
-prev2.save(f"{out}/preview.png")
-print("dark variants done")
+word_dark.save(f"{out}/sharnaqa-wordmark-dark.png")
+
+# 4. Stacked lockups: the mark centred above the wordmark, as in the artwork.
+gap = 14
+for name, w in (("sharnaqa-logo", word), ("sharnaqa-logo-dark", word_dark)):
+    width = max(mark.width, w.width)
+    lock = Image.new("RGBA", (width, mark.height + gap + w.height), (0, 0, 0, 0))
+    lock.alpha_composite(mark, ((width - mark.width) // 2, 0))
+    lock.alpha_composite(w, ((width - w.width) // 2, mark.height + gap))
+    lock.save(f"{out}/{name}.png")
+    print(name, lock.size)
+
+# 5. Compressed copies for the app (the bars show the mark at 36-40px, the sign-in page at 72).
+for n, a in (("sharnaqa-mark", mark.resize((288, 288), Image.LANCZOS)), ("sharnaqa-wordmark", word),
+             ("sharnaqa-wordmark-dark", word_dark)):
+    a.save(f"{out}/{n}.webp", "WEBP", quality=90, method=6)
+mark.resize((160, 160), Image.LANCZOS).save(f"{out}/sharnaqa-mark-report.png", optimize=True)
+
+# 6. App icons from the mark (the tile is opaque, so no white backing is needed).
+for s in (32, 192, 512):
+    mark.resize((s, s), Image.LANCZOS).save(f"{out}/icon-{s}.png", optimize=True)
+t = Image.new("RGB", (180, 180), BG)  # iOS: square and opaque, it rounds the corners itself
+t.paste(art.crop(MARK_BOX).resize((180, 180), Image.LANCZOS))
+t.save(f"{out}/apple-touch-icon.png", optimize=True)
+mark.resize((48, 48), Image.LANCZOS).save(f"{out}/favicon.ico", sizes=[(16, 16), (32, 32), (48, 48)])
+
+# 7. Preview on birch and walnut grounds.
+lock = Image.open(f"{out}/sharnaqa-logo.png")
+lock_dark = Image.open(f"{out}/sharnaqa-logo-dark.png")
+prev = Image.new("RGBA", (lock.width * 2 + 60, lock.height + 40), (251, 246, 236, 255))
+prev.alpha_composite(Image.new("RGBA", (lock.width + 30, lock.height + 40), (22, 18, 14, 255)), (lock.width + 30, 0))
+prev.alpha_composite(lock, (20, 20))
+prev.alpha_composite(lock_dark, (lock.width + 40, 20))
+prev.save(f"{out}/preview.png")
+print("done")

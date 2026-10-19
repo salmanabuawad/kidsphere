@@ -63,11 +63,11 @@ def test_defaults(admin_client, monkeypatch):
     r = admin_client.get("/api/admin/settings")
     assert r.status_code == 200, r.text
     data = r.json()
-    assert data["general"] == {"organization_name": "KidSphere", "default_ui_language": settings.default_locale,
+    assert data["general"] == {"organization_name": "Sharnaqa", "default_ui_language": settings.default_locale,
                                "default_content_language": "child"}
     assert data["ai"] == {"provider_mode": "claude", "model": settings.anthropic_model, "effort": settings.ai_effort,
                           "key_set": False, "key_last4": None, "env_key_set": False, "effective_mode": "template"}
-    assert data["reports"] == {"header_title": "KidSphere", "footer_note": None}
+    assert data["reports"] == {"header_title": "Sharnaqa", "footer_note": None}
 
 
 def test_update_general_and_reports_with_audit(admin_client, admin, db):
@@ -218,7 +218,7 @@ def test_invalid_stored_values_fall_back_to_defaults(db):
     assert app_settings.effective_ai().provider_mode == "claude"
     assert app_settings.effective_ai().effort == "low"
     g = app_settings.general(db)
-    assert g.organization_name == "KidSphere" and g.default_content_language == "he"
+    assert g.organization_name == "Sharnaqa" and g.default_content_language == "he"
 
 
 # --------------------------------------------------------------------------- connection test

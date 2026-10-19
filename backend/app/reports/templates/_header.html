@@ -1,11 +1,13 @@
 {# Compact running header (pages 2+, static/report.css) and the full header block on page 1.
-   The wordmark is its own left-to-right inline block (.wm) so it reads "KidSphere" in RTL reports too.
-   meta.org (admin settings): a header title other than "KidSphere" replaces the wordmark, and an
-   organization name other than the title is printed under it. #}
+   The wordmark is its own left-to-right inline block (.wm) so it reads "Sharnaqa" in RTL reports too.
+   meta.org (admin settings): a header title other than the brand name ("Sharnaqa", or "KidSphere"
+   saved before the rename) replaces the wordmark, and an organization name other than the brand
+   and the title is printed under it. #}
 {% set org = meta.org or {} %}
-{% set custom_title = org.header_title and org.header_title != "KidSphere" %}
+{% set brand_names = ("Sharnaqa", "KidSphere") %}
+{% set custom_title = org.header_title and org.header_title not in brand_names %}
 <div class="running-header">
-  <span class="rh-brand"><img class="rh-mark" src="static/kidsphere-mark.png" alt="">{% if custom_title %}<span class="rh-org">{{ org.header_title | iso }}</span>{% else %}<span class="wm"><span class="kid">Kid</span><span class="sphere">Sphere</span></span>{% endif %}</span>
+  <span class="rh-brand"><img class="rh-mark" src="static/sharnaqa-mark.png" alt="">{% if custom_title %}<span class="rh-org">{{ org.header_title | iso }}</span>{% else %}<span class="wm">Sharnaqa</span>{% endif %}</span>
   <span class="rh-sep">·</span>
   <span class="rh-title">{{ meta.title }}</span>
   <span class="rh-sep">·</span>
@@ -13,10 +15,10 @@
 </div>
 <header class="cover">
   <div class="brand-row">
-    <img class="mark" src="static/kidsphere-mark.png" alt="KidSphere">
+    <img class="mark" src="static/sharnaqa-mark.png" alt="Sharnaqa">
     <div class="brand-text">
-      {% if custom_title %}<p class="wordmark">{{ org.header_title | iso }}</p>{% else %}<p class="wordmark"><span class="wm"><span class="kid">Kid</span><span class="sphere">Sphere</span></span></p>{% endif %}
-      {% if org.name and org.name != "KidSphere" and org.name != org.header_title %}<p class="report-label">{{ org.name | iso }}</p>{% endif %}
+      {% if custom_title %}<p class="wordmark">{{ org.header_title | iso }}</p>{% else %}<p class="wordmark"><span class="wm">Sharnaqa</span></p>{% endif %}
+      {% if org.name and org.name not in brand_names and org.name != org.header_title %}<p class="report-label">{{ org.name | iso }}</p>{% endif %}
       <p class="report-label">{{ t.report_label }}</p>
     </div>
   </div>

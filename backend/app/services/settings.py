@@ -2,12 +2,12 @@
 
 Sections and their typed defaults (a missing or unreadable value falls back to its default):
 
-    general  organization_name ("KidSphere", <=120), default_ui_language (ar|he|en; .env
+    general  organization_name ("Sharnaqa", <=120), default_ui_language (ar|he|en; .env
              DEFAULT_LOCALE), default_content_language (ar|he|en|child; "child" = the
              child's main language)
     ai       provider_mode (claude|template), model (.env ANTHROPIC_MODEL), effort
              (low|medium|high; .env AI_EFFORT), api_key (write-only, see below)
-    reports  header_title ("KidSphere", <=120), footer_note (optional, <=300; the
+    reports  header_title ("Sharnaqa", <=120), footer_note (optional, <=300; the
              non-clinical disclaimer is printed on every page regardless)
 
 Nothing is cached: every reader asks the database (one primary-key lookup).
@@ -69,7 +69,7 @@ class _Stored(BaseModel):
 
 
 class GeneralSettings(_Stored):
-    organization_name: str = Field(default="KidSphere", min_length=1, max_length=120)
+    organization_name: str = Field(default="Sharnaqa", min_length=1, max_length=120)
     default_ui_language: Language = Field(default_factory=lambda: settings.default_locale)
     default_content_language: ContentLanguage = "child"
 
@@ -82,7 +82,7 @@ class AiStored(_Stored):
 
 
 class ReportsSettings(_Stored):
-    header_title: str = Field(default="KidSphere", min_length=1, max_length=120)
+    header_title: str = Field(default="Sharnaqa", min_length=1, max_length=120)
     footer_note: str | None = Field(default=None, max_length=300)
 
 
