@@ -50,21 +50,23 @@ export function LoginPage() {
   }
 
   return (
+    // The whole page fits one screen (a laptop at about 800px tall): the language switch floats in the
+    // corner, and the pillar chips and the block cluster appear only on tall screens.
     <div className="relative flex min-h-dvh flex-col overflow-hidden bg-ground">
-      <div className="relative flex justify-end p-3">
+      <div className="absolute end-0 top-0 z-10 p-3">
         <LocaleSwitcher variant="compact" />
       </div>
 
-      <main className="relative flex flex-1 items-center justify-center px-4 pb-12">
+      <main className="relative flex flex-1 items-center justify-center px-4 py-4">
         <div className="w-full max-w-md">
-          <div className="mb-6 flex flex-col items-center text-center">
-            <Logo variant="lockup" size={144} className="mb-5" />
+          <div className="mb-4 flex flex-col items-center text-center">
+            <Logo variant="lockup" size={120} className="mb-3" />
             <h1 className="font-display text-display-lg font-semibold text-ink">{t("auth.welcome")}</h1>
             <p className="mt-1.5 text-sm text-ink-muted">{t("auth.welcomeSub")}</p>
           </div>
 
           <div className="animate-placed rounded-lg border border-line bg-surface p-6 shadow-lip sm:p-8">
-            <form onSubmit={onSubmit} className="space-y-5" noValidate>
+            <form onSubmit={onSubmit} className="space-y-4" noValidate>
               {error && <Alert tone="error">{error}</Alert>}
               <Field label={t("auth.identifier")} required>
                 {(p) => (
@@ -112,10 +114,10 @@ export function LoginPage() {
                 {pending ? t("auth.signingIn") : t("auth.signIn")}
               </Button>
             </form>
-            <p className="text-caption mt-5 text-center text-ink-muted">{t("auth.forgotHint")}</p>
+            <p className="text-caption mt-4 text-center text-ink-muted">{t("auth.forgotHint")}</p>
           </div>
 
-          <ul className="mt-6 flex flex-wrap justify-center gap-2" aria-label={t("common.tagline")}>
+          <ul className="mt-6 hidden flex-wrap justify-center gap-2 [@media(min-height:960px)]:flex" aria-label={t("common.tagline")}>
             <li>
               <Chip tone="strength" icon={<StrengthsIcon size={16} />}>
                 {t("auth.pillarStrengths")}
@@ -132,7 +134,7 @@ export function LoginPage() {
               </Chip>
             </li>
           </ul>
-          <BlockCluster className="mx-auto mt-6" />
+          <BlockCluster className="mx-auto mt-6 hidden [@media(min-height:960px)]:block" />
         </div>
       </main>
     </div>
