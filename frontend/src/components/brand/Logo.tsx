@@ -1,10 +1,18 @@
 import markUrl from "@/assets/brand/sharnaqa-mark.webp";
 import wordmarkUrl from "@/assets/brand/sharnaqa-wordmark.webp";
 import wordmarkDarkUrl from "@/assets/brand/sharnaqa-wordmark-dark.webp";
+import { CURRENT_BRAND, type Brand } from "@/lib/brand";
 import { cn } from "@/lib/utils";
 
-/** The brand name exactly as the logo spells it, in every interface language (the alt text is the image's own words). */
-export const BRAND_NAME = "Sharnaqa";
+/**
+ * The brand name exactly as the logo spells it, in every interface language (the alt text is the
+ * logo's own words): "Sharnaqa" under /sharnaqa, "ניצנים" under /nitzanim (lib/brand).
+ */
+export const BRAND_NAME = logoName(CURRENT_BRAND);
+
+export function logoName(brand: Brand): string {
+  return brand.key === "nitzanim" ? brand.names.he : brand.names.en;
+}
 
 /*
  * Pixel sizes of the processed brand art in src/assets/brand (cut by design-system/make_logo.py):
@@ -46,11 +54,12 @@ const IMG = "shrink-0 object-contain select-none";
  * - width/height are always set (no layout shift) and `object-contain` keeps the art from
  *   ever stretching. The lockup is laid out LTR in every language: the logo is never mirrored.
  */
-export function Logo({ variant = "mark", size = 40, layout = "stacked", className }: LogoProps) {
+export function Logo({ variant = "mark", size = 40, layout = "stacked", className, brand = CURRENT_BRAND }: LogoProps & { brand?: Brand }) {
+  const name = logoName(brand);
   const mark = (
     <img
       src={markUrl}
-      alt={BRAND_NAME}
+      alt={name}
       width={size}
       height={size}
       draggable={false}
@@ -86,8 +95,24 @@ export function Logo({ variant = "mark", size = 40, layout = "stacked", classNam
       style={{ gap }}
     >
       {mark}
-      {wordmark(wordmarkUrl, "light")}
-      {wordmark(wordmarkDarkUrl, "dark")}
+      {brand.key === "nitzanim" ? (
+        // No Nitzanim wordmark art yet: the name in the display face, in the logo's ink.
+        <span
+          aria-hidden
+          dir="rtl"
+          lang="he"
+          className="font-display shrink-0 leading-none font-bold text-ink select-none"
+          style={{ fontSize: Math.round(wordH * 0.62) }}
+          data-logo-part="wordmark-text"
+        >
+          {name}
+        </span>
+      ) : (
+        <>
+          {wordmark(wordmarkUrl, "light")}
+          {wordmark(wordmarkDarkUrl, "dark")}
+        </>
+      )}
     </span>
   );
 }

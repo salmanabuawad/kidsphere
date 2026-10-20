@@ -12,11 +12,12 @@ import { BlockCluster } from "@/components/ui/EmptyState";
 import { FullPageSpinner } from "@/components/ui/Spinner";
 import { GrowthSupportIcon, InterestsIcon, StrengthsIcon } from "@/icons";
 import { useI18n } from "@/i18n/I18nProvider";
+import { brandName } from "@/lib/brand";
 import { homeFor, safeNext } from "@/lib/paths";
 import { useErrorMessage } from "@/lib/useAction";
 
 export function LoginPage() {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const { user, status, login } = useAuth();
   const navigate = useNavigate();
   const [params] = useSearchParams();
@@ -62,7 +63,7 @@ export function LoginPage() {
         <div className="w-full max-w-md">
           <div className="mb-4 flex flex-col items-center text-center">
             <Logo variant="lockup" size={120} className="mb-3 [@media(max-height:780px)]:[zoom:0.7]" />
-            <h1 className="font-display text-display-lg font-semibold text-ink">{t("auth.welcome")}</h1>
+            <h1 className="font-display text-display-lg font-semibold text-ink">{t("auth.welcome", { brand: brandName(locale) })}</h1>
             <p className="mt-1.5 text-sm text-ink-muted">{t("auth.welcomeSub")}</p>
           </div>
 

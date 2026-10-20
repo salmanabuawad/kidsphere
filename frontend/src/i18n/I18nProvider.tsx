@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { AuthContext, type User } from "@/auth/AuthProvider";
 import { api } from "@/lib/api";
+import { brandName, IN_ENTRANCE } from "@/lib/brand";
 import { applyDocumentLocale, dirOf, initialLocale, INTL_LOCALE, isLocale, storeLocale, type AppLocale } from "./config";
 import { createTranslator, type Translate } from "./translate";
 
@@ -20,7 +21,8 @@ const I18nContext = createContext<I18nContextValue | null>(null);
 
 /**
  * Must sit inside AuthProvider: it adopts `user.language` after sign-in and
- * persists language changes to the signed-in user.
+ * persists language changes to the signed-in user. Inside an entrance (lib/brand) the entrance
+ * decides instead: /sharnaqa starts in Arabic and /nitzanim in Hebrew, and each remembers a switch.
  */
 export function I18nProvider({ children, locale: forced }: { children: ReactNode; locale?: AppLocale }) {
   const auth = useContext(AuthContext);
@@ -28,21 +30,23 @@ export function I18nProvider({ children, locale: forced }: { children: ReactNode
   const authRef = useRef(auth);
   authRef.current = auth;
 
-  // Keep <html lang dir> in sync before paint.
+  // Keep <html lang dir> and the tab title (the brand's name) in sync before paint.
   useLayoutEffect(() => {
     applyDocumentLocale(locale);
+    document.title = brandName(locale);
   }, [locale]);
 
   // Adopt the signed-in user's saved language.
   const userLanguage = auth?.user?.language;
   const userId = auth?.user?.id;
   useEffect(() => {
+    if (IN_ENTRANCE && !forced) return; // each entrance keeps its own language (lib/brand)
     if (isLocale(userLanguage)) {
       setLocaleState(userLanguage);
       applyDocumentLocale(userLanguage);
       storeLocale(userLanguage);
     }
-  }, [userId, userLanguage]);
+  }, [userId, userLanguage, forced]);
 
   const setLocale = useCallback(async (next: AppLocale) => {
     setLocaleState(next);

@@ -1,8 +1,15 @@
+import { CURRENT_BRAND, IN_ENTRANCE } from "@/lib/brand";
+
 export const LOCALES = ["ar", "he", "en"] as const;
 export type AppLocale = (typeof LOCALES)[number];
 
 export const DEFAULT_LOCALE: AppLocale = "ar";
 export const LOCALE_STORAGE_KEY = "ks_locale";
+
+/** Where the interface language is remembered: per entrance (lib/brand), like public/boot.js. */
+function storageKey(): string {
+  return IN_ENTRANCE ? `${LOCALE_STORAGE_KEY}_${CURRENT_BRAND.key}` : LOCALE_STORAGE_KEY;
+}
 
 export const RTL_LOCALES: ReadonlySet<AppLocale> = new Set(["ar", "he"]);
 
@@ -51,7 +58,7 @@ export function applyDocumentLocale(locale: AppLocale, doc: Document = document)
 
 export function readStoredLocale(): AppLocale | null {
   try {
-    const v = window.localStorage.getItem(LOCALE_STORAGE_KEY);
+    const v = window.localStorage.getItem(storageKey());
     return isLocale(v) ? v : null;
   } catch {
     return null;
@@ -60,7 +67,7 @@ export function readStoredLocale(): AppLocale | null {
 
 export function storeLocale(locale: AppLocale) {
   try {
-    window.localStorage.setItem(LOCALE_STORAGE_KEY, locale);
+    window.localStorage.setItem(storageKey(), locale);
   } catch {
     /* storage blocked */
   }
@@ -69,5 +76,5 @@ export function storeLocale(locale: AppLocale) {
 /** The locale boot.js already applied, else storage, else the default. */
 export function initialLocale(): AppLocale {
   if (typeof document !== "undefined" && isLocale(document.documentElement.lang)) return document.documentElement.lang;
-  return readStoredLocale() ?? DEFAULT_LOCALE;
+  return readStoredLocale() ?? (IN_ENTRANCE ? CURRENT_BRAND.locale : DEFAULT_LOCALE);
 }

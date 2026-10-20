@@ -6,6 +6,7 @@ import { useI18n } from "@/i18n/I18nProvider";
 import { useOptions } from "@/lib/options";
 import { useAction } from "@/lib/useAction";
 import { useFetch } from "@/lib/useFetch";
+import { brandName } from "@/lib/brand";
 import { cn } from "@/lib/utils";
 import { createPerson, deletePerson, deletePersonPhoto, MAX_NAME, peopleUrl, updatePerson, uploadPersonPhoto, type PeopleResponse, type Person } from "./api";
 import { PersonAvatar } from "./PersonAvatar";
@@ -16,7 +17,7 @@ import { PersonAvatar } from "./PersonAvatar";
  * and the relation. Staff add, edit and remove them; parents see the list.
  */
 export function PeopleCard({ childId, childName, canEdit }: { childId: string; childName: string; canEdit: boolean }) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const { optionLabel } = useOptions();
   const { data, reload } = useFetch<PeopleResponse>(peopleUrl(childId));
   const [editing, setEditing] = useState<Person | "new" | null>(null);
@@ -74,7 +75,7 @@ export function PeopleCard({ childId, childName, canEdit }: { childId: string; c
         )}
         <p className="text-caption flex items-start gap-1.5 text-ink-muted">
           <Lock className="mt-0.5 size-3.5 shrink-0" aria-hidden />
-          {t("people.privacy")}
+          {t("people.privacy", { brand: brandName(locale) })}
         </p>
         {full && canEdit && <p className="text-caption text-ink-muted">{t("people.full", { count: data.max })}</p>}
       </CardBody>

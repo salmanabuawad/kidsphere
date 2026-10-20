@@ -3,6 +3,7 @@ import { isRouteErrorResponse, useRouteError } from "react-router";
 import { buttonClass, ButtonLink } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { useI18n } from "@/i18n/I18nProvider";
+import { CURRENT_BRAND } from "@/lib/brand";
 
 export function NotFoundPage() {
   const { t } = useI18n();
@@ -37,7 +38,7 @@ export function RouteError() {
               <RotateCcw aria-hidden />
               {t("common.retry")}
             </button>
-            <a href="/" className={buttonClass("secondary")}>
+            <a href={`${CURRENT_BRAND.base}/`} className={buttonClass("secondary")}>
               {t("errors.goHome")}
             </a>
           </div>
