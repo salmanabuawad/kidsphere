@@ -22,6 +22,8 @@ Description = Annotated[Annotated[str, Field(max_length=500)] | None, BeforeVali
 Ages = Annotated[Annotated[str, Field(max_length=80)] | None, BeforeValidator(_blank_to_none)]
 Hero = Annotated[Annotated[str, Field(max_length=40)] | None, BeforeValidator(_blank_to_none)]
 SortOrder = Annotated[int, Field(ge=0, le=10000)]
+# goals: [{key}|{custom}] (focus_suggestions); suits: [{list, key}|{custom}]; checked in the service.
+Tags = Annotated[list[dict], Field(max_length=8)]
 
 
 class AssignIn(StrictModel):
@@ -53,6 +55,8 @@ class ItemCreate(StrictModel):
     audience: Audience = "child"
     mode: Mode = "strength_builder"
     target_strength: OptionalKey = None
+    goals: Tags = []
+    suits: Tags = []
     sort_order: SortOrder = 0
 
 
@@ -64,5 +68,12 @@ class ItemUpdate(StrictModel):
     audience: Audience | None = None
     mode: Mode | None = None
     target_strength: OptionalKey = None
+    goals: Tags | None = None
+    suits: Tags | None = None
     sort_order: SortOrder | None = None
     status: LibraryStatus | None = None
+
+
+class MediaDetails(StrictModel):
+    alt: Annotated[str, Field(max_length=300)] | None = None
+    credit: Annotated[str, Field(max_length=300)] | None = None

@@ -28,6 +28,7 @@ import {
 } from "@/components/ui";
 import type { Tone } from "@/components/ui/Badge";
 import { ContentEditor, ContentPreview, type ContentDetail } from "@/features/content";
+import type { MediaRef } from "@/features/player";
 import { TypeIcon, typeKey } from "@/features/content/ui";
 import { LOCALE_NAMES, LOCALES } from "@/i18n/config";
 import { useI18n } from "@/i18n/I18nProvider";
@@ -43,13 +44,17 @@ import {
   updateCollection,
   updateItem,
   type Audience,
+  type Goal,
   type ItemBody,
   type ItemResponse,
   type LibraryCollection,
   type LibraryItem,
   type LibraryResponse,
   type LibraryStatus,
+  type Suit,
 } from "./api";
+import { MediaPanel } from "./AdminLibraryMedia";
+import { GoalPicker, SuitsPicker } from "./LibraryTags";
 
 const STATUS_TONE: Record<LibraryStatus, Tone> = { draft: "attention", published: "success", archived: "muted" };
 const TYPES = ["story", "real_world_activity", "digital_game", "video"] as const;
@@ -61,8 +66,25 @@ function StatusBadge({ status }: { status: LibraryStatus }) {
 }
 
 /** An item as the shared editor and player expect it. */
-function asContent(item: { id: string; content_type: string; template: string | null; language: string; title: string; content?: Record<string, unknown> | null }): ContentDetail {
-  return { id: item.id, content_type: item.content_type, template: item.template, language: item.language, title: item.title, status: "draft", content: item.content ?? null };
+function asContent(item: {
+  id: string;
+  content_type: string;
+  template: string | null;
+  language: string;
+  title: string;
+  content?: Record<string, unknown> | null;
+  media?: MediaRef[];
+}): ContentDetail {
+  return {
+    id: item.id,
+    content_type: item.content_type,
+    template: item.template,
+    language: item.language,
+    title: item.title,
+    status: "draft",
+    content: item.content ?? null,
+    media: item.media ?? [],
+  };
 }
 
 export function AdminLibraryPage() {
@@ -223,7 +245,7 @@ function CollectionDialog({
   );
 }
 
-type Details = { collection_id: string; language: string; hero: string; audience: Audience; target_strength: string };
+type Details = { collection_id: string; language: string; hero: string; audience: Audience; target_strength: string; goals: Goal[]; suits: Suit[] };
 
 function detailsOf(item: LibraryItem): Details {
   return {
@@ -232,11 +254,21 @@ function detailsOf(item: LibraryItem): Details {
     hero: item.hero ?? "",
     audience: item.audience,
     target_strength: item.target_strength ?? "",
+    goals: item.goals ?? [],
+    suits: item.suits ?? [],
   };
 }
 
 function detailsBody(d: Details): ItemBody {
-  return { collection_id: d.collection_id, language: d.language, hero: d.hero.trim() || null, audience: d.audience, target_strength: d.target_strength || null };
+  return {
+    collection_id: d.collection_id,
+    language: d.language,
+    hero: d.hero.trim() || null,
+    audience: d.audience,
+    target_strength: d.target_strength || null,
+    goals: d.goals,
+    suits: d.suits,
+  };
 }
 
 function DetailsFields({ value, onChange, collections }: { value: Details; onChange: (d: Details) => void; collections: LibraryCollection[] }) {
@@ -290,6 +322,10 @@ function DetailsFields({ value, onChange, collections }: { value: Details; onCha
           </Select>
         )}
       </Field>
+      <div className="space-y-6 sm:col-span-2">
+        <GoalPicker value={value.goals} onChange={(v) => set("goals", v)} />
+        <SuitsPicker value={value.suits} onChange={(v) => set("suits", v)} />
+      </div>
     </div>
   );
 }
@@ -311,6 +347,8 @@ export function AdminLibraryNewItemPage() {
     hero: "",
     audience: "child" as Audience,
     target_strength: "",
+    goals: [] as Goal[],
+    suits: [] as Suit[],
   };
   const draft = asContent({ id: "new", content_type: type, template: type === "digital_game" ? template : null, language: value.language, title: "" });
   draft.content = type === "digital_game" ? { template } : {};
@@ -384,7 +422,7 @@ function ItemEditor({ item, collections, onChange }: { item: LibraryItem; collec
   const { t } = useI18n();
   const { pending, run } = useAction();
   const [details, setDetails] = useState<Details>(() => detailsOf(item));
-  const [tab, setTab] = useState<"edit" | "preview">("edit");
+  const [tab, setTab] = useState<"edit" | "media" | "preview">("edit");
   const type = typeKey(item.content_type);
   const setStatus = (status: LibraryStatus) =>
     run(() => updateItem(item.id, { status }), { success: t(`library.admin.statusToast.${status}`), onSuccess: (r) => onChange(r.item) });
@@ -430,9 +468,10 @@ function ItemEditor({ item, collections, onChange }: { item: LibraryItem; collec
       <Tabs
         label={item.title}
         value={tab}
-        onChange={(k) => setTab(k as "edit" | "preview")}
+        onChange={(k) => setTab(k as "edit" | "media" | "preview")}
         tabs={[
           { key: "edit", label: t("library.admin.editTab") },
+          { key: "media", label: t("library.admin.mediaTab") },
           { key: "preview", label: t("library.admin.previewTab") },
         ]}
       />
@@ -449,6 +488,8 @@ function ItemEditor({ item, collections, onChange }: { item: LibraryItem; collec
           onSaved={() => undefined}
           onCancel={() => setTab("preview")}
         />
+      ) : tab === "media" ? (
+        <MediaPanel itemId={item.id} slots={item.media_slots ?? []} media={item.media ?? []} onChange={(media) => onChange({ ...item, media })} />
       ) : (
         <Card>
           <CardBody>

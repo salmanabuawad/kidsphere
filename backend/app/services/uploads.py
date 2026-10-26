@@ -10,6 +10,8 @@ the sniff logic of src/server/services/media.ts.
   side, which drops EXIF/GPS and any other metadata, and writes it under an
   opaque name ``<subdir>/<uuid4hex>.jpg``. Only that relative path is stored
   in the DB; it is never sent to clients.
+- ``sniff_media`` / ``save_bytes``: audio (mp3, ogg, wav, m4a, webm) and video (mp4, webm)
+  for the library, recognised by magic bytes and stored unchanged under an opaque name.
 - Files are served only through an authenticated endpoint (nginx has no
   location for the uploads directory).
 """
@@ -116,6 +118,52 @@ def save_image(data: bytes, subdir: str) -> str:
         full.parent.mkdir(parents=True, exist_ok=True)
         tmp = full.with_suffix(".tmp")
         tmp.write_bytes(jpeg)
+        os.replace(tmp, full)
+    except OSError:
+        log.exception("could not store upload")
+        raise AppError("UPLOAD_FAILED", "The upload could not be stored. Please try again.") from None
+    return rel
+
+
+MAX_AUDIO_BYTES = 15 * 1024 * 1024
+MAX_VIDEO_BYTES = 50 * 1024 * 1024
+MEDIA_EXT = {"audio/mpeg": "mp3", "audio/ogg": "ogg", "audio/wav": "wav", "audio/mp4": "m4a", "audio/webm": "weba",
+             "video/mp4": "mp4", "video/webm": "webm"}
+
+
+def sniff_media(data: bytes, kind: str) -> str | None:
+    """The MIME type of an ``audio`` or ``video`` file from its magic bytes, else None."""
+    head = data[:16]
+    is_webm = head[:4] == b"\x1a\x45\xdf\xa3"
+    is_mp4 = len(data) >= 12 and data[4:8] == b"ftyp"
+    if kind == "audio":
+        if head[:3] == b"ID3" or (len(head) > 1 and head[0] == 0xFF and head[1] & 0xE0 == 0xE0):
+            return "audio/mpeg"
+        if head[:4] == b"OggS":
+            return "audio/ogg"
+        if head[:4] == b"RIFF" and data[8:12] == b"WAVE":
+            return "audio/wav"
+        if is_mp4 and data[8:11] == b"M4A":
+            return "audio/mp4"
+        if is_webm:
+            return "audio/webm"
+        return None
+    if kind == "video":
+        if is_mp4 and data[8:11] != b"M4A":
+            return "video/mp4"
+        if is_webm:
+            return "video/webm"
+    return None
+
+
+def save_bytes(data: bytes, subdir: str, ext: str) -> str:
+    """Store ``data`` as is under an opaque name; return the relative path ``<subdir>/<hex>.<ext>``."""
+    rel = f"{subdir}/{uuid.uuid4().hex}.{ext}"
+    full = resolve_upload(rel)
+    try:
+        full.parent.mkdir(parents=True, exist_ok=True)
+        tmp = full.with_suffix(".tmp")
+        tmp.write_bytes(data)
         os.replace(tmp, full)
     except OSError:
         log.exception("could not store upload")

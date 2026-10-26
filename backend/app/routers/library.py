@@ -13,14 +13,27 @@ Admin
 - PUT  /admin/library/collections/{id}  CollectionUpdate → {"collection"}
 - POST /admin/library/items  ItemCreate     → 201 {"item"}   a draft; 400 VALIDATION, 422 UNSAFE_CONTENT
 - PUT  /admin/library/items/{id}  ItemUpdate → {"item"}      status draft | published | archived
-"""
-from fastapi import APIRouter
+- PUT  /admin/library/items/{id}/media/{slot}  multipart file (+ alt, credit) → {"media": [media]}
+- PUT  /admin/library/items/{id}/media/{slot}/details  {alt, credit} → {"media"}
+- DELETE /admin/library/items/{id}/media/{slot} → 204
 
-from app.deps import DB, AdminUser, StaffUser
-from app.schemas.library import AssignIn, CollectionCreate, CollectionUpdate, ItemCreate, ItemUpdate
+Anyone signed in (services/library_media.file_for checks access; parents need shared content)
+- GET  /library/media/{id}                → the file (range requests work for audio and video)
+"""
+from typing import Annotated
+
+from fastapi import APIRouter, File, Form, Response, UploadFile
+from fastapi.responses import FileResponse
+
+from app.deps import DB, AdminUser, CurrentUser, StaffUser
+from app.schemas.library import AssignIn, CollectionCreate, CollectionUpdate, ItemCreate, ItemUpdate, MediaDetails
 from app.services import library as svc
+from app.services import library_media as media
+from app.services import uploads
 
 router = APIRouter(tags=["library"])
+
+FILE_HEADERS = {"Cache-Control": "private, no-store", "X-Content-Type-Options": "nosniff"}
 
 
 @router.get("/library")
@@ -61,3 +74,28 @@ def create_item(body: ItemCreate, db: DB, user: AdminUser) -> dict:
 @router.put("/admin/library/items/{item_id}")
 def update_item(item_id: str, body: ItemUpdate, db: DB, user: AdminUser) -> dict:
     return svc.update_item(db, user, item_id, body)
+
+
+@router.put("/admin/library/items/{item_id}/media/{slot}")
+def set_media(item_id: str, slot: str, db: DB, user: AdminUser, file: Annotated[UploadFile, File()],
+              alt: Annotated[str | None, Form(max_length=300)] = None,
+              credit: Annotated[str | None, Form(max_length=300)] = None) -> dict:
+    data = uploads.read_limited(file.file, uploads.MAX_VIDEO_BYTES)
+    return media.upload(db, user, item_id, slot, data, alt=alt, credit=credit)
+
+
+@router.put("/admin/library/items/{item_id}/media/{slot}/details")
+def set_media_details(item_id: str, slot: str, body: MediaDetails, db: DB, user: AdminUser) -> dict:
+    return media.update_details(db, user, item_id, slot, body.alt, body.credit)
+
+
+@router.delete("/admin/library/items/{item_id}/media/{slot}", status_code=204)
+def remove_media(item_id: str, slot: str, db: DB, user: AdminUser) -> Response:
+    media.remove(db, user, item_id, slot)
+    return Response(status_code=204)
+
+
+@router.get("/library/media/{media_id}")
+def get_media(media_id: str, db: DB, user: CurrentUser) -> FileResponse:
+    path, mime = media.file_for(db, user, media_id)
+    return FileResponse(path, media_type=mime, headers=FILE_HEADERS)

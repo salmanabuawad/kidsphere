@@ -43,6 +43,42 @@
     "archive": "Archive",
     "editTab": "Edit",
     "previewTab": "Preview",
+    "mediaTab": "Media",
     "statusToast": { "draft": "Back to draft. Teachers no longer see it.", "published": "Published. Teachers can now give it to children.", "archived": "Archived." }
+  },
+  "tags": {
+    "goals": "Builds",
+    "suits": "Suits children who…",
+    "goalsHint": "What children practise with it.",
+    "suitsHint": "Who it is especially helpful for, in everyday words.",
+    "ownWords": "Or write your own words",
+    "add": "Add",
+    "remove": "Remove {name}",
+    "lists": {
+      "describe_words": "Described as",
+      "social": "With other children",
+      "communication": "Communication",
+      "frustration_reactions": "When frustrated",
+      "transition_reactions": "At transitions",
+      "morning_separation": "In the morning"
+    }
+  },
+  "media": {
+    "intro": "Pictures, clips, narration and music for this item. Children see and hear them in the player.",
+    "upload": "Upload",
+    "replace": "Replace",
+    "remove": "Remove",
+    "removed": "Removed.",
+    "uploaded": "Uploaded.",
+    "empty": "Nothing here yet.",
+    "alt": "Describe the picture or clip",
+    "credit": "Source and licence",
+    "slots": {
+      "cover": "Cover picture",
+      "music": "Background music",
+      "page": "Page {n}: picture",
+      "narration": "Page {n}: narration",
+      "step": "Step {n}: picture or clip"
+    }
   }
 }

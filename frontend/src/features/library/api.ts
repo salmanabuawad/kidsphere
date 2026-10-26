@@ -7,14 +7,23 @@
  *   GET  /api/admin/library → {collections} (every status)
  *   POST /api/admin/library/collections, PUT …/{id} → {collection}
  *   POST /api/admin/library/items, PUT …/{id} → {item}   400 VALIDATION, 422 UNSAFE_CONTENT {issues}
+ *   PUT/DELETE /api/admin/library/items/{id}/media/{slot} (multipart file), PUT …/details {alt, credit} → {media}
  */
 import type { ContentSummary } from "@/features/content";
+import type { MediaRef } from "@/features/player";
 import { api } from "@/lib/api";
 
 const enc = encodeURIComponent;
 
 export type LibraryStatus = "draft" | "published" | "archived";
 export type Audience = "child" | "group";
+
+/** What an item builds: a focus_suggestions key or a custom text. */
+export type Goal = { key: string } | { custom: string };
+/** Which children it suits: a key of a profile list (SUITS_LISTS) or a custom text. */
+export type Suit = { list: string; key: string } | { custom: string };
+/** The profile lists whose keys describe the children an item suits (backend services/library.SUITS_LISTS). */
+export const SUITS_LISTS = ["describe_words", "social", "communication", "frustration_reactions", "transition_reactions", "morning_separation"] as const;
 
 export type LibraryItem = {
   id: string;
@@ -29,10 +38,15 @@ export type LibraryItem = {
   audience: Audience;
   mode: string;
   target_strength: string | null;
+  goals: Goal[];
+  suits: Suit[];
   sort_order: number;
   status: LibraryStatus;
   updated_at: string | null;
+  // detail only
   content?: Record<string, unknown>;
+  media?: MediaRef[];
+  media_slots?: string[];
 };
 
 export type LibraryCollection = {
@@ -73,7 +87,19 @@ export type ItemBody = {
   hero?: string | null;
   audience?: Audience;
   target_strength?: string | null;
+  goals?: Goal[];
+  suits?: Suit[];
   status?: LibraryStatus;
 };
 export const createItem = (body: ItemBody) => api<ItemResponse>(`${adminLibraryUrl}/items`, { method: "POST", body });
 export const updateItem = (id: string, body: ItemBody) => api<ItemResponse>(`${adminLibraryUrl}/items/${enc(id)}`, { method: "PUT", body });
+
+const mediaUrl = (id: string, slot: string) => `${adminLibraryUrl}/items/${enc(id)}/media/${enc(slot)}`;
+export const uploadMedia = (id: string, slot: string, file: File) => {
+  const form = new FormData();
+  form.append("file", file);
+  return api<{ media: MediaRef[] }>(mediaUrl(id, slot), { method: "PUT", form });
+};
+export const updateMediaDetails = (id: string, slot: string, body: { alt: string | null; credit: string | null }) =>
+  api<{ media: MediaRef[] }>(`${mediaUrl(id, slot)}/details`, { method: "PUT", body });
+export const removeMedia = (id: string, slot: string) => api<void>(mediaUrl(id, slot), { method: "DELETE" });

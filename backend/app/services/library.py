@@ -15,10 +15,15 @@ Staff
     or sharing; its generation_input holds only the mode, type, template, language, target
     strength and the library item id, never anything about another child.
 
+What an item builds (``goals``: focus_suggestions keys or custom) and which children it suits
+(``suits``: keys of the SUITS_LISTS profile lists, or custom) are checked here; custom entries
+go through the child-facing wording check. Media: services/library_media.py.
+
 Item JSON::
 
     {id, collection_id, content_type, template, language, title, goal, hero, audience, mode,
-     target_strength, sort_order, status, updated_at,  # detail only: content}
+     target_strength, goals, suits, sort_order, status, updated_at,
+     # detail only: content, media [media], media_slots [slot]}
 
 Collection JSON: {id, title, description, ages, sort_order, status, updated_at, items: [item]}
 """
@@ -28,22 +33,27 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app import access, vocab
-from app.ai import validate_output
+from app.ai import find_unsafe_text, validate_output
 from app.ai.context import first_name
 from app.audit import audit
 from app.errors import AppError
 from app.models import GeneratedContent, LibraryCollection, LibraryItem, User
 from app.schemas.library import AssignIn, CollectionCreate, CollectionUpdate, ItemCreate, ItemUpdate
+from app.services import library_media
 from app.services.content import _record_version, summary_out
 
 PUBLISHED = "published"
+# Profile lists whose keys describe the children an item suits (everyday wording, never a label).
+SUITS_LISTS = ("describe_words", "social", "communication", "frustration_reactions", "transition_reactions",
+               "morning_separation")
+MAX_CUSTOM = 80
 
 
 def _iso(dt):
     return dt.isoformat() if dt is not None else None
 
 
-def item_out(item: LibraryItem, detail: bool = False) -> dict:
+def item_out(item: LibraryItem) -> dict:
     content = item.content or {}
     out = {
         "id": str(item.id),
@@ -57,12 +67,21 @@ def item_out(item: LibraryItem, detail: bool = False) -> dict:
         "audience": item.audience,
         "mode": item.mode,
         "target_strength": item.target_strength,
+        "goals": item.goals or [],
+        "suits": item.suits or [],
         "sort_order": item.sort_order,
         "status": item.status,
         "updated_at": _iso(item.updated_at),
     }
-    if detail:
-        out["content"] = content
+    return out
+
+
+def item_detail(db: Session, item: LibraryItem) -> dict:
+    """item_out + the content, the media and the media slots the item has."""
+    out = item_out(item)
+    out["content"] = item.content or {}
+    out["media"] = library_media.item_media(db, item.id)
+    out["media_slots"] = library_media.allowed_slots(item)
     return out
 
 
@@ -123,7 +142,7 @@ def list_published(db: Session, user: User) -> dict:
 
 def get_item(db: Session, user: User, item_id) -> dict:
     item = _item_row(db, item_id) if user.role == "admin" else _published_item(db, item_id)
-    return {"item": item_out(item, detail=True)}
+    return {"item": item_detail(db, item)}
 
 
 def _rename(value, hero: str, name: str):
@@ -151,12 +170,14 @@ def assign_item(db: Session, user: User, item_id, body: AssignIn) -> dict:
     for child in targets:
         content = copy.deepcopy(item.content)
         name = first_name(child)
-        if body.use_child_name and item.hero and name:
+        renamed = bool(body.use_child_name and item.hero and name)
+        if renamed:
             content = _rename(content, item.hero, name)
         row = GeneratedContent(
             child_id=child.id, focus_area_id=None, pack_id=None, mode=item.mode, content_type=kind, language=item.language,
             title=content["title"], content=content, status="draft", shared_with_parent=False,
-            generation_input=copy.deepcopy(gi), ai_provider="template", ai_model="library", is_template=True,
+            generation_input={**copy.deepcopy(gi), "hero_replaced": renamed}, ai_provider="template", ai_model="library",
+            is_template=True,
             video_status="script_ready" if kind == "video" else None, created_by=user.id, people=[],
         )
         db.add(row)
@@ -241,20 +262,69 @@ def _check_target(key):
         raise AppError("VALIDATION", details=[{"path": "target_strength", "message": "Unknown strength."}])
 
 
+def _custom(tag: dict, path: str) -> dict:
+    text = tag.get("custom")
+    if not isinstance(text, str) or not text.strip() or len(text.strip()) > MAX_CUSTOM or set(tag) != {"custom"}:
+        raise AppError("VALIDATION", details=[{"path": path, "message": f"A custom entry is 1-{MAX_CUSTOM} characters."}])
+    issues = find_unsafe_text(text, child_facing=True)
+    if issues:
+        raise AppError("UNSAFE_CONTENT", details={"issues": [f"{path}: {i}" for i in issues]})
+    return {"custom": text.strip()}
+
+
+def checked_goals(goals: list[dict]) -> list[dict]:
+    """[{key}|{custom}] with focus_suggestions keys, without repeats."""
+    out = []
+    for i, tag in enumerate(goals):
+        path = f"goals.{i}"
+        if not isinstance(tag, dict):
+            raise AppError("VALIDATION", details=[{"path": path, "message": "Choose a goal."}])
+        if "custom" in tag:
+            clean = _custom(tag, path)
+        elif set(tag) == {"key"} and vocab.is_valid("focus_suggestions", str(tag["key"])):
+            clean = {"key": tag["key"]}
+        else:
+            raise AppError("VALIDATION", details=[{"path": path, "message": "Unknown goal."}])
+        if clean not in out:
+            out.append(clean)
+    return out
+
+
+def checked_suits(suits: list[dict]) -> list[dict]:
+    """[{list, key}|{custom}] with keys of SUITS_LISTS, without repeats."""
+    out = []
+    for i, tag in enumerate(suits):
+        path = f"suits.{i}"
+        if not isinstance(tag, dict):
+            raise AppError("VALIDATION", details=[{"path": path, "message": "Choose who it suits."}])
+        if "custom" in tag:
+            clean = _custom(tag, path)
+        elif (set(tag) == {"list", "key"} and tag["list"] in SUITS_LISTS
+              and vocab.is_valid(str(tag["list"]), str(tag["key"]))):
+            clean = {"list": tag["list"], "key": tag["key"]}
+        else:
+            raise AppError("VALIDATION", details=[{"path": path, "message": "Unknown entry."}])
+        if clean not in out:
+            out.append(clean)
+    return out
+
+
 def create_item(db: Session, user: User, body: ItemCreate) -> dict:
     _collection_row(db, body.collection_id)
     _check_target(body.target_strength)
+    goals, suits = checked_goals(body.goals), checked_suits(body.suits)
     content = validated_item_content(body.content_type, body.content)
     row = LibraryItem(
         collection_id=body.collection_id, content_type=body.content_type, language=body.language,
         title=content["title"], content=content, hero=body.hero, audience=body.audience, mode=body.mode,
-        target_strength=body.target_strength, sort_order=body.sort_order, created_by=user.id, updated_by=user.id,
+        target_strength=body.target_strength, goals=goals, suits=suits, sort_order=body.sort_order, created_by=user.id,
+        updated_by=user.id,
     )
     db.add(row)
     db.flush()
     audit(db, user, "library.item_create", "library_item", row.id, content_type=row.content_type,
           collection_id=str(row.collection_id))
-    out = item_out(row, detail=True)
+    out = item_detail(db, row)
     db.commit()
     return {"item": out}
 
@@ -273,6 +343,12 @@ def update_item(db: Session, user: User, item_id, body: ItemUpdate) -> dict:
         _collection_row(db, body.collection_id)
     if "target_strength" in sent:
         _check_target(body.target_strength)
+    for field, check in (("goals", checked_goals), ("suits", checked_suits)):
+        if field in sent and getattr(body, field) is not None:
+            value = check(getattr(body, field))
+            if value != (getattr(row, field) or []):
+                setattr(row, field, value)
+                changed.append(field)
     for field in ("collection_id", "language", "hero", "audience", "mode", "target_strength", "sort_order", "status"):
         if field not in sent:
             continue
@@ -287,6 +363,6 @@ def update_item(db: Session, user: User, item_id, body: ItemUpdate) -> dict:
         audit(db, user, "library.item_update", "library_item", row.id, fields=changed,
               status=row.status if "status" in changed else None)
     db.flush()
-    out = item_out(row, detail=True)
+    out = item_detail(db, row)
     db.commit()
     return {"item": out}

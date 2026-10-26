@@ -9,7 +9,8 @@
 #      then `alembic upgrade head`
 #   4. npm ci (when the lockfile changed) and build the React app into dist.new,
 #      then swap it in
-#   5. restart kidsphere-mvp-api, wait for /api/health, reload nginx
+#   5. restart kidsphere-mvp-api, wait for /api/health, install the nginx site config when it
+#      changed (backup kept, restored if `nginx -t` fails), reload nginx
 # Tests are not rerun here; run deploy/ci/remote-test.sh before deploying.
 set -euo pipefail
 
@@ -92,6 +93,20 @@ for i in $(seq 1 30); do
   sleep 1
   [[ $i == 30 ]] && { journalctl -u kidsphere-mvp-api -n 40 --no-pager; echo "API did not become healthy" >&2; exit 1; }
 done
+# The site config: installed when it changed (the previous one is kept in /root/backups/nginx and
+# put back when the new one does not pass `nginx -t`).
+SITE=/etc/nginx/sites-available/kidsphere-mvp
+if ! cmp -s "$SRC/deploy/nginx/kidsphere-mvp.conf" "$SITE"; then
+  echo "==> nginx site config changed"
+  mkdir -p /root/backups/nginx
+  BACKUP="/root/backups/nginx/kidsphere-mvp.$(date +%Y%m%d-%H%M%S)"
+  cp "$SITE" "$BACKUP"
+  install -m 644 "$SRC/deploy/nginx/kidsphere-mvp.conf" "$SITE"
+  if ! nginx -t; then
+    echo "new nginx config failed the test; restoring $BACKUP" >&2
+    cp "$BACKUP" "$SITE"
+  fi
+fi
 nginx -t && systemctl reload nginx
 
 echo "==> smoke test"

@@ -21,3 +21,4 @@ export {
 export { PresentFrame, type PresentFrameProps } from "./PresentFrame";
 export { PlayerFallback } from "./PlayerFallback";
 export { BackArrow, ChoiceCard, Dots, Feedback, KidButton, KidHeading, NextArrow, PhotoStack, Pic, RoundButton, type CardState } from "./kid-ui";
+export { MediaProvider, MusicToggle, NO_MEDIA, StepMedia, mediaResolver, useAudioClip, useMedia, type MediaRef, type MediaResolver } from "./media";

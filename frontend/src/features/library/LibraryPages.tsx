@@ -11,10 +11,12 @@ import { ChildPicker, toggleIn } from "@/features/children";
 import { ContentPreview, type ContentDetail } from "@/features/content";
 import { TypeIcon, typeKey } from "@/features/content/ui";
 import { useI18n } from "@/i18n/I18nProvider";
+import { useOptions } from "@/lib/options";
 import { paths } from "@/lib/paths";
 import { useAction, useErrorMessage } from "@/lib/useAction";
 import { useFetch } from "@/lib/useFetch";
 import { assignLibraryItem, libraryItemUrl, libraryUrl, type ItemResponse, type LibraryItem, type LibraryResponse } from "./api";
+import { ItemTags, goalLabel } from "./LibraryTags";
 
 export function LibraryPage() {
   const { t } = useI18n();
@@ -64,7 +66,9 @@ export function LibraryPage() {
 
 function ItemRow({ item }: { item: LibraryItem }) {
   const { t } = useI18n();
+  const { optionLabel } = useOptions();
   const type = typeKey(item.content_type);
+  const goals = (item.goals ?? []).map((g) => goalLabel(g, optionLabel));
   return (
     <Link
       to={paths.libraryItem(item.id)}
@@ -79,6 +83,11 @@ function ItemRow({ item }: { item: LibraryItem }) {
         <span className="mt-1 block text-sm text-ink-muted">
           {t(`content.types.${type}`)} · {t(`library.audience.${item.audience === "group" ? "group" : "child"}`)}
         </span>
+        {goals.length > 0 && (
+          <span className="mt-1 block truncate text-sm text-ink" dir="auto" data-testid="row-goals">
+            {goals.join(" · ")}
+          </span>
+        )}
       </span>
       <ChevronRight className="size-5 shrink-0 text-ink-muted rtl:-scale-x-100" aria-hidden />
     </Link>
@@ -112,6 +121,7 @@ export function LibraryItemPage() {
     title: item.title,
     status: "approved",
     content: item.content ?? null,
+    media: item.media ?? [],
   };
   return (
     <div className="mx-auto max-w-4xl">
@@ -131,6 +141,9 @@ export function LibraryItemPage() {
           {item.goal}
         </p>
       )}
+      <div className="mb-5">
+        <ItemTags goals={item.goals ?? []} suits={item.suits ?? []} />
+      </div>
       <Card>
         <CardBody>
           <ContentPreview item={preview} />

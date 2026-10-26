@@ -1,5 +1,5 @@
 import { fireEvent, screen, within } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { routes as contentRoutes } from "@/features/content/routes";
 import type { User } from "@/auth/AuthProvider";
 import { mockFetch, parent, renderApp, teacher } from "@/test/utils";
@@ -27,6 +27,8 @@ const story = {
   audience: "child",
   mode: "strength_builder",
   target_strength: "confidence",
+  goals: [{ key: "sharing_toys" }, { custom: "Breathing calmly" }],
+  suits: [{ list: "describe_words", key: "shy_at_first" }],
   sort_order: 0,
   status: "published",
   updated_at: "2026-10-27T10:00:00Z",
@@ -36,7 +38,24 @@ const collection = (over: Record<string, unknown> = {}) => ({
   id: "k1", title: "لولو والغيمة الصغيرة", description: null, ages: "من عمر ثلاث سنوات", sort_order: 0, status: "published",
   updated_at: null, items: [story, activity], ...over,
 });
-const detail = { ...story, content: storyContent };
+const media = [
+  { id: "m1", slot: "page:0", kind: "image", mime: "image/jpeg", url: "/api/library/media/m1", alt: "Lulu under a tree", credit: null },
+  { id: "m2", slot: "narration:0", kind: "audio", mime: "audio/mpeg", url: "/api/library/media/m2", alt: null, credit: null },
+  { id: "m3", slot: "music", kind: "audio", mime: "audio/mpeg", url: "/api/library/media/m3", alt: null, credit: "Our own" },
+];
+const slots = ["cover", "page:0", "page:1", "narration:0", "narration:1", "music"];
+const detail = { ...story, content: storyContent, media, media_slots: slots };
+const L = (en: string) => ({ en, ar: en, he: en });
+const options = {
+  focus_suggestions: [{ key: "sharing_toys", label: L("Sharing toys") }, { key: "taking_turns", label: L("Taking turns") }],
+  describe_words: [{ key: "shy_at_first", label: L("Shy at first") }],
+  social: [{ key: "needs_adult_support_to_join", label: L("Joins in with adult support") }],
+  communication: [],
+  frustration_reactions: [],
+  transition_reactions: [],
+  morning_separation: [],
+  strength_targets: [{ key: "confidence", label: L("Confidence") }],
+};
 const card = (id: string, name: string) => ({
   id, name, preferred_name: null, birth_date: "2021-01-01", age: { years: 4, months: 0 },
   class: { id: "c", name: "Butterflies", kindergarten: "Sunflower" }, main_language: "ar", has_photo: false, updated_at: null,
@@ -45,7 +64,7 @@ const card = (id: string, name: string) => ({
 describe("Content library (teachers)", () => {
   it("lists the published items by collection, with who they are for", async () => {
     mockFetch({ "GET /api/library": { body: { collections: [collection(), collection({ id: "k2", title: "لولو والسرّ السحري", ages: null, items: [{ ...story, id: "i3", collection_id: "k2" }] })] } } });
-    renderApp({ routes, url: "/library", user: teacher });
+    renderApp({ routes, url: "/library", user: teacher, options });
     expect(await screen.findByRole("heading", { level: 1, name: "Content library" })).toBeTruthy();
     expect(screen.getAllByTestId("library-collection")).toHaveLength(2);
     expect(screen.getAllByTestId("library-row")).toHaveLength(3);
@@ -62,7 +81,7 @@ describe("Content library (teachers)", () => {
         return { status: 201, body: { content: [{ id: "n1", child_id: "c1", title: "x" }, { id: "n2", child_id: "c2", title: "y" }] } };
       },
     });
-    renderApp({ routes, url: "/library/i1", user: teacher });
+    renderApp({ routes, url: "/library/i1", user: teacher, options });
     expect(await screen.findByText(/عاش أرنب صغير اسمه لولو/)).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "Give to children" }));
     const useName = (await screen.findByRole("checkbox", { name: "Use each child's name instead of “لولو”" })) as HTMLInputElement;
@@ -87,7 +106,7 @@ describe("Content library (teachers)", () => {
         body: { content: { id: "n1", child_id: "c1", content_type: "story", language: "ar", title: "لولو والغيمة الصغيرة", status: "draft", content: storyContent } },
       },
     });
-    renderApp({ routes, url: "/library/i1", user: teacher });
+    renderApp({ routes, url: "/library/i1", user: teacher, options });
     fireEvent.click(await screen.findByRole("button", { name: "Give to children" }));
     fireEvent.click(await screen.findByRole("checkbox", { name: /instead of/ }));
     fireEvent.click(await screen.findByRole("checkbox", { name: /Adam/ }));
@@ -113,7 +132,7 @@ describe("Manage library (admins)", () => {
         return { status: 201, body: { collection: collection({ id: "k9", title: "New set", items: [] }) } };
       },
     });
-    renderApp({ routes, url: "/admin/library", user: admin });
+    renderApp({ routes, url: "/admin/library", user: admin, options });
     const col = await screen.findByTestId("admin-collection");
     expect(within(col).getAllByTestId("admin-item")).toHaveLength(2);
     expect(within(col).getByText("Draft")).toBeTruthy();
@@ -135,7 +154,7 @@ describe("Manage library (admins)", () => {
         return { body: { item: { ...detail, status: b.status ?? "draft", hero: b.hero ?? detail.hero } } };
       },
     });
-    renderApp({ routes, url: "/admin/library/items/i1", user: admin });
+    renderApp({ routes, url: "/admin/library/items/i1", user: admin, options });
     fireEvent.click(await screen.findByRole("button", { name: "Publish" }));
     expect(await screen.findByText("Published. Teachers can now give it to children.")).toBeTruthy();
     expect(await screen.findByRole("button", { name: "Unpublish" })).toBeTruthy();
@@ -156,7 +175,7 @@ describe("Manage library (admins)", () => {
       },
       "GET /api/library/items/i9": { body: { item: { ...detail, id: "i9", status: "draft" } } },
     });
-    renderApp({ routes, url: "/admin/library/items/new?collection=k1", user: admin });
+    renderApp({ routes, url: "/admin/library/items/new?collection=k1", user: admin, options });
     expect(await screen.findByTestId("content-editor")).toBeTruthy();
     fireEvent.change(screen.getByLabelText(/^Title/), { target: { value: "Sami" } });
     fireEvent.click(screen.getByRole("button", { name: /Save/ }));
@@ -168,5 +187,67 @@ describe("Manage library (admins)", () => {
     mockFetch({ "GET /api/admin/library": { body: { collections: [] } } });
     renderApp({ routes, url: "/admin/library", user: teacher });
     expect(screen.queryByRole("heading", { level: 1, name: "Manage library" })).toBeNull();
+  });
+});
+
+describe("Library media and tags", () => {
+  it("shows what an item builds and who it suits, its picture, music and recorded narration", async () => {
+    const played: string[] = [];
+    const play = vi.spyOn(HTMLMediaElement.prototype, "play").mockImplementation(function (this: HTMLMediaElement) {
+      played.push(this.src);
+      return Promise.resolve();
+    });
+    vi.spyOn(HTMLMediaElement.prototype, "pause").mockImplementation(() => undefined);
+    mockFetch({ "GET /api/library/items/i1": { body: { item: detail } } });
+    renderApp({ routes, url: "/library/i1", user: teacher, options });
+    const tags = await screen.findByTestId("item-tags");
+    expect(within(tags).getByText("Sharing toys")).toBeTruthy();
+    expect(within(tags).getByText("Breathing calmly")).toBeTruthy();
+    expect(within(tags).getByText("Shy at first")).toBeTruthy();
+    const picture = screen.getByTestId("story-picture") as HTMLImageElement;
+    expect(picture.getAttribute("src")).toBe("/api/library/media/m1");
+    expect(picture.alt).toBe("Lulu under a tree");
+    fireEvent.click(screen.getByTestId("story-listen"));
+    expect(played.at(-1)).toContain("/api/library/media/m2");
+    fireEvent.click(screen.getByTestId("music-toggle"));
+    expect(played.at(-1)).toContain("/api/library/media/m3");
+    expect(screen.getByTestId("music-toggle").getAttribute("aria-pressed")).toBe("true");
+    // Page 2 has no picture or narration: the emoji, and the browser voice if there is one.
+    fireEvent.click(screen.getByTestId("story-next"));
+    expect(screen.queryByTestId("story-picture")).toBeNull();
+    play.mockRestore();
+  });
+
+  it("lets an admin upload media per slot and pick goals", async () => {
+    let uploaded: FormData | null = null;
+    const bodies: Record<string, unknown>[] = [];
+    mockFetch({
+      "GET /api/admin/library": { body: { collections: [collection()] } },
+      "GET /api/library/items/i1": { body: { item: { ...detail, media: [] } } },
+      "PUT /api/admin/library/items/i1/media/page%3A1": (init) => {
+        uploaded = init?.body as FormData;
+        return { body: { media: [{ id: "m9", slot: "page:1", kind: "image", mime: "image/jpeg", url: "/api/library/media/m9", alt: null, credit: null }] } };
+      },
+      "PUT /api/admin/library/items/i1": (init) => {
+        const b = JSON.parse(String(init?.body));
+        bodies.push(b);
+        return { body: { item: { ...detail, ...b } } };
+      },
+    });
+    renderApp({ routes, url: "/admin/library/items/i1", user: admin, options });
+    fireEvent.click(await screen.findByRole("tab", { name: "Media" }));
+    const slot = await screen.findByTestId("media-slot-page:1");
+    expect(within(slot).getByText("Page 2: picture")).toBeTruthy();
+    const file = new File(["x"], "lulu.png", { type: "image/png" });
+    fireEvent.change(within(slot).getByLabelText("Page 2: picture: Upload"), { target: { files: [file] } });
+    expect(await screen.findByText("Uploaded.")).toBeTruthy();
+    expect((uploaded as unknown as FormData).get("file")).toBeTruthy();
+    expect(screen.getByTestId("media-slot-page:1").querySelector("img")?.getAttribute("src")).toBe("/api/library/media/m9");
+
+    // Goals: add one from the list, then save the details.
+    fireEvent.click(within(screen.getByTestId("goal-picker")).getByRole("button", { name: "Taking turns" }));
+    fireEvent.click(screen.getByRole("button", { name: "Save details" }));
+    expect(await screen.findByText("Saved.")).toBeTruthy();
+    expect(bodies[0]!.goals).toEqual([{ key: "sharing_toys" }, { custom: "Breathing calmly" }, { key: "taking_turns" }]);
   });
 });

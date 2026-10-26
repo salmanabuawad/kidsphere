@@ -1,7 +1,7 @@
 """All 29 tables as SQLAlchemy 2 models.
 
 The schema itself is created by the hand-written Alembic revisions in
-``migrations/versions/`` (``0001_initial.py`` … ``0007_content_library.py``); these
+``migrations/versions/`` (``0001_initial.py`` … ``0008_library_media.py``); these
 models must mirror them (tests/test_migrations.py checks that every column
 exists in both).
 
@@ -732,9 +732,37 @@ class LibraryItem(Base):
     audience: Mapped[str] = mapped_column(Text, nullable=False, default="child", server_default="child")
     mode: Mapped[str] = mapped_column(Text, nullable=False, default="strength_builder", server_default="strength_builder")
     target_strength: Mapped[str | None] = mapped_column(Text)
+    # 0008: what it builds [{key}|{custom}] (focus_suggestions) and which children it suits [{list, key}|{custom}].
+    goals: Mapped[list] = _jsonb_list()
+    suits: Mapped[list] = _jsonb_list()
     sort_order: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default=text("0"))
     status: Mapped[str] = mapped_column(Text, nullable=False, default="draft", server_default="draft")
     created_by: Mapped[uuid.UUID | None] = _user_fk()
     updated_by: Mapped[uuid.UUID | None] = _user_fk()
+    created_at: Mapped[datetime] = _created()
+    updated_at: Mapped[datetime] = _updated()
+
+
+# --------------------------------------------------------------------------- 0008: library media
+
+LIBRARY_MEDIA_KIND_VALUES = ("image", "audio", "video")
+
+
+class LibraryMedia(Base):
+    """A picture, clip, narration or music file of a library item, one per slot
+    (services/library_media.py). ``path`` is relative to UPLOAD_DIR and never sent to clients."""
+
+    __tablename__ = "library_media"
+
+    id: Mapped[uuid.UUID] = _pk()
+    item_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("library_items.id"), nullable=False)
+    slot: Mapped[str] = mapped_column(Text, nullable=False)
+    kind: Mapped[str] = mapped_column(Text, nullable=False)
+    path: Mapped[str] = mapped_column(Text, nullable=False)
+    mime: Mapped[str] = mapped_column(Text, nullable=False)
+    size_bytes: Mapped[int] = mapped_column(Integer, nullable=False)
+    alt: Mapped[str | None] = mapped_column(Text)
+    credit: Mapped[str | None] = mapped_column(Text)
+    created_by: Mapped[uuid.UUID | None] = _user_fk()
     created_at: Mapped[datetime] = _created()
     updated_at: Mapped[datetime] = _updated()

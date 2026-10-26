@@ -65,7 +65,7 @@ Content JSON (staff)::
      mode, focus_area_id, focus_area_title, shared_with_parent, is_template,
      ai_provider, ai_model, variant, video_provider, last_feedback_result,
      # detail only:
-     content, cast {child {name, has_photo, updated_at}, people [{token, relation, person_id,
+     content, media [library media, for content made from a library item], cast {child {name, has_photo, updated_at}, people [{token, relation, person_id,
      display_name, has_photo, updated_at}]}, generation_input, approved_by {id,name}|null, created_by {id,name}|null,
      feedback [{id, result, support_level, observation, what_helped, observation_id, created_at, by_name}]}
 
@@ -99,7 +99,7 @@ from app.models import (
     User,
 )
 from app.schemas.content import ContentUpdate, CopyIn, GenerateIn, RegenerateIn, ShareIn
-from app.services import history, people as people_svc, video_service
+from app.services import history, library_media, people as people_svc, video_service
 from app.services import settings as app_settings
 from app.sessions import utcnow
 
@@ -233,6 +233,7 @@ def detail_out(db: Session, row: GeneratedContent, staff: bool) -> dict:
         content.pop("teacher_note", None)
         out["content"] = content
         out["cast"] = _cast(db, row)
+        out["media"] = library_media.media_for_content(db, row)
         return out
     focus_title = (db.scalar(select(FocusArea.title).where(FocusArea.id == row.focus_area_id))
                    if row.focus_area_id else None)
@@ -241,6 +242,7 @@ def detail_out(db: Session, row: GeneratedContent, staff: bool) -> dict:
     out = summary_out(row, staff=True, focus_title=focus_title, last_result=feedback[0].result if feedback else None)
     out["content"] = content
     out["cast"] = _cast(db, row)
+    out["media"] = library_media.media_for_content(db, row)
     out["generation_input"] = row.generation_input
     out["approved_by"] = {"id": str(row.approved_by), "name": names.get(row.approved_by)} if row.approved_by else None
     out["created_by"] = {"id": str(row.created_by), "name": names.get(row.created_by)} if row.created_by else None
@@ -679,7 +681,8 @@ def duplicate_content(db: Session, user: User, content_id) -> dict:
 
 # What a copy keeps of the source's generation_input: no focus, profile labels, domains or
 # instruction of the source child.
-COPY_INPUT_KEYS = ("mode", "content_type", "template", "language", "target_strength", "include_video")
+COPY_INPUT_KEYS = ("mode", "content_type", "template", "language", "target_strength", "include_video", "library_item_id",
+                   "hero_replaced")
 
 
 def _swap_child_name(value, mask, name: str):

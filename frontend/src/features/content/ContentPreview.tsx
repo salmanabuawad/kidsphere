@@ -10,10 +10,13 @@ import { GamePlayer } from "@/features/games";
 import {
   ActivityCard,
   CastProvider,
+  MediaProvider,
+  MusicToggle,
   StoryPlayer,
   VideoPlanView,
   VideoSlideshow,
   castResolver,
+  mediaResolver,
   toContentLocale,
   useCast,
   type Activity,
@@ -89,7 +92,19 @@ export function ContentPreview({
     default:
       player = <GamePlayer game={body} lang={lang} onFinish={onFinish} />;
   }
-  return <CastProvider value={cast}>{player}</CastProvider>;
+  const media = mediaResolver(item.media);
+  return (
+    <CastProvider value={cast}>
+      <MediaProvider value={media}>
+        {media.get("music") && (
+          <div className="mb-4 flex justify-end">
+            <MusicToggle lang={lang} />
+          </div>
+        )}
+        {player}
+      </MediaProvider>
+    </CastProvider>
+  );
 }
 
 /** The 3 discussion prompts of a small pack (stored on the story). */

@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { castDeep, useCast } from "./cast";
 import { contentDir, usePlayerText, type Dir } from "./content-locale";
 import { BackArrow, Dots, KidButton, NextArrow, PhotoStack, playPaint, RoundButton } from "./kid-ui";
+import { useAudioClip, useMedia } from "./media";
 import { parseStory } from "./parse";
 import { PlayerFallback } from "./PlayerFallback";
 import type { Story } from "./types";
@@ -39,7 +40,13 @@ export function StoryPlayer({ story: raw, lang, dir: dirProp, showTeacherNote = 
   const photos = useMemo(() => parsed?.story.map((p) => cast.photos(p)) ?? [], [parsed, cast]);
   const story = useMemo(() => (parsed ? castDeep(parsed, cast) : null), [parsed, cast]);
   const [page, setPage] = useState(0);
-  const { supported, speaking, speak, stop } = useNarration(lang);
+  const { supported, speaking, speak, stop: stopSpeech } = useNarration(lang);
+  const media = useMedia();
+  const clip = useAudioClip();
+  const stop = () => {
+    stopSpeech();
+    clip.stop();
+  };
   const finished = useRef(false);
 
   const pages = story ? story.story.length + 1 : 0;
@@ -67,6 +74,17 @@ export function StoryPlayer({ story: raw, lang, dir: dirProp, showTeacherNote = 
   const pageText = onQuestions ? [t("player.story.questionsTitle"), ...story.questions].join(". ") : story.story[page]!;
   const picture = onQuestions ? "💬" : (story.illustrations?.[page] ?? "📖");
   const pagePhotos = onQuestions ? [] : (photos[page] ?? []);
+  // Library media: the page picture (the cover on the first page), and a recorded narration.
+  const pageImage = onQuestions ? null : (media.get(`page:${page}`) ?? (page === 0 ? media.get("cover") : null));
+  const narration = onQuestions ? null : media.get(`narration:${page}`);
+  const listening = narration ? clip.playing : speaking;
+  const listen = () => {
+    if (listening) return stop();
+    if (narration) {
+      stopSpeech();
+      clip.play(narration.url);
+    } else speak(pageText);
+  };
 
   return (
     <div dir={dir} lang={lang} className="flex min-h-[70vh] flex-col gap-6" data-testid="story-player">
@@ -77,19 +95,23 @@ export function StoryPlayer({ story: raw, lang, dir: dirProp, showTeacherNote = 
       {!onQuestions ? (
         <section key={page} className="animate-rise flex flex-1 flex-col items-center gap-6" data-testid="story-page">
           {/* The picture: a colouring-book frame around a painted block, the emoji in a surface pod. */}
-          <div className="relative flex aspect-[4/3] w-full max-w-xl items-center justify-center rounded-xl bg-surface shadow-lip-lg">
-            <span aria-hidden className="pointer-events-none absolute inset-0 rounded-xl border-[3px] border-ink" />
-            <span aria-hidden className={cn("flex aspect-square h-[66%] items-center justify-center rounded-lg", playPaint(page))}>
-              {pagePhotos.length > 0 ? (
-                <PhotoStack photos={pagePhotos} className="size-[92%]" />
-              ) : (
-                <span className="flex size-[78%] items-center justify-center rounded-full bg-surface">
-                  <span className="text-[6rem] leading-none md:text-[8rem]" data-testid="story-illustration">
-                    {picture}
+          <div className="relative flex aspect-[4/3] w-full max-w-xl items-center justify-center overflow-hidden rounded-xl bg-surface shadow-lip-lg">
+            <span aria-hidden className="pointer-events-none absolute inset-0 z-10 rounded-xl border-[3px] border-ink" />
+            {pageImage && pagePhotos.length === 0 ? (
+              <img src={pageImage.url} alt={pageImage.alt ?? ""} className="size-full object-cover" data-testid="story-picture" />
+            ) : (
+              <span aria-hidden className={cn("flex aspect-square h-[66%] items-center justify-center rounded-lg", playPaint(page))}>
+                {pagePhotos.length > 0 ? (
+                  <PhotoStack photos={pagePhotos} className="size-[92%]" />
+                ) : (
+                  <span className="flex size-[78%] items-center justify-center rounded-full bg-surface">
+                    <span className="text-[6rem] leading-none md:text-[8rem]" data-testid="story-illustration">
+                      {picture}
+                    </span>
                   </span>
-                </span>
-              )}
-            </span>
+                )}
+              </span>
+            )}
           </div>
           <p dir="auto" className="font-display text-kid-story mx-auto max-w-[30ch] text-center font-medium text-ink">
             {story.story[page]}
@@ -139,14 +161,14 @@ export function StoryPlayer({ story: raw, lang, dir: dirProp, showTeacherNote = 
         >
           <BackArrow dir={dir} />
         </RoundButton>
-        {supported ? (
+        {supported || narration ? (
           <RoundButton
-            label={speaking ? t("player.stopReading") : t("player.listen")}
+            label={listening ? t("player.stopReading") : t("player.listen")}
             tone="plain"
-            onClick={() => (speaking ? stop() : speak(pageText))}
+            onClick={listen}
             data-testid="story-listen"
           >
-            {speaking ? <Square className="size-7" aria-hidden /> : <Volume2 className="size-8" aria-hidden />}
+            {listening ? <Square className="size-7" aria-hidden /> : <Volume2 className="size-8" aria-hidden />}
           </RoundButton>
         ) : (
           <span className="size-[72px] md:size-20" aria-hidden />

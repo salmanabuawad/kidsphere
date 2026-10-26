@@ -5,6 +5,8 @@
   "soundOn": "Turn sound on",
   "soundOff": "Turn sound off",
   "stopReading": "Stop",
+  "musicOn": "Music",
+  "musicOff": "Music off",
   "story": {
     "questionsTitle": "Let's talk about it",
     "teacherNote": "Note for the teacher",

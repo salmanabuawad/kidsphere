@@ -9,7 +9,7 @@ from sqlalchemy import inspect, select
 from app.ai import validate_output
 from app.config import BACKEND_DIR
 from app.db import engine as db_engine
-from app.models import AuditLog, GeneratedContent, LibraryCollection, LibraryItem
+from app.models import AuditLog, GeneratedContent, LibraryCollection, LibraryItem, LibraryMedia
 from tests.conftest import alembic_config
 
 STORY = {
@@ -21,9 +21,9 @@ STORY = {
 }
 
 
-def migration_0007():
-    path = BACKEND_DIR / "migrations" / "versions" / "0007_content_library.py"
-    spec = importlib.util.spec_from_file_location("migration_0007", path)
+def migration(name):
+    path = BACKEND_DIR / "migrations" / "versions" / f"{name}.py"
+    spec = importlib.util.spec_from_file_location(name, path)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
@@ -31,8 +31,9 @@ def migration_0007():
 
 @pytest.fixture
 def lulu(db):
-    """The Lulu collections as the 0007 upgrade loads them (the per-test TRUNCATE removed them)."""
-    migration_0007().seed(db.connection())
+    """The Lulu collections as the 0007 and 0008 upgrades load them (the per-test TRUNCATE removed them)."""
+    migration("0007_content_library").seed(db.connection())
+    migration("0008_library_media").seed(db.connection())
     db.commit()
     return {i.content["title"]: i for i in db.scalars(select(LibraryItem))}
 
@@ -177,3 +178,124 @@ def test_admin_item_content_is_checked(admin_client, db):
                                                             "content": STORY})
     assert r.status_code == 404
     assert db.scalars(select(LibraryItem)).first() is None
+
+
+# --------------------------------------------------------------------------- 0008: goals, suits, media
+
+
+def png_bytes():
+    import io
+
+    from PIL import Image
+
+    buf = io.BytesIO()
+    Image.new("RGB", (40, 30), (200, 120, 40)).save(buf, "PNG")
+    return buf.getvalue()
+
+
+MP3 = b"ID3" + b"\x00" * 200
+MP4 = b"\x00\x00\x00\x18ftypmp42" + b"\x00" * 200
+
+
+def put_media(client, item, slot, data, name="f.bin", **form):
+    return client.put(f"/api/admin/library/items/{item.id}/media/{slot}", files={"file": (name, data)}, data=form)
+
+
+def test_migration_0008_up_and_down():
+    try:
+        command.downgrade(alembic_config(), "0007")
+        db_engine.dispose()
+        insp = inspect(db_engine)
+        assert "library_media" not in insp.get_table_names()
+        assert not {"goals", "suits"} & {c["name"] for c in insp.get_columns("library_items")}
+    finally:
+        command.upgrade(alembic_config(), "head")
+        db_engine.dispose()
+    assert "library_media" in inspect(db_engine).get_table_names()
+
+
+def test_seed_goals_and_suits(teacher_client, lulu):
+    tower = lulu["لولو والسرّ السحري للقوة الداخلية"]
+    assert {"key": "coping_with_mistakes"} in tower.goals
+    assert {"list": "social", "key": "needs_adult_support_to_join"} in tower.suits
+    item = teacher_client.get(f"/api/library/items/{tower.id}").json()["item"]
+    assert item["goals"] == tower.goals and item["suits"] == tower.suits
+    assert item["media"] == [] and item["media_slots"][:2] == ["cover", "page:0"]
+
+
+def test_admin_sets_goals_and_suits(admin_client, lulu):
+    item = lulu["نبني البرج من جديد"]
+    url = f"/api/admin/library/items/{item.id}"
+    body = {"goals": [{"key": "sharing_toys"}, {"custom": "Learning to share"}, {"key": "sharing_toys"}],
+            "suits": [{"list": "describe_words", "key": "shy_at_first"}, {"custom": "Children who like building"}]}
+    r = admin_client.put(url, json=body)
+    assert r.status_code == 200, r.text
+    out = r.json()["item"]
+    assert out["goals"] == [{"key": "sharing_toys"}, {"custom": "Learning to share"}]
+    assert out["suits"][0] == {"list": "describe_words", "key": "shy_at_first"}
+    assert admin_client.put(url, json={"goals": [{"key": "nope"}]}).status_code == 400
+    assert admin_client.put(url, json={"suits": [{"list": "sensitivities", "key": "noise"}]}).status_code == 400
+    r = admin_client.put(url, json={"suits": [{"custom": "Children with a diagnosis"}]})
+    assert r.status_code == 422 and r.json()["error"]["code"] == "UNSAFE_CONTENT"
+    assert admin_client.put(url, json={"goals": []}).json()["item"]["goals"] == []
+
+
+def test_admin_uploads_replaces_and_removes_media(admin_client, teacher_client, db, lulu):
+    story = lulu["لولو والغيمة الصغيرة"]
+    activity = lulu["نبني البرج من جديد"]
+    assert put_media(teacher_client, story, "page:0", png_bytes()).status_code == 403
+
+    r = put_media(admin_client, story, "page:0", png_bytes(), alt="Lulu under a tree", credit="Drawn by our team")
+    assert r.status_code == 200, r.text
+    (m,) = r.json()["media"]
+    assert m["kind"] == "image" and m["mime"] == "image/jpeg" and m["alt"] == "Lulu under a tree"
+    assert put_media(admin_client, story, "narration:0", MP3).json()["media"][1]["mime"] == "audio/mpeg"
+    assert put_media(admin_client, story, "music", MP3).status_code == 200
+    r = put_media(admin_client, activity, "step:1", MP4)
+    assert r.status_code == 200 and r.json()["media"][0]["kind"] == "video"
+
+    # Wrong type for the slot, unknown slots and slots past the content.
+    assert put_media(admin_client, story, "page:1", MP3).status_code == 400
+    assert put_media(admin_client, story, "step:0", MP4).status_code == 400
+    assert put_media(admin_client, story, "page:42", png_bytes()).status_code == 400
+    assert put_media(admin_client, activity, "narration:0", MP3).status_code == 400
+
+    got = teacher_client.get(m["url"])
+    assert got.status_code == 200 and got.headers["content-type"] == "image/jpeg"
+    first = db.scalars(select(LibraryMedia).where(LibraryMedia.slot == "page:0")).one().path
+    assert put_media(admin_client, story, "page:0", png_bytes()).status_code == 200
+    db.expire_all()
+    from app.services import uploads
+    assert not uploads.resolve_upload(first).exists()
+
+    r = admin_client.put(f"/api/admin/library/items/{story.id}/media/page:0/details", json={"alt": "Lulu", "credit": None})
+    assert r.json()["media"][0]["alt"] == "Lulu" and r.json()["media"][0]["credit"] is None
+    path = db.scalars(select(LibraryMedia).where(LibraryMedia.slot == "music")).one().path
+    assert admin_client.delete(f"/api/admin/library/items/{story.id}/media/music").status_code == 204
+    assert not uploads.resolve_upload(path).exists()
+    assert admin_client.delete(f"/api/admin/library/items/{story.id}/media/music").status_code == 404
+    actions = [a.action for a in db.scalars(select(AuditLog))]
+    assert {"library.media_set", "library.media_details", "library.media_remove"} <= set(actions)
+
+
+def test_drafts_show_the_media_and_parents_see_it_once_shared(admin_client, teacher_client, parent_client, db,
+                                                             child, lulu):
+    story = lulu["لولو والغيمة الصغيرة"]
+    page = put_media(admin_client, story, "page:0", png_bytes()).json()["media"][0]
+    put_media(admin_client, story, "narration:0", MP3)
+    url = f"/api/library/items/{story.id}/assign"
+
+    renamed = teacher_client.post(url, json={"child_ids": [str(child.id)]}).json()["content"][0]
+    detail = teacher_client.get(f"/api/content/{renamed['id']}").json()["content"]
+    assert [m["slot"] for m in detail["media"]] == ["page:0"]  # the narration still says Lulu
+    kept = teacher_client.post(url, json={"child_ids": [str(child.id)], "use_child_name": False}).json()["content"][0]
+    detail = teacher_client.get(f"/api/content/{kept['id']}").json()["content"]
+    assert [m["slot"] for m in detail["media"]] == ["page:0", "narration:0"]
+
+    assert parent_client.get(page["url"]).status_code == 404
+    assert teacher_client.post(f"/api/content/{kept['id']}/approve").status_code == 200
+    assert parent_client.get(page["url"]).status_code == 404  # approved but not shared
+    assert teacher_client.post(f"/api/content/{kept['id']}/share", json={"shared": True}).status_code == 200
+    assert parent_client.get(page["url"]).status_code == 200
+    parent_view = parent_client.get(f"/api/content/{kept['id']}").json()["content"]
+    assert [m["slot"] for m in parent_view["media"]] == ["page:0", "narration:0"]

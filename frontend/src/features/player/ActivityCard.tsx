@@ -5,6 +5,7 @@ import type { AppLocale } from "@/i18n/config";
 import { cn } from "@/lib/utils";
 import { castDeep, useCast } from "./cast";
 import { contentDir, usePlayerText, type Dir } from "./content-locale";
+import { StepMedia, useMedia } from "./media";
 import { parseActivity } from "./parse";
 import { PlayerFallback } from "./PlayerFallback";
 import type { Activity } from "./types";
@@ -44,6 +45,7 @@ export function ActivityCard({ activity: raw, lang, dir: dirProp, printable = tr
   const t = usePlayerText(lang);
   const dir = contentDir(lang, dirProp);
   const cast = useCast();
+  const media = useMedia();
   const activity = useMemo(() => {
     const parsed = parseActivity(raw);
     return parsed ? castDeep(parsed, cast) : null;
@@ -113,14 +115,20 @@ export function ActivityCard({ activity: raw, lang, dir: dirProp, printable = tr
 
       <Section icon={<ListChecks />} title={t("player.activity.steps")}>
         <ol className="space-y-3">
-          {activity.instructions.map((s, i) => (
-            <li key={i} className="flex items-start gap-3">
-              <span className="font-display tabular flex size-8 shrink-0 items-center justify-center rounded-sm bg-brand text-base font-bold text-on-brand">{i + 1}</span>
-              <p dir="auto" className="pt-0.5 text-lg leading-relaxed text-ink">
-                {s}
-              </p>
-            </li>
-          ))}
+          {activity.instructions.map((s, i) => {
+            const stepMedia = media.get(`step:${i}`);
+            return (
+              <li key={i} className="flex items-start gap-3">
+                <span className="font-display tabular flex size-8 shrink-0 items-center justify-center rounded-sm bg-brand text-base font-bold text-on-brand">{i + 1}</span>
+                <div className="min-w-0 flex-1 space-y-2 pt-0.5">
+                  <p dir="auto" className="text-lg leading-relaxed text-ink">
+                    {s}
+                  </p>
+                  {stepMedia && <StepMedia media={stepMedia} />}
+                </div>
+              </li>
+            );
+          })}
         </ol>
       </Section>
 

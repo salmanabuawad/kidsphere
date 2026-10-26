@@ -11,7 +11,7 @@
  *
  * Parents get only shared, approved/completed rows and none of the staff fields.
  */
-import type { ContentCast, GameTemplate, VideoStatus } from "@/features/player";
+import type { ContentCast, GameTemplate, MediaRef, VideoStatus } from "@/features/player";
 import { api } from "@/lib/api";
 
 export type ContentType = "story" | "video" | "digital_game" | "real_world_activity";
@@ -125,6 +125,8 @@ export type ContentFeedback = {
 
 export type ContentDetail = ContentSummary & {
   content?: Record<string, unknown> | null;
+  /** Pictures, clips, narration and music of the library item it was made from. */
+  media?: MediaRef[];
   /** The child's name and photo flag, and each person placeholder with its display name and photo flag. */
   cast?: ContentCast | null;
   generation_input?: GenerationInput | null;
