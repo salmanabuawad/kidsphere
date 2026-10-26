@@ -4,6 +4,7 @@ Everything runs with the template provider (no API key). Adam (spec §44) and
 Maya (spec §45) are built here with the same profile data as app/dev_seed.py.
 """
 import json
+import uuid
 from datetime import date
 
 import pytest
@@ -413,6 +414,54 @@ def test_completed_content_cannot_be_edited_or_regenerated_but_can_be_duplicated
     assert teacher_client.put(f"/api/content/{copy['id']}", json={"title": "Changed"}).status_code == 200
     (dup,) = audit_rows(db, "content.duplicate")
     assert dup.meta["source_id"] == c["id"] and dup.meta["source_status"] == "completed"
+
+
+def test_copy_to_other_children_makes_drafts_with_their_names(teacher_client, adam, maya, db, make_child, klass):
+    child, focus = adam
+    lina = make_child(klass, name="Lina Haddad", preferred_name="Lulu")
+    c = generate(teacher_client, child, focus, kind="story")["content"]
+    story = dict(c["content"], story=["Adam builds a tower.", "Then Adam asks a friend to help."])
+    assert teacher_client.put(f"/api/content/{c['id']}", json={"content": story}).status_code == 200
+    approve(teacher_client, c["id"])
+    teacher_client.post(f"/api/content/{c['id']}/share", json={"shared": True})
+
+    r = teacher_client.post(f"/api/content/{c['id']}/copy", json={"child_ids": [str(maya.id), str(lina.id), str(maya.id)]})
+    assert r.status_code == 201, r.text
+    copies = r.json()["content"]
+    assert [x["child_id"] for x in copies] == [str(maya.id), str(lina.id)]
+    assert all(x["status"] == "draft" and not x["shared_with_parent"] and x["focus_area_id"] is None for x in copies)
+    db.expire_all()
+    rows = {r.child_id: r for r in db.scalars(select(GeneratedContent).where(GeneratedContent.id.in_([x["id"] for x in copies])))}
+    assert rows[maya.id].content["story"] == ["Maya builds a tower.", "Then Maya asks a friend to help."]
+    assert rows[lina.id].content["story"][0] == "Lulu builds a tower."
+    gi = rows[maya.id].generation_input
+    assert "focus" not in gi and "strengths" not in gi and gi["content_type"] == "story"
+    source = db.get(GeneratedContent, uuid.UUID(c["id"]))
+    assert source.content["story"][0] == "Adam builds a tower." and source.status == "approved"
+    logs = audit_rows(db, "content.copy")
+    assert len(logs) == 2 and all(log.meta["source_id"] == c["id"] for log in logs)
+    # The copy is an ordinary draft: it can be regenerated without the source's focus.
+    assert teacher_client.post(f"/api/content/{copies[0]['id']}/regenerate", json={}).status_code == 200
+
+
+def test_copy_needs_other_children_in_scope_and_no_people(teacher_client, parent_client, adam, maya, db, other_child):
+    child, focus = adam
+    c = generate(teacher_client, child, focus, kind="real_world_activity")["content"]
+    url = f"/api/content/{c['id']}/copy"
+    assert teacher_client.post(url, json={"child_ids": []}).status_code == 400
+    r = teacher_client.post(url, json={"child_ids": [str(child.id)]})
+    assert r.status_code == 400 and r.json()["error"]["code"] == "VALIDATION"
+    # Another class's child is out of scope (404), and nothing is created.
+    assert teacher_client.post(url, json={"child_ids": [str(maya.id), str(other_child.id)]}).status_code == 404
+    db.expire_all()
+    assert db.scalars(select(GeneratedContent).where(GeneratedContent.child_id == maya.id)).first() is None
+    assert parent_client.post(url, json={"child_ids": [str(maya.id)]}).status_code in (403, 404)
+
+    row = db.get(GeneratedContent, uuid.UUID(c["id"]))
+    row.people = [{"token": "{grandmother}", "person_id": str(uuid.uuid4()), "relation": "grandmother"}]
+    db.commit()
+    r = teacher_client.post(url, json={"child_ids": [str(maya.id)]})
+    assert r.status_code == 400 and r.json()["error"]["details"]["field"] == "people"
 
 
 def test_regenerate_keeps_id_bumps_variant_and_returns_to_draft(teacher_client, adam, db):

@@ -1,16 +1,34 @@
 /**
  * /content/:id — review a draft and use approved content (spec §19–20).
  * Preview with the real player, a structured editor, Approve, New version
- * (regenerate), Duplicate, Share with parents, Archive, Delete (drafts), and
+ * (regenerate), Duplicate, Copy to other children (a new draft each), Share
+ * with parents, Archive, Delete (drafts), and
  * for approved/completed content: Present and "How did it go?".
  * ?feedback=1 (used when leaving Present) opens the feedback dialog.
  */
 import { useEffect, useState, type ReactNode } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router";
-import { Archive, Check, Copy, MessageCircleHeart, Pencil, RefreshCw, Share2, Trash2 } from "lucide-react";
+import { Archive, Check, Copy, CopyPlus, MessageCircleHeart, Pencil, RefreshCw, Share2, Trash2 } from "lucide-react";
 import { PackIcon, PresentIcon } from "@/icons";
-import { Alert, Badge, Button, ButtonLink, Card, CardBody, CardHeader, Dialog, EmptyState, Field, PageHeader, PageSkeleton, Tabs, Textarea } from "@/components/ui";
-import { childUrl, displayName, type ChildDetail } from "@/features/children";
+import {
+  Alert,
+  Badge,
+  Button,
+  ButtonLink,
+  Card,
+  CardBody,
+  CardHeader,
+  Checkbox,
+  Dialog,
+  EmptyState,
+  Field,
+  PageHeader,
+  PageSkeleton,
+  Spinner,
+  Tabs,
+  Textarea,
+} from "@/components/ui";
+import { childUrl, displayName, type ChildDetail, type ChildListResponse } from "@/features/children";
 import { LOCALE_NAMES, isLocale } from "@/i18n/config";
 import { useI18n } from "@/i18n/I18nProvider";
 import { useFormat } from "@/lib/format";
@@ -25,6 +43,7 @@ import {
   canEdit,
   canShare,
   contentUrl,
+  copyContent,
   deleteContent,
   domainsUsed,
   duplicateContent,
@@ -71,7 +90,7 @@ function Review({ item, onChange }: { item: ContentDetail; onChange: (c: Content
   const editable = canEdit(item.status);
   const [tab, setTab] = useState<"preview" | "edit">("preview");
   const [feedbackOpen, setFeedbackOpen] = useState(false);
-  const [dialog, setDialog] = useState<null | "regenerate" | "archive" | "delete">(null);
+  const [dialog, setDialog] = useState<null | "regenerate" | "copy" | "archive" | "delete">(null);
   const action = useAction();
   const type = typeKey(item.content_type);
   const Icon = TYPE_ICONS[type];
@@ -211,6 +230,9 @@ function Review({ item, onChange }: { item: ContentDetail; onChange: (c: Content
                 <Button variant="ghost" className="justify-start" onClick={() => void duplicate()} disabled={action.pending} icon={<Copy className="size-4" aria-hidden />}>
                   {t("content.review.duplicate")}
                 </Button>
+                <Button variant="ghost" className="justify-start" onClick={() => setDialog("copy")} icon={<CopyPlus className="size-4" aria-hidden />}>
+                  {t("content.review.copyToChild")}
+                </Button>
                 {status !== "archived" && (
                   <Button variant="ghost" className="justify-start" onClick={() => setDialog("archive")} icon={<Archive className="size-4" aria-hidden />}>
                     {t("content.review.archive")}
@@ -240,6 +262,7 @@ function Review({ item, onChange }: { item: ContentDetail; onChange: (c: Content
           setTab("preview");
         }}
       />
+      <CopyDialog item={item} open={dialog === "copy"} onClose={() => setDialog(null)} />
       <ConfirmDialog
         open={dialog === "archive"}
         title={t("content.review.archive")}
@@ -310,6 +333,90 @@ function RegenerateDialog({ item, open, onClose, onDone }: { item: ContentDetail
           <Textarea {...p} rows={3} maxLength={500} value={instruction} placeholder={t("content.review.regeneratePlaceholder")} onChange={(e) => setInstruction(e.target.value)} />
         )}
       </Field>
+    </Dialog>
+  );
+}
+
+/** Copy to other children of the teacher's classes: a new draft for each (POST /api/content/{id}/copy). */
+function CopyDialog({ item, open, onClose }: { item: ContentDetail; open: boolean; onClose: () => void }) {
+  const { t } = useI18n();
+  const { pending, run } = useAction();
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const { data, loading } = useFetch<ChildListResponse>(open ? "/api/children" : null);
+  const children = (data?.children ?? []).filter((c) => c.id !== item.child_id && !c.archived);
+  const withPeople = (item.cast?.people ?? []).length > 0;
+  const toggle = (id: string, on: boolean) =>
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (on) next.add(id);
+      else next.delete(id);
+      return next;
+    });
+  const close = () => {
+    if (pending) return;
+    setSelected(new Set());
+    onClose();
+  };
+  async function go() {
+    const ids = children.filter((c) => selected.has(c.id)).map((c) => c.id);
+    const r = await run(() => copyContent(item.id, ids), { success: t("content.review.copied", { count: ids.length }) });
+    if (r.ok) {
+      setSelected(new Set());
+      onClose();
+    }
+  }
+  return (
+    <Dialog
+      open={open}
+      onClose={close}
+      title={t("content.review.copyTitle")}
+      description={withPeople ? undefined : t("content.review.copyHint")}
+      footer={
+        <>
+          <Button variant="ghost" onClick={close} disabled={pending}>
+            {t("common.cancel")}
+          </Button>
+          {!withPeople && (
+            <Button onClick={() => void go()} loading={pending} disabled={selected.size === 0} icon={<CopyPlus className="size-4" aria-hidden />}>
+              {t("content.review.copyConfirm", { count: selected.size })}
+            </Button>
+          )}
+        </>
+      }
+    >
+      {withPeople ? (
+        <Alert tone="info">{t("content.review.copyPeople")}</Alert>
+      ) : loading && !data ? (
+        <Spinner label={t("common.loading")} />
+      ) : children.length === 0 ? (
+        <p className="text-sm text-ink-muted">{t("content.review.copyNoChildren")}</p>
+      ) : (
+        <fieldset>
+          <legend className="sr-only">{t("content.review.copyTitle")}</legend>
+          <ul className="divide-y divide-line">
+            {children.map((c) => (
+              <li key={c.id}>
+                <Checkbox
+                  checked={selected.has(c.id)}
+                  onChange={(e) => toggle(c.id, e.target.checked)}
+                  label={
+                    <span className="flex flex-wrap items-baseline gap-x-2">
+                      <span dir="auto" className="font-medium">
+                        {displayName(c)}
+                      </span>
+                      {c.class && (
+                        <span dir="auto" className="text-caption text-ink-muted">
+                          {c.class.name}
+                        </span>
+                      )}
+                    </span>
+                  }
+                />
+              </li>
+            ))}
+          </ul>
+        </fieldset>
+      )}
     </Dialog>
   );
 }

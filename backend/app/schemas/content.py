@@ -5,6 +5,7 @@
   the content is validated against the type's output model plus the safety check
   in the service, not here)
 - ``RegenerateIn``  POST /api/content/{id}/regenerate
+- ``CopyIn``  POST /api/content/{id}/copy  (other children's ids: a new draft for each)
 - ``ShareIn``  POST /api/content/{id}/share
 - ``FeedbackIn``  POST /api/content/{id}/feedback  (only ``result`` is required:
   a 2-tap feedback is valid; the optional ``client_request_id`` makes a retry safe)
@@ -59,6 +60,11 @@ class ContentUpdate(StrictModel):
 
 class RegenerateIn(StrictModel):
     instruction: Instruction = None
+
+
+class CopyIn(StrictModel):
+    # Other children in the user's scope; each gets its own new draft.
+    child_ids: Annotated[list[uuid.UUID], Field(min_length=1, max_length=50)]
 
 
 class ShareIn(StrictModel):

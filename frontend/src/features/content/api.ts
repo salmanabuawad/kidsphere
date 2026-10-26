@@ -5,6 +5,7 @@
  *   GET  /api/children/{id}/content?status&pack_id → {content: ContentSummary[]}
  *   GET  /api/packs/{packId} → {pack_id, child_id, items: ContentDetail[]}
  *   GET/PUT /api/content/{id}; POST …/approve | regenerate | duplicate | share | archive | feedback; DELETE (drafts, a soft delete)
+ *   POST …/copy {child_ids} → 201 {content: ContentSummary[]} (a new draft for each other child)
  *   GET  /api/content/{id}/versions → {content_id, versions: ContentVersion[]} (staff; every AI draft and edit, newest first)
  *   POST …/feedback → 201 {feedback, content}; 200 with the first save for a repeated client_request_id
  *
@@ -180,6 +181,9 @@ export const approveContent = (id: string) => api<ContentResponse>(`${contentUrl
 export const regenerateContent = (id: string, instruction?: string) =>
   api<ContentResponse>(`${contentUrl(id)}/regenerate`, { method: "POST", body: instruction ? { instruction } : {} });
 export const duplicateContent = (id: string) => api<ContentResponse>(`${contentUrl(id)}/duplicate`, { method: "POST" });
+/** A new draft for each of the other children (the child's name is swapped; no focus, pack or people). */
+export const copyContent = (id: string, childIds: string[]) =>
+  api<{ content: ContentSummary[] }>(`${contentUrl(id)}/copy`, { method: "POST", body: { child_ids: childIds } });
 export const shareContent = (id: string, shared: boolean) => api<ContentResponse>(`${contentUrl(id)}/share`, { method: "POST", body: { shared } });
 export const archiveContent = (id: string) => api<ContentResponse>(`${contentUrl(id)}/archive`, { method: "POST" });
 export const deleteContent = (id: string) => api<void>(contentUrl(id), { method: "DELETE" });

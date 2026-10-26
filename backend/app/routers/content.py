@@ -12,6 +12,7 @@ See app/services/content.py for the row JSON, the pack storage and the status tr
 - POST   /content/{id}/approve             → {"content", "video_job"}   draft → approved
 - POST   /content/{id}/regenerate  {instruction?} → {"content", "fallback_reason"}  same id, variant + 1, → draft
 - POST   /content/{id}/duplicate           → 201 {"content"}  a new draft copy
+- POST   /content/{id}/copy  {child_ids}   → 201 {"content": [summary]}  a new draft for each other child
 - POST   /content/{id}/share  {shared}     → {"content"}   sharing needs approved|completed
 - POST   /content/{id}/archive             → {"content"}
 - GET    /content/{id}/versions            → {"content_id", "versions": [version]}  staff only (parents 404)
@@ -23,7 +24,7 @@ from fastapi import APIRouter, Response
 
 from app.deps import DB, CurrentUser
 from app.schemas.common import ContentStatus
-from app.schemas.content import ContentUpdate, GenerateIn, RegenerateIn, ShareIn
+from app.schemas.content import ContentUpdate, CopyIn, GenerateIn, RegenerateIn, ShareIn
 from app.services import content as svc
 
 router = APIRouter(tags=["content"])
@@ -68,6 +69,11 @@ def regenerate_content(content_id: str, db: DB, user: CurrentUser, body: Regener
 @router.post("/content/{content_id}/duplicate", status_code=201)
 def duplicate_content(content_id: str, db: DB, user: CurrentUser) -> dict:
     return svc.duplicate_content(db, user, content_id)
+
+
+@router.post("/content/{content_id}/copy", status_code=201)
+def copy_content(content_id: str, body: CopyIn, db: DB, user: CurrentUser) -> dict:
+    return svc.copy_content(db, user, content_id, body)
 
 
 @router.post("/content/{content_id}/share")

@@ -38,6 +38,8 @@ Lifecycle (B9)
     draft|approved → draft  on edit (PUT) or regenerate; completed/archived → 409
     approved → completed     on feedback (services/feedback.py; repeat allowed)
     any → new draft row      duplicate (pack_id is not copied)
+    any → new draft rows     copy to other children (no focus, pack or people; the child's
+                             name is swapped; generation_input keeps COPY_INPUT_KEYS only)
     any → archived           archive
     DELETE                   drafts only, else 409. A SOFT delete (OQ-5): sets
                              ``deleted_at`` / ``deleted_by``; the row disappears from
@@ -78,6 +80,7 @@ from sqlalchemy.orm import Session
 from app import access, vocab
 from app.ai import build_context, find_unsafe_text, for_focus, for_strength, generate, validate_output
 from app.ai import gather as ai_gather
+from app.ai.context import CHILD_TOKEN, first_name, name_masker
 from app.ai.gather import adult_names, classmate_names  # noqa: F401  (re-exported: reviews use them)
 from app.ai.safety import placeholder_issues
 from app.ai.service import pseudonymous_context
@@ -95,7 +98,7 @@ from app.models import (
     RecordVersion,
     User,
 )
-from app.schemas.content import ContentUpdate, GenerateIn, RegenerateIn, ShareIn
+from app.schemas.content import ContentUpdate, CopyIn, GenerateIn, RegenerateIn, ShareIn
 from app.services import history, people as people_svc, video_service
 from app.services import settings as app_settings
 from app.sessions import utcnow
@@ -670,6 +673,75 @@ def duplicate_content(db: Session, user: User, content_id) -> dict:
           source_status=row.status)
     db.flush()
     out = detail_out(db, new, staff=True)
+    db.commit()
+    return {"content": out}
+
+
+# What a copy keeps of the source's generation_input: no focus, profile labels, domains or
+# instruction of the source child.
+COPY_INPUT_KEYS = ("mode", "content_type", "template", "language", "target_strength", "include_video")
+
+
+def _swap_child_name(value, mask, name: str):
+    """``value`` (any nested str/list/dict) with the source child's names replaced by ``name``."""
+    if isinstance(value, str):
+        return mask(value).replace(CHILD_TOKEN, name)
+    if isinstance(value, list):
+        return [_swap_child_name(v, mask, name) for v in value]
+    if isinstance(value, dict):
+        return {k: _swap_child_name(v, mask, name) for k, v in value.items()}
+    return value
+
+
+def copy_content(db: Session, user: User, content_id, body: CopyIn) -> dict:
+    """A new draft of the content for each other child (staff with write access to each).
+    The source child's name becomes the target child's; there is no focus area, pack or
+    sharing, and content with people of the child's life cannot be copied."""
+    row = row_for_write(db, user, content_id, lock=False)
+    if row.people:
+        raise AppError("VALIDATION", "Content with people of the child's life cannot be copied to another child.",
+                       details={"field": "people"})
+    ids = list(dict.fromkeys(body.child_ids))
+    if row.child_id in ids:
+        raise AppError("VALIDATION", "Choose other children. Use Duplicate for the same child.",
+                       details={"field": "child_ids"})
+    targets = [access.get_child_or_404(db, user, cid, write=True) for cid in ids]
+    source = db.get(Child, row.child_id)
+    mask = name_masker([first_name(source), source.name, source.preferred_name])
+    gi = row.generation_input if isinstance(row.generation_input, dict) else {}
+    gi = {k: copy.deepcopy(gi[k]) for k in COPY_INPUT_KEYS if k in gi}
+    created = []
+    for child in targets:
+        name = first_name(child)
+        content = _swap_child_name(row.content, mask, name)
+        new = GeneratedContent(
+            child_id=child.id,
+            focus_area_id=None,
+            pack_id=None,
+            mode=row.mode,
+            content_type=row.content_type,
+            language=row.language,
+            title=_swap_child_name(row.title, mask, name),
+            content=content,
+            status="draft",
+            shared_with_parent=False,
+            generation_input=copy.deepcopy(gi),
+            ai_provider=row.ai_provider,
+            ai_model=row.ai_model,
+            is_template=row.is_template,
+            variant=row.variant,
+            video_status="script_ready" if row.content_type == "video" else None,
+            created_by=user.id,
+            people=[],
+        )
+        db.add(new)
+        db.flush()
+        _record_version(db, new, user, "manual")
+        audit(db, user, "content.copy", "content", new.id, child_id=child.id, source_id=row.id,
+              source_child_id=row.child_id, source_status=row.status)
+        created.append(new)
+    db.flush()
+    out = [summary_out(r, staff=True) for r in created]
     db.commit()
     return {"content": out}
 

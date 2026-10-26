@@ -436,6 +436,45 @@ describe("ContentReviewPage", () => {
     fireEvent.click(screen.getByRole("button", { name: "Duplicate as new draft" }));
     expect(await screen.findByRole("heading", { level: 1, name: "Copy of the story" })).toBeTruthy();
   });
+
+  it("copies to other children of the classes as new drafts", async () => {
+    let body: Record<string, unknown> | null = null;
+    const card = (id: string, name: string, extra: Record<string, unknown> = {}) => ({
+      id, name, preferred_name: null, birth_date: "2021-01-01", age: { years: 4, months: 0 },
+      class: { id: "k1", name: "Butterflies", kindergarten: "Sunflower" }, main_language: "ar", has_photo: false, updated_at: null, ...extra,
+    });
+    mockFetch({
+      "GET /api/content/s1": { body: { content: row({ id: "s1", status: "approved" }) } },
+      "GET /api/children": {
+        body: { children: [card("c1", "Adam"), card("c2", "Maya"), card("c3", "Omar"), card("c4", "Lina", { archived: true })], classes: [] },
+      },
+      "POST /api/content/s1/copy": (init) => {
+        body = JSON.parse(String(init?.body));
+        return { status: 201, body: { content: [row({ id: "n1", child_id: "c2" }), row({ id: "n2", child_id: "c3" })] } };
+      },
+    });
+    renderApp({ routes, url: "/content/s1", user: teacher, options });
+    fireEvent.click(await screen.findByRole("button", { name: "Copy to another child" }));
+    expect(await screen.findByRole("checkbox", { name: /Maya/ })).toBeTruthy();
+    expect(screen.queryByRole("checkbox", { name: /Adam/ })).toBeNull(); // this child
+    expect(screen.queryByRole("checkbox", { name: /Lina/ })).toBeNull(); // archived
+    fireEvent.click(screen.getByRole("checkbox", { name: /Maya/ }));
+    fireEvent.click(screen.getByRole("checkbox", { name: /Omar/ }));
+    fireEvent.click(screen.getByRole("button", { name: "Copy to 2 children" }));
+    expect(await screen.findByText("New drafts were created for 2 children.")).toBeTruthy();
+    expect(body).toEqual({ child_ids: ["c2", "c3"] });
+  });
+
+  it("does not offer copying content with people of the child's life", async () => {
+    mockFetch({
+      "GET /api/content/s1": { body: { content: row({ id: "s1", cast }) } },
+      "GET /api/children": { body: { children: [], classes: [] } },
+    });
+    renderApp({ routes, url: "/content/s1", user: teacher, options });
+    fireEvent.click(await screen.findByRole("button", { name: "Copy to another child" }));
+    expect(await screen.findByText(/cannot be copied to another child/)).toBeTruthy();
+    expect(screen.queryByRole("button", { name: /^Copy to \d/ })).toBeNull();
+  });
 });
 
 describe("ContentReviewPage: history and AI domains (WP2-AI)", () => {
