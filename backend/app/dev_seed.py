@@ -10,6 +10,9 @@ with a Strength → Need → Adaptation → What we will do → Follow-up plan, 
 baseline for each child dated three weeks ago, followed by a few quick
 observations that show development over time on the timeline (Adam: from
 watching the block corner to inviting a friend; Maya: storytelling).
+Each child also gets approved Arabic content, shared with the parent, about
+Lulu the bunny (``data/demo_content.json``: calm breathing, naming feelings,
+asking for help, trying again); Adam's is linked to his Current Focus.
 Children that already exist in the demo class are left untouched, so running
 it twice is safe.
 
@@ -20,18 +23,22 @@ The production database ``kidsphere_mvp`` matches neither suffix. There are no
 preview databases today; ``_preview`` is only an accepted name. ``seed(db)``
 itself does not check (the tests call it on ``kidsphere_test``).
 """
+import json
 import os
 import secrets
 import sys
 import uuid
 from datetime import date, timedelta
+from pathlib import Path
 
 from sqlalchemy import make_url, select, update
 from sqlalchemy.orm import Session
 
 from app import vocab
+from app.ai import validate_output
 from app.config import settings
-from app.models import Baseline, Child, ChildParent, ChildProfile, Class, ClassTeacher, FocusArea, Observation, User
+from app.models import (Baseline, Child, ChildParent, ChildProfile, Class, ClassTeacher, FocusArea, GeneratedContent,
+                        Observation, User)
 from app.schemas.focus import FocusCreate
 from app.schemas.profile import ProfilePatch
 from app.security import hash_password
@@ -41,6 +48,8 @@ from app.sessions import utcnow
 # The demo story starts this many days ago (baseline and focus), so the
 # observations below land after it on the timeline.
 STORY_DAYS = 21
+
+DATA_DIR = Path(__file__).parent / "data"
 
 CLASS_NAME = "Butterflies"
 KINDERGARTEN = "Sunflower Kindergarten (demo)"
@@ -249,6 +258,39 @@ def _seed_child(db: Session, teacher: User, parent: User, klass: Class, name: st
     return child, True
 
 
+def demo_content() -> list[dict]:
+    return json.loads((DATA_DIR / "demo_content.json").read_text(encoding="utf-8"))
+
+
+def _content(db: Session, teacher: User, child: Child) -> None:
+    """The hand-written Arabic Lulu stories, activities and games (demo_content.json) of ``child``:
+    approved and shared with the parent. Validated like any generated content."""
+    focus = db.scalars(select(FocusArea).where(FocusArea.child_id == child.id, FocusArea.status == "active")).first()
+    # Approved a day ago: after the observations, so they top the timeline as content_approved entries.
+    approved = utcnow() - timedelta(days=1)
+    for spec in demo_content():
+        if spec["child"] != child.name:
+            continue
+        kind = spec["content_type"]
+        content, issues = validate_output(kind, spec["content"], spec["content"].get("template"), ai=True)
+        if content is None:
+            raise ValueError(f"demo content {spec['content']['title']!r}: {issues}")
+        gi = {"mode": spec["mode"], "content_type": kind, "language": "ar", "template": content.get("template")}
+        if spec["mode"] == "growth_support":
+            gi["focus"] = {"title": focus.title, "category": focus.category}
+        else:
+            key = spec["target_strength"]
+            gi["target_strength"] = {"key": key, "label": vocab.label("strength_targets", key, "ar")}
+        db.add(GeneratedContent(
+            child_id=child.id, focus_area_id=focus.id if spec["mode"] == "growth_support" else None,
+            mode=spec["mode"], content_type=kind, language="ar", title=content["title"], content=content,
+            status="approved", shared_with_parent=True, generation_input=gi, ai_provider="template",
+            ai_model="demo_seed", is_template=True, approved_by=teacher.id, approved_at=approved, created_by=teacher.id,
+            created_at=approved, updated_at=approved,
+        ))
+    db.commit()
+
+
 def seed(db: Session, password: str | None = None) -> dict:
     """Create the demo world; returns {"password", "users", "children"}."""
     password = password or secrets.token_urlsafe(9)
@@ -268,6 +310,9 @@ def seed(db: Session, password: str | None = None) -> dict:
                                  ADAM_OBSERVATIONS)
     maya, maya_new = _seed_child(db, teacher, users["demo-parent-maya"], klass, "Maya", _birth_date(5, 1), "girl", MAYA, None,
                                  MAYA_OBSERVATIONS)
+    for child, new in ((adam, adam_new), (maya, maya_new)):
+        if new:
+            _content(db, teacher, child)
     return {
         "password": password,
         "users": [email for email, _, _ in USERS],
