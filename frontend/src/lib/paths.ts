@@ -46,6 +46,8 @@ export const routePatterns = {
   content: "/content/:id",
   presentContent: "/content/:id/present",
   pack: "/packs/:packId",
+  library: "/library",
+  libraryItem: "/library/:key",
   childDevelopment: "/children/:id/development",
   newReview: "/children/:id/review/new",
   adminUsers: "/admin/users",
@@ -94,6 +96,8 @@ export const paths = {
   content: (id: Id) => `/content/${seg(id)}`,
   presentContent: (id: Id) => `/content/${seg(id)}/present`,
   pack: (packId: Id) => `/packs/${seg(packId)}`,
+  library: () => "/library",
+  libraryItem: (key: Id) => `/library/${seg(key)}`,
   childDevelopment: (id: Id) => `/children/${seg(id)}/development`,
   newReview: (id: Id) => `/children/${seg(id)}/review/new`,
 

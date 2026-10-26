@@ -1,0 +1,15 @@
+{
+  "title": "Content library",
+  "intro": "Ready-made stories, activities and games. Give one to children: each child gets a new draft to review and approve.",
+  "empty": "The library is empty.",
+  "notFound": "This library item was not found.",
+  "back": "Content library",
+  "assign": "Give to children",
+  "assignTitle": "Give to children",
+  "assignHint": "Each child you choose gets a new draft. Check the wording before you approve it.",
+  "useChildName": "Use each child's name instead of “{hero}”",
+  "assignConfirm_one": "Give to {count} child",
+  "assignConfirm_other": "Give to {count} children",
+  "assigned_one": "A new draft was created for {count} child.",
+  "assigned_other": "New drafts were created for {count} children."
+}

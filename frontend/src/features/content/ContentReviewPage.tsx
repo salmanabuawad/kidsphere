@@ -18,17 +18,15 @@ import {
   Card,
   CardBody,
   CardHeader,
-  Checkbox,
   Dialog,
   EmptyState,
   Field,
   PageHeader,
   PageSkeleton,
-  Spinner,
   Tabs,
   Textarea,
 } from "@/components/ui";
-import { childUrl, displayName, type ChildDetail, type ChildListResponse } from "@/features/children";
+import { ChildPicker, childUrl, displayName, toggleIn, type ChildDetail } from "@/features/children";
 import { LOCALE_NAMES, isLocale } from "@/i18n/config";
 import { useI18n } from "@/i18n/I18nProvider";
 import { useFormat } from "@/lib/format";
@@ -342,23 +340,14 @@ function CopyDialog({ item, open, onClose }: { item: ContentDetail; open: boolea
   const { t } = useI18n();
   const { pending, run } = useAction();
   const [selected, setSelected] = useState<Set<string>>(new Set());
-  const { data, loading } = useFetch<ChildListResponse>(open ? "/api/children" : null);
-  const children = (data?.children ?? []).filter((c) => c.id !== item.child_id && !c.archived);
   const withPeople = (item.cast?.people ?? []).length > 0;
-  const toggle = (id: string, on: boolean) =>
-    setSelected((prev) => {
-      const next = new Set(prev);
-      if (on) next.add(id);
-      else next.delete(id);
-      return next;
-    });
   const close = () => {
     if (pending) return;
     setSelected(new Set());
     onClose();
   };
   async function go() {
-    const ids = children.filter((c) => selected.has(c.id)).map((c) => c.id);
+    const ids = [...selected];
     const r = await run(() => copyContent(item.id, ids), { success: t("content.review.copied", { count: ids.length }) });
     if (r.ok) {
       setSelected(new Set());
@@ -386,36 +375,15 @@ function CopyDialog({ item, open, onClose }: { item: ContentDetail; open: boolea
     >
       {withPeople ? (
         <Alert tone="info">{t("content.review.copyPeople")}</Alert>
-      ) : loading && !data ? (
-        <Spinner label={t("common.loading")} />
-      ) : children.length === 0 ? (
-        <p className="text-sm text-ink-muted">{t("content.review.copyNoChildren")}</p>
       ) : (
-        <fieldset>
-          <legend className="sr-only">{t("content.review.copyTitle")}</legend>
-          <ul className="divide-y divide-line">
-            {children.map((c) => (
-              <li key={c.id}>
-                <Checkbox
-                  checked={selected.has(c.id)}
-                  onChange={(e) => toggle(c.id, e.target.checked)}
-                  label={
-                    <span className="flex flex-wrap items-baseline gap-x-2">
-                      <span dir="auto" className="font-medium">
-                        {displayName(c)}
-                      </span>
-                      {c.class && (
-                        <span dir="auto" className="text-caption text-ink-muted">
-                          {c.class.name}
-                        </span>
-                      )}
-                    </span>
-                  }
-                />
-              </li>
-            ))}
-          </ul>
-        </fieldset>
+        open && (
+          <ChildPicker
+            selected={selected}
+            onToggle={(id, on) => setSelected((prev) => toggleIn(prev, id, on))}
+            excludeId={item.child_id}
+            label={t("content.review.copyTitle")}
+          />
+        )
       )}
     </Dialog>
   );

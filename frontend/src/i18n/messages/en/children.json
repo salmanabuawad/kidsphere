@@ -188,5 +188,8 @@
     "badge": "Saved",
     "title": "Observation added for {name}",
     "hint": "It joins the development timeline and helps show what works."
+  },
+  "picker": {
+    "none": "There are no children to choose in your classes."
   }
 }

@@ -159,12 +159,11 @@ def test_dev_seed_story_reads_in_order(db, client_for):
     teacher = db.scalars(select(User).where(User.email == "demo-teacher")).one()
     c = client_for(teacher)
     adam = c.get(f"/api/children/{result['children']['Adam'][0]}/timeline").json()["entries"]
-    # The Lulu content (dev_seed.demo_content) was approved a day ago, after the observations.
-    assert [e["type"] for e in adam] == ["content_approved"] * 5 + ["observation"] * 4 + ["baseline", "focus_opened"]
-    assert [e["support_level"] for e in adam[5:9]] == ["independent", "some_support", "some_support", "significant_support"]
-    assert all(e["focus_area_title"] == "Joining group play" for e in adam[:9])
+    assert [e["type"] for e in adam] == ["observation"] * 4 + ["baseline", "focus_opened"]
+    assert [e["support_level"] for e in adam[:4]] == ["independent", "some_support", "some_support", "significant_support"]
+    assert all(e["focus_area_title"] == "Joining group play" for e in adam[:4])
     maya = c.get(f"/api/children/{result['children']['Maya'][0]}/timeline").json()["entries"]
-    assert [e["type"] for e in maya] == ["content_approved"] * 4 + ["observation"] * 3 + ["baseline"]
+    assert [e["type"] for e in maya] == ["observation"] * 3 + ["baseline"]
 
 
 # --------------------------------------------------------------------------- WP2-NAV: filters and new entry types

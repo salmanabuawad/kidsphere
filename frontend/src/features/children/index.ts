@@ -1,5 +1,6 @@
 /** Public surface of the children feature for other features (child pages reuse the header + tabs). */
 export { ChildAvatar } from "./ChildAvatar";
+export { ChildPicker, toggleIn } from "./ChildPicker";
 export { ChildHeader, ChildLayout, ChildTabs } from "./ChildLayout";
 export { ProfileItemChips, useProfileItem } from "./ProfileItems";
 export { deriveFromSources, itemProvenance, lastStamp, parentSaid, provenanceLabels } from "./provenance";

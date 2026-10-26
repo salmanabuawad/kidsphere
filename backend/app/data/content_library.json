@@ -1,6 +1,13 @@
-[
+{
+  "hero": "لولو",
+  "collections": [
+    {"key": "lulu_cloud", "title": "لولو والغيمة الصغيرة", "ages": "من عمر ثلاث سنوات"},
+    {"key": "lulu_tower", "title": "لولو والسرّ السحري للقوة الداخلية", "ages": "من عمر أربع إلى خمس سنوات"}
+  ],
+  "items": [
   {
-    "child": "Maya",
+    "key": "lulu_cloud_story",
+    "collection": "lulu_cloud",
     "content_type": "story",
     "mode": "strength_builder",
     "target_strength": "confidence",
@@ -25,7 +32,8 @@
     }
   },
   {
-    "child": "Maya",
+    "key": "lulu_breathing",
+    "collection": "lulu_cloud",
     "content_type": "real_world_activity",
     "mode": "strength_builder",
     "target_strength": "confidence",
@@ -48,7 +56,8 @@
     }
   },
   {
-    "child": "Maya",
+    "key": "lulu_feeling_colours",
+    "collection": "lulu_cloud",
     "content_type": "real_world_activity",
     "mode": "strength_builder",
     "target_strength": "confidence",
@@ -71,7 +80,8 @@
     }
   },
   {
-    "child": "Maya",
+    "key": "lulu_strong_inside",
+    "collection": "lulu_cloud",
     "content_type": "real_world_activity",
     "mode": "strength_builder",
     "target_strength": "confidence",
@@ -95,9 +105,11 @@
     }
   },
   {
-    "child": "Adam",
+    "key": "lulu_tower_story",
+    "collection": "lulu_tower",
     "content_type": "story",
-    "mode": "growth_support",
+    "mode": "strength_builder",
+    "target_strength": "confidence",
     "content": {
       "title": "لولو والسرّ السحري للقوة الداخلية",
       "goal": "التعرّف إلى المشاعر والتعبير عنها، والتعامل مع الحزن والخوف والغضب، وتعلّم المحاولة من جديد وطلب المساعدة من الأصدقاء.",
@@ -120,9 +132,11 @@
     }
   },
   {
-    "child": "Adam",
+    "key": "lulu_feelings_game",
+    "collection": "lulu_tower",
     "content_type": "digital_game",
-    "mode": "growth_support",
+    "mode": "strength_builder",
+    "target_strength": "confidence",
     "content": {
       "template": "emotion_choice",
       "title": "ماذا يشعر لولو؟",
@@ -150,9 +164,11 @@
     }
   },
   {
-    "child": "Adam",
+    "key": "lulu_strength_tree",
+    "collection": "lulu_tower",
     "content_type": "real_world_activity",
-    "mode": "growth_support",
+    "mode": "strength_builder",
+    "target_strength": "confidence",
     "content": {
       "title": "ماذا يشعر لولو؟ وشجرة القوة الداخلية",
       "goal": "التعرّف إلى المشاعر وتسميتها، والتفكير في ما يساعدنا عندما نحزن أو نخاف، وفي الشخص الذي نطلب منه المساعدة.",
@@ -178,9 +194,11 @@
     }
   },
   {
-    "child": "Adam",
+    "key": "lulu_tower_again",
+    "collection": "lulu_tower",
     "content_type": "real_world_activity",
-    "mode": "growth_support",
+    "mode": "strength_builder",
+    "target_strength": "confidence",
     "content": {
       "title": "نبني البرج من جديد",
       "goal": "تنمية المثابرة والمرونة والتعاون: نحاول مرة أخرى، ونطلب المساعدة من صديق.",
@@ -201,9 +219,11 @@
     }
   },
   {
-    "child": "Adam",
+    "key": "lulu_who_helps",
+    "collection": "lulu_tower",
     "content_type": "digital_game",
-    "mode": "growth_support",
+    "mode": "strength_builder",
+    "target_strength": "confidence",
     "content": {
       "template": "match_pairs",
       "title": "من يستطيع مساعدة لولو؟",
@@ -220,4 +240,5 @@
       ]
     }
   }
-]
+  ]
+}

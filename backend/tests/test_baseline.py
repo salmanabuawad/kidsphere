@@ -6,8 +6,7 @@ from sqlalchemy import select, text
 from sqlalchemy.exc import DBAPIError
 
 from app import dev_seed, vocab
-from app.ai import validate_output
-from app.models import AuditLog, Baseline, Child, ChildProfile, FocusArea, GeneratedContent, User
+from app.models import AuditLog, Baseline, Child, ChildProfile, FocusArea
 
 
 def fill_profile(teacher_client, parent_client, child):
@@ -197,34 +196,10 @@ def test_dev_seed_creates_adam_and_maya(db):
     assert [i["key"] for i in mp.interests] == ["animals"]
     assert result["children"]["Adam"][1] is True
 
-    rows = db.scalars(select(GeneratedContent)).all()
-    by_child = {c: sorted(r.content_type for r in rows if r.child_id == c) for c in (adam.id, maya.id)}
-    assert by_child[adam.id] == ["digital_game", "digital_game", "real_world_activity", "real_world_activity", "story"]
-    assert by_child[maya.id] == ["real_world_activity"] * 3 + ["story"]
-    assert all(r.language == "ar" and r.status == "approved" and r.shared_with_parent for r in rows)
-    assert all(r.focus_area_id == focus.id for r in rows if r.child_id == adam.id)
-    assert {r.content["template"] for r in rows if r.content_type == "digital_game"} == {"emotion_choice", "match_pairs"}
-
     again = dev_seed.seed(db, password="Demo-pass-456")
     assert again["children"]["Adam"] == (str(adam.id), False)
     db.expire_all()
     assert len(db.scalars(select(Child)).all()) == 2
-    assert len(db.scalars(select(GeneratedContent)).all()) == len(rows)
-
-
-def test_dev_seed_content_is_valid_and_safe():
-    for spec in dev_seed.demo_content():
-        content, issues = validate_output(spec["content_type"], spec["content"], spec["content"].get("template"), ai=True)
-        assert content is not None, (spec["content"]["title"], issues)
-
-
-def test_dev_seed_story_reaches_the_parent(db, client_for):
-    dev_seed.seed(db, password="Demo-pass-123")
-    maya = db.scalars(select(Child).where(Child.name == "Maya")).one()
-    parent = db.scalars(select(User).where(User.email == "demo-parent-maya")).one()
-    listed = client_for(parent).get(f"/api/children/{maya.id}/content")
-    assert listed.status_code == 200
-    assert "لولو والغيمة الصغيرة" in listed.text
 
 
 # --------------------------------------------------------------------------- WP2-PLAN: original vs latest (X-12)
