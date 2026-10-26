@@ -38,10 +38,13 @@ export function ContentEditor({
   item,
   onSaved,
   onCancel,
+  save: saveContent,
 }: {
   item: ContentDetail;
   onSaved: (next: ContentDetail) => void;
   onCancel: () => void;
+  /** Where the content is saved; by default PUT /api/content/{id}. The library saves its items elsewhere. */
+  save?: (content: Record<string, unknown>) => Promise<{ content: ContentDetail }>;
 }) {
   const { t } = useI18n();
   const { pending, run } = useAction();
@@ -57,7 +60,7 @@ export function ContentEditor({
       setProblem({ kind: "invalid", issues: [] });
       return;
     }
-    await run(() => updateContent(item.id, { content: draft }), {
+    await run(() => (saveContent ? saveContent(draft) : updateContent(item.id, { content: draft })), {
       errorToast: false,
       success: item.status === "approved" ? t("content.editor.savedBackToDraft") : t("content.editor.saved"),
       onSuccess: (r) => onSaved(r.content),

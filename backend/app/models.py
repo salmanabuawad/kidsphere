@@ -1,7 +1,7 @@
 """All 29 tables as SQLAlchemy 2 models.
 
 The schema itself is created by the hand-written Alembic revisions in
-``migrations/versions/`` (``0001_initial.py`` … ``0006_ai_engines.py``); these
+``migrations/versions/`` (``0001_initial.py`` … ``0007_content_library.py``); these
 models must mirror them (tests/test_migrations.py checks that every column
 exists in both).
 
@@ -689,5 +689,52 @@ class AiCharacter(Base):
     request_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True), ForeignKey("ai_requests.id", ondelete="SET NULL"))
     created_by: Mapped[uuid.UUID | None] = _user_fk()
+    created_at: Mapped[datetime] = _created()
+    updated_at: Mapped[datetime] = _updated()
+
+
+# --------------------------------------------------------------------------- 0007: content library
+
+LIBRARY_STATUS_VALUES = ("draft", "published", "archived")
+LIBRARY_AUDIENCE_VALUES = ("child", "group")
+
+
+class LibraryCollection(Base):
+    """A named set of ready-made content (services/library.py)."""
+
+    __tablename__ = "library_collections"
+
+    id: Mapped[uuid.UUID] = _pk()
+    title: Mapped[str] = mapped_column(Text, nullable=False)
+    description: Mapped[str | None] = mapped_column(Text)
+    ages: Mapped[str | None] = mapped_column(Text)
+    sort_order: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default=text("0"))
+    status: Mapped[str] = mapped_column(Text, nullable=False, default="draft", server_default="draft")
+    created_by: Mapped[uuid.UUID | None] = _user_fk()
+    updated_by: Mapped[uuid.UUID | None] = _user_fk()
+    created_at: Mapped[datetime] = _created()
+    updated_at: Mapped[datetime] = _updated()
+
+
+class LibraryItem(Base):
+    """One ready-made story, activity, game or video plan; ``content`` has the generated_content shape.
+    ``hero`` (the character's name) becomes each child's name when it is given to children."""
+
+    __tablename__ = "library_items"
+
+    id: Mapped[uuid.UUID] = _pk()
+    collection_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("library_collections.id"), nullable=False)
+    content_type: Mapped[str] = mapped_column(Text, nullable=False)
+    language: Mapped[str] = mapped_column(Text, nullable=False)
+    title: Mapped[str] = mapped_column(Text, nullable=False)
+    content: Mapped[dict] = mapped_column(JSONB, nullable=False)
+    hero: Mapped[str | None] = mapped_column(Text)
+    audience: Mapped[str] = mapped_column(Text, nullable=False, default="child", server_default="child")
+    mode: Mapped[str] = mapped_column(Text, nullable=False, default="strength_builder", server_default="strength_builder")
+    target_strength: Mapped[str | None] = mapped_column(Text)
+    sort_order: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default=text("0"))
+    status: Mapped[str] = mapped_column(Text, nullable=False, default="draft", server_default="draft")
+    created_by: Mapped[uuid.UUID | None] = _user_fk()
+    updated_by: Mapped[uuid.UUID | None] = _user_fk()
     created_at: Mapped[datetime] = _created()
     updated_at: Mapped[datetime] = _updated()

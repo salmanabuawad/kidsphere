@@ -1,6 +1,6 @@
 /**
  * /library — ready-made content (the Lulu stories, activities and games) grouped by collection.
- * /library/:key — preview an item with the real player and assign it to children: each child
+ * /library/:id — preview an item with the real player and assign it to children: each child
  * gets a new draft, with the character's name replaced by the child's name unless kept.
  */
 import { useState } from "react";
@@ -14,7 +14,7 @@ import { useI18n } from "@/i18n/I18nProvider";
 import { paths } from "@/lib/paths";
 import { useAction, useErrorMessage } from "@/lib/useAction";
 import { useFetch } from "@/lib/useFetch";
-import { assignLibraryItem, libraryItemUrl, libraryUrl, type LibraryItem, type LibraryResponse } from "./api";
+import { assignLibraryItem, libraryItemUrl, libraryUrl, type ItemResponse, type LibraryItem, type LibraryResponse } from "./api";
 
 export function LibraryPage() {
   const { t } = useI18n();
@@ -29,16 +29,16 @@ export function LibraryPage() {
         </Alert>
       ) : loading && !data ? (
         <Skeleton className="h-40" />
-      ) : !data || data.items.length === 0 ? (
+      ) : !data || data.collections.length === 0 ? (
         <EmptyState scene="search" title={t("library.empty")} />
       ) : (
         <div className="space-y-8">
           {data.collections.map((c) => {
-            const items = data.items.filter((i) => i.collection === c.key);
+            const items = c.items;
             if (items.length === 0) return null;
             return (
-              <section key={c.key} aria-labelledby={`lib-${c.key}`} data-testid={`collection-${c.key}`}>
-                <h2 id={`lib-${c.key}`} className="text-lg font-semibold text-ink" dir="auto">
+              <section key={c.id} aria-labelledby={`lib-${c.id}`} data-testid="library-collection">
+                <h2 id={`lib-${c.id}`} className="text-lg font-semibold text-ink" dir="auto">
                   {c.title}
                 </h2>
                 {c.ages && (
@@ -48,7 +48,7 @@ export function LibraryPage() {
                 )}
                 <ul className="space-y-3">
                   {items.map((i) => (
-                    <li key={i.key}>
+                    <li key={i.id}>
                       <ItemRow item={i} />
                     </li>
                   ))}
@@ -67,7 +67,7 @@ function ItemRow({ item }: { item: LibraryItem }) {
   const type = typeKey(item.content_type);
   return (
     <Link
-      to={paths.libraryItem(item.key)}
+      to={paths.libraryItem(item.id)}
       className="flex items-center gap-3 rounded-lg border border-line bg-surface p-4 shadow-lip focus-visible:outline-offset-4"
       data-testid="library-row"
     >
@@ -76,7 +76,9 @@ function ItemRow({ item }: { item: LibraryItem }) {
         <span className="block truncate text-base font-semibold text-ink" dir="auto">
           {item.title}
         </span>
-        <span className="mt-1 block text-sm text-ink-muted">{t(`content.types.${type}`)}</span>
+        <span className="mt-1 block text-sm text-ink-muted">
+          {t(`content.types.${type}`)} · {t(`library.audience.${item.audience === "group" ? "group" : "child"}`)}
+        </span>
       </span>
       <ChevronRight className="size-5 shrink-0 text-ink-muted rtl:-scale-x-100" aria-hidden />
     </Link>
@@ -84,10 +86,10 @@ function ItemRow({ item }: { item: LibraryItem }) {
 }
 
 export function LibraryItemPage() {
-  const { key = "" } = useParams();
+  const { id = "" } = useParams();
   const { t } = useI18n();
   const toMessage = useErrorMessage();
-  const { data, error, loading, reload } = useFetch<{ item: LibraryItem }>(libraryItemUrl(key));
+  const { data, error, loading, reload } = useFetch<ItemResponse>(libraryItemUrl(id));
   const [open, setOpen] = useState(false);
   const item = data?.item;
   if (!item) {
@@ -103,7 +105,7 @@ export function LibraryItemPage() {
   }
   const type = typeKey(item.content_type);
   const preview: ContentDetail = {
-    id: item.key,
+    id: item.id,
     content_type: item.content_type,
     template: item.template,
     language: item.language,
@@ -152,7 +154,7 @@ function AssignDialog({ item, open, onClose }: { item: LibraryItem; open: boolea
   };
   async function go() {
     const ids = [...selected];
-    const r = await run(() => assignLibraryItem(item.key, ids, useChildName), { success: t("library.assigned", { count: ids.length }) });
+    const r = await run(() => assignLibraryItem(item.id, ids, useChildName && !!item.hero), { success: t("library.assigned", { count: ids.length }) });
     if (r.ok) {
       setSelected(new Set());
       onClose();
@@ -178,11 +180,9 @@ function AssignDialog({ item, open, onClose }: { item: LibraryItem; open: boolea
       }
     >
       <div className="space-y-4">
-        <Checkbox
-          checked={useChildName}
-          onChange={(e) => setUseChildName(e.target.checked)}
-          label={t("library.useChildName", { hero: item.hero })}
-        />
+        {item.hero && (
+          <Checkbox checked={useChildName} onChange={(e) => setUseChildName(e.target.checked)} label={t("library.useChildName", { hero: item.hero })} />
+        )}
         {open && (
           <ChildPicker
             selected={selected}

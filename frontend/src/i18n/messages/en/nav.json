@@ -11,5 +11,6 @@
   "parentHome": "My children",
   "settings": "Settings",
   "aiEngines": "AI engines",
-  "library": "Library"
+  "library": "Library",
+  "adminLibrary": "Manage library"
 }

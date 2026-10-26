@@ -1,4 +1,5 @@
 /** Public surface of the content feature (WP-11). */
+export { ContentEditor } from "./ContentEditor";
 export { ContentList, ContentListPage } from "./ContentListPage";
 export { ContentPreview, DiscussionPrompts } from "./ContentPreview";
 export { ContentReviewPage } from "./ContentReviewPage";
