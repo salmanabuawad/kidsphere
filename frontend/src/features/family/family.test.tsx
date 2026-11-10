@@ -160,3 +160,47 @@ describe("Daily routines", () => {
     await waitFor(() => expect(posted).toEqual({ title: "Our bedtime", steps: [{ emoji: "🛁", label: "Bath" }, { emoji: "🌙", label: "Sleep" }] }));
   });
 });
+
+describe("Pilot", () => {
+  it("parents answer the start questionnaire", async () => {
+    let sent: unknown = null;
+    mockFetch({
+      "GET /api/children/c1/family-programs": { body: { enrolments: [enrolment({ questionnaires: [] })] } },
+      "GET /api/family-questionnaire": { body: { questions: [{ key: "routines", text: "Our day has calm routines.", options: [{ key: "rarely", label: "Rarely" }, { key: "often", label: "Often" }] }] } },
+      "POST /api/family-enrolments/e1/questionnaire": (init) => {
+        sent = JSON.parse(String(init?.body));
+        return { status: 201, body: { kind: "baseline", answered: ["baseline"] } };
+      },
+    });
+    const routes: AppRoute[] = [{ path: "/x", element: <ParentJourneyCard childId="c1" /> }];
+    renderApp({ routes, url: "/x", user: parent });
+    const form = await screen.findByTestId("questionnaire-baseline");
+    fireEvent.click(within(form).getByRole("radio", { name: "Often" }));
+    fireEvent.click(within(form).getByRole("button", { name: "Send" }));
+    await waitFor(() => expect(sent).toEqual({ kind: "baseline", answers: { routines: "often" } }));
+  });
+
+  it("staff see plain counts only", async () => {
+    const { OverviewPage } = await import("./OverviewPage");
+    mockFetch({
+      "GET /api/family-overview": {
+        body: {
+          programs: [{ id: "p1", title: { en: "Roots of Resilience" } }],
+          journeys: { total: 3, by_status: { active: 2, completed: 1 }, by_kindergarten: [{ kindergarten: "Sunflower KG", count: 3 }] },
+          weekly_reflections: [{ week: 1, families: 2 }],
+          families_active_recently: 2,
+          recent_days: 14,
+          content: { home_reflections: 4, shared: 6, awaiting_approval: 1 },
+          questionnaires: { baseline: 2, end: 1, answers: { baseline: { routines: { rarely: 1, often: 1 } }, end: { routines: { rarely: 0, often: 1 } } } },
+        },
+      },
+      "GET /api/family-questionnaire": { body: { questions: [{ key: "routines", text: "Our day has calm routines.", options: [{ key: "rarely", label: "Rarely" }, { key: "often", label: "Often" }] }] } },
+    });
+    const routes: AppRoute[] = [{ path: "/family/overview", element: <OverviewPage /> }];
+    renderApp({ routes, url: "/family/overview", user: teacher });
+    expect(await screen.findByTestId("family-overview")).toBeTruthy();
+    expect(screen.getByText("2 families")).toBeTruthy();
+    expect(await screen.findByText("Our day has calm routines.")).toBeTruthy();
+    expect(document.body.textContent).not.toMatch(NO_SCORES);
+  });
+});

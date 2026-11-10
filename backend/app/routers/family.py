@@ -160,3 +160,29 @@ def update_child_routine(routine_id: str, body: RoutineIn, db: DB, user: Current
 def delete_child_routine(routine_id: str, db: DB, user: CurrentUser) -> Response:
     routines.delete_routine(db, user, routine_id)
     return Response(status_code=204)
+
+
+# --------------------------------------------------------------------------- pilot (0014)
+# - GET  /family-questionnaire?language            signed-in users -> {questions}
+# - POST /family-enrolments/{id}/questionnaire      parents (or staff on their behalf) -> {kind, answered}
+# - GET  /family-overview?program_id                staff (scoped) -> counts only
+
+import uuid as _uuid  # noqa: E402
+
+from app.schemas.family import QuestionnaireIn  # noqa: E402
+from app.services import family_pilot as pilot  # noqa: E402
+
+
+@router.get("/family-questionnaire")
+def family_questionnaire(user: CurrentUser, language: str | None = None) -> dict:
+    return pilot.questionnaire(user, language)
+
+
+@router.post("/family-enrolments/{enrolment_id}/questionnaire", status_code=201)
+def submit_family_questionnaire(enrolment_id: str, body: QuestionnaireIn, db: DB, user: CurrentUser) -> dict:
+    return pilot.submit(db, user, enrolment_id, body)
+
+
+@router.get("/family-overview")
+def family_overview(db: DB, user: CurrentUser, program_id: _uuid.UUID | None = None) -> dict:
+    return pilot.overview(db, user, program_id)

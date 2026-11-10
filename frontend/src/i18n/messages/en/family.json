@@ -65,6 +65,36 @@
     "notSaved": "The routine was not saved. Check every step has a picture and words.",
     "wording": "Please use gentle, simple words: your child will see them."
   },
+  "questionnaire": {
+    "startTitle": "Before we start: a few quick questions",
+    "endTitle": "At the end: the same quick questions",
+    "hint": "There are no right or wrong answers. They help the kindergarten see what is useful for families.",
+    "send": "Send",
+    "thanks": "Thank you for answering."
+  },
+  "overview": {
+    "title": "Family overview",
+    "subtitle": "How the family journeys are going, in plain counts. Never per child.",
+    "empty": "Nothing to show yet",
+    "allPrograms": "All programs",
+    "journeys": "Family journeys",
+    "active": "Active",
+    "completed": "Completed",
+    "recent": "Families who shared in the last {days} days",
+    "homeReflections": "Answers from home on shared activities",
+    "shared": "Activities shared with families",
+    "awaiting": "Drafts waiting for review",
+    "questionnaires": "Questionnaires answered",
+    "byKindergarten": "Journeys by kindergarten",
+    "weekly": "Families who shared, week by week",
+    "families_one": "{count} family",
+    "families_other": "{count} families",
+    "answers": "What parents answered",
+    "answersHint": "Answer sets at the start: {start}. At the end: {end}.",
+    "atStart": "At the start",
+    "atEnd": "At the end",
+    "disclaimer": "These counts describe use and participation in the pilot. They are not evidence that the program works; that needs a proper evaluation design."
+  },
   "admin": {
     "title": "Family programs",
     "subtitle": "Weekly journeys for families. Parents see the published ones when a teacher starts a journey.",

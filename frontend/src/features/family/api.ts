@@ -27,6 +27,8 @@ export type Enrolment = {
   reflections: WeekReflection[];
   shared_content: { id: string; title: string; content_type: string; approved_at: string | null }[];
   can_edit: boolean;
+  /** Which questionnaires the family answered (baseline at the start, end after the last week). */
+  questionnaires?: ("baseline" | "end")[];
 };
 
 

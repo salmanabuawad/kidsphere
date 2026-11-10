@@ -34,6 +34,7 @@ from app.errors import AppError
 from app.models import FamilyEnrolment, FamilyProgram, FamilyWeekReflection, GeneratedContent, User
 from app.schemas.family import EnrolIn, EnrolmentUpdate, ProgramCreate, ProgramUpdate, WeekReflectionIn
 from app.sessions import utcnow
+from app.services import family_pilot
 
 LANGS = ("en", "ar", "he")
 
@@ -166,6 +167,7 @@ def enrolment_out(db: Session, e: FamilyEnrolment, program: FamilyProgram, staff
         "shared_content": [{"id": str(c.id), "title": c.title, "content_type": c.content_type,
                             "approved_at": _iso(c.approved_at)} for c in shared],
         "can_edit": staff,
+        "questionnaires": family_pilot.answered_kinds(db, e.id),
     }
 
 

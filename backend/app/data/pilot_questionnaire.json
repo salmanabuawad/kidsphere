@@ -1,0 +1,40 @@
+{
+  "about": "Short parent questionnaire at the start and the end of a family journey. Descriptive answers only: they are never added up, scored or compared between families.",
+  "questions": [
+    {
+      "key": "big_feelings",
+      "text": {"en": "When my child has big feelings, I know what I can do.", "ar": "عندما يشعر طفلي بمشاعر كبيرة، أعرف ما الذي يمكنني فعله.", "he": "כשלילד שלי יש רגשות גדולים, אני יודע/ת מה אני יכול/ה לעשות."},
+      "options": ["rarely", "sometimes", "often"]
+    },
+    {
+      "key": "talk_feelings",
+      "text": {"en": "We talk about feelings at home.", "ar": "نتحدّث عن المشاعر في البيت.", "he": "אנחנו מדברים על רגשות בבית."},
+      "options": ["rarely", "sometimes", "often"]
+    },
+    {
+      "key": "routines",
+      "text": {"en": "Our day has calm, predictable routines.", "ar": "يومنا فيه روتين هادئ ومتوقَّع.", "he": "ביום שלנו יש שגרה רגועה וצפויה."},
+      "options": ["rarely", "sometimes", "often"]
+    },
+    {
+      "key": "play_together",
+      "text": {"en": "We play together without screens.", "ar": "نلعب معاً بعيداً عن الشاشات.", "he": "אנחנו משחקים יחד בלי מסכים."},
+      "options": ["rarely", "few_times_week", "every_day"]
+    },
+    {
+      "key": "ask_teacher",
+      "text": {"en": "I feel comfortable asking the kindergarten teacher for ideas.", "ar": "أشعر بالراحة عندما أطلب أفكاراً من معلمة الروضة.", "he": "נוח לי לבקש רעיונות מהגננת."},
+      "options": ["not_yet", "somewhat", "yes"]
+    }
+  ],
+  "options": {
+    "rarely": {"en": "Rarely", "ar": "نادراً", "he": "לעתים רחוקות"},
+    "sometimes": {"en": "Sometimes", "ar": "أحياناً", "he": "לפעמים"},
+    "often": {"en": "Often", "ar": "غالباً", "he": "לעתים קרובות"},
+    "few_times_week": {"en": "A few times a week", "ar": "بضع مرات في الأسبوع", "he": "כמה פעמים בשבוע"},
+    "every_day": {"en": "Every day", "ar": "كل يوم", "he": "כל יום"},
+    "not_yet": {"en": "Not yet", "ar": "ليس بعد", "he": "עדיין לא"},
+    "somewhat": {"en": "Somewhat", "ar": "إلى حدّ ما", "he": "במידה מסוימת"},
+    "yes": {"en": "Yes", "ar": "نعم", "he": "כן"}
+  }
+}

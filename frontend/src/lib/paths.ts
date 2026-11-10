@@ -66,6 +66,7 @@ export const routePatterns = {
   parentChildContent: "/parent/children/:id/content",
   parentCopilot: "/parent/ideas",
   familyRoutines: "/family/:id/routines",
+  familyOverview: "/family/overview",
   parentContent: "/parent/content/:id",
 
   // Source-document workflow (COVERAGE-MATRIX §5): the child profile tabs and their pages.
@@ -126,6 +127,7 @@ export const paths = {
   parentChildContent: (id: Id) => `/parent/children/${seg(id)}/content`,
   parentCopilot: () => "/parent/ideas",
   familyRoutines: (id: Id) => `/family/${seg(id)}/routines`,
+  familyOverview: () => "/family/overview",
   parentContent: (id: Id) => `/parent/content/${seg(id)}`,
 
   /** Parent View tab: the complete questionnaire, read-only (PV). */

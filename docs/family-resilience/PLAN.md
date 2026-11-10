@@ -4,7 +4,7 @@
 
 This plan is based on the program brief "Roots of Resilience" (שורשים של חוסן). It describes how the module fits into KidSphere. It is not a separate app: it extends the existing loop **Know → Focus → Create → Experience → Observe → Learn → Adapt** with the family at home. The brief's cycle **Observe → Define Goal → Generate → Review → Practice → Reflect → Adapt** maps onto that loop one to one.
 
-Status: **Phase 1, first slice built** (migration `0010_family_home`). Everything else here is a proposal.
+Status (2026-11-10): **built** — Phase 1 slice (0010), local AI and generation jobs (0011), the eight-week journey (0012), the Parent Copilot, situations (Event → Thought → Feeling → Response), routines (0013) and the pilot questionnaires and overview (0014). Still open: interactive personalised games beyond the existing templates, real video generation (needs a local video model), and the legal/privacy review before production.
 
 ## 1. Assessment of the existing architecture
 

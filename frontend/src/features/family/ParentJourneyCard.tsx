@@ -14,12 +14,13 @@ import { useAction } from "@/lib/useAction";
 import { useFetch } from "@/lib/useFetch";
 import { addReflection, enrolmentsUrl, type Enrolment, type WeekResult } from "./api";
 import { WeekView } from "./WeekView";
+import { QuestionnaireForm } from "./QuestionnaireForm";
 
 const RESULTS: WeekResult[] = ["worked_well", "partly", "did_not_work"];
 
 export function ParentJourneyCard({ childId }: { childId: string }) {
   const { t, locale } = useI18n();
-  const { data, setData } = useFetch<{ enrolments: Enrolment[] }>(enrolmentsUrl(childId));
+  const { data, setData, reload } = useFetch<{ enrolments: Enrolment[] }>(enrolmentsUrl(childId));
   const active = data?.enrolments.find((e) => e.status === "active");
   if (!active) return null;
   const replace = (e: Enrolment) => setData({ enrolments: (data?.enrolments ?? []).map((x) => (x.id === e.id ? e : x)) });
@@ -29,6 +30,7 @@ export function ParentJourneyCard({ childId }: { childId: string }) {
         <Sprout className="size-4" aria-hidden />
         <span dir="auto">{pick(active.program.title, locale)}</span>
       </p>
+      {!active.questionnaires?.includes("baseline") && <QuestionnaireForm enrolmentId={active.id} kind="baseline" onDone={reload} />}
       {active.current_week === 0 ? (
         <p className="text-sm text-ink-muted">{t("family.notStarted", { date: active.started_on })}</p>
       ) : (
@@ -50,6 +52,9 @@ export function ParentJourneyCard({ childId }: { childId: string }) {
             </div>
           )}
           <WeekReflectionForm enrolment={active} onSaved={replace} />
+          {active.current_week === active.weeks_count && active.questionnaires?.includes("baseline") && !active.questionnaires.includes("end") && (
+            <QuestionnaireForm enrolmentId={active.id} kind="end" onDone={reload} />
+          )}
         </>
       )}
     </section>

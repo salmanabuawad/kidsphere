@@ -20,6 +20,7 @@ KidSphere stores sensitive information about young children. It is an educationa
 | Family journeys | `family_programs`, `family_enrolments`, `family_week_reflections` | Which program a child's family follows, from when, and each week's parent reflection (result + optional note) or teacher note. Never sent to any AI provider. Deleted with the child. |
 | Generation jobs | `generation_jobs` | A content request waiting for the local AI (the same fields as a generate request, no free text about the child) and the ids it produced. Deleted with the child. |
 | Family routines | `family_routines` | Picture schedules (a title and 2-12 steps of an emoji and a short label) made by the child's parents or staff. Never sent to any AI provider. Deleted with the child. |
+| Family questionnaires | `family_questionnaires` | A parent's answers at the start and the end of a family journey (one option per question, descriptive, never scored). Shown to staff only as counts per option, never per child. Never sent to any AI provider. |
 | Sessions | `sessions` | The sha256 of the session token, the expiry and the user agent. |
 | Audit log | `audit_log` | Who did what, with ids, keys and field names only. It never holds observation text, answers or content. |
 

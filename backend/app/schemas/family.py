@@ -116,3 +116,8 @@ class RoutineStep(StrictModel):
 class RoutineIn(StrictModel):
     title: Annotated[str, Field(min_length=1, max_length=80)]
     steps: Annotated[list[RoutineStep], Field(min_length=2, max_length=12)]
+
+
+class QuestionnaireIn(StrictModel):
+    kind: Literal["baseline", "end"]
+    answers: dict[Annotated[str, Field(max_length=40)], Annotated[str, Field(max_length=40)]]

@@ -1,7 +1,7 @@
-"""All 35 tables as SQLAlchemy 2 models.
+"""All 36 tables as SQLAlchemy 2 models.
 
 The schema itself is created by the hand-written Alembic revisions in
-``migrations/versions/`` (``0001_initial.py`` … ``0013_family_routines.py``); these
+``migrations/versions/`` (``0001_initial.py`` … ``0014_family_questionnaires.py``); these
 models must mirror them (tests/test_migrations.py checks that every column
 exists in both).
 
@@ -896,3 +896,17 @@ class FamilyRoutine(Base):
     created_by_role: Mapped[str] = mapped_column(Text, nullable=False)
     created_at: Mapped[datetime] = _created()
     updated_at: Mapped[datetime] = _updated()
+
+
+class FamilyQuestionnaire(Base):
+    """A parent's start or end questionnaire for a family journey (0014). Descriptive, never scored."""
+
+    __tablename__ = "family_questionnaires"
+
+    id: Mapped[uuid.UUID] = _pk()
+    enrolment_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("family_enrolments.id", ondelete="CASCADE"), nullable=False)
+    child_id: Mapped[uuid.UUID] = _child_fk()
+    kind: Mapped[str] = mapped_column(Text, nullable=False)
+    answers: Mapped[dict] = mapped_column(JSONB, nullable=False)
+    created_by: Mapped[uuid.UUID | None] = _user_fk()
+    created_at: Mapped[datetime] = _created()
