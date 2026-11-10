@@ -53,6 +53,7 @@ KidSphere stores sensitive information about young children. It is an educationa
 - the approved current understanding (summary, adaptations, next steps)
 - the teacher's regenerate instruction
 - the people the teacher chose for this content (at most 3): only a placeholder such as `{grandfather}` and the relation with its label. Never their name or photo. The AI writes the placeholder; the browser shows the name and photo in its place, so names and photos never leave KidSphere. AI output that uses any other placeholder is rejected and replaced by the built-in template.
+- a situation the teacher chose for this content (Event → Interpretation → Emotion → Response): a ready one from `app/data/scenarios.json` or her own words (each at most 200 characters, names masked like every free text) and the feeling label.
 
 **For a development-review suggestion and a functional-summary draft (analysis, de-identified):**
 - the child as `[child]`, never the first or preferred name, and the age; the answer gets the name back on the server

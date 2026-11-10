@@ -156,6 +156,13 @@
     "fs_team": {"en": "Share with the kindergarten team what helps {name} ({helps}), so that everyone responds in the same way.", "ar": "شاركوا فريق الروضة بما يساعد {name} ({helps})، كي يستجيب الجميع بالطريقة نفسها.", "he": "לשתף את צוות הגן במה שעוזר ל{name} ({helps}), כדי שכולם יגיבו באותה דרך."},
     "fs_team_none": {"en": "Share with the kindergarten team what helps {name} in everyday moments, so that everyone responds in the same way.", "ar": "شاركوا فريق الروضة بما يساعد {name} في اللحظات اليومية، كي يستجيب الجميع بالطريقة نفسها.", "he": "לשתף את צוות הגן במה שעוזר ל{name} ברגעים יומיומיים, כדי שכולם יגיבו באותה דרך."}
   },
+  "scenario": {
+    "thought": {"en": "{Hero} thought: {thought}", "ar": "فكّر {hero}: {thought}", "he": "{hero} חשב: {thought}"},
+    "felt": {"en": "{Hero} felt {feeling}.", "ar": "شعر {hero} {feeling}.", "he": "{hero} הרגיש {feeling}."},
+    "action": {"en": "{Hero} took a deep breath and said: “{phrase}”", "ar": "أخذ {hero} نفساً عميقاً وقال: «{phrase}»", "he": "{hero} לקח נשימה עמוקה ואמר: ״{phrase}״"},
+    "ending": {"en": "Things got better, and {hero} felt calm again.", "ar": "تحسّنت الأمور، وشعر {hero} بالهدوء من جديد.", "he": "הדברים הסתדרו, ו{hero} הרגיש שוב רגוע."},
+    "step": {"en": "Act out the moment with a toy: {event} Ask: “What does it think? How does it feel?” Then practise the words: “{phrase}”", "ar": "مثّلوا اللحظة بدمية: {event} واسألوا: «بماذا تفكّر؟ وبماذا تشعر؟» ثم تدرّبوا على الكلمات: «{phrase}»", "he": "המחישו את הרגע עם בובה: {event} שאלו: ״מה היא חושבת? מה היא מרגישה?״ ואז תרגלו את המילים: ״{phrase}״"}
+  },
   "home": {
     "title": {"en": "At Home Together: {HeroTitle} and Me", "ar": "معاً في البيت: {hero} وأنا", "he": "יחד בבית: {hero} ואני"},
     "goal": {"en": "A short, playful time together that helps {name} {goal_child}.", "ar": "وقت قصير وممتع معاً يساعد {name} على أن {goal_child}.", "he": "זמן קצר ונעים של משחק יחד, שעוזר ל{name} {goal_child}."},

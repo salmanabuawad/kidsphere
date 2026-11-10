@@ -72,6 +72,18 @@
     "shared": "Shared with parents"
   },
   "create": {
+    "scenario": {
+      "title": "A situation to build it around (optional)",
+      "hint": "What happened, what the child thought, how they felt, and what they can say or do.",
+      "none": "No situation",
+      "own": "My own words",
+      "event": "What happened",
+      "thought": "What the child thought",
+      "thoughtHint": "Optional. For the youngest children it is left out.",
+      "feeling": "The feeling",
+      "response": "What the child can say or do",
+      "responseHint": "Words the child can practise, for example: “Can we take turns?”"
+    },
     "title": "Create content",
     "titleFor": "Create content for {name}",
     "backToContent": "Back to content",

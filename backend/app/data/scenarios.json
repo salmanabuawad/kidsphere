@@ -1,0 +1,60 @@
+{
+  "about": "Event -> Interpretation -> Emotion -> Response (the Hebrew AFRT model, simplified for ages 3-6). Interpretation and response are words the child could think or say. Teachers may also write their own.",
+  "feelings": [
+    {"key": "happy", "emoji": "😊", "label": {"en": "Happy", "ar": "فرح", "he": "שמחה"}, "felt": {"en": "happy", "ar": "بالفرح", "he": "שמחה"}},
+    {"key": "sad", "emoji": "😢", "label": {"en": "Sad", "ar": "حزن", "he": "עצב"}, "felt": {"en": "sad", "ar": "بالحزن", "he": "עצב"}},
+    {"key": "angry", "emoji": "😠", "label": {"en": "Angry", "ar": "غضب", "he": "כעס"}, "felt": {"en": "angry", "ar": "بالغضب", "he": "כעס"}},
+    {"key": "scared", "emoji": "😨", "label": {"en": "Scared", "ar": "خوف", "he": "פחד"}, "felt": {"en": "scared", "ar": "بالخوف", "he": "פחד"}},
+    {"key": "frustrated", "emoji": "😣", "label": {"en": "Frustrated", "ar": "إحباط", "he": "תסכול"}, "felt": {"en": "frustrated", "ar": "بالإحباط", "he": "תסכול"}},
+    {"key": "worried", "emoji": "😟", "label": {"en": "Worried", "ar": "قلق", "he": "דאגה"}, "felt": {"en": "worried", "ar": "بالقلق", "he": "דאגה"}},
+    {"key": "disappointed", "emoji": "😞", "label": {"en": "Disappointed", "ar": "خيبة أمل", "he": "אכזבה"}, "felt": {"en": "disappointed", "ar": "بخيبة الأمل", "he": "אכזבה"}},
+    {"key": "proud", "emoji": "🤩", "label": {"en": "Proud", "ar": "فخر", "he": "גאווה"}, "felt": {"en": "proud", "ar": "بالفخر", "he": "גאווה"}}
+  ],
+  "scenarios": [
+    {
+      "key": "toy_taken",
+      "goals": ["sharing_toys", "taking_turns", "expressing_frustration_in_words"],
+      "feeling": "angry",
+      "title": {"en": "A friend takes my toy", "ar": "صديق يأخذ لعبتي", "he": "חבר לוקח לי את הצעצוע"},
+      "event": {"en": "A friend took the toy car away.", "ar": "أخذ صديق السيارة اللعبة.", "he": "חבר לקח את מכונית הצעצוע."},
+      "interpretation": {"en": "“I will never get it back!”", "ar": "«لن أستعيدها أبداً!»", "he": "״לא אקבל אותה בחזרה אף פעם!״"},
+      "response": {"en": "“I was playing with it. Can we take turns?”", "ar": "«كنت ألعب بها. هل يمكن أن نتبادل الأدوار؟»", "he": "״שיחקתי בה. אפשר לעשות תורות?״"}
+    },
+    {
+      "key": "tower_fell",
+      "goals": ["calming_after_frustration", "coping_with_mistakes", "expressing_frustration_in_words"],
+      "feeling": "frustrated",
+      "title": {"en": "My tower fell down", "ar": "سقط برجي", "he": "המגדל שלי נפל"},
+      "event": {"en": "The tall tower fell down.", "ar": "سقط البرج العالي.", "he": "המגדל הגבוה נפל."},
+      "interpretation": {"en": "“I can't do anything right!”", "ar": "«لا أستطيع أن أفعل شيئاً!»", "he": "״אני לא מצליח שום דבר!״"},
+      "response": {"en": "“Oops! I need a break, then I can try again.”", "ar": "«أوه! أحتاج إلى استراحة، ثم أستطيع أن أحاول مرة أخرى.»", "he": "״אופס! אני צריך הפסקה, ואז אפשר לנסות שוב.״"}
+    },
+    {
+      "key": "not_let_play",
+      "goals": ["joining_group_play", "participating_in_group_activities", "asking_for_help"],
+      "feeling": "sad",
+      "title": {"en": "They said I can't play", "ar": "قالوا إنني لا أستطيع أن ألعب", "he": "אמרו לי שאני לא יכול לשחק"},
+      "event": {"en": "Two friends said: “You can't play with us.”", "ar": "قال صديقان: «لا يمكنك أن تلعب معنا.»", "he": "שני חברים אמרו: ״אתה לא יכול לשחק איתנו.״"},
+      "interpretation": {"en": "“Nobody wants to play with me.”", "ar": "«لا أحد يريد أن يلعب معي.»", "he": "״אף אחד לא רוצה לשחק איתי.״"},
+      "response": {"en": "“Can I join you? I can build the garage.”", "ar": "«هل يمكنني أن ألعب معكم؟ أستطيع أن أبني المرآب.»", "he": "״אפשר להצטרף? אני יכול לבנות את החניון.״"}
+    },
+    {
+      "key": "goodbye_morning",
+      "goals": ["separating_in_the_morning", "managing_transitions"],
+      "feeling": "worried",
+      "title": {"en": "Saying goodbye in the morning", "ar": "الوداع في الصباح", "he": "פרידה בבוקר"},
+      "event": {"en": "Mum says goodbye at the kindergarten door.", "ar": "تودّع الأم طفلها عند باب الروضة.", "he": "אמא נפרדת בדלת הגן."},
+      "interpretation": {"en": "“Maybe she won't come back.”", "ar": "«ربما لن تعود.»", "he": "״אולי היא לא תחזור.״"},
+      "response": {"en": "“Bye-bye! You will come after lunch.”", "ar": "«مع السلامة! ستأتين بعد الغداء.»", "he": "״ביי ביי! תבואי אחרי ארוחת הצהריים.״"}
+    },
+    {
+      "key": "lost_the_game",
+      "goals": ["coping_with_mistakes", "taking_turns", "naming_feelings"],
+      "feeling": "disappointed",
+      "title": {"en": "The game did not go my way", "ar": "اللعبة لم تسر كما أردت", "he": "המשחק לא הלך כמו שרציתי"},
+      "event": {"en": "In the game, a friend reached the end first.", "ar": "في اللعبة، وصل صديق إلى النهاية أولاً.", "he": "במשחק, חבר הגיע לסוף ראשון."},
+      "interpretation": {"en": "“It's not fair!”", "ar": "«هذا ليس عدلاً!»", "he": "״זה לא הוגן!״"},
+      "response": {"en": "“I feel disappointed. Let's play again!”", "ar": "«أشعر بخيبة أمل. لنلعب مرة أخرى!»", "he": "״אני מרגיש אכזבה. בואו נשחק שוב!״"}
+    }
+  ]
+}

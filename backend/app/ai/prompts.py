@@ -90,6 +90,15 @@ KIND_GUIDES = {
     ),
 }
 
+# Only when the teacher chose a situation (app/data/scenarios.json or her own words).
+SCENARIO_GUIDE = (
+    "Situation: \"scenario\" in the context is a moment the teacher chose, in four steps: event (what happened), "
+    "interpretation (what the character thinks), feeling and response (what the character can say or do). Build the "
+    "content around exactly this moment: show the event, let the character notice the thought and name the feeling, "
+    "then model the response, using the response words as the phrase to practise. For a child aged 3-4 keep it to "
+    "event, feeling and response. The thought is understandable, never wrong or silly; the feeling is always okay."
+)
+
 # Only when the teacher chose people of the child's life (services/people.py). The context carries a
 # placeholder and the relation of each, never a name or a photo.
 CAST_GUIDE = (
@@ -176,6 +185,8 @@ def user_prompt(kind: str, ctx: AIContext, template: str | None = None) -> str:
             parts.append("Also include a video plan in \"video\". " + KIND_GUIDES["video"])
     if ctx.cast:
         parts.append(CAST_GUIDE)
+    if ctx.scenario:
+        parts.append(SCENARIO_GUIDE)
     if ctx.current_understanding:
         parts.append("Build on the teacher-approved current understanding (adaptations and next steps) in the context.")
     if ctx.instruction:

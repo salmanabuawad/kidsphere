@@ -145,6 +145,8 @@ export type GenerateBody = {
   include_video?: boolean;
   /** Up to 3 people of the child's life (child_people ids). */
   people?: string[];
+  /** A situation to build the content around: a ready one or the teacher's own words. */
+  scenario?: { key: string } | { event: string; interpretation?: string; feeling: string; response: string };
 };
 
 /** A content request that local AI finishes after the response (202). */

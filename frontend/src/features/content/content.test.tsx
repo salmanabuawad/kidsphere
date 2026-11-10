@@ -219,6 +219,24 @@ describe("CreateContentPage", () => {
     expect(polls).toBe(1);
   }, 10000);
 
+  it("growth support with a ready situation sends its key", async () => {
+    let body: Record<string, unknown> | null = null;
+    mockFetch({
+      "GET /api/children/c1": { body: { child: adam } },
+      "GET /api/scenarios": { body: { feelings: [{ key: "angry", emoji: "😠", label: { en: "Angry" } }], scenarios: [{ key: "toy_taken", goals: ["joining_group_play"], feeling: "angry", title: { en: "A friend takes my toy" }, event: { en: "A friend took the toy car." }, interpretation: { en: "“Never back!”" }, response: { en: "“Can we take turns?”" } }] } },
+      "POST /api/children/c1/content/generate": (init) => {
+        body = JSON.parse(String(init?.body));
+        return { status: 201, body: { content: row({ id: "new3" }) } };
+      },
+      "GET /api/content/new3": { body: { content: row({ id: "new3" }) } },
+    });
+    renderApp({ routes, url: "/children/c1/content/new?mode=growth_support&focus=f1&type=story", user: teacher, options });
+    fireEvent.click(await screen.findByRole("radio", { name: "A friend takes my toy" }));
+    expect(screen.getByTestId("scenario-steps").textContent).toContain("Can we take turns?");
+    fireEvent.click(screen.getByRole("button", { name: "Create draft" }));
+    await waitFor(() => expect(body).toMatchObject({ content_type: "story", scenario: { key: "toy_taken" } }));
+  });
+
   it("strength builder: pick a strength and a small pack with a video plan", async () => {
     let body: Record<string, unknown> | null = null;
     mockFetch({

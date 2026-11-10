@@ -35,6 +35,19 @@ Instruction = Annotated[Annotated[str, Field(max_length=500)] | None, BeforeVali
 FeedbackText = Annotated[Annotated[str, Field(max_length=4000)] | None, BeforeValidator(_blank_to_none)]
 
 
+ScenarioText = Annotated[Annotated[str, Field(max_length=200)] | None, BeforeValidator(_blank_to_none)]
+
+
+class ScenarioIn(StrictModel):
+    """A situation to build the content around: a ready one (``key``, app/data/scenarios.json) or the
+    teacher's own words (event, feeling key and response required; the interpretation is optional)."""
+    key: OptionalKey = None
+    event: ScenarioText = None
+    interpretation: ScenarioText = None
+    feeling: OptionalKey = None
+    response: ScenarioText = None
+
+
 class GenerateIn(StrictModel):
     mode: Mode
     content_type: GenerateType
@@ -51,6 +64,8 @@ class GenerateIn(StrictModel):
     # People of the child's life to include (child_people ids of THIS child, at most 3, no repeats).
     # The AI sees only a placeholder token and the relation of each (services/people.py).
     people: Annotated[list[uuid.UUID], Field(max_length=3)] = []
+    # A situation (Event -> Interpretation -> Emotion -> Response) for story, activities and video plans.
+    scenario: ScenarioIn | None = None
 
 
 class ContentUpdate(StrictModel):

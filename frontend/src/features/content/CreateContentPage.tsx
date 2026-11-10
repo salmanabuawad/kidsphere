@@ -28,6 +28,7 @@ import { GENERATE_TYPES, MODES, generateContent, getGenerationJob, type Generate
 
 const JOB_POLL_MS = 3000;
 import { ChoiceTile, MODE_ICONS, TypeIcon } from "./ui";
+import { ScenarioPicker, type ScenarioChoice } from "./ScenarioPicker";
 
 const asMode = (v: string | null): Mode | null => (MODES as string[]).includes(v ?? "") ? (v as Mode) : null;
 const asType = (v: string | null): GenerateType | null => (GENERATE_TYPES as string[]).includes(v ?? "") ? (v as GenerateType) : null;
@@ -90,6 +91,7 @@ function CreateForm({ childId, child }: { childId: string; child: ChildDetail })
   const [type, setType] = useState<GenerateType | null>(asType(params.get("type")));
   const [template, setTemplate] = useState<GameTemplate | null>(null);
   const [includeVideo, setIncludeVideo] = useState(false);
+  const [scenario, setScenario] = useState<ScenarioChoice | null>(null);
   const [language, setLanguage] = useState<AppLocale>(isLocale(child.main_language) ? child.main_language : locale);
   const people = useFetch<PeopleResponse>(peopleUrl(childId)).data?.people ?? [];
   const [cast, setCast] = useState<string[]>([]);
@@ -116,6 +118,11 @@ function CreateForm({ childId, child }: { childId: string; child: ChildDetail })
     if (mode === "strength_builder" && strength) body.target_strength = strength;
     if (type === "digital_game" && template) body.template = template;
     if (type === "pack" && includeVideo) body.include_video = true;
+    if (scenario && type !== "digital_game") {
+      if (!("event" in scenario)) body.scenario = { key: scenario.key };
+      else if (scenario.event.trim() && scenario.response.trim())
+        body.scenario = { event: scenario.event.trim(), interpretation: scenario.interpretation.trim() || undefined, feeling: scenario.feeling, response: scenario.response.trim() };
+    }
     const chosen = cast.filter((id) => people.some((p) => p.id === id));
     if (chosen.length) body.people = chosen;
     const r = await run(() => generateContent(childId, body));
@@ -307,6 +314,9 @@ function CreateForm({ childId, child }: { childId: string; child: ChildDetail })
               <Alert tone="info" className="mt-5">
                 {t("content.create.videoNote")}
               </Alert>
+            )}
+            {type && type !== "digital_game" && mode === "growth_support" && (
+              <ScenarioPicker value={scenario} onChange={setScenario} goal={focusAreas.find((f) => f.id === chosenFocus)?.suggestion_key ?? null} />
             )}
           </Step>
 

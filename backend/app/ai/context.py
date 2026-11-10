@@ -169,6 +169,16 @@ class UnderstandingContext(_M):
     next_steps: str | None = None
 
 
+class ScenarioContext(_M):
+    """A situation to build the content around (Event -> Interpretation -> Emotion -> Response),
+    chosen or written by the teacher (app/data/scenarios.json). Texts are masked like every free text."""
+    event: str = Field(max_length=200)
+    interpretation: str | None = Field(default=None, max_length=200)
+    feeling: str = Field(max_length=60)
+    feeling_key: str | None = Field(default=None, max_length=40)
+    response: str = Field(max_length=200)
+
+
 class AIContext(_M):
     mode: Mode | None = None
     content_type: ContentType
@@ -190,6 +200,7 @@ class AIContext(_M):
     variant: int = 0
     include_video: bool = False
     cast: list[CastMember] = Field(default_factory=list, max_length=MAX_CAST)
+    scenario: ScenarioContext | None = None
 
 
 # --------------------------------------------------------------------------- helpers
@@ -578,6 +589,18 @@ def domain_blocks(raw: dict | None, mask=None) -> dict[str, DomainBlock]:
 # --------------------------------------------------------------------------- builder
 
 
+def _scenario(scenario: dict | None, mask) -> "ScenarioContext | None":
+    if not scenario or not scenario.get("event") or not scenario.get("response") or not scenario.get("feeling"):
+        return None
+    return ScenarioContext(
+        event=_clip(mask(scenario["event"]), 200) or "",
+        interpretation=_clip(mask(scenario.get("interpretation") or ""), 200),
+        feeling=_clip(scenario["feeling"], 60) or "",
+        feeling_key=scenario.get("feeling_key"),
+        response=_clip(mask(scenario["response"]), 200) or "",
+    )
+
+
 def build_context(
     *,
     child,
@@ -600,6 +623,7 @@ def build_context(
     avoid=(),
     domains: dict | None = None,
     cast=(),
+    scenario: dict | None = None,
 ) -> AIContext:
     """Build the allow-listed AIContext. ``child``/``profile``/``focus`` may be rows or dicts.
 
@@ -679,6 +703,7 @@ def build_context(
         variant=max(int(variant or 0), 0),
         include_video=bool(include_video),
         cast=[CastMember(**c) for c in cast or ()][:MAX_CAST],
+        scenario=_scenario(scenario, mask),
     )
 
 

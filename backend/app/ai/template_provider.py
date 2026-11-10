@@ -33,6 +33,9 @@ from app.ai.context import AIContext
 from app.ai.domains import for_focus
 
 TEMPLATE_MODEL = "kidsphere-template-1"
+_QUOTES = "\"'“”«»״„‘’"
+_FRIEND = {"en": "a friend", "ar": "صديق", "he": "חבר"}
+_ADULT = {"en": "a grown-up", "ar": "شخص كبير", "he": "מבוגר"}
 _DIR = Path(__file__).resolve().parent / "templates"
 
 
@@ -142,6 +145,18 @@ class _Kit:
         self.vars["phrase"] = self.say(theme["phrase"])
         self.vars["goal_child"] = self.say(theme["goal_child"])
         self.vars["helper_line"] = self.say(self.frames["helpers"][helper_key])
+        # A situation the teacher chose: its response becomes the phrase to practise.
+        self.scenario = ctx.scenario
+        if self.scenario:
+            self.vars["phrase"] = self.unmask(self.scenario.response).strip().strip(_QUOTES).strip()
+            self.vars["event"] = self.unmask(self.scenario.event)
+            self.vars["thought"] = self.unmask(self.scenario.interpretation or "")
+            self.vars["feeling"] = self.scenario.feeling
+
+    def unmask(self, text: str) -> str:
+        """Teacher text in the context is masked; a template shows the name and plain words instead."""
+        return (text.replace("[child]", self.ctx.name).replace("[friend]", _FRIEND.get(self.lang, "a friend"))
+                .replace("[adult]", _ADULT.get(self.lang, "a grown-up")))
 
     def t(self, entry) -> str:
         if isinstance(entry, str):
@@ -228,6 +243,15 @@ def _other_phrases(kit: _Kit, n: int) -> list[str]:
 
 def _story_parts(kit: _Kit) -> list[str]:
     f, th = kit.frames, kit.theme
+    if kit.scenario:
+        s = f["scenario"]
+        parts = [kit.say(f["story_open"][kit.v % len(f["story_open"])]), kit.vars["event"]]
+        if kit.scenario.interpretation and (kit.ctx.age_years or 5) >= 5:
+            parts.append(kit.say(s["thought"]))
+        parts += [kit.say(s["felt"]), kit.say(s["action"]), kit.say(s["ending"])]
+        if kit.cast:
+            parts.insert(1, kit.say(f["cast_line"]))
+        return parts[:6]  # StoryOut allows at most 6 paragraphs
     action = kit.say(th["action"])
     if kit.growth:
         action = f"{action} {kit.vars['helper_line']}"
@@ -246,12 +270,15 @@ def _story_parts(kit: _Kit) -> list[str]:
     return parts
 
 
-def _pictures(kit: _Kit) -> list[str]:
+def _pictures(kit: _Kit, story: bool = False) -> list[str]:
     """One emoji per story paragraph / video scene (the cast line gets the first person's icon)."""
     pictures = [kit.hero["emoji"], kit.theme["sequence"][0]["emoji"], "💬", "🌟", "😊"]
+    if story and kit.scenario:
+        thought = ["💭"] if kit.scenario.interpretation and (kit.ctx.age_years or 5) >= 5 else []
+        pictures = [kit.hero["emoji"], "💥", *thought, "💗", "💬", "🌟"]
     if kit.cast:
         pictures.insert(1, relation_icon(kit.cast[0].relation))
-    return pictures
+    return pictures[:6]
 
 
 def _goal(kit: _Kit) -> str:
@@ -270,8 +297,15 @@ def story(kit: _Kit) -> dict:
             kit.say(th["question"]),
         ],
         "teacher_note": kit.say(f["note_growth" if kit.growth else "note_strength"]),
-        "illustrations": _pictures(kit),
+        "illustrations": _pictures(kit, story=True),
     }
+
+
+def _with_scenario_step(kit: _Kit, steps: list[str]) -> list[str]:
+    """With a chosen situation, the second step acts it out (event, thought, feeling, the words)."""
+    if not kit.scenario:
+        return steps
+    return steps[:1] + [kit.say(kit.frames["scenario"]["step"])] + steps[1:]
 
 
 def activity(kit: _Kit) -> dict:
@@ -288,7 +322,7 @@ def activity(kit: _Kit) -> dict:
         "goal": _goal(kit),
         "duration_minutes": th["duration"],
         "materials": materials,
-        "instructions": [kit.say(s) for s in th["steps"]] + [kit.say(f["activity_close"])],
+        "instructions": _with_scenario_step(kit, [kit.say(s) for s in th["steps"]]) + [kit.say(f["activity_close"])],
         "what_to_observe": [kit.say(o) for o in th["observe"]] + [kit.say(f["observe_support"])],
         "adaptation": adaptation,
     }
@@ -309,7 +343,7 @@ def home_activity(kit: _Kit) -> dict:
         "goal": kit.say(h["goal"]),
         "duration_minutes": 10,
         "materials": materials,
-        "steps": [kit.say(s) for s in h["steps"]],
+        "steps": _with_scenario_step(kit, [kit.say(s) for s in h["steps"]]),
         "words_to_try": [kit.vars["phrase"], *[kit.say(w) for w in h["words"]]],
         "what_to_notice": [kit.say(n) for n in h["notice"]],
         "if_it_feels_hard": if_hard,

@@ -116,3 +116,12 @@ def copilot_ask(body: CopilotAsk, db: DB, user: CurrentUser) -> dict:
 def copilot_topics(user: CurrentUser, language: str | None = None) -> dict:
     lang = language if language in copilot.LANGS else (user.language if user.language in copilot.LANGS else "en")
     return {"topics": copilot.topics(lang)}
+
+
+# - GET /scenarios  staff → {feelings, scenarios}  (Event -> Interpretation -> Emotion -> Response)
+from app.services import scenarios as scenarios_svc  # noqa: E402
+
+
+@router.get("/scenarios")
+def list_scenarios(user: CurrentUser) -> dict:
+    return scenarios_svc.list_scenarios(user)

@@ -100,6 +100,7 @@ from app.models import (
 )
 from app.schemas.content import ContentUpdate, CopyIn, GenerateIn, RegenerateIn, ShareIn
 from app.services import history, library_media, people as people_svc, video_service
+from app.services import scenarios as scenarios_svc
 from app.services import settings as app_settings
 from app.sessions import utcnow
 
@@ -371,7 +372,8 @@ def relevant_domains(focus: FocusArea | None, target: str | None) -> list[str]:
 
 def _context(db: Session, child: Child, profile: ChildProfile | None, *, mode: str, kind: str, language: str,
              focus: FocusArea | None, target: str | None, template: str | None = None,
-             instruction: str | None = None, variant: int = 0, include_video: bool = False, people=()):
+             instruction: str | None = None, variant: int = 0, include_video: bool = False, people=(),
+             scenario: dict | None = None):
     linked = _focus_observations(db, child.id, focus.id if focus is not None else None)
     blocks, avoid = ai_gather.content_domains(db, child.id, relevant_domains(focus, target),
                                               exclude_observation_ids=[o.id for o in linked])
@@ -394,6 +396,7 @@ def _context(db: Session, child: Child, profile: ChildProfile | None, *, mode: s
         avoid=avoid,
         domains=blocks,
         cast=people_svc.ai_cast(people, language),
+        scenario=scenario,
     )
 
 
@@ -433,6 +436,7 @@ def _check_request(db: Session, child: Child, profile: ChildProfile | None, body
         raise _invalid("template", "A game template is used with digital_game or pack only.")
     if body.include_video and body.content_type != "pack":
         raise _invalid("include_video", "include_video is used with pack only.")
+    scenarios_svc.resolve(body.scenario, "en")  # 400 for an unknown or incomplete situation
     return focus, target
 
 
@@ -444,7 +448,8 @@ def generate_content(db: Session, user: User, child_id, body: GenerateIn) -> dic
     language = body.language or app_settings.default_content_language(db) or default_language(child, user)
     people = people_svc.content_people(db, child, body.people)
     ctx = _context(db, child, profile, mode=body.mode, kind=body.content_type, language=language, focus=focus,
-                   target=target, template=body.template, include_video=body.include_video, people=people)
+                   target=target, template=body.template, include_video=body.include_video, people=people,
+                   scenario=scenarios_svc.resolve(body.scenario, language))
     # Nothing is written yet: end the read transaction so no connection is held while the AI works.
     db.commit()
     result = generate(body.content_type, ctx)
@@ -623,7 +628,8 @@ def regenerate_content(db: Session, user: User, content_id, body: RegenerateIn) 
         kind, template = "pack", gi.get("template")
     variant = (row.variant or 0) + 1
     ctx = _context(db, child, profile, mode=row.mode, kind=kind, language=row.language, focus=focus, target=target,
-                   template=template, instruction=body.instruction, variant=variant, people=row.people)
+                   template=template, instruction=body.instruction, variant=variant, people=row.people,
+                   scenario=gi.get("scenario") if isinstance(gi, dict) else None)
     row_id = row.id
     db.commit()  # no connection held during the AI call
     result = generate(kind, ctx)
