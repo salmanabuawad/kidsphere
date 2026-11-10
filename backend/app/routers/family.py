@@ -110,3 +110,9 @@ from app.services import copilot  # noqa: E402
 @router.post("/copilot/ask")
 def copilot_ask(body: CopilotAsk, db: DB, user: CurrentUser) -> dict:
     return copilot.ask(db, user, body.child_id, body.question, body.topic, body.language)
+
+
+@router.get("/copilot/topics")
+def copilot_topics(user: CurrentUser, language: str | None = None) -> dict:
+    lang = language if language in copilot.LANGS else (user.language if user.language in copilot.LANGS else "en")
+    return {"topics": copilot.topics(lang)}

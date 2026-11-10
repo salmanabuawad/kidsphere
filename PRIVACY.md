@@ -17,6 +17,8 @@ KidSphere stores sensitive information about young children. It is an educationa
 | Generated content | `generated_content` | The content and the minimised AI input that produced it (`generation_input`). |
 | Development reviews | `development_reviews` | Summaries and decisions written or approved by the teacher. |
 | Home reflections | `home_reflections` | A parent's "How did it go at home?" on content shared with them: the result and an optional short note (at most 1000 characters). Shown to the child's staff only, never sent to any AI provider, never turned into an observation. Deleted with the child or the content. |
+| Family journeys | `family_programs`, `family_enrolments`, `family_week_reflections` | Which program a child's family follows, from when, and each week's parent reflection (result + optional note) or teacher note. Never sent to any AI provider. Deleted with the child. |
+| Generation jobs | `generation_jobs` | A content request waiting for the local AI (the same fields as a generate request, no free text about the child) and the ids it produced. Deleted with the child. |
 | Sessions | `sessions` | The sha256 of the session token, the expiry and the user agent. |
 | Audit log | `audit_log` | Who did what, with ids, keys and field names only. It never holds observation text, answers or content. |
 
@@ -132,6 +134,8 @@ Important changes are written to `audit_log` in the same transaction as the chan
 - content generate, edit, approve, regenerate, duplicate, share, archive and delete
 - feedback
 - home reflections (ids, the result and whether there is a note; never the note)
+- family programs (create, update), enrolments, week reflections (ids, week, role, result; never the note)
+- Copilot questions (kind of answer, article key, source, language; never the question)
 - development reviews
 
 The metadata contains only ids, keys and field names. Read a child's history on the server with `python -m app.cli audit --child <id>`.
@@ -147,3 +151,8 @@ The metadata contains only ids, keys and field names. Read a child's history on 
   - An admin can then delete an archived child permanently (`DELETE /api/children/{id}`, after typing the child's full name in the edit dialog). The database cascade removes every row that belongs to the child, including baselines, history, AI requests and the people list, and the app removes the child's photo, the people's photos and the files AI engines produced. Only the audit rows remain, with ids and no names.
   - There is no export feature yet. Removing a person through the app also removes their photo.
   - Deleted data stays in the backups until they rotate out: 14 nights for the nightly backups, and the last 10 deploys for the pre-deploy dumps.
+
+## Local AI and the Parent Copilot
+
+- **Local AI** (Settings > AI > Local AI): the same minimised, pseudonymous context as for Claude is sent to an OpenAI-compatible server the organisation runs itself (LOCAL_AI_BASE_URL). Nothing goes to an external provider in this mode.
+- **Parent Copilot** (`POST /api/copilot/ask`): the parent's question is checked for safety concerns first (a fixed answer with emergency and welfare numbers; no AI call). Otherwise it is matched to curated guidance. Only when the effective AI mode is **local** is the question sent to the model, with the child's, other children's and adults' names masked, together with the child's age in years and the matched guidance article. It is never sent to Claude or any external provider. The question is not stored; the audit row holds only the kind of answer, the article key, the source and the language.

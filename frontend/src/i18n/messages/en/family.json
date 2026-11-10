@@ -27,6 +27,23 @@
   "noteSaved": "The note was sent to the family.",
   "complete": "Mark as completed",
   "stop": "Stop the journey",
+  "copilot": {
+    "title": "Ideas for home",
+    "subtitle": "Practical ideas for everyday moments with your child, from guidance reviewed by educators.",
+    "child": "For which child?",
+    "common": "Common situations",
+    "ownWords": "Or describe it in your own words",
+    "placeholder": "For example: my child cries when I leave the kindergarten",
+    "privacy": "Your question is not saved. Names are hidden before anything is processed.",
+    "ask": "Get ideas",
+    "noMatch": "We do not have ideas for this yet. Choose one of the common situations, or talk with your child's teacher.",
+    "adapted": "Adapted to your question from our guidance",
+    "steps": "Steps you can try",
+    "say": "Words you can say",
+    "activity": "Something to do together",
+    "whenToTalk": "When to talk with someone:",
+    "disclaimer": "These are general ideas for everyday family life. They do not replace advice from the kindergarten team or a doctor."
+  },
   "admin": {
     "title": "Family programs",
     "subtitle": "Weekly journeys for families. Parents see the published ones when a teacher starts a journey.",

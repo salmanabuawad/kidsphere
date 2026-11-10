@@ -102,3 +102,8 @@ def test_claude_is_never_used(admin_client, parent_client, child, monkeypatch):
     monkeypatch.setattr("app.config.settings.anthropic_api_key", "sk-ant-test-key-123456")
     out = ask(parent_client, child, question="My child becomes angry when I say no")
     assert out["source"] == "guidance"
+
+
+def test_topics_list(parent_client):
+    topics = parent_client.get("/api/copilot/topics", params={"language": "ar"}).json()["topics"]
+    assert len(topics) >= 6 and topics[0]["title"] == "عندما يغضب طفلكم من كلمة «لا»"

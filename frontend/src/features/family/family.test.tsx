@@ -104,3 +104,33 @@ describe("Family journey", () => {
     expect(weeks[0]!.topic).toEqual({ en: "Feelings at home", ar: "موضوع 1" });
   });
 });
+
+describe("Parent Copilot", () => {
+  it("gives curated ideas for a common situation and the safety answer when needed", async () => {
+    const { CopilotPage } = await import("./CopilotPage");
+    const answer = { title: "When your child gets angry at \"no\"", explanation: "Anger after a no is common.", steps: ["Stay calm.", "Name the feeling."], say: ["I see you are angry."], activity: "Play angry teddy.", see_professional: "Talk with the teacher if it is very frequent." };
+    const bodies: unknown[] = [];
+    mockFetch({
+      "GET /api/children": { body: { children: [{ id: "c1", name: "Adam" }] } },
+      "GET /api/copilot/topics": { body: { topics: [{ key: "angry_when_no", title: answer.title }] } },
+      "POST /api/copilot/ask": (init) => {
+        const b = JSON.parse(String(init?.body));
+        bodies.push(b);
+        if (b.question) return { body: { kind: "safety", article_key: null, source: "guidance", answer: { title: "Please get help now", explanation: "Call now.", steps: ["Police 100"], say: [], activity: null, see_professional: null }, topics: [], suggested_content: [] } };
+        return { body: { kind: "guidance", article_key: "angry_when_no", source: "guidance", answer, topics: [], suggested_content: [{ id: "h1", title: "At Home Together", content_type: "home_activity" }] } };
+      },
+    });
+    const routes: AppRoute[] = [{ path: "/parent/ideas", element: <CopilotPage /> }];
+    renderApp({ routes, url: "/parent/ideas", user: parent });
+    fireEvent.click(await screen.findByRole("button", { name: answer.title }));
+    const card = await screen.findByTestId("copilot-answer");
+    expect(within(card).getByText("Stay calm.")).toBeTruthy();
+    expect(within(card).getByRole("link", { name: "At Home Together" })).toBeTruthy();
+    expect(bodies[0]).toEqual({ child_id: "c1", language: "en", topic: "angry_when_no" });
+
+    fireEvent.change(screen.getByPlaceholderText(/For example/), { target: { value: "someone hurts him" } });
+    fireEvent.click(screen.getByRole("button", { name: "Get ideas" }));
+    expect(await screen.findByTestId("safety-steps")).toBeTruthy();
+    expect(document.body.textContent).not.toMatch(NO_SCORES);
+  });
+});
