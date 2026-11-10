@@ -1,7 +1,7 @@
-"""All 31 tables as SQLAlchemy 2 models.
+"""All 34 tables as SQLAlchemy 2 models.
 
 The schema itself is created by the hand-written Alembic revisions in
-``migrations/versions/`` (``0001_initial.py`` … ``0011_generation_jobs.py``); these
+``migrations/versions/`` (``0001_initial.py`` … ``0012_family_programs.py``); these
 models must mirror them (tests/test_migrations.py checks that every column
 exists in both).
 
@@ -834,3 +834,50 @@ class GenerationJob(Base):
     created_at: Mapped[datetime] = _created()
     started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+PROGRAM_STATUS_VALUES = ("draft", "published", "archived")
+ENROLMENT_STATUS_VALUES = ("active", "completed", "stopped")
+
+
+class FamilyProgram(Base):
+    """A weekly journey for families (services/family_programs.py, 0012). Texts are {en, ar, he}."""
+
+    __tablename__ = "family_programs"
+
+    id: Mapped[uuid.UUID] = _pk()
+    title: Mapped[dict] = mapped_column(JSONB, nullable=False)
+    description: Mapped[dict | None] = mapped_column(JSONB)
+    weeks: Mapped[list] = _jsonb_list()
+    status: Mapped[str] = mapped_column(Text, nullable=False, default="draft", server_default="draft")
+    created_by: Mapped[uuid.UUID | None] = _user_fk()
+    updated_by: Mapped[uuid.UUID | None] = _user_fk()
+    created_at: Mapped[datetime] = _created()
+    updated_at: Mapped[datetime] = _updated()
+
+
+class FamilyEnrolment(Base):
+    __tablename__ = "family_enrolments"
+
+    id: Mapped[uuid.UUID] = _pk()
+    child_id: Mapped[uuid.UUID] = _child_fk()
+    program_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("family_programs.id"), nullable=False)
+    started_on: Mapped[date] = mapped_column(Date, nullable=False)
+    status: Mapped[str] = mapped_column(Text, nullable=False, default="active", server_default="active")
+    created_by: Mapped[uuid.UUID | None] = _user_fk()
+    created_at: Mapped[datetime] = _created()
+    updated_at: Mapped[datetime] = _updated()
+
+
+class FamilyWeekReflection(Base):
+    __tablename__ = "family_week_reflections"
+
+    id: Mapped[uuid.UUID] = _pk()
+    enrolment_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("family_enrolments.id", ondelete="CASCADE"), nullable=False)
+    child_id: Mapped[uuid.UUID] = _child_fk()
+    week: Mapped[int] = mapped_column(SmallInteger, nullable=False)
+    author_role: Mapped[str] = mapped_column(Text, nullable=False)
+    result: Mapped[str | None] = mapped_column(Text)
+    note: Mapped[str | None] = mapped_column(Text)
+    created_by: Mapped[uuid.UUID | None] = _user_fk()
+    created_at: Mapped[datetime] = _created()

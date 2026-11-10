@@ -1,0 +1,130 @@
+{
+  "title": {"en": "Roots of Resilience", "ar": "جذور المرونة", "he": "שורשים של חוסן"},
+  "description": {
+    "en": "Eight weeks for families of children aged 3 to 5: raising secure, calm and connected children, one small step a week.",
+    "ar": "ثمانية أسابيع لعائلات الأطفال من 3 إلى 5 سنوات: نربّي أطفالاً آمنين وهادئين ومتّصلين، خطوة صغيرة كل أسبوع.",
+    "he": "שמונה שבועות למשפחות של ילדים בני 3 עד 5: מגדלים ילדים בטוחים, רגועים ומחוברים, צעד קטן בכל שבוע."
+  },
+  "weeks": [
+    {
+      "content_type": "story",
+      "topic": {"en": "Understanding your child's world of feelings", "ar": "فهم عالم مشاعر طفلكم", "he": "להבין את עולם הרגשות של הילד"},
+      "lesson": {
+        "en": "Young children feel big feelings before they have words for them. When we notice a feeling and name it calmly (\"You look sad\"), children learn that feelings are safe and can be talked about.",
+        "ar": "يشعر الأطفال الصغار بمشاعر كبيرة قبل أن يملكوا الكلمات لها. عندما نلاحظ الشعور ونسمّيه بهدوء («تبدو حزيناً»)، يتعلّم الطفل أن المشاعر آمنة وأنه يمكن الحديث عنها.",
+        "he": "ילדים צעירים מרגישים רגשות גדולים עוד לפני שיש להם מילים בשבילם. כשאנחנו שמים לב לרגש וקוראים לו בשם בשקט (״נראה שאת/ה עצוב/ה״), הילד לומד שרגשות הם בטוחים ושאפשר לדבר עליהם."
+      },
+      "try_at_home": {
+        "en": "Read the story together. Stop once or twice and ask: \"How do you think they feel?\"",
+        "ar": "اقرؤوا القصة معاً. توقّفوا مرة أو مرتين واسألوا: «بماذا تظن أنه يشعر؟»",
+        "he": "קראו יחד את הסיפור. עצרו פעם או פעמיים ושאלו: ״איך לדעתך הוא מרגיש?״"
+      },
+      "reflection": {"en": "When did you notice and name a feeling this week?", "ar": "متى لاحظتم شعوراً وسمّيتموه هذا الأسبوع؟", "he": "מתי השבוע שמתם לב לרגש וקראתם לו בשם?"}
+    },
+    {
+      "content_type": "home_activity",
+      "topic": {"en": "The parent as a source of security", "ar": "الأهل مصدر للأمان", "he": "ההורה כמקור לביטחון"},
+      "lesson": {
+        "en": "Children explore bravely when they know a calm adult is there for them. Short moments of full attention, without a phone, build that feeling of safety.",
+        "ar": "يستكشف الأطفال بشجاعة عندما يعرفون أن شخصاً بالغاً هادئاً موجود من أجلهم. لحظات قصيرة من الانتباه الكامل، من دون هاتف، تبني هذا الشعور بالأمان.",
+        "he": "ילדים חוקרים באומץ כשהם יודעים שמבוגר רגוע נמצא שם בשבילם. רגעים קצרים של תשומת לב מלאה, בלי טלפון, בונים את תחושת הביטחון הזאת."
+      },
+      "try_at_home": {
+        "en": "Ten minutes a day of play your child leads. Follow, describe what you see, and enjoy it together.",
+        "ar": "عشر دقائق يومياً من لعب يقوده طفلكم. اتبعوه، صِفوا ما ترونه، واستمتعوا معاً.",
+        "he": "עשר דקות ביום של משחק שהילד מוביל. הלכו אחריו, תארו מה שאתם רואים, ותיהנו יחד."
+      },
+      "reflection": {"en": "What did your child choose to play when they led?", "ar": "ماذا اختار طفلكم أن يلعب عندما قاد اللعب؟", "he": "במה הילד בחר לשחק כשהוא הוביל?"}
+    },
+    {
+      "content_type": "digital_game",
+      "topic": {"en": "Building a vocabulary of feelings", "ar": "بناء مفردات المشاعر", "he": "לבנות אוצר מילים של רגשות"},
+      "lesson": {
+        "en": "The more words a child has for feelings, the easier it is to ask for help. Start with four: happy, sad, angry, calm. Add new ones slowly: proud, worried, disappointed.",
+        "ar": "كلما امتلك الطفل كلمات أكثر للمشاعر، صار طلب المساعدة أسهل. ابدؤوا بأربع: سعيد، حزين، غاضب، هادئ. ثم أضيفوا كلمات جديدة ببطء: فخور، قلق، خائب الأمل.",
+        "he": "ככל שיש לילד יותר מילים לרגשות, קל לו יותר לבקש עזרה. התחילו בארבע: שמח, עצוב, כועס, רגוע. הוסיפו לאט מילים חדשות: גאה, דואג, מאוכזב."
+      },
+      "try_at_home": {
+        "en": "Play the feelings game together, then make faces in a mirror for each feeling.",
+        "ar": "العبوا لعبة المشاعر معاً، ثم قلّدوا أمام المرآة وجهاً لكل شعور.",
+        "he": "שחקו יחד במשחק הרגשות, ואחר כך עשו מול המראה פרצוף לכל רגש."
+      },
+      "reflection": {"en": "Which feeling word did your child use this week?", "ar": "أي كلمة شعور استخدمها طفلكم هذا الأسبوع؟", "he": "באיזו מילה של רגש הילד השתמש השבוע?"}
+    },
+    {
+      "content_type": "story",
+      "topic": {"en": "Learning through play", "ar": "التعلّم من خلال اللعب", "he": "ללמוד דרך משחק"},
+      "lesson": {
+        "en": "Pretend play lets children practise hard moments in a safe way. When a toy is sad or angry, your child can try out what to say and do.",
+        "ar": "يتيح اللعب التخيّلي للأطفال التدرّب على اللحظات الصعبة بطريقة آمنة. عندما تكون الدمية حزينة أو غاضبة، يستطيع طفلكم أن يجرّب ماذا يقول وماذا يفعل.",
+        "he": "משחק דמיון מאפשר לילדים לתרגל רגעים קשים בדרך בטוחה. כשבובה עצובה או כועסת, הילד יכול לנסות מה להגיד ומה לעשות."
+      },
+      "try_at_home": {
+        "en": "After the story, act it out with toys. Let your child choose who to be.",
+        "ar": "بعد القصة، مثّلوها بالألعاب. دعوا طفلكم يختار الشخصية التي يريدها.",
+        "he": "אחרי הסיפור, שחקו אותו עם צעצועים. תנו לילד לבחור את מי לשחק."
+      },
+      "reflection": {"en": "What did your child's toy say or do in a hard moment?", "ar": "ماذا قالت دمية طفلكم أو فعلت في لحظة صعبة؟", "he": "מה הבובה של הילד אמרה או עשתה ברגע קשה?"}
+    },
+    {
+      "content_type": "home_activity",
+      "topic": {"en": "Fear, frustration and calming down", "ar": "الخوف والإحباط والعودة إلى الهدوء", "he": "פחד, תסכול והירגעות"},
+      "lesson": {
+        "en": "Children calm down with an adult before they can calm down alone. Stay close, speak slowly, and breathe together. Talk about what happened only after the storm has passed.",
+        "ar": "يهدأ الأطفال مع شخص بالغ قبل أن يتعلّموا الهدوء وحدهم. ابقوا قريبين، تكلّموا ببطء، وتنفّسوا معاً. تحدّثوا عمّا حدث فقط بعد أن تمرّ العاصفة.",
+        "he": "ילדים נרגעים עם מבוגר לפני שהם יכולים להירגע לבד. הישארו קרוב, דברו לאט ונשמו יחד. דברו על מה שקרה רק אחרי שהסערה עברה."
+      },
+      "try_at_home": {
+        "en": "Practise a calm breath when everyone is calm: smell the flower, blow out the candle. Choose a calm corner together.",
+        "ar": "تدرّبوا على نفس هادئ عندما يكون الجميع هادئين: شمّوا الوردة، وانفخوا الشمعة. اختاروا معاً ركناً هادئاً.",
+        "he": "תרגלו נשימה רגועה כשכולם רגועים: מריחים פרח, מכבים נר. בחרו יחד פינה רגועה."
+      },
+      "reflection": {"en": "What helped your child calm down this week?", "ar": "ما الذي ساعد طفلكم على الهدوء هذا الأسبوع؟", "he": "מה עזר לילד להירגע השבוע?"}
+    },
+    {
+      "content_type": "digital_game",
+      "topic": {"en": "Independence and confidence", "ar": "الاستقلالية والثقة بالنفس", "he": "עצמאות וביטחון עצמי"},
+      "lesson": {
+        "en": "Confidence grows when children do things themselves, with a little help nearby. Give small jobs, wait a moment before helping, and praise the effort, not only the result.",
+        "ar": "تنمو الثقة عندما يقوم الأطفال بالأشياء بأنفسهم، مع قليل من المساعدة القريبة. أعطوهم مهاماً صغيرة، وانتظروا لحظة قبل المساعدة، وامدحوا المحاولة لا النتيجة فقط.",
+        "he": "ביטחון עצמי גדל כשילדים עושים דברים בעצמם, עם קצת עזרה בסביבה. תנו משימות קטנות, חכו רגע לפני שעוזרים, ושבחו את המאמץ ולא רק את התוצאה."
+      },
+      "try_at_home": {
+        "en": "Choose one small job your child can do alone this week, like setting the spoons or watering a plant.",
+        "ar": "اختاروا مهمة صغيرة يستطيع طفلكم القيام بها وحده هذا الأسبوع، مثل وضع الملاعق أو سقي نبتة.",
+        "he": "בחרו משימה קטנה אחת שהילד יכול לעשות לבד השבוע, כמו לסדר כפיות או להשקות עציץ."
+      },
+      "reflection": {"en": "What did your child do by themselves this week?", "ar": "ما الذي فعله طفلكم بنفسه هذا الأسبوع؟", "he": "מה הילד עשה בעצמו השבוע?"}
+    },
+    {
+      "content_type": "home_activity",
+      "topic": {"en": "Family routines when things change", "ar": "روتين العائلة عندما تتغيّر الأمور", "he": "שגרה משפחתית כשדברים משתנים"},
+      "lesson": {
+        "en": "Routines tell a child what comes next, and that feels safe, especially when life is busy or uncertain. A picture schedule for the morning or bedtime helps.",
+        "ar": "يخبر الروتين الطفل بما سيأتي بعد ذلك، وهذا يُشعره بالأمان، خاصة عندما تكون الحياة مزدحمة أو غير واضحة. يساعد جدول مصوّر للصباح أو لوقت النوم.",
+        "he": "שגרה אומרת לילד מה בא אחר כך, וזה נותן תחושת ביטחון, במיוחד כשהחיים עמוסים או לא צפויים. לוח תמונות לבוקר או לשעת השינה עוזר."
+      },
+      "try_at_home": {
+        "en": "Make a picture schedule for one part of the day together, and let your child point to each step.",
+        "ar": "اصنعوا معاً جدولاً مصوّراً لجزء واحد من اليوم، ودعوا طفلكم يشير إلى كل خطوة.",
+        "he": "הכינו יחד לוח תמונות לחלק אחד של היום, ותנו לילד להצביע על כל שלב."
+      },
+      "reflection": {"en": "Which part of the day went more smoothly with the schedule?", "ar": "أي جزء من اليوم صار أسهل مع الجدول؟", "he": "איזה חלק של היום הלך חלק יותר עם הלוח?"}
+    },
+    {
+      "content_type": "home_activity",
+      "topic": {"en": "Family, kindergarten and community", "ar": "العائلة والروضة والمجتمع", "he": "משפחה, גן וקהילה"},
+      "lesson": {
+        "en": "Children feel they belong when the people around them work together. Share with the teacher what helps your child, and celebrate what you all tried together.",
+        "ar": "يشعر الأطفال بالانتماء عندما يتعاون الناس من حولهم. شاركوا المعلمة بما يساعد طفلكم، واحتفلوا بكل ما جرّبتموه معاً.",
+        "he": "ילדים מרגישים שייכות כשהאנשים סביבם פועלים יחד. שתפו את הגננת במה שעוזר לילד, וחגגו את כל מה שניסיתם יחד."
+      },
+      "try_at_home": {
+        "en": "Do a small project as a family, like a drawing for the kindergarten or a gift for a neighbour, and let everyone add a part.",
+        "ar": "قوموا بمشروع صغير كعائلة، مثل رسمة للروضة أو هدية لجار، ودعوا كل واحد يضيف جزءاً.",
+        "he": "עשו פרויקט קטן כמשפחה, כמו ציור לגן או מתנה לשכן, ותנו לכל אחד להוסיף חלק."
+      },
+      "reflection": {"en": "What are you proud of from these eight weeks?", "ar": "بماذا تفخرون من هذه الأسابيع الثمانية؟", "he": "במה אתם גאים מתוך שמונת השבועות האלה?"}
+    }
+  ]
+}

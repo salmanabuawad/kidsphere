@@ -15,6 +15,7 @@ import {
   WhatHelpsIcon,
   type KidIcon,
 } from "@/icons";
+import { TeacherJourneyCard } from "@/features/family";
 import { NextStepsCard } from "@/features/next-steps";
 import { PeopleCard } from "@/features/people";
 import { pick } from "@/i18n/config";
@@ -160,6 +161,8 @@ function StaffOverview({ child }: { child: ChildStaffView }) {
       <FocusCard child={child} />
 
       <NextStepsCard childId={child.id} />
+
+      <TeacherJourneyCard childId={child.id} />
 
       <div className="grid gap-5 lg:grid-cols-2">
         <RecentCard child={child} />

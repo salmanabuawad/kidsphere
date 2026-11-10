@@ -1,0 +1,236 @@
+{
+  "version": 1,
+  "reviewed_note": "Curated educational guidance for parents of children aged 3-6. Educators must review every text before the pilot. Plain words, no clinical terms, no scores.",
+  "safety": {
+    "keywords": {
+      "en": ["hit me", "hits me", "hitting him", "hitting her", "beats", "beaten", "bruise", "bruises", "burn mark", "touched him", "touched her", "touches him", "touches her", "private parts", "abuse", "abused", "neglect", "hurt himself", "hurt herself", "hurts himself", "hurts herself", "kill", "suicide", "die", "wants to die", "not breathing", "unconscious", "fever", "seizure", "poison", "swallowed", "violence", "violent at home", "afraid of his father", "afraid of her father", "afraid of his mother", "afraid of her mother"],
+      "ar": ["يضربني", "يضربه", "يضربها", "ضرب", "كدمة", "كدمات", "حرق", "لمسه", "لمسها", "الأماكن الخاصة", "تحرش", "إساءة", "اعتداء", "إهمال", "يؤذي نفسه", "تؤذي نفسها", "انتحار", "يموت", "يريد أن يموت", "لا يتنفس", "فاقد الوعي", "حرارة عالية", "تشنج", "ابتلع", "سم", "عنف"],
+      "he": ["מכה אותי", "מכה אותו", "מכה אותה", "מכות", "חבורה", "חבורות", "כוויה", "נגע בו", "נגע בה", "איברים מוצנעים", "התעללות", "הזנחה", "פוגע בעצמו", "פוגעת בעצמה", "התאבדות", "למות", "רוצה למות", "לא נושם", "לא נושמת", "מחוסר הכרה", "חום גבוה", "פרכוס", "בלע", "רעל", "אלימות"]
+    },
+    "answer": {
+      "title": {"en": "Please get help now", "ar": "من فضلكم اطلبوا المساعدة الآن", "he": "בבקשה פנו לעזרה עכשיו"},
+      "explanation": {
+        "en": "What you describe may need help from people who can act right away. This assistant only gives everyday parenting ideas and cannot help with safety or health emergencies.",
+        "ar": "ما تصفونه قد يحتاج إلى مساعدة من أشخاص يستطيعون التصرّف فوراً. هذا المساعد يقدّم أفكاراً للتربية اليومية فقط، ولا يستطيع المساعدة في حالات الطوارئ المتعلقة بالأمان أو الصحة.",
+        "he": "מה שאתם מתארים עשוי לדרוש עזרה מאנשים שיכולים לפעול מיד. העוזר הזה נותן רק רעיונות לחינוך יומיומי ואינו יכול לעזור במצבי חירום של בטיחות או בריאות."
+      },
+      "steps": {
+        "en": ["If a child is in danger now, call the police (100) or an ambulance (101).", "For worries about a child's safety at home, call the welfare hotline (118).", "For emotional support for you, call ERAN (1201).", "Tell the kindergarten teacher or principal as soon as you can."],
+        "ar": ["إذا كان الطفل في خطر الآن، اتصلوا بالشرطة (100) أو بالإسعاف (101).", "للقلق على أمان طفل في البيت، اتصلوا بخط الرفاه الاجتماعي (118).", "للدعم النفسي لكم، اتصلوا بـ«عيران» (1201).", "أخبروا معلمة الروضة أو المديرة في أقرب وقت."],
+        "he": ["אם ילד בסכנה עכשיו, התקשרו למשטרה (100) או לאמבולנס (101).", "לדאגה לביטחון של ילד בבית, התקשרו למוקד הרווחה (118).", "לתמיכה רגשית עבורכם, התקשרו לער\"ן (1201).", "ספרו לגננת או למנהלת בהקדם האפשרי."]
+      }
+    }
+  },
+  "articles": [
+    {
+      "key": "angry_when_no",
+      "keywords": {
+        "en": ["angry", "anger", "no", "tantrum", "shouts", "screams", "yells", "throws", "kicks", "upset when", "says no", "refuse", "mad"],
+        "ar": ["غاضب", "يغضب", "غضب", "لا", "نوبة", "يصرخ", "يرمي", "يركل", "يرفض", "عصبي", "زعلان"],
+        "he": ["כועס", "כועסת", "כעס", "לא", "התקף", "צועק", "צועקת", "זורק", "בועט", "מסרב", "עצבני"]
+      },
+      "title": {"en": "When your child gets angry at \"no\"", "ar": "عندما يغضب طفلكم من كلمة «لا»", "he": "כשהילד כועס על \"לא\""},
+      "explanation": {
+        "en": "At this age children want things strongly and are still learning to wait and to accept limits. Anger after a \"no\" is common. Your calm, clear limit, said with warmth, teaches more than a long explanation in the moment.",
+        "ar": "في هذا العمر يريد الأطفال الأشياء بقوة، وما زالوا يتعلّمون الانتظار وتقبّل الحدود. الغضب بعد كلمة «لا» أمر شائع. حدّكم الهادئ والواضح، بنبرة دافئة، يعلّم أكثر من شرح طويل في تلك اللحظة.",
+        "he": "בגיל הזה ילדים רוצים דברים בעוצמה ועדיין לומדים לחכות ולקבל גבולות. כעס אחרי \"לא\" הוא דבר נפוץ. גבול רגוע וברור, שנאמר בחום, מלמד יותר מהסבר ארוך באותו רגע."
+      },
+      "steps": {
+        "en": ["Stay close and calm. Lower your voice.", "Name the feeling: \"You are angry. You really wanted it.\"", "Keep the limit kind and short: \"The answer is still no.\"", "Offer a choice you can accept: \"You can have an apple or a banana.\"", "When calm returns, hug and move on. Talk about it later, briefly."],
+        "ar": ["ابقوا قريبين وهادئين. اخفضوا صوتكم.", "سمّوا الشعور: «أنت غاضب. كنت تريده كثيراً».", "اجعلوا الحد لطيفاً وقصيراً: «الجواب ما زال لا».", "اعرضوا خياراً تقبلونه: «يمكنك أن تأخذ تفاحة أو موزة».", "عندما يعود الهدوء، عانقوه وتابعوا. تحدّثوا عن الأمر لاحقاً وباختصار."],
+        "he": ["הישארו קרוב ורגועים. הנמיכו את הקול.", "תנו שם לרגש: \"אתה כועס. מאוד רצית את זה.\"", "השאירו את הגבול נעים וקצר: \"התשובה עדיין לא.\"", "הציעו בחירה שמתאימה לכם: \"אפשר תפוח או בננה.\"", "כשחוזר השקט, חבקו והמשיכו הלאה. דברו על זה אחר כך, בקצרה."]
+      },
+      "say": {
+        "en": ["I see you are angry. I am here.", "You wanted it so much. It is hard to hear no.", "When you are ready, we can play together."],
+        "ar": ["أرى أنك غاضب. أنا هنا.", "كنت تريده كثيراً. صعب أن تسمع «لا».", "عندما تكون جاهزاً، يمكننا أن نلعب معاً."],
+        "he": ["אני רואה שאתה כועס. אני כאן.", "כל כך רצית את זה. קשה לשמוע לא.", "כשתהיה מוכן, נוכל לשחק יחד."]
+      },
+      "activity": {
+        "en": "Play \"angry teddy\": a toy gets a \"no\", feels angry, takes three slow breaths, then chooses something else. Let your child help the teddy.",
+        "ar": "العبوا «الدب الغاضب»: دمية تسمع «لا» فتغضب، ثم تأخذ ثلاثة أنفاس بطيئة وتختار شيئاً آخر. دعوا طفلكم يساعد الدب.",
+        "he": "שחקו ב\"דובי כועס\": בובה שומעת \"לא\", כועסת, לוקחת שלוש נשימות איטיות ובוחרת משהו אחר. תנו לילד לעזור לדובי."
+      },
+      "content_types": ["home_activity", "digital_game"],
+      "see_professional": {
+        "en": "Talk with the kindergarten teacher if anger is very frequent, lasts a long time, or if your child often hurts others or themselves.",
+        "ar": "تحدّثوا مع معلمة الروضة إذا كان الغضب متكرراً جداً، أو يدوم طويلاً، أو إذا كان طفلكم يؤذي الآخرين أو نفسه كثيراً.",
+        "he": "דברו עם הגננת אם הכעס תכוף מאוד, נמשך זמן רב, או אם הילד פוגע הרבה באחרים או בעצמו."
+      }
+    },
+    {
+      "key": "refuses_to_share",
+      "keywords": {
+        "en": ["share", "sharing", "mine", "won't share", "takes toys", "grabs", "turn", "turns", "brother", "sister", "friend"],
+        "ar": ["يشارك", "مشاركة", "لي", "لا يشارك", "يأخذ الألعاب", "يخطف", "دور", "الدور", "أخوه", "أخته", "صديق"],
+        "he": ["לשתף", "שיתוף", "שלי", "לא משתף", "לוקח צעצועים", "חוטף", "תור", "תורות", "אח", "אחות", "חבר"]
+      },
+      "title": {"en": "When your child refuses to share", "ar": "عندما يرفض طفلكم المشاركة", "he": "כשהילד מסרב לשתף"},
+      "explanation": {
+        "en": "Sharing is learned slowly. Young children feel that what they hold is part of them. Taking turns is easier to learn first than giving things away.",
+        "ar": "المشاركة تُتعلّم ببطء. يشعر الأطفال الصغار أن ما يحملونه جزء منهم. تعلّم الدور أسهل في البداية من إعطاء الأشياء للآخرين.",
+        "he": "שיתוף נלמד לאט. ילדים צעירים מרגישים שמה שהם מחזיקים הוא חלק מהם. קל יותר ללמוד קודם תורות מאשר לתת דברים."
+      },
+      "steps": {
+        "en": ["Practise taking turns in short games at home.", "Use a simple timer: \"Two minutes for you, then two for your sister.\"", "Before a friend comes, let your child put away one or two special toys.", "Notice and name every small moment of sharing."],
+        "ar": ["تدرّبوا على تبادل الأدوار في ألعاب قصيرة في البيت.", "استخدموا مؤقتاً بسيطاً: «دقيقتان لك، ثم دقيقتان لأختك».", "قبل أن يأتي صديق، دعوا طفلكم يخبّئ لعبة أو لعبتين خاصتين.", "لاحظوا كل لحظة مشاركة صغيرة وسمّوها."],
+        "he": ["תרגלו תורות במשחקים קצרים בבית.", "השתמשו בטיימר פשוט: \"שתי דקות לך, ואז שתיים לאחותך.\"", "לפני שחבר מגיע, תנו לילד להצניע צעצוע מיוחד אחד או שניים.", "שימו לב לכל רגע קטן של שיתוף ותנו לו שם."]
+      },
+      "say": {
+        "en": ["It's your turn now, and then it's her turn.", "You can say: \"Can I have the next turn?\"", "You let him play. That was kind."],
+        "ar": ["الآن دورك، ثم دورها.", "يمكنك أن تقول: «هل يمكن أن يكون الدور التالي لي؟»", "تركته يلعب. كان ذلك لطيفاً."],
+        "he": ["עכשיו התור שלך, ואחר כך התור שלה.", "אפשר להגיד: \"אפשר את התור הבא?\"", "נתת לו לשחק. זה היה נחמד."]
+      },
+      "activity": {
+        "en": "Build a tower together where each person adds one block at a time. Say \"my turn, your turn\" out loud.",
+        "ar": "ابنوا برجاً معاً يضيف فيه كل شخص مكعّباً واحداً في كل مرة. قولوا بصوت عالٍ: «دوري، دورك».",
+        "he": "בנו יחד מגדל שבו כל אחד מוסיף קובייה אחת בכל פעם. אמרו בקול: \"התור שלי, התור שלך\"."
+      },
+      "content_types": ["story", "home_activity"],
+      "see_professional": {
+        "en": "Talk with the kindergarten teacher if play with other children often ends in pushing or hurting.",
+        "ar": "تحدّثوا مع معلمة الروضة إذا كان اللعب مع الأطفال الآخرين ينتهي كثيراً بالدفع أو الأذى.",
+        "he": "דברו עם הגננת אם משחק עם ילדים אחרים מסתיים הרבה פעמים בדחיפות או בפגיעה."
+      }
+    },
+    {
+      "key": "afraid_sleeping_alone",
+      "keywords": {
+        "en": ["sleep", "sleeping", "bed", "bedtime", "night", "dark", "afraid", "scared", "fear", "monster", "alone", "nightmare"],
+        "ar": ["نوم", "ينام", "السرير", "وقت النوم", "الليل", "الظلام", "خائف", "يخاف", "خوف", "وحش", "وحده", "كابوس"],
+        "he": ["שינה", "לישון", "מיטה", "שעת שינה", "לילה", "חושך", "פוחד", "מפחד", "פחד", "מפלצת", "לבד", "סיוט"]
+      },
+      "title": {"en": "When your child is afraid to sleep alone", "ar": "عندما يخاف طفلكم من النوم وحده", "he": "כשהילד מפחד לישון לבד"},
+      "explanation": {
+        "en": "Fears of the dark and of being alone are very common between 3 and 6, when imagination grows fast. Children need to feel safe first; independence comes step by step.",
+        "ar": "الخوف من الظلام ومن البقاء وحيداً شائع جداً بين 3 و6 سنوات، عندما ينمو الخيال بسرعة. يحتاج الأطفال أولاً إلى الشعور بالأمان، والاستقلالية تأتي خطوة خطوة.",
+        "he": "פחד מחושך ומלהיות לבד נפוץ מאוד בין גיל 3 ל-6, כשהדמיון גדל מהר. ילדים צריכים קודם להרגיש בטוחים; העצמאות מגיעה צעד אחר צעד."
+      },
+      "steps": {
+        "en": ["Keep the same calm bedtime routine every night.", "Take the fear seriously, without arguing about monsters.", "Offer a night light and a soft toy as a \"guard\".", "Stay close at first, then sit a little further away each few nights.", "Praise every small brave step in the morning."],
+        "ar": ["حافظوا على روتين نوم هادئ نفسه كل ليلة.", "خذوا الخوف بجدية، من دون جدال حول الوحوش.", "قدّموا ضوءاً ليلياً ودمية طرية «حارسة».", "ابقوا قريبين في البداية، ثم اجلسوا أبعد قليلاً كل بضع ليالٍ.", "امدحوا كل خطوة شجاعة صغيرة في الصباح."],
+        "he": ["שמרו על אותה שגרת שינה רגועה בכל ערב.", "התייחסו לפחד ברצינות, בלי להתווכח על מפלצות.", "הציעו מנורת לילה ובובה רכה ש\"שומרת\".", "בהתחלה הישארו קרוב, ואז שבו קצת יותר רחוק כל כמה לילות.", "שבחו בבוקר כל צעד אמיץ קטן."]
+      },
+      "say": {
+        "en": ["You feel scared. I am close by.", "Teddy will keep you company.", "I will come back to check on you in a few minutes."],
+        "ar": ["أنت تشعر بالخوف. أنا قريب منك.", "الدب سيبقى معك.", "سأعود لأطمئن عليك بعد بضع دقائق."],
+        "he": ["אתה מרגיש פחד. אני קרוב.", "הדובי ישמור לך חברה.", "אחזור לבדוק מה שלומך בעוד כמה דקות."]
+      },
+      "activity": {
+        "en": "During the day, play \"night time\" with toys: put a doll to bed, turn off a pretend light, and show how the doll feels safe.",
+        "ar": "في النهار، العبوا «وقت الليل» بالألعاب: ضعوا دمية في السرير، وأطفئوا ضوءاً وهمياً، وأظهروا كيف تشعر الدمية بالأمان.",
+        "he": "במהלך היום, שחקו \"לילה\" עם צעצועים: השכיבו בובה לישון, כבו אור מדומה, והראו איך הבובה מרגישה בטוחה."
+      },
+      "content_types": ["story", "home_activity"],
+      "see_professional": {
+        "en": "Talk with the kindergarten team or your family doctor if sleep problems last many weeks or affect the whole day.",
+        "ar": "تحدّثوا مع فريق الروضة أو طبيب العائلة إذا استمرت صعوبات النوم أسابيع طويلة أو أثّرت على اليوم كله.",
+        "he": "דברו עם צוות הגן או עם רופא המשפחה אם קשיי השינה נמשכים שבועות רבים או משפיעים על כל היום."
+      }
+    },
+    {
+      "key": "crying_at_separation",
+      "keywords": {
+        "en": ["cries", "crying", "goodbye", "separation", "morning", "kindergarten", "drop off", "leave", "leaving", "clings", "doesn't want to go"],
+        "ar": ["يبكي", "بكاء", "وداع", "الانفصال", "الصباح", "الروضة", "أوصله", "أتركه", "يتعلق", "لا يريد الذهاب"],
+        "he": ["בוכה", "בכי", "פרידה", "להיפרד", "בוקר", "גן", "הגן", "להשאיר", "נצמד", "לא רוצה ללכת"]
+      },
+      "title": {"en": "When your child cries at the kindergarten door", "ar": "عندما يبكي طفلكم عند باب الروضة", "he": "כשהילד בוכה בפרידה בגן"},
+      "explanation": {
+        "en": "Tears at goodbye show a strong bond, and they usually stop soon after you leave. A short, warm and predictable goodbye helps more than a long one.",
+        "ar": "الدموع عند الوداع تدل على رابطة قوية، وعادةً تتوقف بعد وقت قصير من مغادرتكم. وداع قصير ودافئ ومتوقَّع يساعد أكثر من وداع طويل.",
+        "he": "דמעות בפרידה מראות קשר חזק, ובדרך כלל הן נעצרות זמן קצר אחרי שאתם הולכים. פרידה קצרה, חמה וצפויה עוזרת יותר מפרידה ארוכה."
+      },
+      "steps": {
+        "en": ["Talk about the day the evening before: who he will see and what he will do.", "Create a short goodbye ritual: a hug, a special wave, a phrase.", "Always say goodbye; do not slip away.", "Leave calmly, even if there are tears. Trust the teacher.", "At pick-up, tell your child you thought about them."],
+        "ar": ["تحدّثوا عن اليوم في المساء السابق: من سيرى وماذا سيفعل.", "اصنعوا طقس وداع قصيراً: عناق، تلويحة خاصة، عبارة.", "ودّعوا دائماً؛ لا تغادروا خفية.", "غادروا بهدوء حتى لو كانت هناك دموع. ثقوا بالمعلمة.", "عند العودة، أخبروا طفلكم أنكم فكرتم فيه."],
+        "he": ["דברו על היום בערב שלפני: את מי יראה ומה יעשה.", "צרו טקס פרידה קצר: חיבוק, נפנוף מיוחד, משפט.", "תמיד תגידו שלום; אל תתחמקו.", "צאו ברוגע, גם אם יש דמעות. סמכו על הגננת.", "באיסוף, ספרו לילד שחשבתם עליו."]
+      },
+      "say": {
+        "en": ["Bye-bye! I will come after lunch.", "You are sad that I'm leaving. The teacher is here with you.", "Hug, kiss, wave, and off I go!"],
+        "ar": ["مع السلامة! سآتي بعد الغداء.", "أنت حزين لأنني ذاهب. المعلمة هنا معك.", "عناق، قبلة، تلويحة، وأنا ذاهب!"],
+        "he": ["ביי ביי! אבוא אחרי ארוחת הצהריים.", "אתה עצוב שאני הולך. הגננת כאן איתך.", "חיבוק, נשיקה, נפנוף, ואני יוצא!"]
+      },
+      "activity": {
+        "en": "Play goodbyes with toys: a toy parent leaves the toy kindergarten and always comes back. Let your child be the parent too.",
+        "ar": "العبوا الوداع بالألعاب: دمية الأم أو الأب تغادر روضة الألعاب وتعود دائماً. دعوا طفلكم يلعب دور الأهل أيضاً.",
+        "he": "שחקו פרידות עם צעצועים: בובת ההורה יוצאת מגן הצעצועים ותמיד חוזרת. תנו לילד להיות ההורה גם כן."
+      },
+      "content_types": ["story", "home_activity"],
+      "see_professional": {
+        "en": "Talk with the teacher if the crying does not ease after a few weeks, or if your child is upset for most of the day.",
+        "ar": "تحدّثوا مع المعلمة إذا لم يخفّ البكاء بعد بضعة أسابيع، أو إذا كان طفلكم منزعجاً معظم اليوم.",
+        "he": "דברו עם הגננת אם הבכי לא נרגע אחרי כמה שבועות, או אם הילד נסער רוב היום."
+      }
+    },
+    {
+      "key": "frustrated_when_difficult",
+      "keywords": {
+        "en": ["frustrated", "frustration", "difficult", "hard", "gives up", "can't do", "puzzle", "breaks", "cries when", "mistake", "fails", "quits"],
+        "ar": ["محبط", "إحباط", "صعب", "صعبة", "يستسلم", "لا يستطيع", "بازل", "يكسر", "يبكي عندما", "خطأ", "يترك"],
+        "he": ["מתוסכל", "תסכול", "קשה", "מוותר", "לא מצליח", "פאזל", "שובר", "בוכה כש", "טעות", "עוזב"]
+      },
+      "title": {"en": "When something is hard and your child gets frustrated", "ar": "عندما يكون شيء ما صعباً ويشعر طفلكم بالإحباط", "he": "כשמשהו קשה והילד מתוסכל"},
+      "explanation": {
+        "en": "Frustration is part of learning. Children grow confidence when an adult helps just a little, so they can still finish by themselves.",
+        "ar": "الإحباط جزء من التعلّم. تنمو ثقة الأطفال عندما يساعدهم شخص بالغ قليلاً فقط، فيبقى بإمكانهم أن ينهوا المهمة بأنفسهم.",
+        "he": "תסכול הוא חלק מהלמידה. ביטחון עצמי גדל כשמבוגר עוזר רק קצת, כך שהילד עדיין יכול לסיים בעצמו."
+      },
+      "steps": {
+        "en": ["Name the feeling: \"This is hard. You feel frustrated.\"", "Offer a short break and a breath together.", "Break the task into one small next step.", "Help with one part only, then step back.", "Praise the effort: \"You kept trying.\""],
+        "ar": ["سمّوا الشعور: «هذا صعب. أنت تشعر بالإحباط».", "اقترحوا استراحة قصيرة ونفساً معاً.", "قسّموا المهمة إلى خطوة صغيرة تالية واحدة.", "ساعدوا في جزء واحد فقط، ثم ابتعدوا قليلاً.", "امدحوا المحاولة: «واصلت المحاولة»."],
+        "he": ["תנו שם לרגש: \"זה קשה. אתה מרגיש תסכול.\"", "הציעו הפסקה קצרה ונשימה משותפת.", "חלקו את המשימה לצעד קטן אחד הבא.", "עזרו רק בחלק אחד, ואז התרחקו קצת.", "שבחו את המאמץ: \"המשכת לנסות.\""]
+      },
+      "say": {
+        "en": ["Oops! We can try again.", "Do you want a little help or more time?", "Let's do just the next piece."],
+        "ar": ["أوه! يمكننا أن نحاول مرة أخرى.", "هل تريد قليلاً من المساعدة أم وقتاً أطول؟", "لنفعل القطعة التالية فقط."],
+        "he": ["אופס! אפשר לנסות שוב.", "אתה רוצה קצת עזרה או עוד זמן?", "בוא נעשה רק את החלק הבא."]
+      },
+      "activity": {
+        "en": "Build something tricky together, like a tall tower. When it falls, both of you say \"Oops, again!\" and laugh.",
+        "ar": "ابنوا معاً شيئاً صعباً قليلاً، مثل برج عالٍ. عندما يسقط، قولوا معاً «أوه، مرة أخرى!» واضحكوا.",
+        "he": "בנו יחד משהו קצת מאתגר, כמו מגדל גבוה. כשהוא נופל, תגידו שניכם \"אופס, עוד פעם!\" ותצחקו."
+      },
+      "content_types": ["home_activity", "story"],
+      "see_professional": {
+        "en": "Talk with the kindergarten teacher if frustration often ends with hurting, or stops your child from trying new things.",
+        "ar": "تحدّثوا مع معلمة الروضة إذا كان الإحباط ينتهي غالباً بالأذى، أو يمنع طفلكم من تجربة أشياء جديدة.",
+        "he": "דברו עם הגננת אם התסכול מסתיים הרבה פעמים בפגיעה, או מונע מהילד לנסות דברים חדשים."
+      }
+    },
+    {
+      "key": "naming_feelings",
+      "keywords": {
+        "en": ["feelings", "feeling", "emotions", "talk about", "doesn't say", "sad", "happy", "worried", "tell me", "how he feels", "how she feels"],
+        "ar": ["مشاعر", "شعور", "عواطف", "يتحدث عن", "لا يقول", "حزين", "سعيد", "قلق", "يخبرني", "ماذا يشعر"],
+        "he": ["רגשות", "רגש", "לדבר על", "לא אומר", "עצוב", "שמח", "דואג", "מספר לי", "מה הוא מרגיש", "מה היא מרגישה"]
+      },
+      "title": {"en": "Helping your child talk about feelings", "ar": "مساعدة طفلكم على الحديث عن المشاعر", "he": "לעזור לילד לדבר על רגשות"},
+      "explanation": {
+        "en": "Children learn feeling words by hearing them often, in calm moments. When you name your own feelings and theirs, they learn that feelings can be shared.",
+        "ar": "يتعلّم الأطفال كلمات المشاعر عندما يسمعونها كثيراً في اللحظات الهادئة. عندما تسمّون مشاعركم ومشاعرهم، يتعلّمون أن المشاعر يمكن مشاركتها.",
+        "he": "ילדים לומדים מילים של רגשות כששומעים אותן הרבה, ברגעים רגועים. כשאתם קוראים בשם לרגשות שלכם ושלהם, הם לומדים שאפשר לשתף ברגשות."
+      },
+      "steps": {
+        "en": ["Name your own feelings out loud: \"I feel tired today.\"", "Ask about the day with a choice: \"Was today a sunny day or a cloudy day?\"", "Read books and ask how the characters feel.", "Accept every answer without fixing it."],
+        "ar": ["سمّوا مشاعركم بصوت عالٍ: «أشعر بالتعب اليوم».", "اسألوا عن اليوم بخيار: «هل كان اليوم مشمساً أم غائماً؟»", "اقرؤوا الكتب واسألوا بماذا تشعر الشخصيات.", "تقبّلوا كل جواب من دون تصحيحه."],
+        "he": ["תנו שם לרגשות שלכם בקול: \"אני מרגיש עייף היום.\"", "שאלו על היום עם בחירה: \"היום היה יום שמשי או יום מעונן?\"", "קראו ספרים ושאלו מה הדמויות מרגישות.", "קבלו כל תשובה בלי לתקן אותה."]
+      },
+      "say": {
+        "en": ["Today I felt…", "You look happy. What happened?", "Thank you for telling me."],
+        "ar": ["اليوم شعرت بـ…", "تبدو سعيداً. ماذا حدث؟", "شكراً لأنك أخبرتني."],
+        "he": ["היום הרגשתי…", "אתה נראה שמח. מה קרה?", "תודה שסיפרת לי."]
+      },
+      "activity": {
+        "en": "Make four feeling cards together (happy, sad, angry, calm). At dinner, each person picks the card for their day.",
+        "ar": "اصنعوا معاً أربع بطاقات مشاعر (سعيد، حزين، غاضب، هادئ). على العشاء، يختار كل شخص البطاقة التي تناسب يومه.",
+        "he": "הכינו יחד ארבעה קלפי רגשות (שמח, עצוב, כועס, רגוע). בארוחת הערב, כל אחד בוחר את הקלף של היום שלו."
+      },
+      "content_types": ["digital_game", "home_activity"],
+      "see_professional": {
+        "en": "Talk with the kindergarten teacher if your child seems sad or withdrawn for many days.",
+        "ar": "تحدّثوا مع معلمة الروضة إذا بدا طفلكم حزيناً أو منعزلاً لأيام كثيرة.",
+        "he": "דברו עם הגננת אם הילד נראה עצוב או מסוגר במשך ימים רבים."
+      }
+    }
+  ]
+}

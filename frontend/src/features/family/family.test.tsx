@@ -1,0 +1,106 @@
+import { fireEvent, screen, waitFor, within } from "@testing-library/react";
+import { describe, expect, it } from "vitest";
+import type { User } from "@/auth/AuthProvider";
+import type { AppRoute } from "@/lib/routing";
+import { mockFetch, parent, renderApp, teacher } from "@/test/utils";
+import type { Enrolment, Program } from "./api";
+import { ParentJourneyCard } from "./ParentJourneyCard";
+import { routes as adminRoutes } from "./routes";
+import { TeacherJourneyCard } from "./TeacherJourneyCard";
+
+const admin: User = { id: "u-admin", name: "Admin", email: "admin", role: "admin", language: "en" };
+
+const program: Program = {
+  id: "p1",
+  title: { en: "Roots of Resilience", ar: "جذور المرونة", he: "שורשים של חוסן" },
+  description: { en: "Eight weeks." },
+  status: "published",
+  weeks: [1, 2].map((n) => ({
+    content_type: "home_activity" as const,
+    topic: { en: `Topic ${n}`, ar: `موضوع ${n}` },
+    lesson: { en: `Lesson ${n}` },
+    try_at_home: { en: `Try ${n}` },
+    reflection: { en: `Question ${n}?` },
+  })),
+};
+
+const enrolment = (over: Partial<Enrolment> = {}): Enrolment => ({
+  id: "e1",
+  child_id: "c1",
+  status: "active",
+  started_on: "2026-11-02",
+  current_week: 2,
+  weeks_count: 2,
+  program,
+  reflections: [{ id: "r0", week: 2, author_role: "teacher", result: null, note: "Try the calm breath at bedtime.", created_at: "2026-11-09T10:00:00Z", by_name: "Rana" }],
+  shared_content: [{ id: "h1", title: "At Home Together", content_type: "home_activity", approved_at: "2026-11-05T10:00:00Z" }],
+  can_edit: false,
+  ...over,
+});
+
+const NO_SCORES = /\d+\s*%|\bscore\b|\bpoints\b/i;
+
+describe("Family journey", () => {
+  it("parents see this week, the teacher's note and send a reflection", async () => {
+    let sent: unknown = null;
+    mockFetch({
+      "GET /api/children/c1/family-programs": { body: { enrolments: [enrolment()] } },
+      "POST /api/family-enrolments/e1/reflections": (init) => {
+        sent = JSON.parse(String(init?.body));
+        return { status: 201, body: { enrolment: enrolment() } };
+      },
+    });
+    const routes: AppRoute[] = [{ path: "/x", element: <ParentJourneyCard childId="c1" /> }];
+    renderApp({ routes, url: "/x", user: parent });
+    expect(await screen.findByText("Week 2 of 2")).toBeTruthy();
+    expect(screen.getByText("Topic 2")).toBeTruthy();
+    expect(screen.getByTestId("teacher-guidance").textContent).toContain("calm breath");
+    expect(screen.getByRole("link", { name: "At Home Together" }).getAttribute("href")).toBe("/parent/content/h1");
+    fireEvent.click(screen.getByRole("radio", { name: "Partly" }));
+    fireEvent.click(screen.getByRole("button", { name: "Send to the teacher" }));
+    await waitFor(() => expect(sent).toEqual({ week: 2, result: "partly", note: null }));
+    expect(document.body.textContent).not.toMatch(NO_SCORES);
+  });
+
+  it("teachers start a journey for the family", async () => {
+    let body: unknown = null;
+    let enrolled = false;
+    mockFetch({
+      "GET /api/children/c1/family-programs": () => ({ body: { enrolments: enrolled ? [enrolment({ can_edit: true })] : [] } }),
+      "GET /api/family-programs": { body: { programs: [program] } },
+      "POST /api/children/c1/family-programs": (init) => {
+        body = JSON.parse(String(init?.body));
+        enrolled = true;
+        return { status: 201, body: { enrolment: enrolment({ can_edit: true }) } };
+      },
+    });
+    const routes: AppRoute[] = [{ path: "/x", element: <TeacherJourneyCard childId="c1" /> }];
+    renderApp({ routes, url: "/x", user: teacher });
+    const card = await screen.findByTestId("teacher-journey");
+    fireEvent.click(await within(card).findByRole("button", { name: "Start the journey" }));
+    await waitFor(() => expect(body).toMatchObject({ program_id: "p1" }));
+    expect(await screen.findByText("Week 2 of 2")).toBeTruthy();
+    expect(screen.getByRole("link", { name: /Create this week's/ })).toBeTruthy();
+  });
+
+  it("admins edit a program one language at a time", async () => {
+    const sent: unknown[] = [];
+    mockFetch({
+      "GET /api/family-programs": { body: { programs: [program] } },
+      "PUT /api/admin/family-programs/p1": (init) => {
+        sent.push(JSON.parse(String(init?.body)));
+        return { body: { program } };
+      },
+    });
+    renderApp({ routes: adminRoutes, url: "/admin/family-programs", user: admin });
+    expect(await screen.findByText("Roots of Resilience")).toBeTruthy();
+    expect(screen.getByText("2 weeks")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Edit" }));
+    const editor = await screen.findByTestId("program-editor");
+    fireEvent.change(within(editor).getByLabelText("Topic for parents"), { target: { value: "Feelings at home" } });
+    fireEvent.click(within(editor).getByRole("button", { name: "Save" }));
+    await waitFor(() => expect(sent).toHaveLength(1));
+    const weeks = (sent[0] as { weeks: { topic: Record<string, string> }[] }).weeks;
+    expect(weeks[0]!.topic).toEqual({ en: "Feelings at home", ar: "موضوع 1" });
+  });
+});

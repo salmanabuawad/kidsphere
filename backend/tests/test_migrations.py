@@ -51,7 +51,8 @@ TABLES_0007 = {"library_collections", "library_items", "library_media"}  # tests
 TABLES_0009 = {"class_sessions", "class_session_children"}  # tests/test_sessions.py covers 0009 up/down
 TABLES_0010 = {"home_reflections"}  # tests/test_family_home.py covers 0010 up/down
 TABLES_0011 = {"generation_jobs"}  # tests/test_generation_jobs.py covers 0011 up/down
-TABLES = TABLES_0001 | NEW_TABLES | TABLES_0003 | TABLES_0004 | TABLES_0005 | TABLES_0006 | TABLES_0007 | TABLES_0009 | TABLES_0010 | TABLES_0011
+TABLES_0012 = {"family_programs", "family_enrolments", "family_week_reflections"}  # tests/test_family_programs.py
+TABLES = TABLES_0001 | NEW_TABLES | TABLES_0003 | TABLES_0004 | TABLES_0005 | TABLES_0006 | TABLES_0007 | TABLES_0009 | TABLES_0010 | TABLES_0011 | TABLES_0012
 NOW = datetime(2026, 10, 6, 9, 0, tzinfo=timezone.utc)
 
 
