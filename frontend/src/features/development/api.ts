@@ -83,7 +83,7 @@ export type ObservationQuestion = { domain: string; question: string };
 
 export type SuggestResponse = DraftContext & {
   suggestion: Suggestion;
-  provider: "claude" | "template";
+  provider: "claude" | "local" | "template";
   is_template: boolean;
   /** The stored ai_suggestions row; send it back as `ai_suggestion_id` when saving the review. */
   suggestion_id?: string;
@@ -348,7 +348,7 @@ export type SummaryInput = Partial<SummaryFields> & {
 export type SummarySuggestResponse = {
   draft: SummaryFields;
   suggestion_id: string;
-  provider: "claude" | "template";
+  provider: "claude" | "local" | "template";
   is_template: boolean;
   possible_patterns: string[];
   next_observation_questions: ObservationQuestion[];

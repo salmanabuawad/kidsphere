@@ -57,6 +57,7 @@ from app import vocab
 from app.ai import domains as ai_domains
 from app.ai import gather, suggestions, template_provider
 from app.ai.claude_provider import AIError, call_claude
+from app.ai import local_provider
 from app.ai.context import (
     ADULT_TOKEN,
     CHILD_TOKEN,
@@ -108,7 +109,7 @@ ADULT_WORDS = {"en": "an adult", "ar": "شخص بالغ", "he": "מבוגר/ת"}
 class GenerationResult(BaseModel):
     title: str
     content: dict
-    provider: Literal["claude", "template"]
+    provider: Literal["claude", "local", "template"]
     model: str | None
     is_template: bool
     fallback_reason: str | None = None
@@ -116,7 +117,7 @@ class GenerationResult(BaseModel):
 
 class UnderstandingResult(BaseModel):
     suggestion: UnderstandingSuggestion
-    provider: Literal["claude", "template"]
+    provider: Literal["claude", "local", "template"]
     model: str | None
     is_template: bool
     fallback_reason: str | None = None
@@ -124,12 +125,25 @@ class UnderstandingResult(BaseModel):
     suggestion_id: str | None = None
 
 
-def _use_claude(client, cfg: EffectiveAI) -> bool:
-    """Admin provider_mode "template" always wins; otherwise Claude when a client is injected
-    or a key is set (a key saved in the admin settings, else .env)."""
+def _provider(client, cfg: EffectiveAI) -> str | None:
+    """Which AI provider answers, or None for the templates. Admin provider_mode "template" always
+    wins; "local" needs a base URL and a model (Settings > AI, else .env); "claude" needs an injected
+    client or a key (saved in the admin settings, else .env)."""
     if cfg.provider_mode == "template":
-        return False
-    return client is not None or bool(cfg.api_key)
+        return None
+    if cfg.provider_mode == "local":
+        return "local" if cfg.mode == "local" else None
+    return "claude" if client is not None or cfg.api_key else None
+
+
+def _call(provider: str, op: str, system: str, prompt: str, output_model, client, cfg: EffectiveAI) -> dict:
+    if provider == "local":
+        return local_provider.call_local(op, system, prompt, output_model, config=cfg)
+    return call_claude(op, system, prompt, output_model, client=client, config=cfg)
+
+
+def _model_name(provider: str, cfg: EffectiveAI) -> str:
+    return cfg.local_model if provider == "local" else cfg.model
 
 
 def pseudonymous_context(ctx: AIContext) -> AIContext:
@@ -205,18 +219,19 @@ def generate(kind: str, ctx: AIContext, *, client=None) -> GenerationResult:
     tokens = {c.token for c in ctx.cast}
     fallback_reason = None
     cfg = effective_ai()
-    if _use_claude(client, cfg):
+    ai_provider = _provider(client, cfg)
+    if ai_provider:
         try:
             # The provider never gets the child's real name: it writes [child] and the name is put
             # back here, on our side (pseudonymous_context).
-            data = call_claude(kind, SYSTEM_PROMPT, user_prompt(kind, pseudonymous_context(ctx), template),
-                               provider_model(kind, template, ctx.include_video), client=client, config=cfg)
+            data = _call(ai_provider, kind, SYSTEM_PROMPT, user_prompt(kind, pseudonymous_context(ctx), template),
+                         provider_model(kind, template, ctx.include_video), client, cfg)
             if isinstance(data, dict):
                 data = restore_names(data, ctx.name, ctx.language)
             content, issues = validate_output(kind, data, template, ctx.include_video, ai=True, tokens=tokens)
             if content is not None:
-                return GenerationResult(title=_title(kind, content), content=content, provider="claude",
-                                        model=cfg.model, is_template=False)
+                return GenerationResult(title=_title(kind, content), content=content, provider=ai_provider,
+                                        model=_model_name(ai_provider, cfg), is_template=False)
             fallback_reason = _fallback_code(issues)
             log.warning("ai output rejected op=%s reason=%s issues=%d first=%s", kind, fallback_reason, len(issues),
                         issues[0] if issues else "")
@@ -474,11 +489,12 @@ def _understanding(ctx: AIContext, observations, focus_areas, baseline_items, *,
     suggestion = None
     provider, model = "template", template_provider.TEMPLATE_MODEL
     cfg = effective_ai()
-    if _use_claude(client, cfg):
+    ai_provider = _provider(client, cfg)
+    if ai_provider:
         try:
-            data = call_claude("understanding", UNDERSTANDING_SYSTEM_PROMPT,
-                               understanding_prompt(ai_ctx, [], [], [], payload=payload),
-                               UnderstandingSuggestion, client=client, config=cfg)
+            data = _call(ai_provider, "understanding", UNDERSTANDING_SYSTEM_PROMPT,
+                         understanding_prompt(ai_ctx, [], [], [], payload=payload),
+                         UnderstandingSuggestion, client, cfg)
             suggestion = UnderstandingSuggestion.model_validate(data)
             issues = check_content(suggestion, set(), ai=True)
             if issues:
@@ -486,7 +502,7 @@ def _understanding(ctx: AIContext, observations, focus_areas, baseline_items, *,
                 log.warning("understanding rejected: unsafe issues=%d first=%s", len(issues), issues[0])
             else:
                 _restore_baseline_texts(suggestion, baseline, ai_baseline)
-                provider, model = "claude", cfg.model
+                provider, model = ai_provider, _model_name(ai_provider, cfg)
         except ValidationError as e:
             fallback_reason, suggestion = "AI_INVALID_OUTPUT", None
             log.warning("understanding rejected: invalid issues=%s", _error_list(e)[:3])
@@ -597,18 +613,18 @@ def draft_functional_summary(db: Session, child, lang: str, user: User | None, *
     fallback_reason = None
     provider, model = "template", template_provider.TEMPLATE_MODEL
     cfg = effective_ai()
-    if _use_claude(client, cfg):
+    ai_provider = _provider(client, cfg)
+    if ai_provider:
         try:
-            data = call_claude("functional_summary", FUNCTIONAL_SUMMARY_SYSTEM_PROMPT,
-                               functional_summary_prompt(ai_ctx, payload), FunctionalSummaryDraft, client=client,
-                               config=cfg)
+            data = _call(ai_provider, "functional_summary", FUNCTIONAL_SUMMARY_SYSTEM_PROMPT,
+                         functional_summary_prompt(ai_ctx, payload), FunctionalSummaryDraft, client, cfg)
             draft = FunctionalSummaryDraft.model_validate(data)
             issues = check_content(draft, set(), ai=True)
             if issues:
                 fallback_reason, draft = "AI_UNSAFE_OUTPUT", None
                 log.warning("functional summary rejected: unsafe issues=%d first=%s", len(issues), issues[0])
             else:
-                provider, model = "claude", cfg.model
+                provider, model = ai_provider, _model_name(ai_provider, cfg)
         except ValidationError as e:
             fallback_reason, draft = "AI_INVALID_OUTPUT", None
             log.warning("functional summary rejected: invalid issues=%s", _error_list(e)[:3])

@@ -147,7 +147,16 @@ export type GenerateBody = {
   people?: string[];
 };
 
-export type GenerateResponse = { content?: ContentDetail; items?: ContentDetail[]; pack_id?: string; fallback_reason?: string | null };
+/** A content request that local AI finishes after the response (202). */
+export type GenerationJob = {
+  id: string;
+  child_id: string;
+  status: "pending" | "running" | "done" | "failed";
+  error_code: string | null;
+  result: { content_ids: string[]; pack_id: string | null; fallback_reason: string | null } | null;
+  created_at: string;
+};
+export type GenerateResponse = { content?: ContentDetail; items?: ContentDetail[]; pack_id?: string; fallback_reason?: string | null; job?: GenerationJob };
 export type ContentResponse = { content: ContentDetail };
 export type ContentListResponse = { content: ContentSummary[] };
 export type PackResponse = { pack_id: string; child_id: string; items: ContentDetail[] };
@@ -177,6 +186,7 @@ export function domainsUsed(gi?: GenerationInput | null): string[] {
 
 export const generateContent = (childId: string, body: GenerateBody) =>
   api<GenerateResponse>(`/api/children/${enc(childId)}/content/generate`, { method: "POST", body });
+export const getGenerationJob = (id: string) => api<{ job: GenerationJob }>(`/api/generation-jobs/${enc(id)}`);
 export const updateContent = (id: string, body: { title?: string; content?: Record<string, unknown> }) =>
   api<ContentResponse>(contentUrl(id), { method: "PUT", body });
 export const approveContent = (id: string) => api<ContentResponse>(`${contentUrl(id)}/approve`, { method: "POST" });

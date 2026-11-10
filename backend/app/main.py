@@ -5,6 +5,7 @@ Run: ``uvicorn app.main:app --host 127.0.0.1 --port 3071`` (from backend/).
 import importlib
 import logging
 import pkgutil
+from contextlib import asynccontextmanager
 from pathlib import Path
 from urllib.parse import urlsplit
 
@@ -60,9 +61,25 @@ def _mount_spa(app: FastAPI, dist: Path) -> None:
         return FileResponse(dist / "index.html", headers={"Cache-Control": "no-cache"})
 
 
+@asynccontextmanager
+async def _lifespan(app: FastAPI):
+    """On start-up, generation jobs a restart left behind become failed (INTERRUPTED)."""
+    try:
+        from app.db import SessionLocal
+        from app.services.generation_jobs import mark_interrupted
+
+        with SessionLocal() as db:
+            n = mark_interrupted(db)
+        if n:
+            logging.getLogger("app.jobs").warning("marked %d interrupted generation jobs", n)
+    except Exception as e:  # never block start-up
+        logging.getLogger("app.jobs").warning("could not check generation jobs (%s)", type(e).__name__)
+    yield
+
+
 def create_app() -> FastAPI:
     logging.basicConfig(level=settings.log_level.upper(), format="%(asctime)s %(levelname)s %(name)s: %(message)s")
-    app = FastAPI(title="KidSphere API", docs_url=None, redoc_url=None, openapi_url=None)
+    app = FastAPI(title="KidSphere API", docs_url=None, redoc_url=None, openapi_url=None, lifespan=_lifespan)
     install_error_handlers(app)
 
     @app.middleware("http")

@@ -200,6 +200,25 @@ describe("CreateContentPage", () => {
     expect(screen.getByTestId("template-badge").textContent).toBe("Made with templates");
   });
 
+  it("local AI: waits for the job, then opens the draft", async () => {
+    let polls = 0;
+    const draft = row({ id: "new2", title: "Build the Garage Together", content_type: "real_world_activity", content: en.activity as unknown as Record<string, unknown> });
+    mockFetch({
+      "GET /api/children/c1": { body: { child: adam } },
+      "POST /api/children/c1/content/generate": { status: 202, body: { job: { id: "j1", child_id: "c1", status: "pending", error_code: null, result: null, created_at: "2026-11-10T10:00:00Z" } } },
+      "GET /api/generation-jobs/j1": () => {
+        polls += 1;
+        return { body: { job: { id: "j1", child_id: "c1", status: "done", error_code: null, result: { content_ids: ["new2"], pack_id: null, fallback_reason: null }, created_at: "2026-11-10T10:00:00Z" } } };
+      },
+      "GET /api/content/new2": { body: { content: draft } },
+    });
+    renderApp({ routes, url: "/children/c1/content/new?mode=growth_support&focus=f1&type=real_world_activity", user: teacher, options });
+    fireEvent.click(await screen.findByRole("button", { name: "Create draft" }));
+    expect(await screen.findByTestId("generating-local")).toBeTruthy();
+    expect(await screen.findByRole("heading", { level: 1, name: "Build the Garage Together" }, { timeout: 6000 })).toBeTruthy();
+    expect(polls).toBe(1);
+  }, 10000);
+
   it("strength builder: pick a strength and a small pack with a video plan", async () => {
     let body: Record<string, unknown> | null = null;
     mockFetch({

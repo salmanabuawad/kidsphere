@@ -1,7 +1,7 @@
-"""All 30 tables as SQLAlchemy 2 models.
+"""All 31 tables as SQLAlchemy 2 models.
 
 The schema itself is created by the hand-written Alembic revisions in
-``migrations/versions/`` (``0001_initial.py`` … ``0010_family_home.py``); these
+``migrations/versions/`` (``0001_initial.py`` … ``0011_generation_jobs.py``); these
 models must mirror them (tests/test_migrations.py checks that every column
 exists in both).
 
@@ -814,3 +814,23 @@ class HomeReflection(Base):
     client_request_id: Mapped[str | None] = mapped_column(Text)
     created_by: Mapped[uuid.UUID | None] = _user_fk()
     created_at: Mapped[datetime] = _created()
+
+
+GENERATION_JOB_STATUS_VALUES = ("pending", "running", "done", "failed")
+
+
+class GenerationJob(Base):
+    """A content request that is generated after the response (services/generation_jobs.py, 0011)."""
+
+    __tablename__ = "generation_jobs"
+
+    id: Mapped[uuid.UUID] = _pk()
+    child_id: Mapped[uuid.UUID] = _child_fk()
+    request: Mapped[dict] = mapped_column(JSONB, nullable=False)
+    status: Mapped[str] = mapped_column(Text, nullable=False, default="pending", server_default="pending")
+    result: Mapped[dict | None] = mapped_column(JSONB)
+    error_code: Mapped[str | None] = mapped_column(Text)
+    created_by: Mapped[uuid.UUID | None] = _user_fk()
+    created_at: Mapped[datetime] = _created()
+    started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))

@@ -94,6 +94,8 @@
     "generate": "Create draft",
     "generating": "Creating the draft…",
     "generatingHint": "This can take up to a minute. You will review it before it is used.",
+    "generatingLocal": "The local AI is writing it now. This can take a few minutes. You can leave this page: the draft will appear under Activities.",
+    "jobFailed": "The draft could not be made this time. Please try again.",
     "pickGoal": "Choose a goal.",
     "pickFocus": "Choose a focus area.",
     "pickStrength": "Choose a strength.",

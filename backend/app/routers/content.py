@@ -5,6 +5,9 @@ See app/services/content.py for the row JSON, the pack storage and the status tr
 
 - POST   /children/{id}/content/generate  GenerateIn
          → 201 {"content", "fallback_reason"}  or, for a pack, {"items", "pack_id", "fallback_reason"}
+         In local AI mode: 202 {"job"}; the draft is made after the response (services/generation_jobs.py).
+- GET    /generation-jobs/{id}             → {"job"}  staff only
+- GET    /children/{id}/generation-jobs?open → {"jobs"}  staff only
 - GET    /children/{id}/content?status&pack_id → {"content": [summary]}   (parents: shared approved/completed only)
 - GET    /packs/{pack_id}                  → {"pack_id", "child_id", "items": [detail]}
 - GET    /content/{id}                     → {"content": detail}
@@ -20,19 +23,37 @@ See app/services/content.py for the row JSON, the pack storage and the status tr
 """
 import uuid
 
-from fastapi import APIRouter, Response
+from fastapi import APIRouter, BackgroundTasks, Response
 
 from app.deps import DB, CurrentUser
 from app.schemas.common import ContentStatus
 from app.schemas.content import ContentUpdate, CopyIn, GenerateIn, RegenerateIn, ShareIn
 from app.services import content as svc
+from app.services import generation_jobs as jobs
 
 router = APIRouter(tags=["content"])
 
 
 @router.post("/children/{child_id}/content/generate", status_code=201)
-def generate_content(child_id: str, body: GenerateIn, db: DB, user: CurrentUser) -> dict:
+def generate_content(child_id: str, body: GenerateIn, response: Response, background: BackgroundTasks, db: DB,
+                     user: CurrentUser) -> dict:
+    # Local AI can be slow: the request is checked and stored, and generated after the response (202).
+    if jobs.runs_in_background(db):
+        job = jobs.create_job(db, user, child_id, body)
+        background.add_task(jobs.run_job, job.id)
+        response.status_code = 202
+        return {"job": jobs.job_out(job)}
     return svc.generate_content(db, user, child_id, body)
+
+
+@router.get("/generation-jobs/{job_id}")
+def get_generation_job(job_id: str, db: DB, user: CurrentUser) -> dict:
+    return jobs.get_job(db, user, job_id)
+
+
+@router.get("/children/{child_id}/generation-jobs")
+def list_generation_jobs(child_id: str, db: DB, user: CurrentUser, open: bool = False) -> dict:
+    return jobs.list_jobs(db, user, child_id, open_only=open)
 
 
 @router.get("/children/{child_id}/content")

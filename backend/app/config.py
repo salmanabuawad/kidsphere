@@ -29,6 +29,12 @@ class Settings(BaseSettings):
     anthropic_model: str = "claude-opus-5-5"
     ai_effort: str = "medium"
     ai_timeout_seconds: int = 60
+    # Local AI (an OpenAI-compatible server on this machine or the local network: Ollama, vLLM,
+    # llama.cpp). Admins can override the URL and model in Settings > AI (provider_mode "local").
+    local_ai_base_url: str = ""
+    local_ai_model: str = ""
+    local_ai_api_key: str = ""
+    local_ai_timeout_seconds: int = 240  # under the nginx /api/ proxy_read_timeout (300 s)
     video_provider: str = "none"
     # AI engines (app/ai/engines): run every engine that has no provider on the built-in mock
     # provider. For development and tests only; per-engine settings are AI_<ENGINE>_* variables.

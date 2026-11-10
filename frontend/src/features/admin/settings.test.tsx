@@ -161,3 +161,26 @@ describe("SettingsPage", () => {
     expect(fetch.mock.calls.some(([u]) => String(u).includes("/api/admin/settings"))).toBe(false);
   });
 });
+
+describe("SettingsPage local AI", () => {
+  it("saves the local server address and model", async () => {
+    const sent: unknown[] = [];
+    mockFetch({
+      "GET /api/admin/settings": { body: settings },
+      "GET /api/admin/system": { body: system },
+      "PUT /api/admin/settings/ai": (init) => {
+        sent.push(body(init));
+        return { body: { ...settings, ai: { ...settings.ai, provider_mode: "local", effective_mode: "local", local_base_url: "http://127.0.0.1:11434/v1", local_model: "qwen2.5:14b" } } };
+      },
+    });
+    renderApp({ routes, url: "/admin/settings", user: me });
+    const ai = await screen.findByRole("form", { name: "AI" });
+    expect(within(ai).queryByTestId("local-ai-fields")).toBeNull();
+    fireEvent.click(within(ai).getByRole("radio", { name: /Local AI/ }));
+    fireEvent.change(within(ai).getByLabelText(/Local AI server address/), { target: { value: " http://127.0.0.1:11434/v1 " } });
+    fireEvent.change(within(ai).getByLabelText(/Local model name/), { target: { value: "qwen2.5:14b" } });
+    fireEvent.click(within(ai).getByRole("button", { name: "Save" }));
+    await waitFor(() => expect(sent).toHaveLength(1));
+    expect(sent[0]).toMatchObject({ provider_mode: "local", local_base_url: "http://127.0.0.1:11434/v1", local_model: "qwen2.5:14b" });
+  });
+});

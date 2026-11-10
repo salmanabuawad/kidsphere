@@ -66,7 +66,8 @@ def test_defaults(admin_client, monkeypatch):
     assert data["general"] == {"organization_name": "Sharnaqa", "default_ui_language": settings.default_locale,
                                "default_content_language": "child"}
     assert data["ai"] == {"provider_mode": "claude", "model": settings.anthropic_model, "effort": settings.ai_effort,
-                          "key_set": False, "key_last4": None, "env_key_set": False, "effective_mode": "template"}
+                          "key_set": False, "key_last4": None, "env_key_set": False, "effective_mode": "template",
+                          "local_base_url": None, "local_model": None}
     assert data["reports"] == {"header_title": "Sharnaqa", "footer_note": None}
 
 
@@ -285,7 +286,7 @@ def test_system_shape(admin_client, admin, teacher, klass, child, monkeypatch):
     data = r.json()
     assert set(data) == {"app_version", "alembic_revision", "last_backup_at", "ai", "counts"}
     assert data["app_version"] == "abc1234"
-    assert data["alembic_revision"] == "0010"
+    assert data["alembic_revision"] == "0011"
     assert data["last_backup_at"] is None or isinstance(data["last_backup_at"], str)
     assert data["ai"] == {"effective_mode": "template", "provider_mode": "claude", "model": settings.anthropic_model,
                           "key_source": None}
@@ -375,4 +376,4 @@ def test_migration_0003_up_and_down():
     assert set(cols) == {"key", "value", "updated_by", "updated_at"}
     assert cols["value"]["nullable"] is False and cols["updated_by"]["nullable"] is True
     with engine.connect() as conn:
-        assert conn.execute(text("SELECT version_num FROM alembic_version")).scalar() == "0010"
+        assert conn.execute(text("SELECT version_num FROM alembic_version")).scalar() == "0011"

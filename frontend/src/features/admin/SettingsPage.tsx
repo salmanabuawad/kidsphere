@@ -24,7 +24,7 @@ import type { Language } from "./types";
  */
 
 export type ContentLanguage = Language | "child";
-export type ProviderMode = "claude" | "template";
+export type ProviderMode = "claude" | "local" | "template";
 
 export type GeneralSettings = { organization_name: string; default_ui_language: Language; default_content_language: ContentLanguage };
 export type AiSettings = {
@@ -35,6 +35,8 @@ export type AiSettings = {
   key_last4: string | null;
   env_key_set: boolean;
   effective_mode: ProviderMode;
+  local_base_url?: string | null;
+  local_model?: string | null;
 };
 export type ReportSettings = { header_title: string; footer_note: string | null };
 export type AdminSettings = { general: GeneralSettings; ai: AiSettings; reports: ReportSettings };
@@ -52,12 +54,18 @@ export type AiTestResult = { ok: boolean; model: string; error_code: string | nu
 export const AI_MODELS = ["claude-opus-5-5", "claude-sonnet-5-5", "claude-haiku-4-5"];
 export const EFFORTS = ["low", "medium", "high"] as const;
 const KEY_PREFIX = "sk-ant-";
-const TEST_ERRORS = ["AI_NO_KEY", "AI_AUTH", "AI_MODEL_NOT_FOUND", "AI_TIMEOUT", "AI_BAD_REQUEST", "AI_UNAVAILABLE"];
+const TEST_ERRORS = ["AI_NOT_CONFIGURED", "AI_INVALID_OUTPUT", "AI_MAX_TOKENS", "AI_NO_KEY", "AI_AUTH", "AI_MODEL_NOT_FOUND", "AI_TIMEOUT", "AI_BAD_REQUEST", "AI_UNAVAILABLE"];
 
 type SaveFn = (section: keyof AdminSettings, body: Record<string, unknown>, success: string) => Promise<boolean>;
 
 function ModeBadge({ mode }: { mode: ProviderMode }) {
   const { t } = useI18n();
+  if (mode === "local")
+    return (
+      <Badge tone="brand" icon={<Server aria-hidden />}>
+        {t("admin.settings.ai.modeLocal")}
+      </Badge>
+    );
   return mode === "claude" ? (
     <Badge tone="brand" icon={<Sparkles aria-hidden />}>
       {t("admin.settings.ai.modeClaude")}
@@ -132,6 +140,8 @@ function AiCard({ value, save, pending }: { value: AiSettings; save: SaveFn; pen
   const [effort, setEffort] = useState(value.effort);
   const [key, setKey] = useState("");
   const [keyError, setKeyError] = useState<string | null>(null);
+  const [localUrl, setLocalUrl] = useState(value.local_base_url ?? "");
+  const [localModel, setLocalModel] = useState(value.local_model ?? "");
   const [result, setResult] = useState<AiTestResult | null>(null);
   const testing = useAction();
   const models = AI_MODELS.includes(value.model) ? AI_MODELS : [value.model, ...AI_MODELS];
@@ -145,6 +155,10 @@ function AiCard({ value, save, pending }: { value: AiSettings; save: SaveFn; pen
     const body: Record<string, unknown> = { provider_mode: mode, model };
     if ((EFFORTS as readonly string[]).includes(effort)) body.effort = effort;
     if (k) body.anthropic_api_key = k;
+    if (mode === "local") {
+      if (localUrl.trim()) body.local_base_url = localUrl.trim();
+      if (localModel.trim()) body.local_model = localModel.trim();
+    }
     const ok = await save("ai", body, t("admin.settings.ai.saved"));
     if (ok) setKey("");
   }
@@ -180,12 +194,25 @@ function AiCard({ value, save, pending }: { value: AiSettings; save: SaveFn; pen
               <ToggleChip single selected={mode === "claude"} onToggle={() => setMode("claude")} icon={<Sparkles className="size-4" aria-hidden />}>
                 {t("admin.settings.ai.modeClaude")}
               </ToggleChip>
+              <ToggleChip single selected={mode === "local"} onToggle={() => setMode("local")} icon={<Server className="size-4" aria-hidden />}>
+                {t("admin.settings.ai.modeLocal")}
+              </ToggleChip>
               <ToggleChip single selected={mode === "template"} onToggle={() => setMode("template")} icon={<FileText className="size-4" aria-hidden />}>
                 {t("admin.settings.ai.modeTemplate")}
               </ToggleChip>
             </div>
-            <p className="text-caption mt-1.5 text-ink-muted">{mode === "claude" ? t("admin.settings.ai.modeClaudeHint") : t("admin.settings.ai.modeTemplateHint")}</p>
+            <p className="text-caption mt-1.5 text-ink-muted">{t(mode === "claude" ? "admin.settings.ai.modeClaudeHint" : mode === "local" ? "admin.settings.ai.modeLocalHint" : "admin.settings.ai.modeTemplateHint")}</p>
           </div>
+          {mode === "local" && (
+            <div className="grid gap-4 md:grid-cols-2" data-testid="local-ai-fields">
+              <Field label={t("admin.settings.ai.localUrl")} hint={t("admin.settings.ai.localUrlHint")}>
+                {(p) => <Input {...p} dir="ltr" spellCheck={false} placeholder="http://127.0.0.1:11434/v1" value={localUrl} onChange={(e) => setLocalUrl(e.target.value)} />}
+              </Field>
+              <Field label={t("admin.settings.ai.localModel")} hint={t("admin.settings.ai.localModelHint")}>
+                {(p) => <Input {...p} dir="ltr" spellCheck={false} placeholder="qwen2.5:14b" value={localModel} onChange={(e) => setLocalModel(e.target.value)} />}
+              </Field>
+            </div>
+          )}
           <div className="grid gap-4 md:grid-cols-2">
             <Field label={t("admin.settings.ai.model")}>
               {(p) => (
@@ -300,7 +327,7 @@ function SystemCard() {
           t("admin.settings.system.ai"),
           <span className="inline-flex flex-wrap items-center gap-2">
             <ModeBadge mode={data.ai.effective_mode} />
-            {data.ai.effective_mode === "claude" && <span dir="ltr">{data.ai.model}</span>}
+            {data.ai.effective_mode !== "template" && <span dir="ltr">{data.ai.model}</span>}
           </span>,
         ],
         [t("admin.settings.system.users"), formatNumber(data.counts.users)],

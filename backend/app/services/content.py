@@ -419,14 +419,27 @@ def _pack_parts(content: dict) -> list[tuple[str, dict]]:
     return parts
 
 
-def generate_content(db: Session, user: User, child_id, body: GenerateIn) -> dict:
+def check_generate(db: Session, user: User, child_id, body: GenerateIn) -> Child:
+    """Every check of a generate request that needs no AI (generation jobs run these first)."""
     child = access.get_child_or_404(db, user, child_id, write=True)
-    profile = _profile(db, child.id)
+    _check_request(db, child, _profile(db, child.id), body)
+    people_svc.content_people(db, child, body.people)
+    return child
+
+
+def _check_request(db: Session, child: Child, profile: ChildProfile | None, body: GenerateIn):
     focus, target = _check_goal(db, child, profile, body)
     if body.template and body.content_type not in GAME_KINDS:
         raise _invalid("template", "A game template is used with digital_game or pack only.")
     if body.include_video and body.content_type != "pack":
         raise _invalid("include_video", "include_video is used with pack only.")
+    return focus, target
+
+
+def generate_content(db: Session, user: User, child_id, body: GenerateIn) -> dict:
+    child = access.get_child_or_404(db, user, child_id, write=True)
+    profile = _profile(db, child.id)
+    focus, target = _check_request(db, child, profile, body)
     # Admin setting general.default_content_language ("child" = the child's main language).
     language = body.language or app_settings.default_content_language(db) or default_language(child, user)
     people = people_svc.content_people(db, child, body.people)

@@ -9,10 +9,10 @@
  * 4. Language (defaults to the child's main language).
  * Generate → a draft to review. Query: ?mode=&focus=&strength=&type= preselect.
  */
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router";
 import { Lock, Users, Wand } from "lucide-react";
-import { Alert, Button, ButtonLink, Card, CardBody, Checkbox, EmptyState, NumeralBlock, PageHeader, PageSkeleton, Spinner, ToggleChip } from "@/components/ui";
+import { Alert, Button, ButtonLink, Card, CardBody, Checkbox, EmptyState, NumeralBlock, PageHeader, PageSkeleton, Spinner, toast, ToggleChip } from "@/components/ui";
 import { CurrentFocusIcon } from "@/icons";
 import { childUrl, displayName, isStaffView, type ChildDetail } from "@/features/children";
 import { MAX_IN_CONTENT, PersonAvatar, peopleUrl, type PeopleResponse } from "@/features/people";
@@ -24,7 +24,9 @@ import { paths } from "@/lib/paths";
 import { useAction, useErrorMessage } from "@/lib/useAction";
 import { useFetch } from "@/lib/useFetch";
 import { cn } from "@/lib/utils";
-import { GENERATE_TYPES, MODES, generateContent, type GenerateBody, type GenerateType, type Mode } from "./api";
+import { GENERATE_TYPES, MODES, generateContent, getGenerationJob, type GenerateBody, type GenerateType, type Mode } from "./api";
+
+const JOB_POLL_MS = 3000;
 import { ChoiceTile, MODE_ICONS, TypeIcon } from "./ui";
 
 const asMode = (v: string | null): Mode | null => (MODES as string[]).includes(v ?? "") ? (v as Mode) : null;
@@ -78,6 +80,7 @@ function CreateForm({ childId, child }: { childId: string; child: ChildDetail })
   const [params] = useSearchParams();
   const { pending, run } = useAction();
   const staff = isStaffView(child) ? child : null;
+  const [jobId, setJobId] = useState<string | null>(null);
   const focusAreas = staff?.focus_areas ?? [];
   const name = displayName(child);
 
@@ -115,23 +118,59 @@ function CreateForm({ childId, child }: { childId: string; child: ChildDetail })
     if (type === "pack" && includeVideo) body.include_video = true;
     const chosen = cast.filter((id) => people.some((p) => p.id === id));
     if (chosen.length) body.people = chosen;
-    const r = await run(() => generateContent(childId, body), { success: t("content.create.ready") });
-    if (r.ok) {
-      if (r.data.pack_id) navigate(paths.pack(r.data.pack_id));
-      else if (r.data.content) navigate(paths.content(r.data.content.id));
+    const r = await run(() => generateContent(childId, body));
+    if (!r.ok) return;
+    if (r.data.job) {
+      setJobId(r.data.job.id);
+      return;
     }
+    toast(t("content.create.ready"), "success");
+    if (r.data.pack_id) navigate(paths.pack(r.data.pack_id));
+    else if (r.data.content) navigate(paths.content(r.data.content.id));
   }
+
+  // Local AI: the draft is made after the response; check the job until it is done.
+  useEffect(() => {
+    if (!jobId) return;
+    let stopped = false;
+    const tick = async () => {
+      try {
+        const { job } = await getGenerationJob(jobId);
+        if (stopped) return;
+        if (job.status === "done" && job.result) {
+          toast(t("content.create.ready"), "success");
+          if (job.result.pack_id) navigate(paths.pack(job.result.pack_id));
+          else if (job.result.content_ids[0]) navigate(paths.content(job.result.content_ids[0]));
+          return;
+        }
+        if (job.status === "failed") {
+          toast(t("content.create.jobFailed"), "error");
+          setJobId(null);
+          return;
+        }
+      } catch {
+        // a network hiccup: try again on the next tick
+      }
+      if (!stopped) timer = window.setTimeout(tick, JOB_POLL_MS);
+    };
+    let timer = window.setTimeout(tick, JOB_POLL_MS);
+    return () => {
+      stopped = true;
+      window.clearTimeout(timer);
+    };
+  }, [jobId, navigate, t]);
 
   return (
     <div className="mx-auto max-w-4xl">
       <PageHeader back={{ to: paths.childContent(childId), label: t("content.create.backToContent") }} icon={<Wand />} title={t("content.create.titleFor", { name })} />
 
-      {pending ? (
+      {pending || jobId ? (
         <Card className="mx-auto max-w-xl" data-testid="generating">
           <CardBody className="flex flex-col items-center gap-4 py-12 text-center" aria-live="polite">
             <Spinner className="size-10 text-brand" />
             <p className="text-lg font-semibold text-ink">{t("content.create.generating")}</p>
             <p className="max-w-sm text-sm text-ink-muted">{t("content.create.generatingHint")}</p>
+            {jobId && <p className="max-w-sm text-sm text-ink-muted" data-testid="generating-local">{t("content.create.generatingLocal")}</p>}
           </CardBody>
         </Card>
       ) : (

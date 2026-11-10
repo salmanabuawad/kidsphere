@@ -55,7 +55,9 @@ BACKUP_DIR = Path("/var/backups/kidsphere")
 VERSION_FILE = BACKEND_DIR / "VERSION"
 TEST_MAX_TOKENS = 256
 
-ProviderMode = Literal["claude", "template"]
+ProviderMode = Literal["claude", "local", "template"]
+LOCAL_MODEL_PATTERN = r"^[A-Za-z0-9][A-Za-z0-9._:/-]{0,119}$"
+LOCAL_URL_PATTERN = r"^https?://[^\s]{1,300}$"
 Effort = Literal["low", "medium", "high"]
 ContentLanguage = Literal["ar", "he", "en", "child"]
 
@@ -79,6 +81,8 @@ class AiStored(_Stored):
     model: str | None = Field(default=None, pattern=MODEL_PATTERN)
     effort: Effort | None = None
     api_key: str | None = None
+    local_base_url: str | None = Field(default=None, pattern=LOCAL_URL_PATTERN)
+    local_model: str | None = Field(default=None, pattern=LOCAL_MODEL_PATTERN)
 
 
 class ReportsSettings(_Stored):
@@ -100,6 +104,8 @@ class AiIn(StrictModel):
     model: str | None = Field(default=None, pattern=MODEL_PATTERN)
     effort: Effort | None = None
     anthropic_api_key: str | None = Field(default=None, max_length=300)
+    local_base_url: str | None = Field(default=None, pattern=LOCAL_URL_PATTERN)
+    local_model: str | None = Field(default=None, pattern=LOCAL_MODEL_PATTERN)
     clear: bool = False
 
     @field_validator("anthropic_api_key")
@@ -156,16 +162,19 @@ def _ai(db: Session) -> AiStored:
 class EffectiveAI:
     """What the AI provider uses right now. ``mode`` is "claude" only when provider_mode is
     claude and a key exists (saved here, else .env). Never log ``api_key``."""
-    mode: Literal["claude", "template"]
+    mode: Literal["claude", "local", "template"]
     provider_mode: ProviderMode
     api_key: str
     key_source: Literal["settings", "env"] | None
     model: str
     effort: str
+    local_base_url: str = ""
+    local_model: str = ""
 
     def __repr__(self) -> str:  # keeps the key out of any accidental log line
         return (f"EffectiveAI(mode={self.mode!r}, provider_mode={self.provider_mode!r}, "
-                f"key_source={self.key_source!r}, model={self.model!r}, effort={self.effort!r})")
+                f"key_source={self.key_source!r}, model={self.model!r}, effort={self.effort!r}, "
+                f"local_model={self.local_model!r})")
 
 
 def _effective(ai: AiStored) -> EffectiveAI:
@@ -175,9 +184,17 @@ def _effective(ai: AiStored) -> EffectiveAI:
         key, source = settings.anthropic_api_key, "env"
     else:
         key, source = "", None
-    mode = "claude" if ai.provider_mode == "claude" and key else "template"
+    local_url = ai.local_base_url or settings.local_ai_base_url or ""
+    local_model = ai.local_model or settings.local_ai_model or ""
+    if ai.provider_mode == "claude" and key:
+        mode = "claude"
+    elif ai.provider_mode == "local" and local_url and local_model:
+        mode = "local"
+    else:
+        mode = "template"
     return EffectiveAI(mode=mode, provider_mode=ai.provider_mode, api_key=key, key_source=source,
-                       model=ai.model or settings.anthropic_model, effort=ai.effort or settings.ai_effort)
+                       model=ai.model or settings.anthropic_model, effort=ai.effort or settings.ai_effort,
+                       local_base_url=local_url, local_model=local_model)
 
 
 def effective_ai(db: Session | None = None) -> EffectiveAI:
@@ -206,6 +223,8 @@ def _ai_out(ai: AiStored) -> dict:
         "key_last4": ai.api_key[-4:] if ai.api_key else None,
         "env_key_set": bool(settings.anthropic_api_key),
         "effective_mode": eff.mode,
+        "local_base_url": eff.local_base_url or None,
+        "local_model": eff.local_model or None,
     }
 
 
@@ -294,9 +313,16 @@ def check_ai_connection(db: Session, user: User, *, client=None) -> dict:
     """ONE minimal Messages call with the effective key and model (whatever provider_mode
     says), so an admin can check a key before switching to Claude. The prompt is a fixed
     word: no child data is ever sent. The key and the response text are never logged."""
-    from app.ai import claude_provider
+    from app.ai import claude_provider, local_provider
 
     eff = effective_ai(db)
+    if eff.provider_mode == "local" and client is None:
+        error_code = local_provider.check_connection(eff)
+        log.info("ai connection test provider=local model=%s ok=%s error=%s", eff.local_model, error_code is None,
+                 error_code)
+        audit(db, user, "settings.ai_test", "settings", None, ok=error_code is None, error_code=error_code)
+        db.commit()
+        return {"ok": error_code is None, "model": eff.local_model or None, "error_code": error_code}
     if not eff.api_key and client is None:
         return {"ok": False, "model": eff.model, "error_code": "AI_NO_KEY"}
     error_code = None
@@ -351,7 +377,8 @@ def system_status(db: Session) -> dict:
         "app_version": app_version(),
         "alembic_revision": revision,
         "last_backup_at": _last_backup(),
-        "ai": {"effective_mode": eff.mode, "provider_mode": eff.provider_mode, "model": eff.model,
+        "ai": {"effective_mode": eff.mode, "provider_mode": eff.provider_mode,
+               "model": eff.local_model if eff.mode == "local" else eff.model,
                "key_source": eff.key_source},
         "counts": {
             "users": db.scalar(select(func.count()).select_from(User).where(User.is_active.is_(True))) or 0,
