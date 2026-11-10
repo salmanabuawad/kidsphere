@@ -1,7 +1,7 @@
-"""All 34 tables as SQLAlchemy 2 models.
+"""All 35 tables as SQLAlchemy 2 models.
 
 The schema itself is created by the hand-written Alembic revisions in
-``migrations/versions/`` (``0001_initial.py`` … ``0012_family_programs.py``); these
+``migrations/versions/`` (``0001_initial.py`` … ``0013_family_routines.py``); these
 models must mirror them (tests/test_migrations.py checks that every column
 exists in both).
 
@@ -881,3 +881,18 @@ class FamilyWeekReflection(Base):
     note: Mapped[str | None] = mapped_column(Text)
     created_by: Mapped[uuid.UUID | None] = _user_fk()
     created_at: Mapped[datetime] = _created()
+
+
+class FamilyRoutine(Base):
+    """A picture schedule for part of the day (services/family_routines.py, 0013)."""
+
+    __tablename__ = "family_routines"
+
+    id: Mapped[uuid.UUID] = _pk()
+    child_id: Mapped[uuid.UUID] = _child_fk()
+    title: Mapped[str] = mapped_column(Text, nullable=False)
+    steps: Mapped[list] = _jsonb_list()
+    created_by: Mapped[uuid.UUID | None] = _user_fk()
+    created_by_role: Mapped[str] = mapped_column(Text, nullable=False)
+    created_at: Mapped[datetime] = _created()
+    updated_at: Mapped[datetime] = _updated()

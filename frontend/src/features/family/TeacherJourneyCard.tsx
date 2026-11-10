@@ -30,6 +30,9 @@ export function TeacherJourneyCard({ childId }: { childId: string }) {
       />
       <CardBody className="space-y-5">
         {active ? <ActiveJourney enrolment={active} childId={childId} onChange={replace} onStatus={reload} /> : <EnrolForm childId={childId} onDone={reload} />}
+        <ButtonLink size="sm" variant="ghost" to={paths.familyRoutines(childId)}>
+          {t("family.routines.title")}
+        </ButtonLink>
       </CardBody>
     </Card>
   );

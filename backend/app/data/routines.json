@@ -1,0 +1,41 @@
+{
+  "presets": [
+    {
+      "key": "morning",
+      "title": {"en": "Our morning", "ar": "صباحنا", "he": "הבוקר שלנו"},
+      "steps": [
+        {"emoji": "🌞", "label": {"en": "Wake up", "ar": "نستيقظ", "he": "מתעוררים"}},
+        {"emoji": "🚽", "label": {"en": "Toilet", "ar": "الحمّام", "he": "שירותים"}},
+        {"emoji": "👕", "label": {"en": "Get dressed", "ar": "نلبس", "he": "מתלבשים"}},
+        {"emoji": "🥣", "label": {"en": "Breakfast", "ar": "الفطور", "he": "ארוחת בוקר"}},
+        {"emoji": "🪥", "label": {"en": "Brush teeth", "ar": "نغسل الأسنان", "he": "מצחצחים שיניים"}},
+        {"emoji": "👟", "label": {"en": "Shoes on", "ar": "نلبس الحذاء", "he": "נועלים נעליים"}},
+        {"emoji": "🏫", "label": {"en": "Kindergarten", "ar": "إلى الروضة", "he": "לגן"}}
+      ]
+    },
+    {
+      "key": "bedtime",
+      "title": {"en": "Our bedtime", "ar": "وقت النوم", "he": "שעת השינה שלנו"},
+      "steps": [
+        {"emoji": "🛁", "label": {"en": "Bath", "ar": "الحمّام", "he": "מקלחת"}},
+        {"emoji": "👚", "label": {"en": "Pyjamas", "ar": "البيجاما", "he": "פיג'מה"}},
+        {"emoji": "🪥", "label": {"en": "Brush teeth", "ar": "نغسل الأسنان", "he": "מצחצחים שיניים"}},
+        {"emoji": "📖", "label": {"en": "Story", "ar": "قصة", "he": "סיפור"}},
+        {"emoji": "🤗", "label": {"en": "Hug", "ar": "عناق", "he": "חיבוק"}},
+        {"emoji": "🌙", "label": {"en": "Sleep", "ar": "نوم", "he": "שינה"}}
+      ]
+    },
+    {
+      "key": "arrival",
+      "title": {"en": "Arriving at kindergarten", "ar": "الوصول إلى الروضة", "he": "מגיעים לגן"},
+      "steps": [
+        {"emoji": "🎒", "label": {"en": "Bag on the hook", "ar": "الحقيبة على العلّاقة", "he": "תיק על הקולב"}},
+        {"emoji": "🧼", "label": {"en": "Wash hands", "ar": "نغسل اليدين", "he": "שוטפים ידיים"}},
+        {"emoji": "🤗", "label": {"en": "Goodbye hug", "ar": "عناق الوداع", "he": "חיבוק פרידה"}},
+        {"emoji": "👋", "label": {"en": "Wave at the window", "ar": "نلوّح من النافذة", "he": "מנפנפים בחלון"}},
+        {"emoji": "🧸", "label": {"en": "Play", "ar": "نلعب", "he": "משחקים"}}
+      ]
+    }
+  ],
+  "emojis": ["🌞", "🚽", "👕", "🥣", "🪥", "👟", "🏫", "🛁", "👚", "📖", "🤗", "🌙", "🎒", "🧼", "👋", "🧸", "🍎", "🚗", "🏠", "🎨", "🧩", "🎵", "🌳", "🍽️", "💤", "⏰", "🧺", "🐶"]
+}

@@ -106,3 +106,13 @@ class CopilotAsk(StrictModel):
     question: Annotated[str, Field(max_length=500)] | None = None
     topic: Annotated[str, Field(max_length=60)] | None = None
     language: Literal["en", "ar", "he"] | None = None
+
+
+class RoutineStep(StrictModel):
+    emoji: Annotated[str, Field(min_length=1, max_length=16)]
+    label: Annotated[str, Field(min_length=1, max_length=60)]
+
+
+class RoutineIn(StrictModel):
+    title: Annotated[str, Field(min_length=1, max_length=80)]
+    steps: Annotated[list[RoutineStep], Field(min_length=2, max_length=12)]

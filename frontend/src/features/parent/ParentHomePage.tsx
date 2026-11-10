@@ -147,6 +147,9 @@ function ChildCard({ child: listed }: { child: ParentChild }) {
         <ButtonLink to={paths.parentChildContent(child.id)} variant="secondary" className="flex-1 sm:flex-none" icon={<ContentIcon aria-hidden />}>
           {t("parent.home.shared")}
         </ButtonLink>
+        <ButtonLink to={paths.familyRoutines(child.id)} variant="secondary" className="flex-1 sm:flex-none">
+          {t("family.routines.title")}
+        </ButtonLink>
       </CardFooter>
     </Card>
   );

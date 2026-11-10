@@ -125,3 +125,38 @@ from app.services import scenarios as scenarios_svc  # noqa: E402
 @router.get("/scenarios")
 def list_scenarios(user: CurrentUser) -> dict:
     return scenarios_svc.list_scenarios(user)
+
+
+# --------------------------------------------------------------------------- routines (0013)
+# - GET /routine-presets?language -> {presets, emojis}
+# - GET/POST /children/{id}/routines  parents and staff of the child -> {routines} / 201 {routine}
+# - PUT/DELETE /routines/{id}          parents and staff of the child -> {routine} / 204
+
+from app.schemas.family import RoutineIn  # noqa: E402
+from app.services import family_routines as routines  # noqa: E402
+
+
+@router.get("/routine-presets")
+def routine_presets(user: CurrentUser, language: str | None = None) -> dict:
+    return routines.presets(user, language)
+
+
+@router.get("/children/{child_id}/routines")
+def list_child_routines(child_id: str, db: DB, user: CurrentUser) -> dict:
+    return routines.list_routines(db, user, child_id)
+
+
+@router.post("/children/{child_id}/routines", status_code=201)
+def create_child_routine(child_id: str, body: RoutineIn, db: DB, user: CurrentUser) -> dict:
+    return routines.create_routine(db, user, child_id, body)
+
+
+@router.put("/routines/{routine_id}")
+def update_child_routine(routine_id: str, body: RoutineIn, db: DB, user: CurrentUser) -> dict:
+    return routines.update_routine(db, user, routine_id, body)
+
+
+@router.delete("/routines/{routine_id}", status_code=204)
+def delete_child_routine(routine_id: str, db: DB, user: CurrentUser) -> Response:
+    routines.delete_routine(db, user, routine_id)
+    return Response(status_code=204)

@@ -134,3 +134,29 @@ describe("Parent Copilot", () => {
     expect(document.body.textContent).not.toMatch(NO_SCORES);
   });
 });
+
+describe("Daily routines", () => {
+  it("shows a picture schedule and saves a routine from a preset", async () => {
+    const { RoutinesPage } = await import("./RoutinesPage");
+    let posted: unknown = null;
+    const routine = { id: "r1", child_id: "c1", title: "Our morning", steps: [{ emoji: "🌞", label: "Wake up" }, { emoji: "🥣", label: "Breakfast" }], created_by_role: "parent" };
+    mockFetch({
+      "GET /api/children/c1/routines": { body: { routines: [routine] } },
+      "GET /api/routine-presets": { body: { presets: [{ key: "bedtime", title: "Our bedtime", steps: [{ emoji: "🛁", label: "Bath" }, { emoji: "🌙", label: "Sleep" }] }], emojis: ["🛁", "🌙"] } },
+      "POST /api/children/c1/routines": (init) => {
+        posted = JSON.parse(String(init?.body));
+        return { status: 201, body: { routine: { ...routine, id: "r2" } } };
+      },
+    });
+    const routes: AppRoute[] = [{ path: "/family/:id/routines", element: <RoutinesPage /> }];
+    renderApp({ routes, url: "/family/c1/routines", user: parent });
+    const card = await screen.findByTestId("routine");
+    const step = within(card).getByRole("button", { name: /Wake up/ });
+    fireEvent.click(step);
+    expect(step.getAttribute("aria-pressed")).toBe("true");
+    fireEvent.click(screen.getByRole("button", { name: "Our bedtime" }));
+    const editor = await screen.findByTestId("routine-editor");
+    fireEvent.click(within(editor).getByRole("button", { name: "Save" }));
+    await waitFor(() => expect(posted).toEqual({ title: "Our bedtime", steps: [{ emoji: "🛁", label: "Bath" }, { emoji: "🌙", label: "Sleep" }] }));
+  });
+});

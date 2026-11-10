@@ -44,6 +44,27 @@
     "whenToTalk": "When to talk with someone:",
     "disclaimer": "These are general ideas for everyday family life. They do not replace advice from the kindergarten team or a doctor."
   },
+  "routines": {
+    "title": "Daily routines",
+    "subtitle": "Picture schedules that show your child what comes next. Tap a card when a step is done.",
+    "print": "Print",
+    "blank": "Start from scratch",
+    "empty": "No routines yet",
+    "emptyHint": "Choose a ready routine above and change it to fit your family.",
+    "done": "Done!",
+    "name": "Routine name",
+    "picture": "Picture",
+    "step": "Step {n}",
+    "up": "Move up",
+    "down": "Move down",
+    "removeStep": "Remove this step",
+    "addStep": "Add a step",
+    "delete": "Delete routine",
+    "saved": "The routine was saved.",
+    "deleted": "The routine was deleted.",
+    "notSaved": "The routine was not saved. Check every step has a picture and words.",
+    "wording": "Please use gentle, simple words: your child will see them."
+  },
   "admin": {
     "title": "Family programs",
     "subtitle": "Weekly journeys for families. Parents see the published ones when a teacher starts a journey.",
