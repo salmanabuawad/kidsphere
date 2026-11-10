@@ -11,7 +11,7 @@ import { Link, useParams } from "react-router";
 import { ChevronLeft, ChevronRight, Maximize2 } from "lucide-react";
 import { ContentIcon } from "@/icons";
 import { Alert, Button, Card, CardBody, EmptyState, PageHeader, PageSkeleton } from "@/components/ui";
-import { parseActivity, parseGame, parseStory, parseVideoPlan, PresentFrame, toContentLocale } from "@/features/player";
+import { parseActivity, parseGame, parseHomeActivity, parseStory, parseVideoPlan, PresentFrame, toContentLocale } from "@/features/player";
 import { useI18n } from "@/i18n/I18nProvider";
 import { isApiError } from "@/lib/api";
 import { paths } from "@/lib/paths";
@@ -19,6 +19,7 @@ import { useErrorMessage } from "@/lib/useAction";
 import { useFetch } from "@/lib/useFetch";
 import { contentListUrl, contentUrl, type ContentDetail, type ContentSummary } from "./api";
 import { ContentPreview, playerBody } from "./ContentPreview";
+import { HomeReflectionCard } from "./HomeReflectionCard";
 import { TypeIcon, typeKey } from "./ui";
 
 type ChildLike = { name?: unknown; preferred_name?: unknown };
@@ -50,6 +51,8 @@ function renderable(item: ContentDetail): boolean {
       return parseStory(body) !== null;
     case "real_world_activity":
       return parseActivity(body) !== null;
+    case "home_activity":
+      return parseHomeActivity(body) !== null;
     case "video":
       return parseVideoPlan(body) !== null;
     case "digital_game":
@@ -183,6 +186,9 @@ export function ParentContentPage() {
       </div>
       <div className="rounded-lg border border-line bg-surface p-4 sm:p-6">
         <ContentPreview item={item} audience="child" />
+      </div>
+      <div className="mt-6">
+        <HomeReflectionCard contentId={item.id} />
       </div>
       {full && (
         <PresentFrame lang={toContentLocale(item.language)} onExit={() => setFull(false)}>

@@ -7,7 +7,7 @@
 import { useState, type ReactNode } from "react";
 import { ArrowDown, ArrowUp, Plus, Save, Trash2, Users } from "lucide-react";
 import { Alert, Button, Field, IconButton, Input, Label, Select, Textarea } from "@/components/ui";
-import { isGameTemplate, parseActivity, parseGame, parseStory, parseVideoPlan, toContentLocale } from "@/features/player";
+import { isGameTemplate, parseActivity, parseGame, parseHomeActivity, parseStory, parseVideoPlan, toContentLocale } from "@/features/player";
 import { useI18n } from "@/i18n/I18nProvider";
 import { isApiError } from "@/lib/api";
 import { useAction } from "@/lib/useAction";
@@ -27,6 +27,8 @@ function isValid(item: ContentDetail, draft: Obj): boolean {
       return parseStory(draft) !== null;
     case "real_world_activity":
       return parseActivity(draft) !== null;
+    case "home_activity":
+      return parseHomeActivity(draft) !== null;
     case "video":
       return parseVideoPlan(draft) !== null;
     default:
@@ -79,6 +81,9 @@ export function ContentEditor({
       break;
     case "real_world_activity":
       fields = <ActivityFields draft={draft} set={set} />;
+      break;
+    case "home_activity":
+      fields = <HomeActivityFields draft={draft} set={set} />;
       break;
     case "video":
       fields = <VideoFields draft={draft} set={set} />;
@@ -428,6 +433,56 @@ function ActivityFields({ draft, set }: { draft: Obj; set: SetFn }) {
         itemLabel={(i) => t("content.editor.observeItem", { n: i + 1 })}
       />
       <TextField label={t("content.editor.adaptation")} value={str(draft.adaptation)} max={600} multiline onChange={(v) => set("adaptation", v)} />
+    </>
+  );
+}
+
+function HomeActivityFields({ draft, set }: { draft: Obj; set: SetFn }) {
+  const { t } = useI18n();
+  return (
+    <>
+      <TextField label={t("content.editor.homeWhy")} value={str(draft.goal)} max={300} multiline rows={2} onChange={(v) => set("goal", v)} />
+      <NumberField label={t("content.editor.duration")} value={draft.duration_minutes} min={3} max={30} onChange={(v) => set("duration_minutes", v)} />
+      <TextList
+        label={t("content.editor.materials")}
+        items={arr(draft.materials)}
+        onChange={(v) => set("materials", v)}
+        min={0}
+        max={8}
+        maxLength={120}
+        itemLabel={(i) => t("content.editor.material", { n: i + 1 })}
+      />
+      <TextList
+        label={t("content.editor.homeSteps")}
+        items={arr(draft.steps)}
+        onChange={(v) => set("steps", v)}
+        min={2}
+        max={8}
+        maxLength={400}
+        multiline
+        itemLabel={(i) => t("content.editor.step", { n: i + 1 })}
+      />
+      <TextList
+        label={t("content.editor.homeWords")}
+        items={arr(draft.words_to_try)}
+        onChange={(v) => set("words_to_try", v)}
+        min={1}
+        max={4}
+        maxLength={200}
+        itemLabel={(i) => t("content.editor.homeWordsItem", { n: i + 1 })}
+      />
+      <TextList
+        label={t("content.editor.homeNotice")}
+        items={arr(draft.what_to_notice)}
+        onChange={(v) => set("what_to_notice", v)}
+        min={1}
+        max={4}
+        maxLength={300}
+        multiline
+        itemLabel={(i) => t("content.editor.homeNoticeItem", { n: i + 1 })}
+      />
+      <TextField label={t("content.editor.homeIfHard")} value={str(draft.if_it_feels_hard)} max={400} multiline onChange={(v) => set("if_it_feels_hard", v)} />
+      <TextField label={t("content.editor.homeTip")} value={str(draft.parent_tip)} max={400} multiline onChange={(v) => set("parent_tip", v)} />
     </>
   );
 }

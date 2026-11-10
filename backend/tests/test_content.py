@@ -13,7 +13,7 @@ from sqlalchemy import select
 from app.config import settings
 from app.models import AuditLog, ChildProfile, FocusArea, GeneratedContent, Observation, RecordVersion
 
-KINDS = ("story", "video", "digital_game", "real_world_activity")
+KINDS = ("story", "video", "digital_game", "real_world_activity", "home_activity")
 MODES = ("growth_support", "strength_builder")
 
 ADAM_PHRASE = "Can we build this together?"

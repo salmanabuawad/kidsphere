@@ -16,6 +16,7 @@ KidSphere stores sensitive information about young children. It is an educationa
 | Observations and feedback | `observations`, `content_feedback` | What happened, the context, the support level, what helped, notes. |
 | Generated content | `generated_content` | The content and the minimised AI input that produced it (`generation_input`). |
 | Development reviews | `development_reviews` | Summaries and decisions written or approved by the teacher. |
+| Home reflections | `home_reflections` | A parent's "How did it go at home?" on content shared with them: the result and an optional short note (at most 1000 characters). Shown to the child's staff only, never sent to any AI provider, never turned into an observation. Deleted with the child or the content. |
 | Sessions | `sessions` | The sha256 of the session token, the expiry and the user agent. |
 | Audit log | `audit_log` | Who did what, with ids, keys and field names only. It never holds observation text, answers or content. |
 
@@ -30,6 +31,7 @@ KidSphere stores sensitive information about young children. It is an educationa
   - **Shared content:** only approved or completed content, shown without the teacher note, the AI input, the focus area or any feedback.
   - **What they can never see:** the teacher's perspective, focus areas, observations, the timeline, baselines or reviews.
   - **What they can change:** only the preferred name, additional languages and parent name and contact, plus their own answers. Every change is audited.
+  - **What they can add:** a home reflection on content shared with them. They see only their own reflections.
 - **Unknown or out-of-scope ids** return 404, so the API does not reveal whether a child exists.
 
 ## What is sent to the AI provider
@@ -72,7 +74,7 @@ KidSphere stores sensitive information about young children. It is an educationa
 - A given name that is also a common word (Will, May, אור, نور) is masked wherever that word appears. A name particle (bin, בן, عبد, de) is masked only together with the next word.
 - Vocabulary labels are not changed.
 
-**Never sent:** the birth date, the surname, the photo, the names and photos of the people in the child's life, the parent's name or contact, free-text parent answers (including the message from the heart), the health, medical and family answers, whole perspectives, observation notes and the other observation free texts (who was there, before, after, what changed, documentation), teacher-observation notes and texts, "who is responsible" in a plan, follow-up and summary texts, user accounts and other children's data. The source registries (`backend/app/data/source/*.json`) mark every question with `ai_policy`; anything marked `never` (or not listed) stays out, and `tests/test_ai_payload_policy.py` checks it.
+**Never sent:** the birth date, the surname, the photo, the names and photos of the people in the child's life, the parent's name or contact, free-text parent answers (including the message from the heart) and parents' home reflections, the health, medical and family answers, whole perspectives, observation notes and the other observation free texts (who was there, before, after, what changed, documentation), teacher-observation notes and texts, "who is responsible" in a plan, follow-up and summary texts, user accounts and other children's data. The source registries (`backend/app/data/source/*.json`) mark every question with `ai_policy`; anything marked `never` (or not listed) stays out, and `tests/test_ai_payload_policy.py` checks it.
 
 **Checks and logs:**
 - AI output is validated and safety-checked before it is saved, and it is always saved as a draft for teacher review. AI output may never recommend a referral or a professional evaluation, and never uses deficit wording, also in text only the teacher sees; such output is replaced by the built-in template.
@@ -129,6 +131,7 @@ Important changes are written to `audit_log` in the same transaction as the chan
 - observation create and update
 - content generate, edit, approve, regenerate, duplicate, share, archive and delete
 - feedback
+- home reflections (ids, the result and whether there is a note; never the note)
 - development reviews
 
 The metadata contains only ids, keys and field names. Read a child's history on the server with `python -m app.cli audit --child <id>`.

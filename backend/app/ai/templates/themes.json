@@ -90,6 +90,14 @@
     "telling_about_an_experience": {
       "phrase": {"en": "Guess what happened today!", "ar": "خمّنوا ماذا حدث اليوم!", "he": "נחשו מה קרה היום!"},
       "goal_child": {"en": "tell what happened", "ar": "يحكي ما حدث", "he": "לספר מה קרה"}
+    },
+    "naming_feelings": {
+      "phrase": {"en": "I feel happy. I feel sad. I feel angry.", "ar": "أنا سعيد. أنا حزين. أنا غاضب.", "ar_f": "أنا سعيدة. أنا حزينة. أنا غاضبة.", "he": "אני שמח/ה. אני עצוב/ה. אני כועס/ת."},
+      "goal_child": {"en": "give each feeling a name", "ar": "يسمّي كل شعور باسمه", "he": "לתת לכל רגש שם"}
+    },
+    "talking_about_feelings_with_family": {
+      "phrase": {"en": "Today I felt…", "ar": "اليوم شعرت بـ…", "he": "היום הרגשתי…"},
+      "goal_child": {"en": "tell the family how the day felt", "ar": "يحكي للعائلة عن مشاعره في يومه", "he": "לספר למשפחה איך הרגיש היום"}
     }
   },
   "themes": {

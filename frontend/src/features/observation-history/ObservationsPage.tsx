@@ -167,6 +167,7 @@ function ObservationHistory({ childId }: { childId: string }) {
 export function ObservationKind({ o }: { o: ObservationRow }) {
   const { t } = useI18n();
   if (o.source === "content_feedback") return <>{o.content_title ? t("history.observations.after", { title: o.content_title }) : t("history.sources.content_feedback")}</>;
+  if (o.source === "session") return <>{t("history.sources.session")}</>;
   return <>{t("history.sources.quick")}</>;
 }
 

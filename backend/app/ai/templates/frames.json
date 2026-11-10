@@ -155,5 +155,28 @@
     "nq_helps": {"en": "Which of the things that help ({helps}) makes the biggest difference for {name}, and when?", "ar": "أيّ مما يساعد ({helps}) يُحدث الفرق الأكبر لدى {name}، ومتى؟", "he": "מה מבין הדברים שעוזרים ({helps}) עושה את ההבדל הגדול ביותר עבור {name}, ומתי?"},
     "fs_team": {"en": "Share with the kindergarten team what helps {name} ({helps}), so that everyone responds in the same way.", "ar": "شاركوا فريق الروضة بما يساعد {name} ({helps})، كي يستجيب الجميع بالطريقة نفسها.", "he": "לשתף את צוות הגן במה שעוזר ל{name} ({helps}), כדי שכולם יגיבו באותה דרך."},
     "fs_team_none": {"en": "Share with the kindergarten team what helps {name} in everyday moments, so that everyone responds in the same way.", "ar": "شاركوا فريق الروضة بما يساعد {name} في اللحظات اليومية، كي يستجيب الجميع بالطريقة نفسها.", "he": "לשתף את צוות הגן במה שעוזר ל{name} ברגעים יומיומיים, כדי שכולם יגיבו באותה דרך."}
+  },
+  "home": {
+    "title": {"en": "At Home Together: {HeroTitle} and Me", "ar": "معاً في البيت: {hero} وأنا", "he": "יחד בבית: {hero} ואני"},
+    "goal": {"en": "A short, playful time together that helps {name} {goal_child}.", "ar": "وقت قصير وممتع معاً يساعد {name} على أن {goal_child}.", "he": "זמן קצר ונעים של משחק יחד, שעוזר ל{name} {goal_child}."},
+    "material": {"en": "A cushion or a soft toy", "ar": "وسادة أو دمية طرية", "he": "כרית או בובה רכה"},
+    "steps": [
+      {"en": "Choose a calm moment of about ten minutes, with no screens around. Sit close to {name}.", "ar": "اختاروا لحظة هادئة لمدة عشر دقائق تقريباً، بعيداً عن الشاشات. اجلسوا قريباً من {name}.", "he": "לבחור רגע רגוע של כעשר דקות, בלי מסכים. לשבת קרוב ל{name}."},
+      {"en": "Play with {material_lc} together and let {name} lead the game for a few minutes.", "ar": "العبوا معاً بـ{material} ودعوا {name} يقود اللعب لبضع دقائق.", "ar_f": "العبوا معاً بـ{material} ودعوا {name} تقود اللعب لبضع دقائق.", "he": "לשחק יחד עם {material} ולתת ל{name} להוביל את המשחק כמה דקות."},
+      {"en": "Act out a small moment with {hero}: something does not go as planned. Ask: “How does {hero} feel?”", "ar": "مثّلوا لحظة صغيرة مع {hero}: شيء لا يسير كما خطّطنا. واسألوا: «بماذا يشعر {hero}؟»", "he": "להמחיש רגע קטן עם {hero}: משהו לא הולך כמו שתכננו. לשאול: ״איך {hero} מרגיש?״"},
+      {"en": "Show how {hero} says: “{phrase}” Then invite {name} to say it too. Every try is welcome.", "ar": "أظهروا كيف يقول {hero}: «{phrase}» ثم ادعوا {name} ليقولها أيضاً. كل محاولة مرحّب بها.", "ar_f": "أظهروا كيف يقول {hero}: «{phrase}» ثم ادعوا {name} لتقولها أيضاً. كل محاولة مرحّب بها.", "he": "להראות איך {hero} אומר: ״{phrase}״ ואז להזמין את {name} להגיד גם. כל ניסיון מתקבל בברכה."},
+      {"en": "Finish with a hug or warm words about what you enjoyed together.", "ar": "اختموا بعناق أو بكلمات دافئة عمّا استمتعتم به معاً.", "he": "לסיים בחיבוק או במילים חמות על מה שנהניתם ממנו יחד."}
+    ],
+    "words": [
+      {"en": "I see you. I am here with you.", "ar": "أنا أراك. أنا هنا معك.", "ar_f": "أنا أراكِ. أنا هنا معكِ.", "he": "אני רואה אותך. אני כאן איתך."},
+      {"en": "What do you think {hero} feels now?", "ar": "بماذا تظن أن {hero} يشعر الآن؟", "ar_f": "بماذا تظنين أن {hero} يشعر الآن؟", "he": "מה לדעתך {hero} מרגיש עכשיו?"}
+    ],
+    "notice": [
+      {"en": "What did {name} enjoy most?", "ar": "ما الذي استمتع به {name} أكثر؟", "ar_f": "ما الذي استمتعت به {name} أكثر؟", "he": "ממה {name} נהנה/תה הכי הרבה?"},
+      {"en": "Did {name} say the words “{phrase}” or similar words?", "ar": "هل قال {name} عبارة «{phrase}» أو كلمات مشابهة؟", "ar_f": "هل قالت {name} عبارة «{phrase}» أو كلمات مشابهة؟", "he": "האם {name} אמר/ה את המילים ״{phrase}״ או מילים דומות?"}
+    ],
+    "if_hard": {"en": "Keep it short and playful. You can say the words for {hero} yourself and try again another day.", "ar": "اجعلوه قصيراً ومرحاً. يمكنكم أن تقولوا الكلمات بأنفسكم على لسان {hero} وأن تحاولوا مرة أخرى في يوم آخر.", "he": "לשמור על זה קצר ומשחקי. אפשר להגיד את המילים בעצמכם בשם {hero} ולנסות שוב ביום אחר."},
+    "helper": {"en": "What often helps {name}: “{helper}”.", "ar": "ما يساعد {name} غالباً: «{helper}».", "he": "מה שעוזר ל{name} לעתים קרובות: ״{helper}״."},
+    "tip": {"en": "There is no right or wrong way to play. The time you spend together is what matters most.", "ar": "لا توجد طريقة صحيحة أو خاطئة للعب. الوقت الذي تقضونه معاً هو الأهم.", "he": "אין דרך נכונה או לא נכונה לשחק. הזמן שאתם מבלים יחד הוא הדבר החשוב ביותר."}
   }
 }

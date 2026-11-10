@@ -294,6 +294,29 @@ def activity(kit: _Kit) -> dict:
     }
 
 
+def home_activity(kit: _Kit) -> dict:
+    """A parent-child activity at home, written to the parent in plain words (no screen)."""
+    h = kit.frames["home"]
+    materials = [kit.vars["material"]]
+    extra = kit.say(h["material"])
+    if extra.lower() != materials[0].lower():
+        materials.append(extra)
+    if_hard = kit.say(h["if_hard"])
+    if kit.vars["helper"]:
+        if_hard = f"{if_hard} {kit.say(h['helper'])}"
+    return {
+        "title": kit.say(h["title"]),
+        "goal": kit.say(h["goal"]),
+        "duration_minutes": 10,
+        "materials": materials,
+        "steps": [kit.say(s) for s in h["steps"]],
+        "words_to_try": [kit.vars["phrase"], *[kit.say(w) for w in h["words"]]],
+        "what_to_notice": [kit.say(n) for n in h["notice"]],
+        "if_it_feels_hard": if_hard,
+        "parent_tip": kit.say(h["tip"]),
+    }
+
+
 def _round(question: str, choices: list[dict], answer_label: str | None, explanation: str, v: int) -> dict:
     choices = _rotate(choices, v)
     answer = next((i for i, c in enumerate(choices) if c["label"] == answer_label), None) if answer_label else None
@@ -408,6 +431,8 @@ def generate(kind: str, ctx: AIContext, template: str | None = None) -> dict:
         return story(kit)
     if kind == "real_world_activity":
         return activity(kit)
+    if kind == "home_activity":
+        return home_activity(kit)
     if kind == "digital_game":
         return game(kit, template or ctx.template or pick_template(ctx))
     if kind == "video":

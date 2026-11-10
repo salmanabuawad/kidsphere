@@ -14,7 +14,9 @@ Gender = Literal["girl", "boy", "unspecified"]
 SupportLevel = Literal["independent", "some_support", "significant_support", "not_observed"]
 FocusStatus = Literal["active", "paused", "completed"]
 Mode = Literal["strength_builder", "growth_support"]
-ContentType = Literal["story", "video", "digital_game", "real_world_activity"]
+ContentType = Literal["story", "video", "digital_game", "real_world_activity", "home_activity"]
+# Library items are made for children or groups in the kindergarten: no home activities.
+LibraryContentType = Literal["story", "video", "digital_game", "real_world_activity"]
 ContentStatus = Literal["draft", "approved", "completed", "archived"]
 FeedbackResult = Literal["worked_well", "partly", "did_not_work"]
 

@@ -31,7 +31,19 @@ from sqlalchemy.orm import Session
 
 from app import vocab
 from app.config import settings
-from app.models import Baseline, Child, ChildParent, ChildProfile, Class, ClassTeacher, FocusArea, Observation, User
+from app.models import (
+    Baseline,
+    Child,
+    ChildParent,
+    ChildProfile,
+    Class,
+    ClassTeacher,
+    FocusArea,
+    GeneratedContent,
+    HomeReflection,
+    Observation,
+    User,
+)
 from app.schemas.focus import FocusCreate
 from app.schemas.profile import ProfilePatch
 from app.security import hash_password
@@ -249,6 +261,43 @@ def _seed_child(db: Session, teacher: User, parent: User, klass: Class, name: st
     return child, True
 
 
+MAYA_FAMILY_FOCUS = {"suggestion_key": "naming_feelings"}
+MAYA_HOME_NOTE = "We played with her toy animals. She said the lion felt sad, then happy again when his friend came back."
+
+
+def _seed_family(db: Session, teacher: User, parent: User, child: Child) -> None:
+    """Family and home demo (0010): an emotional goal, a home activity the teacher approved and shared,
+    and the parent's reflection on it. Always made with the built-in templates (never calls the AI)."""
+    from app.ai import template_provider
+    from app.ai.service import pseudonymous_context, validate_output
+    from app.services import content as content_svc
+
+    now = utcnow()
+    focus_id = uuid.UUID(focus_areas.create_focus(db, teacher, child.id, FocusCreate(**MAYA_FAMILY_FOCUS))["focus_area"]["id"])
+    db.execute(update(FocusArea).where(FocusArea.id == focus_id).values(created_at=now - timedelta(days=2)))
+    db.commit()
+    focus = db.get(FocusArea, focus_id)
+    profile = db.scalar(select(ChildProfile).where(ChildProfile.child_id == child.id))
+    ctx = content_svc._context(db, child, profile, mode="growth_support", kind="home_activity", language="en",
+                               focus=focus, target=None)
+    content, issues = validate_output("home_activity", template_provider.generate("home_activity", ctx))
+    if content is None:  # pragma: no cover - the template tests keep this valid
+        raise RuntimeError(f"home activity template is invalid: {issues}")
+    approved_at = now - timedelta(days=2) + timedelta(hours=2)
+    row = GeneratedContent(
+        child_id=child.id, focus_area_id=focus_id, mode="growth_support", content_type="home_activity", language="en",
+        title=content["title"], content=content, status="approved", shared_with_parent=True,
+        generation_input=pseudonymous_context(ctx).model_dump(mode="json"), ai_provider="template",
+        ai_model=template_provider.TEMPLATE_MODEL, is_template=True, variant=0, people=[],
+        approved_by=teacher.id, approved_at=approved_at, created_by=teacher.id,
+    )
+    db.add(row)
+    db.flush()
+    db.add(HomeReflection(content_id=row.id, child_id=child.id, result="worked_well", note=MAYA_HOME_NOTE,
+                          created_by=parent.id, created_at=now - timedelta(days=1)))
+    db.commit()
+
+
 def seed(db: Session, password: str | None = None) -> dict:
     """Create the demo world; returns {"password", "users", "children"}."""
     password = password or secrets.token_urlsafe(9)
@@ -268,6 +317,8 @@ def seed(db: Session, password: str | None = None) -> dict:
                                  ADAM_OBSERVATIONS)
     maya, maya_new = _seed_child(db, teacher, users["demo-parent-maya"], klass, "Maya", _birth_date(5, 1), "girl", MAYA, None,
                                  MAYA_OBSERVATIONS)
+    if maya_new:
+        _seed_family(db, teacher, users["demo-parent-maya"], maya)
     return {
         "password": password,
         "users": [email for email, _, _ in USERS],

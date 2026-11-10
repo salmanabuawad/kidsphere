@@ -99,7 +99,7 @@ WHAT_HELPS_LISTS = ("what_helps", "calming_helps", "transition_helps", "sensitiv
 STRENGTH_LISTS = ("strengths", "strength_targets")
 
 Mode = Literal["strength_builder", "growth_support"]
-ContentType = Literal["story", "video", "digital_game", "real_world_activity", "pack", "understanding",
+ContentType = Literal["story", "video", "digital_game", "real_world_activity", "home_activity", "pack", "understanding",
                       "functional_summary"]
 Template = Literal[
     "multiple_choice", "match_pairs", "sequence", "emotion_choice", "categorize", "what_happens_next", "story_builder"

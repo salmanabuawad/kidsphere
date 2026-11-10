@@ -8,6 +8,7 @@ checks (answer index in range, categories exist, unique items) live in
 Kinds and their models:
     story                -> StoryOut
     real_world_activity  -> ActivityOut
+    home_activity        -> HomeActivityOut (for the parent, at home)
     digital_game         -> one of GAME_MODELS (discriminated on ``template``; ``GameOut``)
     video                -> VideoPlanOut
     pack                 -> PackOut (story with exactly 3 questions, activity, game,
@@ -81,6 +82,21 @@ class ActivityOut(Out):
     instructions: list[Text(400)] = Field(min_length=2, max_length=10)
     what_to_observe: list[Text(300)] = Field(min_length=1, max_length=6)
     adaptation: Text(600)
+
+
+class HomeActivityOut(Out):
+    """A short activity a parent does with the child at home (offline, no screen). Every field is read
+    by the parent, so every field gets the child-facing wording check (safety.child_facing_fields)."""
+
+    title: Text(120)
+    goal: Text(300)
+    duration_minutes: int = Field(ge=3, le=30)
+    materials: list[Text(120)] = Field(max_length=8)
+    steps: list[Text(400)] = Field(min_length=2, max_length=8)
+    words_to_try: list[Text(200)] = Field(min_length=1, max_length=4)
+    what_to_notice: list[Text(300)] = Field(min_length=1, max_length=4)
+    if_it_feels_hard: Text(400)
+    parent_tip: Text(400)
 
 
 # --------------------------------------------------------------------------- games
@@ -389,6 +405,7 @@ class FunctionalSummaryDraft(Out):
 KIND_MODELS: dict[str, type[Out]] = {
     "story": StoryOut,
     "real_world_activity": ActivityOut,
+    "home_activity": HomeActivityOut,
     "video": VideoPlanOut,
     "pack": PackOut,
     "understanding": UnderstandingSuggestion,

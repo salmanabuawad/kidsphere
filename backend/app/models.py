@@ -1,7 +1,7 @@
-"""All 29 tables as SQLAlchemy 2 models.
+"""All 30 tables as SQLAlchemy 2 models.
 
 The schema itself is created by the hand-written Alembic revisions in
-``migrations/versions/`` (``0001_initial.py`` … ``0008_library_media.py``); these
+``migrations/versions/`` (``0001_initial.py`` … ``0010_family_home.py``); these
 models must mirror them (tests/test_migrations.py checks that every column
 exists in both).
 
@@ -49,10 +49,10 @@ LANGUAGE_VALUES = ("ar", "he", "en")
 GENDER_VALUES = ("girl", "boy", "unspecified")
 FOCUS_STATUS_VALUES = ("active", "paused", "completed")
 MODE_VALUES = ("strength_builder", "growth_support")
-CONTENT_TYPE_VALUES = ("story", "video", "digital_game", "real_world_activity")
+CONTENT_TYPE_VALUES = ("story", "video", "digital_game", "real_world_activity", "home_activity")
 CONTENT_STATUS_VALUES = ("draft", "approved", "completed", "archived")
 VIDEO_STATUS_VALUES = ("script_ready", "generating", "ready", "failed")
-OBSERVATION_SOURCE_VALUES = ("quick", "content_feedback")
+OBSERVATION_SOURCE_VALUES = ("quick", "content_feedback", "session")
 SUPPORT_LEVEL_VALUES = ("independent", "some_support", "significant_support", "not_observed")
 FEEDBACK_RESULT_VALUES = ("worked_well", "partly", "did_not_work")
 
@@ -314,6 +314,9 @@ class Observation(Base):
     domains: Mapped[list[str]] = mapped_column(
         ARRAY(Text), nullable=False, default=list, server_default=text("'{}'::text[]"))
     attributes: Mapped[dict | None] = mapped_column(JSONB)
+    # 0009: the class session it was noted in (source "session"; one per child and session).
+    session_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("class_sessions.id", ondelete="SET NULL"))
 
 
 class ContentFeedback(Base):
@@ -766,3 +769,48 @@ class LibraryMedia(Base):
     created_by: Mapped[uuid.UUID | None] = _user_fk()
     created_at: Mapped[datetime] = _created()
     updated_at: Mapped[datetime] = _updated()
+
+
+# --------------------------------------------------------------------------- 0009: class sessions
+
+
+class ClassSession(Base):
+    """A group activity a teacher ran with children of a class (services/class_sessions.py)."""
+
+    __tablename__ = "class_sessions"
+
+    id: Mapped[uuid.UUID] = _pk()
+    class_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("classes.id", ondelete="CASCADE"), nullable=False)
+    library_item_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("library_items.id"))
+    title: Mapped[str] = mapped_column(Text, nullable=False)
+    held_on: Mapped[date] = mapped_column(Date, nullable=False)
+    created_by: Mapped[uuid.UUID | None] = _user_fk()
+    created_at: Mapped[datetime] = _created()
+    updated_at: Mapped[datetime] = _updated()
+
+
+class ClassSessionChild(Base):
+    __tablename__ = "class_session_children"
+
+    session_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("class_sessions.id", ondelete="CASCADE"), primary_key=True)
+    child_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("children.id", ondelete="CASCADE"), primary_key=True)
+
+
+class HomeReflection(Base):
+    """A parent's short note on how shared content went at home (services/home_reflections.py).
+
+    Parent-reported, never an observation: it is shown to staff (timeline, next steps) and is never
+    sent to the AI (its note is parent free text). Rows are only inserted.
+    """
+
+    __tablename__ = "home_reflections"
+
+    id: Mapped[uuid.UUID] = _pk()
+    content_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("generated_content.id", ondelete="CASCADE"), nullable=False)
+    child_id: Mapped[uuid.UUID] = _child_fk()
+    result: Mapped[str] = mapped_column(Text, nullable=False)
+    note: Mapped[str | None] = mapped_column(Text)
+    client_request_id: Mapped[str | None] = mapped_column(Text)
+    created_by: Mapped[uuid.UUID | None] = _user_fk()
+    created_at: Mapped[datetime] = _created()

@@ -1,0 +1,21 @@
+{
+  "title": "Suggested next step",
+  "subtitle": "What was recorded lately for each Current Focus, and an idea for what could come next.",
+  "factsTitle": "What was recorded",
+  "noFacts": "Nothing recorded yet for this focus.",
+  "suggestionTitle": "Idea for next",
+  "reasons": {
+    "start": "Nothing has been tried yet. A short story can introduce the idea, and an activity at home lets the family practise it too.",
+    "build": "The last time went well. Keep it going with a small game, and invite the family to practise at home.",
+    "repeat": "It partly worked. Practise the same idea again in the kindergarten with a little support, and share an activity for home.",
+    "smaller_step": "It did not work this time. Try a smaller, gentler step: read a calm story together and plan an activity with more adult support."
+  },
+  "create": "Create: {type}",
+  "libraryTitle": "Ready-made from the library",
+  "kinds": {
+    "teacher_feedback": "Teacher feedback:",
+    "home_reflection": "From home (parent):",
+    "observation": "Observation:"
+  },
+  "disclaimer": "This is a simple suggestion based on what was recorded. You decide what comes next."
+}

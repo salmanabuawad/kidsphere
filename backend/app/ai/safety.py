@@ -128,6 +128,7 @@ def placeholder_issues(data, allowed=()) -> list[str]:
 
 _STORY = {"title", "story", "questions", "illustrations"}
 _ACTIVITY = {"title", "instructions", "materials"}
+_HOME = {"title", "goal", "materials", "steps", "words_to_try", "what_to_notice", "if_it_feels_hard", "parent_tip"}
 _VIDEO = {"title", "script", "scenes.narration"}
 _GAME = {"title", "intro", "rounds", "pairs", "items", "categories", "steps", "closing_prompt"}
 
@@ -137,6 +138,8 @@ def child_facing_fields(kind: str, template: str | None = None) -> set[str]:
         return set(_STORY)
     if kind == "real_world_activity":
         return set(_ACTIVITY)
+    if kind == "home_activity":
+        return set(_HOME)
     if kind == "digital_game":
         return set(_GAME)
     if kind == "video":

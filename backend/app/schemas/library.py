@@ -11,7 +11,7 @@ from typing import Annotated, Literal
 
 from pydantic import BeforeValidator, Field
 
-from app.schemas.common import ContentType, Language, Mode, StrictModel
+from app.schemas.common import Language, LibraryContentType, Mode, StrictModel
 from app.schemas.content import OptionalKey, _blank_to_none
 
 LibraryStatus = Literal["draft", "published", "archived"]
@@ -48,7 +48,7 @@ class CollectionUpdate(StrictModel):
 
 class ItemCreate(StrictModel):
     collection_id: uuid.UUID
-    content_type: ContentType
+    content_type: LibraryContentType
     language: Language
     content: dict
     hero: Hero = None

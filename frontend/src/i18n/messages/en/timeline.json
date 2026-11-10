@@ -26,6 +26,7 @@
     "focus_closed_paused": "Focus paused",
     "observation": "Observation",
     "content_feedback": "Feedback",
+    "home_reflection": "From home",
     "content_approved": "Content approved",
     "review": "Development review",
     "summary_approved": "Functional summary approved",
@@ -54,7 +55,9 @@
     "reassessment": "Follow-up observation cycle"
   },
   "feedbackOn": "After “{title}”",
+  "fromHomeOn": "At home: “{title}”",
   "focusLink": "Focus: {title}",
+  "inSession": "In a group session: {title}",
   "baselineText": "The starting picture of strengths, interests and what helps was saved.",
   "openReview": "Open development",
   "openPlan": "Open the plan",

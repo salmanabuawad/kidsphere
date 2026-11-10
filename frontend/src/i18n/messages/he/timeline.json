@@ -26,6 +26,7 @@
     "focus_closed_paused": "המיקוד הושהה",
     "observation": "תצפית",
     "content_feedback": "משוב",
+    "home_reflection": "מהבית",
     "content_approved": "תוכן אושר",
     "review": "סקירת התפתחות",
     "summary_approved": "הסיכום התפקודי אושר",
@@ -54,7 +55,9 @@
     "reassessment": "מחזור תצפית חוזר"
   },
   "feedbackOn": "אחרי „{title}”",
+  "fromHomeOn": "בבית: „{title}”",
   "focusLink": "מיקוד: {title}",
+  "inSession": "במפגש קבוצתי: {title}",
   "baselineText": "נשמרה תמונת הפתיחה של החוזקות, תחומי העניין ומה שעוזר.",
   "openReview": "מעבר להתפתחות",
   "openPlan": "מעבר לתוכנית",

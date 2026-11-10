@@ -7,6 +7,7 @@ import {
   type ChoiceTemplate,
   type Game,
   type GameTemplate,
+  type HomeActivity,
   type MatchPairsGame,
   type Round,
   type SequenceGame,
@@ -115,6 +116,23 @@ export function parseActivity(data: unknown): Activity | null {
       instructions: list(o.instructions, 2, 10, "instructions", (s) => text(s, 400, "instruction")),
       what_to_observe: list(o.what_to_observe, 1, 6, "what_to_observe", (s) => text(s, 300, "what_to_observe")),
       adaptation: text(o.adaptation, 600, "adaptation"),
+    };
+  });
+}
+
+export function parseHomeActivity(data: unknown): HomeActivity | null {
+  return safely(() => {
+    const o = obj(data, "home_activity");
+    return {
+      title: text(o.title, 120, "title"),
+      goal: text(o.goal, 300, "goal"),
+      duration_minutes: int(o.duration_minutes, 3, 30, "duration_minutes"),
+      materials: list(o.materials, 0, 8, "materials", (m) => text(m, 120, "material")),
+      steps: list(o.steps, 2, 8, "steps", (s) => text(s, 400, "step")),
+      words_to_try: list(o.words_to_try, 1, 4, "words_to_try", (s) => text(s, 200, "words_to_try")),
+      what_to_notice: list(o.what_to_notice, 1, 4, "what_to_notice", (s) => text(s, 300, "what_to_notice")),
+      if_it_feels_hard: text(o.if_it_feels_hard, 400, "if_it_feels_hard"),
+      parent_tip: text(o.parent_tip, 400, "parent_tip"),
     };
   });
 }

@@ -19,7 +19,8 @@
   },
   "sources": {
     "quick": "Quick observation",
-    "content_feedback": "After an activity"
+    "content_feedback": "After an activity",
+    "session": "In a group session"
   },
   "observations": {
     "title": "Observations",

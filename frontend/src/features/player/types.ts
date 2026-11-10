@@ -32,6 +32,19 @@ export type Activity = {
   adaptation: string;
 };
 
+/** HomeActivityOut: a short activity a parent does with the child at home (written to the parent). */
+export type HomeActivity = {
+  title: string;
+  goal: string;
+  duration_minutes: number;
+  materials: string[];
+  steps: string[];
+  words_to_try: string[];
+  what_to_notice: string[];
+  if_it_feels_hard: string;
+  parent_tip: string;
+};
+
 /** `emoji` pictures the scene in the narrated slideshow (plans made before it have none). */
 export type VideoScene = { description: string; narration: string; visual_prompt: string; emoji?: string | null };
 

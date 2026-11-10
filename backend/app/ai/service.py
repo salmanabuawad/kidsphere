@@ -95,7 +95,7 @@ from app.models import AiSuggestion, Baseline, ChildProfile, FocusArea, Observat
 
 log = logging.getLogger("app.ai")
 
-KINDS = ("story", "real_world_activity", "digital_game", "video", "pack")
+KINDS = ("story", "real_world_activity", "home_activity", "digital_game", "video", "pack")
 MIN_LINKED_OBSERVATIONS = 3
 MAX_UNDERSTANDING_OBSERVATIONS = 40
 MAX_SUMMARY_OBSERVATIONS = 40

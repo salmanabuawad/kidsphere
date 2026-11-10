@@ -85,7 +85,7 @@ EXACT_KEYS = {
     "validation_statuses": [
         "supported", "partially_supported", "needs_more_observation", "may_need_refinement",
     ],
-    "content_types": ["story", "video", "digital_game", "real_world_activity", "pack"],
+    "content_types": ["story", "video", "digital_game", "real_world_activity", "home_activity", "pack"],
     "modes": ["strength_builder", "growth_support"],
     "game_templates": [
         "multiple_choice", "match_pairs", "sequence", "emotion_choice", "categorize",

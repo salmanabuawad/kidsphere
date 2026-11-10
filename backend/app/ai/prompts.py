@@ -65,6 +65,17 @@ KIND_GUIDES = {
         "2-4 observable things the teacher should notice (including how much adult support was needed); adaptation = "
         "how to make it easier or give more support if it feels hard for the child."
     ),
+    "home_activity": (
+        "Plan a short activity a parent does with the child at home, without a screen (shared play, a feelings "
+        "game, role play with toys, a calm routine, a small cooperative task): title; goal (one plain sentence for the "
+        "parent: what this time together supports); duration_minutes (5-15); materials = everyday things found at "
+        "home; steps = 3-6 short, concrete steps written to the parent in plain words (no professional terms); "
+        "words_to_try = 2-3 short sentences the parent can say (include the phrase the child can practise, in quotes); "
+        "what_to_notice = 2-3 simple things the parent may notice (what the child enjoyed, which words they used); "
+        "if_it_feels_hard = how to make it shorter or easier and try again another day; parent_tip = one warm sentence "
+        "reminding the parent that the time together matters more than doing it right. Never blame or worry the "
+        "parent, never mention problems of the child, and never give medical or therapy advice."
+    ),
     "video": (
         "Write a short video content plan (no video is generated now): title; learning_goal; script (the full "
         "narration, under 90 seconds when read aloud); scenes = 3-6 scenes, each with a description, the narration "

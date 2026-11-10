@@ -18,7 +18,7 @@ from pydantic import AfterValidator, BeforeValidator, Field
 from app.schemas.common import FeedbackResult, Language, Mode, StrictModel, SupportLevel
 from app.schemas.observations import HelpItem, RequestId, _check_helps
 
-GenerateType = Literal["story", "video", "digital_game", "real_world_activity", "pack"]
+GenerateType = Literal["story", "video", "digital_game", "real_world_activity", "home_activity", "pack"]
 GameTemplate = Literal[
     "multiple_choice", "match_pairs", "sequence", "emotion_choice", "categorize", "what_happens_next", "story_builder"
 ]

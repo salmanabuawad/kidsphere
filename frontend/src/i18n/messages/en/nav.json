@@ -12,5 +12,6 @@
   "settings": "Settings",
   "aiEngines": "AI engines",
   "library": "Library",
-  "adminLibrary": "Manage library"
+  "adminLibrary": "Manage library",
+  "sessions": "Group sessions"
 }

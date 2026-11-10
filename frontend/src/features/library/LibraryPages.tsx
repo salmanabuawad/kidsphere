@@ -5,11 +5,12 @@
  */
 import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
-import { ChevronRight, LibraryBig, Send } from "lucide-react";
+import { ChevronRight, LibraryBig, Send, Users } from "lucide-react";
 import { Alert, Button, Card, CardBody, Checkbox, Dialog, EmptyState, PageHeader, PageSkeleton, Skeleton } from "@/components/ui";
 import { ChildPicker, toggleIn } from "@/features/children";
 import { ContentPreview, type ContentDetail } from "@/features/content";
 import { TypeIcon, typeKey } from "@/features/content/ui";
+import { StartSessionDialog } from "@/features/sessions/StartSessionDialog";
 import { useI18n } from "@/i18n/I18nProvider";
 import { useOptions } from "@/lib/options";
 import { paths } from "@/lib/paths";
@@ -100,6 +101,7 @@ export function LibraryItemPage() {
   const toMessage = useErrorMessage();
   const { data, error, loading, reload } = useFetch<ItemResponse>(libraryItemUrl(id));
   const [open, setOpen] = useState(false);
+  const [runOpen, setRunOpen] = useState(false);
   const item = data?.item;
   if (!item) {
     if (error)
@@ -131,9 +133,22 @@ export function LibraryItemPage() {
         eyebrow={t(`content.types.${type}`)}
         title={<span dir="auto">{item.title}</span>}
         actions={
-          <Button onClick={() => setOpen(true)} icon={<Send className="size-4 rtl:-scale-x-100" aria-hidden />}>
-            {t("library.assign")}
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant={item.audience === "group" ? "primary" : "outline"}
+              onClick={() => setRunOpen(true)}
+              icon={<Users className="size-4" aria-hidden />}
+            >
+              {t("sessions.runWithClass")}
+            </Button>
+            <Button
+              variant={item.audience === "group" ? "outline" : "primary"}
+              onClick={() => setOpen(true)}
+              icon={<Send className="size-4 rtl:-scale-x-100" aria-hidden />}
+            >
+              {t("library.assign")}
+            </Button>
+          </div>
         }
       />
       {item.goal && (
@@ -150,6 +165,7 @@ export function LibraryItemPage() {
         </CardBody>
       </Card>
       <AssignDialog item={item} open={open} onClose={() => setOpen(false)} />
+      {runOpen && <StartSessionDialog open item={item} onClose={() => setRunOpen(false)} />}
     </div>
   );
 }

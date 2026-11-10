@@ -20,8 +20,8 @@ latest plan version.
 
 Observation JSON::
 
-    {id, child_id, source: quick|content_feedback, observed_at, focus_area_id,
-     focus_area_title, content_id, content_title, result, area, context,
+    {id, child_id, source: quick|content_feedback|session, observed_at, focus_area_id,
+     focus_area_title, content_id, content_title, session_id, result, area, context,
      observation, support_level, what_helped: [{key}|{custom}] | null, note,
      details: {what_i_see, when, when_detail{…}, what_needed, needs{helps, text},
                what_we_did, plan_ref{focus_area_id, version_seq}, did_it_change,
@@ -51,7 +51,7 @@ DEFAULT_LIMIT = 30
 MAX_LIMIT = 100
 # Clock skew allowed for observed_at coming from a phone.
 FUTURE_SLACK = timedelta(minutes=10)
-SOURCES = ("quick", "content_feedback")
+SOURCES = ("quick", "content_feedback", "session")
 
 # observations.area (priority_categories) → AI domains (migration 0002 uses the same map).
 AREA_DOMAINS: dict[str, list[str]] = {
@@ -143,6 +143,7 @@ def _out(row) -> dict:
         "focus_area_title": focus_title,
         "content_id": str(obs.content_id) if obs.content_id else None,
         "content_title": content_title,
+        "session_id": str(obs.session_id) if obs.session_id else None,
         "result": result,
         "area": obs.area,
         "context": obs.context,

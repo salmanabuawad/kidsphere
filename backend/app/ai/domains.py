@@ -84,6 +84,8 @@ FOCUS_SUGGESTION_DOMAINS: dict[str, tuple[str, ...]] = {
     "managing_transitions": ("daily_routine", "executive_function"),
     "separating_in_the_morning": ("emotional", "daily_routine"),
     "sorting_and_matching": ("cognitive",),
+    "naming_feelings": ("emotional", "language"),
+    "talking_about_feelings_with_family": ("communication", "emotional"),
 }
 STRENGTH_DOMAINS: dict[str, tuple[str, ...]] = {
     "imagination": ("play", "cognitive"),

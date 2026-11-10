@@ -19,7 +19,8 @@
   },
   "sources": {
     "quick": "ملاحظة سريعة",
-    "content_feedback": "بعد نشاط"
+    "content_feedback": "بعد نشاط",
+    "session": "في جلسة جماعية"
   },
   "observations": {
     "title": "الملاحظات",

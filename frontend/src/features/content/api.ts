@@ -14,22 +14,22 @@
 import type { ContentCast, GameTemplate, MediaRef, VideoStatus } from "@/features/player";
 import { api } from "@/lib/api";
 
-export type ContentType = "story" | "video" | "digital_game" | "real_world_activity";
+export type ContentType = "story" | "video" | "digital_game" | "real_world_activity" | "home_activity";
 export type GenerateType = ContentType | "pack";
 export type Mode = "strength_builder" | "growth_support";
 export type ContentStatus = "draft" | "approved" | "completed" | "archived";
 export type FeedbackResult = "worked_well" | "partly" | "did_not_work";
 export type FeedbackSupport = "independent" | "some_support" | "significant_support";
 
-export const CONTENT_TYPES: ContentType[] = ["story", "video", "digital_game", "real_world_activity"];
-export const GENERATE_TYPES: GenerateType[] = ["story", "video", "digital_game", "real_world_activity", "pack"];
+export const CONTENT_TYPES: ContentType[] = ["story", "video", "digital_game", "real_world_activity", "home_activity"];
+export const GENERATE_TYPES: GenerateType[] = ["story", "video", "digital_game", "real_world_activity", "home_activity", "pack"];
 export const MODES: Mode[] = ["strength_builder", "growth_support"];
 export const STATUS_ORDER: ContentStatus[] = ["draft", "approved", "completed", "archived"];
 export const RESULTS: FeedbackResult[] = ["worked_well", "partly", "did_not_work"];
 export const RESULT_EMOJI: Record<FeedbackResult, string> = { worked_well: "🌟", partly: "🌤️", did_not_work: "🌧️" };
 export const FEEDBACK_SUPPORT: FeedbackSupport[] = ["independent", "some_support", "significant_support"];
 /** Order of the parts of a small pack. */
-export const PACK_ORDER: Record<ContentType, number> = { story: 0, real_world_activity: 1, digital_game: 2, video: 3 };
+export const PACK_ORDER: Record<ContentType, number> = { story: 0, real_world_activity: 1, digital_game: 2, video: 3, home_activity: 4 };
 
 export type LabelItem = { key?: string | null; label: string };
 

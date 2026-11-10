@@ -34,7 +34,7 @@ const FIELD_KEYS: Record<FilterField, FilterKey[]> = {
 export const CHANGE_RESULTS = ["yes", "partly", "no"] as const;
 
 /** Observation sources (observations.source). */
-export const OBSERVATION_SOURCES = ["quick", "content_feedback"] as const;
+export const OBSERVATION_SOURCES = ["quick", "content_feedback", "session"] as const;
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 

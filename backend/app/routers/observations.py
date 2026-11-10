@@ -38,7 +38,7 @@ def list_observations(
     date_to: date | None = None,
     domain: AiDomain | None = None,
     context: Annotated[str | None, Query(max_length=40)] = None,
-    source: Literal["quick", "content_feedback"] | None = None,
+    source: Literal["quick", "content_feedback", "session"] | None = None,
     did_it_change: Literal["yes", "partly", "no"] | None = None,
     result: Annotated[str | None, Query(max_length=40)] = None,
     limit: Annotated[int, Query(ge=1, le=svc.MAX_LIMIT)] = svc.DEFAULT_LIMIT,

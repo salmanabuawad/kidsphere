@@ -26,6 +26,7 @@ from types import SimpleNamespace
 
 from app import vocab
 from app.config import APP_DIR, settings
+from app.reports.i18n import LOCAL_TZ
 from app.models import (
     AiSuggestion,
     Baseline,
@@ -238,10 +239,12 @@ def seed(db, *, teacher, klass, make_child, lang: str = "en", parent=None):
                                      "next_steps": "Keep small groups"}
     db.commit()
 
-    # Teacher observation cycle with one entry per domain kind.
+    # Teacher observation cycle with one entry per domain kind. The period ends on the LOCAL day (the
+    # reports filter by local days): late in the UTC evening it is already tomorrow in the kindergarten.
+    local_today = datetime.now(LOCAL_TZ).date()
     cycle = TeacherAssessment(child_id=child.id, kind="initial", teacher_id=teacher.id, created_by=teacher.id,
                               filled_on=date.today() - timedelta(days=10), period_from=date.today() - timedelta(days=40),
-                              period_to=date.today(), child_snapshot={"name": "Adam Haddad", "preferred_name": T["name"],
+                              period_to=local_today, child_snapshot={"name": "Adam Haddad", "preferred_name": T["name"],
                                                                       "kindergarten": T["kindergarten"]})
     db.add(cycle)
     db.flush()

@@ -18,6 +18,7 @@
     "video": "Video",
     "digital_game": "Digital game",
     "real_world_activity": "Real-world activity",
+    "home_activity": "Activity at home",
     "pack": "Small pack"
   },
   "typeHints": {
@@ -25,6 +26,7 @@
     "video": "A video plan: script and scenes, 30–90 seconds",
     "digital_game": "A simple game to play on a tablet",
     "real_world_activity": "A teacher-led activity in the kindergarten",
+    "home_activity": "A short activity for a parent and child at home, without a screen",
     "pack": "A story, an activity and a game for one goal"
   },
   "templates": {
@@ -195,6 +197,14 @@
     "step": "Step {n}",
     "observe": "What to observe",
     "observeItem": "Point {n}",
+    "homeWhy": "Why this time together (for the parent)",
+    "homeSteps": "What to do",
+    "homeWords": "Words the parent can try",
+    "homeWordsItem": "Sentence {n}",
+    "homeNotice": "What the parent may notice",
+    "homeNoticeItem": "Item {n}",
+    "homeIfHard": "If it feels hard",
+    "homeTip": "A warm tip for the parent",
     "adaptation": "If the child needs more support",
     "learningGoal": "Learning goal",
     "durationSeconds": "Length (seconds)",
@@ -278,6 +288,17 @@
     "notAvailableHint": "It may no longer be shared. You can ask the teacher about it.",
     "back": "Back",
     "fullScreen": "Full screen",
-    "cantShow": "This can't be shown here right now."
+    "cantShow": "This can't be shown here right now.",
+    "reflect": {
+      "title": "How did it go at home?",
+      "hint": "One tap is enough. Your teacher will see it.",
+      "note": "Anything you noticed",
+      "noteHint": "Only your child's teacher sees this.",
+      "notePlaceholder": "For example: what your child enjoyed or said",
+      "save": "Send to the teacher",
+      "saved": "Thank you! The teacher will see it.",
+      "thanks": "Thank you for sharing. Every time together counts.",
+      "earlier": "What you shared before"
+    }
   }
 }

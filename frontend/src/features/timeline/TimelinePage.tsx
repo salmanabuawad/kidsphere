@@ -41,7 +41,8 @@ export type TimelineEntryType =
   | "content_approved"
   | "review"
   | "summary_approved"
-  | "assessment_closed";
+  | "assessment_closed"
+  | "home_reflection";
 
 /** One entry of GET /api/children/{id}/timeline (backend/app/services/timeline.py). */
 export type TimelineEntry = {
@@ -61,6 +62,8 @@ export type TimelineEntry = {
   content_type: string | null;
   focus_area_id: string | null;
   focus_area_title: string | null;
+  /** The class session an observation was noted in. */
+  session_title?: string | null;
   /** plan_changed: the changed fields (title, description, category, plan, follow_up_on; status = reopened). */
   changes?: string[] | null;
   /** How a goal changed: manual, review, status, backfill… */
@@ -80,7 +83,7 @@ export const TIMELINE_FIELDS: readonly FilterField[] = ["dates", "focus", "domai
 export const TYPE_GROUPS: { key: string; types: TimelineEntryType[] }[] = [
   { key: "start", types: ["baseline", "questionnaire_submitted"] },
   { key: "plans", types: ["focus_opened", "plan_changed", "focus_closed"] },
-  { key: "activities", types: ["content_approved", "content_feedback"] },
+  { key: "activities", types: ["content_approved", "content_feedback", "home_reflection"] },
   { key: "observations", types: ["observation"] },
   { key: "reviews", types: ["review"] },
   { key: "approved", types: ["summary_approved", "assessment_closed"] },
@@ -96,6 +99,7 @@ const STYLE: Record<string, { icon: ReactNode; ring: string }> = {
   observation: { icon: <MessageSquareQuote aria-hidden />, ring: "bg-tray text-ink" },
   content_feedback: { icon: <ClipboardCheck aria-hidden />, ring: "bg-accent-soft text-ink" },
   content_approved: { icon: <Sparkles aria-hidden />, ring: "bg-accent-soft text-ink" },
+  home_reflection: { icon: <Home aria-hidden />, ring: "bg-helps-soft text-ink" },
   review: { icon: <Lightbulb aria-hidden />, ring: "bg-brand-soft text-brand" },
   summary_approved: { icon: <BadgeCheck aria-hidden />, ring: "bg-brand-soft text-brand" },
   assessment_closed: { icon: <Eye aria-hidden />, ring: "bg-tray text-ink" },
@@ -106,6 +110,7 @@ const PROVENANCE: Partial<Record<TimelineEntryType, ProvenanceKind>> = {
   questionnaire_submitted: "parent_said",
   observation: "teacher_observed",
   content_feedback: "teacher_observed",
+  home_reflection: "parent_said",
   review: "teacher_approved",
   summary_approved: "teacher_approved",
 };
@@ -341,10 +346,21 @@ function Entry({ entry: e, childId }: { entry: TimelineEntry; childId: string })
 
   switch (e.type) {
     case "observation":
+      if (e.session_title) title = t("timeline.inSession", { title: e.session_title });
       body = e.text && <Quote>{e.text}</Quote>;
       break;
     case "content_feedback":
       title = e.content_title ? t("timeline.feedbackOn", { title: e.content_title }) : title;
+      if (e.result)
+        chips.unshift(
+          <Chip key="result" tone={RESULT_TONE[e.result] ?? "neutral"} icon={item("content_results", e.result)?.icon ?? RESULT_EMOJI[e.result]}>
+            {optionLabel("content_results", e.result)}
+          </Chip>,
+        );
+      body = e.text && <Quote>{e.text}</Quote>;
+      break;
+    case "home_reflection":
+      title = e.content_title ? t("timeline.fromHomeOn", { title: e.content_title }) : title;
       if (e.result)
         chips.unshift(
           <Chip key="result" tone={RESULT_TONE[e.result] ?? "neutral"} icon={item("content_results", e.result)?.icon ?? RESULT_EMOJI[e.result]}>
@@ -432,7 +448,7 @@ function Entry({ entry: e, childId }: { entry: TimelineEntry; childId: string })
       );
       break;
   }
-  if (e.focus_area_title && (e.type === "observation" || e.type === "content_feedback" || e.type === "content_approved"))
+  if (e.focus_area_title && (e.type === "observation" || e.type === "content_feedback" || e.type === "content_approved" || e.type === "home_reflection"))
     chips.push(
       <Chip key="focus" tone="focus">
         {t("timeline.focusLink", { title: e.focus_area_title })}

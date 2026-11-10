@@ -23,6 +23,14 @@
     "observe": "What to observe",
     "adaptation": "If the child needs more support"
   },
+  "home": {
+    "why": "Why this time together",
+    "materials": "What you need",
+    "steps": "What to do",
+    "words": "Words you can try",
+    "notice": "What you may notice",
+    "ifHard": "If it feels hard"
+  },
   "video": {
     "status": {
       "script_ready": "Script ready",

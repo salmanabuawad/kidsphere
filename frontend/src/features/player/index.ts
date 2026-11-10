@@ -1,5 +1,6 @@
 export * from "./types";
-export { parseActivity, parseGame, parseStory, parseVideoPlan, isGameTemplate } from "./parse";
+export { parseActivity, parseGame, parseHomeActivity, parseStory, parseVideoPlan, isGameTemplate } from "./parse";
+export { HomeActivityCard, type HomeActivityCardProps } from "./HomeActivityCard";
 export { contentDir, toContentLocale, usePlayerText, SPEECH_LANG, type Dir } from "./content-locale";
 export { useNarration } from "./useNarration";
 export { StoryPlayer, type StoryPlayerProps } from "./StoryPlayer";

@@ -26,6 +26,7 @@
     "focus_closed_paused": "توقف التركيز مؤقتاً",
     "observation": "ملاحظة",
     "content_feedback": "انطباع بعد الاستخدام",
+    "home_reflection": "من البيت",
     "content_approved": "تمت الموافقة على المحتوى",
     "review": "مراجعة التطور",
     "summary_approved": "تم اعتماد الملخص الوظيفي",
@@ -54,7 +55,9 @@
     "reassessment": "دورة ملاحظة للمتابعة"
   },
   "feedbackOn": "بعد «{title}»",
+  "fromHomeOn": "في البيت: «{title}»",
   "focusLink": "التركيز: {title}",
+  "inSession": "في جلسة جماعية: {title}",
   "baselineText": "تم حفظ الصورة الأولى لمواطن القوة والاهتمامات وما يساعد.",
   "openReview": "فتح صفحة التطور",
   "openPlan": "فتح الخطة",

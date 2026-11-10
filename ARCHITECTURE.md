@@ -62,6 +62,7 @@ Every table has a UUID primary key (except `audit_log`) and `timestamptz` timest
 | `generated_content` | `deleted_at`, `deleted_by` (soft delete; a CHECK allows it only for drafts), `mode` strength_builder\|growth_support, `content_type` story\|video\|digital_game\|real_world_activity, `language`, `title`, `content`, `status` draft\|approved\|completed\|archived, `shared_with_parent`, `pack_id`, `generation_input`, `ai_provider`, `ai_model`, `is_template`, `variant`, `video_status` script_ready\|generating\|ready\|failed, `video_provider`, `video_external_job_id`, `video_url`, `approved_by`, `approved_at`. |
 | `observations` | `source` quick\|content_feedback, `focus_area_id`, `content_id`, `observed_at`, `area`, `domains` (text[] of the 12 AI domains, GIN index), `context`, `observation` (NULL only for content_feedback), `support_level`, `what_helped`, `note`, `details`, `attributes`, `client_request_id` (unique per author). |
 | `content_feedback` | `content_id`, `result` worked_well\|partly\|did_not_work, `support_level`, `observation`, `what_helped`, `observation_id` (the mirrored observation). |
+| `home_reflections` | 0010. A parent's "How did it go at home?" on shared content: `content_id`, `result`, optional `note` (shown to staff, never sent to the AI), `client_request_id`. Parent-reported, never an observation. Inserted only. |
 | `development_reviews` | `review_date`, `summary`, `focus_review`, `baseline_validation`, `understanding`, `ai_suggested`, `ai_suggestion_id`, `follow_up` (Domain 16). |
 | `record_versions` | Append-only history (trigger): the full state of a profile section (`entity_key` `<perspective>:<section>`), observation, focus area or content row after each change, with `seq`, `changed_by`/`_name`/`_role`, `reported_by`, `via`, `review_id`, `ai_suggestion_id`. Written only through `services/history.record()`. |
 | `teacher_assessments` | One observation cycle (section א): `kind` initial|reassessment, `previous_id` (the cycle numbers are derived),\|reassessment, `number`, `previous_id`, `status` open\|closed, `filled_on`, `period_from`/`_to`/`_note`, `teacher_id`, `filled_by_text`, `child_snapshot`, `domains` (cache of the latest entry per domain). At most one open and one initial cycle per child; a closed cycle is immutable. |
@@ -177,6 +178,8 @@ An id outside the user's scope returns **404**, because the scope is part of the
 - `GET /content/{id}`, `PUT /content/{id} {title?, content?}`, `DELETE /content/{id}` (soft delete, drafts only), `GET /content/{id}/versions`
 - `POST /content/{id}/approve`, `/regenerate {instruction?}`, `/duplicate`, `/share {shared}`, `/archive`
 - `POST /content/{id}/feedback {result, support_level?, observation?, what_helped?, client_request_id?}`. A repeated `client_request_id` returns the existing feedback with status 200; one used for other content or for a quick observation returns 409 DUPLICATE.
+- `POST /content/{id}/home-reflections {result, note?, client_request_id?}` (parents, on content shared with them; staff 403), `GET /content/{id}/home-reflections` (staff: all; a parent: their own), `GET /children/{id}/home-reflections` (staff)
+- `GET /children/{id}/next-steps` (staff): per active focus, the newest facts, a signal and suggested content types (docs/family-resilience/PLAN.md)
 
 **Development reviews**
 

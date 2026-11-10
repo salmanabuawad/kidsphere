@@ -15,6 +15,7 @@ import {
   GameIcon,
   GrowthSupportIcon,
   PackIcon,
+  ParentHomeIcon,
   PartlyIcon,
   StoryIcon,
   StrengthBuilderIcon,
@@ -31,6 +32,7 @@ export const TYPE_ICONS: Record<GenerateType, KidIcon> = {
   video: VideoIcon,
   digital_game: GameIcon,
   real_world_activity: ActivityIcon,
+  home_activity: ParentHomeIcon,
   pack: PackIcon,
 };
 
@@ -48,7 +50,7 @@ const STATUS: Record<ContentStatus, { tone: Tone; icon?: ReactNode }> = {
 };
 
 export function typeKey(v: unknown): GenerateType {
-  return v === "story" || v === "video" || v === "digital_game" || v === "real_world_activity" || v === "pack" ? v : "story";
+  return v === "story" || v === "video" || v === "digital_game" || v === "real_world_activity" || v === "home_activity" || v === "pack" ? v : "story";
 }
 
 /** Type icon (ink outline + sky paint) in a tray block: sm 36, md 48 (the inline tile), lg 56 (picker). */

@@ -290,7 +290,9 @@
       {"key": "coping_with_mistakes", "category": "confidence", "label": {"en": "Coping with mistakes", "ar": "التعامل مع الأخطاء", "he": "התמודדות עם טעויות"}},
       {"key": "telling_about_an_experience", "category": "language", "label": {"en": "Telling about an experience", "ar": "الحديث عن تجربة", "he": "סיפור על חוויה"}},
       {"key": "using_scissors", "category": "motor", "label": {"en": "Cutting with scissors", "ar": "القص بالمقص", "he": "גזירה במספריים"}},
-      {"key": "sorting_and_matching", "category": "learning", "label": {"en": "Sorting and matching", "ar": "التصنيف والمطابقة", "he": "מיון והתאמה"}}
+      {"key": "sorting_and_matching", "category": "learning", "label": {"en": "Sorting and matching", "ar": "التصنيف والمطابقة", "he": "מיון והתאמה"}},
+      {"key": "naming_feelings", "category": "emotional", "label": {"en": "Naming feelings", "ar": "تسمية المشاعر", "he": "לתת שם לרגשות"}},
+      {"key": "talking_about_feelings_with_family", "category": "communication", "label": {"en": "Talking about feelings with the family", "ar": "الحديث عن المشاعر مع العائلة", "he": "לדבר על רגשות עם המשפחה"}}
     ],
     "observation_contexts": [
       {"key": "arrival", "icon": "🚪", "label": {"en": "Morning arrival", "ar": "الاستقبال الصباحي", "he": "קבלת בוקר"}},
@@ -381,6 +383,7 @@
       {"key": "video", "icon": "🎬", "label": {"en": "Video", "ar": "فيديو", "he": "סרטון"}},
       {"key": "digital_game", "icon": "🎮", "label": {"en": "Digital game", "ar": "لعبة رقمية", "he": "משחק דיגיטלי"}},
       {"key": "real_world_activity", "icon": "🤲", "label": {"en": "Real-world activity", "ar": "نشاط عملي في الروضة", "he": "פעילות מעשית בגן"}},
+      {"key": "home_activity", "icon": "🏡", "label": {"en": "Activity at home with a parent", "ar": "نشاط مشترك في البيت مع الأهل", "he": "פעילות משותפת בבית עם ההורים"}},
       {"key": "pack", "icon": "🎁", "label": {"en": "Small pack", "ar": "حزمة صغيرة", "he": "חבילה קטנה"}}
     ],
     "game_templates": [

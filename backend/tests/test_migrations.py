@@ -48,7 +48,9 @@ TABLES_0004 = {"child_people"}  # tests/test_people.py covers 0004 up/down
 TABLES_0005 = {"kindergarten_themes"}  # tests/test_kindergartens.py covers 0005 up/down
 TABLES_0006 = {"ai_engine_configs", "ai_requests", "ai_request_events", "ai_assets", "ai_prompt_templates", "ai_characters"}  # tests/test_ai_engines.py covers 0006 up/down
 TABLES_0007 = {"library_collections", "library_items", "library_media"}  # tests/test_library.py covers 0007 and 0008 up/down
-TABLES = TABLES_0001 | NEW_TABLES | TABLES_0003 | TABLES_0004 | TABLES_0005 | TABLES_0006 | TABLES_0007
+TABLES_0009 = {"class_sessions", "class_session_children"}  # tests/test_sessions.py covers 0009 up/down
+TABLES_0010 = {"home_reflections"}  # tests/test_family_home.py covers 0010 up/down
+TABLES = TABLES_0001 | NEW_TABLES | TABLES_0003 | TABLES_0004 | TABLES_0005 | TABLES_0006 | TABLES_0007 | TABLES_0009 | TABLES_0010
 NOW = datetime(2026, 10, 6, 9, 0, tzinfo=timezone.utc)
 
 

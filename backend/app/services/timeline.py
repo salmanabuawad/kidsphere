@@ -24,6 +24,8 @@ One chronological list, newest first, built from:
 - development reviews → ``review``
 - approved functional summaries → ``summary_approved`` (approved_at)
 - closed teacher observation cycles → ``assessment_closed`` (closed_at)
+- parents' home reflections on shared content → ``home_reflection`` (created_at; parent-reported, the
+  note is the text; never an observation)
 
 Filters (all optional, combined with AND; X-34, no BI). Each source is filtered
 in its own query before the merge, so pagination stays exact:
@@ -39,7 +41,7 @@ in its own query before the merge, so pagination stays exact:
   category maps to it. Other entry types are left out.
 - ``content_type``: content_approved and content_feedback for content of that
   type. Other entry types are left out.
-- ``result``: content_feedback with that result. Other entry types are left out.
+- ``result``: content_feedback and home_reflection with that result. Other entry types are left out.
 
 Pagination is limit/offset ("Load older"). Each source returns up to
 offset+limit+1 rows in the same order (at DESC, id DESC) and the sources are
@@ -48,7 +50,7 @@ merged, which gives exactly the same page as one big UNION would.
 Entry JSON (absent fields are null)::
 
     {type, at, id, title, text, support_level, result, status, context, area,
-     content_id, content_title, content_type, focus_area_id, focus_area_title,
+     content_id, content_title, content_type, focus_area_id, focus_area_title, session_id, session_title,
      changes, via, by_name}
 
 ``status`` is the focus status (focus_*/plan_changed), the content status
@@ -69,12 +71,14 @@ from sqlalchemy.orm import Session
 from app.errors import AppError
 from app.models import (
     Baseline,
+    ClassSession,
     ChildProfile,
     ContentFeedback,
     DevelopmentReview,
     FocusArea,
     FunctionalSummary,
     GeneratedContent,
+    HomeReflection,
     Observation,
     RecordVersion,
     TeacherAssessment,
@@ -87,18 +91,20 @@ MAX_LIMIT = 100
 
 ENTRY_TYPES = (
     "baseline", "questionnaire_submitted", "focus_opened", "plan_changed", "focus_closed", "observation",
-    "content_feedback", "content_approved", "review", "summary_approved", "assessment_closed",
+    "content_feedback", "content_approved", "review", "summary_approved", "assessment_closed", "home_reflection",
 )
 
 ENTRY_FIELDS = ("title", "text", "support_level", "result", "status", "context", "area", "content_id",
-                "content_title", "content_type", "focus_area_id", "focus_area_title", "changes", "via")
+                "content_title", "content_type", "focus_area_id", "focus_area_title", "changes", "via", "session_id",
+                "session_title")
 
 # Which entry types a filter keeps (the others are left out while it is set).
 FOCUS_TYPES = frozenset({"observation", "content_feedback", "content_approved", "focus_opened", "plan_changed",
-                         "focus_closed", "review"})
+                         "focus_closed", "review", "home_reflection"})
 DOMAIN_TYPES = frozenset({"observation", "content_feedback", "content_approved", "focus_opened", "plan_changed",
                           "focus_closed"})
-CONTENT_TYPES = frozenset({"content_feedback", "content_approved"})
+CONTENT_TYPES = frozenset({"content_feedback", "content_approved", "home_reflection"})
+RESULT_TYPES = frozenset({"content_feedback", "home_reflection"})
 
 # Focus category / observation area (priority_categories) -> AI domains: the map
 # migration 0002 used to backfill observations.domains.
@@ -149,7 +155,7 @@ class Filters:
         """Whether entries of this type can match at all."""
         if self.types is not None and type_ not in self.types:
             return False
-        if self.result is not None and type_ != "content_feedback":
+        if self.result is not None and type_ not in RESULT_TYPES:
             return False
         if self.content_type is not None and type_ not in CONTENT_TYPES:
             return False
@@ -233,9 +239,10 @@ def _observations(db: Session, child_id, n: int, f: Filters) -> list[dict]:
         .order_by(ContentFeedback.created_at.desc()).limit(1).correlate(Observation).scalar_subquery()
     )
     stmt = (
-        select(Observation, FocusArea.title, GeneratedContent.title, GeneratedContent.content_type, result)
+        select(Observation, FocusArea.title, GeneratedContent.title, GeneratedContent.content_type, result, ClassSession.title)
         .outerjoin(FocusArea, FocusArea.id == Observation.focus_area_id)
         .outerjoin(GeneratedContent, GeneratedContent.id == Observation.content_id)
+        .outerjoin(ClassSession, ClassSession.id == Observation.session_id)
         .where(Observation.child_id == child_id, *f.range_conds(Observation.observed_at))
     )
     if not want_obs:
@@ -254,13 +261,14 @@ def _observations(db: Session, child_id, n: int, f: Filters) -> list[dict]:
         stmt = stmt.where(result == f.result)
     stmt = stmt.order_by(Observation.observed_at.desc(), Observation.id.desc()).limit(n)
     out = []
-    for obs, focus_title, content_title, content_type, res in db.execute(stmt).all():
+    for obs, focus_title, content_title, content_type, res, session_title in db.execute(stmt).all():
         feedback = obs.source == "content_feedback"
         out.append(_entry(
             "content_feedback" if feedback else "observation", obs.observed_at, obs.id, obs.created_by,
             text=obs.observation, support_level=obs.support_level, result=res if feedback else None,
             context=obs.context, area=obs.area, content_id=obs.content_id, content_title=content_title,
             content_type=content_type, focus_area_id=obs.focus_area_id, focus_area_title=focus_title,
+            session_id=obs.session_id, session_title=session_title,
         ))
     return out
 
@@ -393,6 +401,31 @@ def _content(db: Session, child_id, n: int, f: Filters) -> list[dict]:
     ]
 
 
+def _home_reflections(db: Session, child_id, n: int, f: Filters) -> list[dict]:
+    """A parent's "How did it go at home?" on shared content (parent-reported; the note is shown to staff)."""
+    if not f.keeps("home_reflection"):
+        return []
+    stmt = (
+        select(HomeReflection, GeneratedContent, FocusArea.title)
+        .join(GeneratedContent, GeneratedContent.id == HomeReflection.content_id)
+        .outerjoin(FocusArea, FocusArea.id == GeneratedContent.focus_area_id)
+        .where(HomeReflection.child_id == child_id, *f.range_conds(HomeReflection.created_at))
+    )
+    if f.focus_area_id is not None:
+        stmt = stmt.where(GeneratedContent.focus_area_id == f.focus_area_id)
+    if f.content_type is not None:
+        stmt = stmt.where(GeneratedContent.content_type == f.content_type)
+    if f.result is not None:
+        stmt = stmt.where(HomeReflection.result == f.result)
+    stmt = stmt.order_by(HomeReflection.created_at.desc(), HomeReflection.id.desc()).limit(n)
+    return [
+        _entry("home_reflection", r.created_at, r.id, r.created_by, text=r.note, result=r.result,
+               content_id=c.id, content_title=c.title, content_type=c.content_type,
+               focus_area_id=c.focus_area_id, focus_area_title=focus_title)
+        for r, c, focus_title in db.execute(stmt).all()
+    ]
+
+
 def _reviews(db: Session, child_id, n: int, f: Filters) -> list[dict]:
     if not f.keeps("review"):
         return []
@@ -430,7 +463,7 @@ def _assessments(db: Session, child_id, n: int, f: Filters) -> list[dict]:
 
 
 SOURCES = (_observations, _baselines, _questionnaire, _focus_opened, _focus_history, _content, _reviews,
-           _summaries, _assessments)
+           _summaries, _assessments, _home_reflections)
 
 
 def get_timeline(db: Session, user, child_id, limit: int = DEFAULT_LIMIT, offset: int = 0,

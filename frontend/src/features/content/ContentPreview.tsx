@@ -10,6 +10,7 @@ import { GamePlayer } from "@/features/games";
 import {
   ActivityCard,
   CastProvider,
+  HomeActivityCard,
   MediaProvider,
   MusicToggle,
   StoryPlayer,
@@ -21,6 +22,7 @@ import {
   useCast,
   type Activity,
   type CastResolver,
+  type HomeActivity,
   type Story,
   type VideoPlan,
 } from "@/features/player";
@@ -80,6 +82,9 @@ export function ContentPreview({
       break;
     case "real_world_activity":
       player = <ActivityCard activity={body as unknown as Activity} lang={lang} />;
+      break;
+    case "home_activity":
+      player = <HomeActivityCard activity={body as unknown as HomeActivity} lang={lang} />;
       break;
     case "video":
       player = (
